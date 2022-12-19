@@ -25,6 +25,12 @@
                         Environment.Exit(1);
                         return;
                     }
+                    if (!File.Exists(args[1]))
+                    {
+                        Console.WriteLine("The specified file does not exist.");
+                        Environment.Exit(1);
+                        return;
+                    }
                     string filename = string.Join('.', args[1].Split('.')[..^1]);
                     byte[] program;
                     try
@@ -47,6 +53,12 @@
                         Environment.Exit(1);
                         return;
                     }
+                    if (!File.Exists(args[1]))
+                    {
+                        Console.WriteLine("The specified file does not exist.");
+                        Environment.Exit(1);
+                        return;
+                    }
                     Processor p = new(2046);
                     try
                     {
@@ -66,6 +78,12 @@
                     if (args.Length < 2)
                     {
                         Console.WriteLine("A path to the program listing to be executed is required.");
+                        Environment.Exit(1);
+                        return;
+                    }
+                    if (!File.Exists(args[1]))
+                    {
+                        Console.WriteLine("The specified file does not exist.");
                         Environment.Exit(1);
                         return;
                     }
