@@ -38,7 +38,7 @@
                         return;
                     }
                     File.WriteAllBytes(filename + ".aap", program);
-                    Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: {filename + ".aap"}");
+                    Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: \"{filename + ".aap"}\"");
                     break;
                 case "execute":
                     if (args.Length < 2)
