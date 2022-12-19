@@ -120,7 +120,7 @@ namespace AssEmbly
                 switch (operandTypes[i])
                 {
                     case Data.OperandType.Register:
-                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i]));
+                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i].ToLowerInvariant()));
                         break;
                     case Data.OperandType.Literal:
                         if (operands[i].StartsWith(":&"))
@@ -146,7 +146,7 @@ namespace AssEmbly
                         }
                         break;
                     case Data.OperandType.Pointer:
-                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i][1..]));
+                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i][1..].ToLowerInvariant()));
                         break;
                     default: break;
                 }
@@ -206,7 +206,7 @@ namespace AssEmbly
             else
             {
                 int offset = operand[0] == '*' ? 1 : 0;
-                return Enum.TryParse<Data.Register>(operand[offset..], out _)
+                return Enum.TryParse<Data.Register>(operand[offset..].ToLowerInvariant(), out _)
                     ? operand[0] == '*' ? Data.OperandType.Pointer : Data.OperandType.Register
                     : throw new FormatException($"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
             }
