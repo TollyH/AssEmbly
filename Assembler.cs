@@ -226,6 +226,10 @@ namespace AssEmbly
                 {
                     throw new FormatException("A string literal is not a valid operand in this context.");
                 }
+                if (Regex.Matches(operand, @"(?<!\\)""").Count > 2)
+                {
+                    throw new FormatException("An operand can only contain a single string literal. Did you forget to escape a quote mark?");
+                }
                 if (operand[^1] != '"')
                 {
                     throw new FormatException("String literal contains characters after closing quote mark.");
