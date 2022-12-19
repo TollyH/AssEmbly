@@ -1111,10 +1111,6 @@ namespace AssEmbly
                                 filepath += (char)Memory[i];
                             }
                             Registers[Data.Register.rpo] += 8;
-                            if (!File.Exists(filepath))
-                            {
-                                throw new InvalidOperationException($"File \"{filepath}\" does not exist");
-                            }
                             openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                             fileWrite = new StreamWriter(openFile);
                             fileRead = new StreamReader(openFile);
