@@ -80,7 +80,7 @@ namespace AssEmbly
             Match unclosedQuote = Regex.Match(statement, @"(?<=^(?>(?:[^""]*""){2})*[^""]*)""(?=[^""]*?$)");
             if (unclosedQuote.Success)
             {
-                throw new FormatException($"Statement contains an unclosed quote mark.\n    {statement}\n    {new string(' ', unclosedQuote.Index)}^");
+                throw new FormatException($"Statement contains an unclosed quote mark:\n    {statement}\n    {new string(' ', unclosedQuote.Index)}^");
             }
             string[] split = statement.Split(' ', 2);
             string mnemonic = split[0];
