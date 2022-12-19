@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "AssEmbly": {
-      "commandName": "Project",
-      "commandLineArgs": "execute \"C:\\Users\\ptole\\Downloads\\file.aap\""
-    }
-  }
-}
