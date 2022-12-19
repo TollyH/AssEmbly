@@ -32,6 +32,10 @@ namespace AssEmbly
                     {
                         // Will throw an error if label is not valid
                         _ = DetermineOperandType(line);
+                        if (line[1] == '&')
+                        {
+                            throw new FormatException($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {line}\n     ^");
+                        }
                         if (labels.ContainsKey(line[1..]))
                         {
                             throw new FormatException($"Label \"{line[1..]}\" has already been defined. Label names must be unique.");
