@@ -59,7 +59,15 @@
                         Environment.Exit(1);
                         return;
                     }
-                    Processor p = new(2046);
+                    ulong memSize = 2046;
+                    foreach (string a in args)
+                    {
+                        if (a.ToLowerInvariant().StartsWith("--mem-size="))
+                        {
+                            memSize = ulong.Parse(a.Split("=")[1]);
+                        }
+                    }
+                    Processor p = new(memSize);
                     try
                     {
                         p.LoadProgram(File.ReadAllBytes(args[1]));
@@ -87,7 +95,15 @@
                         Environment.Exit(1);
                         return;
                     }
-                    p = new(2046);
+                    memSize = 2046;
+                    foreach (string a in args)
+                    {
+                        if (a.ToLowerInvariant().StartsWith("--mem-size="))
+                        {
+                            memSize = ulong.Parse(a.Split("=")[1]);
+                        }
+                    }
+                    p = new(memSize);
                     try
                     {
                         program = Assembler.AssembleLines(File.ReadAllLines(args[1]));
