@@ -71,7 +71,7 @@ namespace AssEmbly
         /// <summary>
         /// Execute a single instruction.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><see langword="true"/> if execution should stop (HLT reached) - otherwise <see langword="false"/></returns>
         /// <exception cref="InvalidOperationException">Thrown if the instruction was invalid, or attempted to perform an invalid operation.</exception>
         public bool Step()
         {
