@@ -106,9 +106,9 @@ namespace AssEmbly
                     throw new FormatException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
                 }
                 byte[] parsedBytes = ParseLiteral(operands[0], true);
-                return parsedBytes[1..].Where(b => b != 0).Any()
+                return operands[0][0] != '"' && parsedBytes[1..].Where(b => b != 0).Any()
                     ? throw new FormatException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
-                    : (parsedBytes[0..1], new List<(string, ulong)>());
+                    : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
             }
             if (mnemonic.ToUpperInvariant() == "PAD")
             {
