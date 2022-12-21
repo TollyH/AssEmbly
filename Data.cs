@@ -175,6 +175,9 @@
             // NOT
             { ("NOT", new OperandType[1] { OperandType.Register }), 0x6C },
 
+            // RNG
+            { ("RNG", new OperandType[1] { OperandType.Register }), 0x6D },
+
             // Comparison (Results will be discarded, but flags will still be set - best used in conjunction with conditional jumps)
             // TST (Test [Bitwise And Then Discard Result])
             { ("TST", new OperandType[2] { OperandType.Register, OperandType.Register }), 0x70 },  // (reg & reg)

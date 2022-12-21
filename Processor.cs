@@ -15,6 +15,8 @@ namespace AssEmbly
         private StreamReader? fileRead;
         private StreamWriter? fileWrite;
 
+        private Random rng = new();
+
         public Processor(ulong memorySize)
         {
             Memory = new byte[memorySize];
@@ -578,6 +580,12 @@ namespace AssEmbly
                             break;
                         case 0xC:  // NOT reg
                             Registers[targetRegister] = ~Registers[targetRegister];
+                            Registers[Data.Register.rpo]++;
+                            break;
+                        case 0xD:  // RNG reg
+                            byte[] randomBuffer = new byte[8];
+                            rng.NextBytes(randomBuffer);
+                            Registers[targetRegister] = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
                             Registers[Data.Register.rpo]++;
                             break;
                         default:
