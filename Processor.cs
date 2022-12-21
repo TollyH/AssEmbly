@@ -102,7 +102,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] = MemReadQWord(Registers[Data.Register.rpo]);
                             break;
                         case 0x3:  // JMP ptr (Unconditional Jump)
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0x4:  // JEQ adr (Jump If Equal To - Zero Flag Set)
                             if ((Registers[Data.Register.rsf] & 0b1) != 0)
@@ -117,7 +117,7 @@ namespace AssEmbly
                         case 0x5:  // JEQ ptr (Jump If Equal To - Zero Flag Set)
                             if ((Registers[Data.Register.rsf] & 0b1) != 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -137,7 +137,7 @@ namespace AssEmbly
                         case 0x7:  // JNE ptr (Jump If Not Equal To - Zero Flag Unset)
                             if ((Registers[Data.Register.rsf] & 0b1) == 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -157,7 +157,7 @@ namespace AssEmbly
                         case 0x9:  // JLT ptr (Jump If Less Than - Carry Flag Set)
                             if ((Registers[Data.Register.rsf] & 0b10) != 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -177,7 +177,7 @@ namespace AssEmbly
                         case 0xB:  // JLE ptr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
                             if ((Registers[Data.Register.rsf] & 0b11) != 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -197,7 +197,7 @@ namespace AssEmbly
                         case 0xD:  // JGT ptr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
                             if ((Registers[Data.Register.rsf] & 0b11) == 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -217,7 +217,7 @@ namespace AssEmbly
                         case 0xF:  // JGE ptr (Jump If Greater Than or Equal To - Carry Flag Unset)
                             if ((Registers[Data.Register.rsf] & 0b10) == 0)
                             {
-                                Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                                Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             }
                             else
                             {
@@ -844,7 +844,7 @@ namespace AssEmbly
                             MemWriteQWord(Registers[Data.Register.rso] - 24, Registers[Data.Register.rso]);
                             Registers[Data.Register.rso] -= 24;
                             Registers[Data.Register.rsb] = Registers[Data.Register.rso];
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0x2:  // CAL adr, reg
                             Registers[Data.Register.rfp] = MemReadRegister(Registers[Data.Register.rpo] + 8);
@@ -889,7 +889,7 @@ namespace AssEmbly
                             MemWriteQWord(Registers[Data.Register.rso] - 24, Registers[Data.Register.rso]);
                             Registers[Data.Register.rso] -= 24;
                             Registers[Data.Register.rsb] = Registers[Data.Register.rso];
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0x7:  // CAL ptr, lit
                             Registers[Data.Register.rfp] = MemReadQWord(Registers[Data.Register.rpo] + 1);
@@ -898,7 +898,7 @@ namespace AssEmbly
                             MemWriteQWord(Registers[Data.Register.rso] - 24, Registers[Data.Register.rso]);
                             Registers[Data.Register.rso] -= 24;
                             Registers[Data.Register.rsb] = Registers[Data.Register.rso];
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0x8:  // CAL ptr, adr
                             Registers[Data.Register.rfp] = MemReadQWordPointer(Registers[Data.Register.rpo] + 1);
@@ -907,7 +907,7 @@ namespace AssEmbly
                             MemWriteQWord(Registers[Data.Register.rso] - 24, Registers[Data.Register.rso]);
                             Registers[Data.Register.rso] -= 24;
                             Registers[Data.Register.rsb] = Registers[Data.Register.rso];
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0x9:  // CAL ptr, ptr
                             Registers[Data.Register.rfp] = MemReadRegisterQWord(Registers[Data.Register.rpo] + 1);
@@ -916,7 +916,7 @@ namespace AssEmbly
                             MemWriteQWord(Registers[Data.Register.rso] - 24, Registers[Data.Register.rso]);
                             Registers[Data.Register.rso] -= 24;
                             Registers[Data.Register.rsb] = Registers[Data.Register.rso];
-                            Registers[Data.Register.rpo] = MemReadRegisterQWord(Registers[Data.Register.rpo]);
+                            Registers[Data.Register.rpo] = MemReadRegister(Registers[Data.Register.rpo]);
                             break;
                         case 0xA:  // RET
                             Registers[Data.Register.rpo] = MemReadQWord(Registers[Data.Register.rsb] + 16);
@@ -1129,7 +1129,7 @@ namespace AssEmbly
                                 throw new InvalidOperationException("Cannot execute open file instruction if a file is already open");
                             }
                             filepath = "";
-                            for (ulong i = MemReadRegisterQWord(Registers[Data.Register.rpo]); Memory[i] != 0x0; i++)
+                            for (ulong i = MemReadRegister(Registers[Data.Register.rpo]); Memory[i] != 0x0; i++)
                             {
                                 filepath += (char)Memory[i];
                             }
@@ -1169,7 +1169,7 @@ namespace AssEmbly
                             break;
                         case 0x4:  // DFL ptr
                             filepath = "";
-                            for (ulong i = MemReadRegisterQWord(Registers[Data.Register.rpo]); Memory[i] != 0x0; i++)
+                            for (ulong i = MemReadRegister(Registers[Data.Register.rpo]); Memory[i] != 0x0; i++)
                             {
                                 filepath += (char)Memory[i];
                             }
