@@ -17,12 +17,9 @@ namespace AssEmbly
             while (offset < program.Length)
             {
                 offsetToLine[offset] = result.Count;
-                (string line, int additionalOffset, ulong? referencedAddress) = DisassembleInstruction(program[offset..]);
+                (string line, int additionalOffset, List<ulong> referencedAddresses) = DisassembleInstruction(program[offset..]);
                 offset += additionalOffset;
-                if (referencedAddress is not null)
-                {
-                    references.Add((referencedAddress.Value, result.Count));
-                }
+                references.AddRange(referencedAddresses.Select(x => (x, result.Count)));
                 result.Add(line);
             }
             // Insert label definitions
@@ -73,8 +70,8 @@ namespace AssEmbly
         /// Disassemble a single line of AssEmbly code from it's assembled bytecode.
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
-        /// <returns>(Disassembled line, Number of bytes instruction was, Referenced address [if present])</returns>
-        public static (string, int, ulong?) DisassembleInstruction(byte[] instruction)
+        /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
+        public static (string, int, List<ulong>) DisassembleInstruction(byte[] instruction)
         {
             bool fallbackToDat = false;
 
@@ -91,7 +88,7 @@ namespace AssEmbly
                     }
                     padString += $"\nPAD {byteCount - 1}";
                 }
-                return (padString, byteCount, null);
+                return (padString, byteCount, new());
             }
             IEnumerable<KeyValuePair<(string, Data.OperandType[]), byte>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
             if (!matching.Any())
@@ -103,7 +100,7 @@ namespace AssEmbly
                 (string mnemonic, Data.OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
                 int totalBytes = 1;
-                ulong? referencedAddress = null;
+                List<ulong> referencedAddresses = new();
                 foreach (Data.OperandType type in operandTypes)
                 {
                     if (totalBytes >= instruction.Length)
@@ -139,8 +136,8 @@ namespace AssEmbly
                                 fallbackToDat = true;
                                 break;
                             }
-                            referencedAddress = BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]);
-                            operandStrings.Add($":ADDR_{referencedAddress:X}");
+                            referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]));
+                            operandStrings.Add($":ADDR_{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
                         case Data.OperandType.Pointer:
@@ -165,11 +162,11 @@ namespace AssEmbly
                 }
                 if (!fallbackToDat)
                 {
-                    return ($"{mnemonic} {string.Join(", ", operandStrings)}", totalBytes, referencedAddress);
+                    return ($"{mnemonic} {string.Join(", ", operandStrings)}", totalBytes, referencedAddresses);
                 }
             }
 
-            return ($"DAT {instruction[0]}", 1, null);
+            return ($"DAT {instruction[0]}", 1, new());
         }
     }
 }
