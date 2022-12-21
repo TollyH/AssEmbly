@@ -1176,6 +1176,24 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 8;
                             File.Delete(filepath);
                             break;
+                        case 0x5:  // FEX reg, adr
+                            filepath = "";
+                            for (ulong i = MemReadQWord(Registers[Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
+                            Registers[Data.Register.rpo] += 9;
+                            break;
+                        case 0x6:  // FEX reg, ptr
+                            filepath = "";
+                            for (ulong i = MemReadRegister(Registers[Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
+                            Registers[Data.Register.rpo] += 2;
+                            break;
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised file operation low opcode");
                     }

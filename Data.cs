@@ -323,6 +323,10 @@
             { ("DFL", new OperandType[1] { OperandType.Address }), 0xE3 },
             { ("DFL", new OperandType[1] { OperandType.Pointer }), 0xE4 },
 
+            // FEX (Does File Exist at Path Specified by 0x00 Terminated String in Memory?)
+            { ("FEX", new OperandType[2] { OperandType.Register, OperandType.Address }), 0xE5 },
+            { ("FEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), 0xE6 },
+
             // Reading
             // RCC (Read Character from Console as a Byte)
             { ("RCC", new OperandType[1] { OperandType.Register }), 0xF0 },
