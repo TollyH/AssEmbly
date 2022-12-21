@@ -98,10 +98,20 @@ namespace AssEmbly
                             }
                             break;
                         case Data.OperandType.Literal:
+                            if (totalBytes + 8 > instruction.Length)
+                            {
+                                fallbackToDat = true;
+                                break;
+                            }
                             operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]).ToString());
                             totalBytes += 8;
                             break;
                         case Data.OperandType.Address:
+                            if (totalBytes + 8 > instruction.Length)
+                            {
+                                fallbackToDat = true;
+                                break;
+                            }
                             referencedAddress = BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]);
                             operandStrings.Add($":ADDR_{referencedAddress:X}");
                             totalBytes += 8;
