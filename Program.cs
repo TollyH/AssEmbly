@@ -13,7 +13,7 @@
             if (args.Length < 1)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("An operation to perform is required. Run the 'help' operation for information.");
+                Console.WriteLine("An operation to perform is required. Run the 'help' operation for information on available operations.");
                 Console.WriteLine("i.e. 'AssEmbly help'");
                 Console.ResetColor();
                 Environment.Exit(1);
@@ -53,8 +53,9 @@
                         Environment.Exit(1);
                         return;
                     }
-                    File.WriteAllBytes(filename + ".aap", program);
-                    Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: \"{filename + ".aap"}\"");
+                    string destination = args.Length >= 3 ? args[2] : filename + ".aap";
+                    File.WriteAllBytes(destination, program);
+                    Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: \"{destination}\"");
                     break;
                 #endregion
                 #region Execute
@@ -478,18 +479,19 @@
                         Environment.Exit(1);
                         return;
                     }
-                    File.WriteAllText(filename + ".dis.asm", disassembledProgram);
-                    Console.WriteLine($"Program disassembled successfully. It can be found at: \"{filename + ".dis.asm"}\"");
+                    destination = args.Length >= 3 ? args[2] : filename + ".dis.asm";
+                    File.WriteAllText(destination, disassembledProgram);
+                    Console.WriteLine($"Program disassembled successfully. It can be found at: \"{destination}\"");
                     break;
                 #endregion
                 #region Help
                 case "help":
-                    Console.WriteLine("Usage: 'AssEmbly <operation> <required-parameters (if any)> [--optional-parameters]'");
+                    Console.WriteLine("Usage: 'AssEmbly <operation> <required-parameters (if any)> [optional-parameters]'");
                     Console.WriteLine("Any command can take the '--no-header' optional parameter to disable the copyright printout.");
                     Console.WriteLine();
                     Console.WriteLine("Operations:");
                     Console.WriteLine("assemble - Take a program written in AssEmbly and assemble it down to executable bytecode");
-                    Console.WriteLine("    Usage: 'AssEmbly assemble <file-path>'");
+                    Console.WriteLine("    Usage: 'AssEmbly assemble <file-path> [destination-path]'");
                     Console.WriteLine();
                     Console.WriteLine("execute - Execute an already assembled bytecode file");
                     Console.WriteLine("    Usage: 'AssEmbly execute <file-path> [--mem-size=2046]'");
@@ -507,7 +509,7 @@
                     Console.WriteLine("    Memory size will be 2046 bytes if paramter is not given.");
                     Console.WriteLine();
                     Console.WriteLine("disassemble - Generate an AssEmbly program listing from already assembled bytecode.");
-                    Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path>'");
+                    Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path> [destination-path]'");
                     Console.WriteLine();
                     break;
                 #endregion
