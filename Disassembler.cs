@@ -8,7 +8,7 @@ namespace AssEmbly
         /// <summary>
         /// Disassemble a program to AssEmbly code from it's assembled bytecode.
         /// </summary>
-        public static string DisassembleProgram(byte[] program)
+        public static string DisassembleProgram(byte[] program, bool detectStrings)
         {
             int offset = 0;
             List<string> result = new();
@@ -38,28 +38,30 @@ namespace AssEmbly
                     result = result.Select(s => s.Replace($":ADDR_{address:X}", ":INVALID-LABEL")).ToList();
                 }
             }
-            // Check for strings
-            for (int start = 0; start < result.Count; start++)
+            if (detectStrings)
             {
-                if (result[start].StartsWith("DAT ") && result[start][4] != '"' && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
+                for (int start = 0; start < result.Count; start++)
                 {
-                    int end = result.Count;
-                    for (int j = start + 1; j < result.Count; j++)
+                    if (result[start].StartsWith("DAT ") && result[start][4] != '"' && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
                     {
-                        if (!result[j].StartsWith("DAT ") || result[j][4] == '"' || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
+                        int end = result.Count;
+                        for (int j = start + 1; j < result.Count; j++)
                         {
-                            end = j;
-                            break;
+                            if (!result[j].StartsWith("DAT ") || result[j][4] == '"' || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
+                            {
+                                end = j;
+                                break;
+                            }
                         }
-                    }
-                    if (start < end)
-                    {
-                        string newLine = "DAT \"";
-                        newLine += Encoding.UTF8.GetString(result.GetRange(start, end - start)
-                            .Select(x => byte.Parse(x.Split(' ')[1])).ToArray()).Replace("\"", "\\\"");
-                        newLine += '"';
-                        result.RemoveRange(start, end - start);
-                        result.Insert(start, newLine);
+                        if (start < end)
+                        {
+                            string newLine = "DAT \"";
+                            newLine += Encoding.UTF8.GetString(result.GetRange(start, end - start)
+                                .Select(x => byte.Parse(x.Split(' ')[1])).ToArray()).Replace("\"", "\\\"");
+                            newLine += '"';
+                            result.RemoveRange(start, end - start);
+                            result.Insert(start, newLine);
+                        }
                     }
                 }
             }

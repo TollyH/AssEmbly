@@ -469,7 +469,7 @@
                     string disassembledProgram;
                     try
                     {
-                        disassembledProgram = Disassembler.DisassembleProgram(File.ReadAllBytes(args[1]));
+                        disassembledProgram = Disassembler.DisassembleProgram(File.ReadAllBytes(args[1]), !args.Contains("--no-strings"));
                     }
                     catch (Exception e)
                     {
@@ -509,7 +509,8 @@
                     Console.WriteLine("    Memory size will be 2046 bytes if paramter is not given.");
                     Console.WriteLine();
                     Console.WriteLine("disassemble - Generate an AssEmbly program listing from already assembled bytecode.");
-                    Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path> [destination-path]'");
+                    Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path> [destination-path] [--no-strings]'");
+                    Console.WriteLine("    --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes");
                     Console.WriteLine();
                     break;
                 #endregion
