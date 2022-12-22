@@ -366,6 +366,102 @@
                                             Console.ResetColor();
                                         }
                                         Console.WriteLine();
+                                        Console.ForegroundColor = ConsoleColor.Blue;
+                                        Console.Write("rpo");
+                                        Console.ResetColor();
+                                        Console.Write(", ");
+                                        Console.ForegroundColor = ConsoleColor.Red;
+                                        Console.Write("rsb");
+                                        Console.ResetColor();
+                                        Console.Write(", ");
+                                        Console.ForegroundColor = ConsoleColor.Green;
+                                        Console.Write("rso");
+                                        Console.ResetColor();
+                                        Console.WriteLine();
+                                        continue;
+                                    #endregion
+                                    #region Debug Stack
+                                    case "stack":
+                                        if (command.Length != 1)
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.WriteLine("This command does not take any arguments. Run 'help' for more info.");
+                                            Console.ResetColor();
+                                            continue;
+                                        }
+                                        if (processor.Registers[Data.Register.rso] >= (ulong)processor.Memory.LongLength)
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                            Console.WriteLine("The stack is currently empty.");
+                                            Console.ResetColor();
+                                            continue;
+                                        }
+                                        if (processor.Registers[Data.Register.rso] > processor.Registers[Data.Register.rsb])
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                            Console.WriteLine("The stack pointer is currently greater than the stack base - stack visualisation not available in this state.");
+                                            Console.ResetColor();
+                                            continue;
+                                        }
+                                        ulong currentStackOffset = processor.Registers[Data.Register.rso];
+                                        ulong currentStackBase = processor.Registers[Data.Register.rsb];
+                                        for (ulong i = currentStackOffset; i < currentStackBase; i += 8)
+                                        {
+                                            if (i == currentStackOffset)
+                                            {
+                                                Console.ForegroundColor = ConsoleColor.Green;
+                                                Console.WriteLine("Current stack frame (likely local variables)");
+                                                Console.ResetColor();
+                                                Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
+                                            }
+                                            Console.Write($"│ {i:X16} │ {processor.MemReadQWord(i):X16}              │ rsb - {currentStackBase - i,-4} │");
+                                            if (i == currentStackOffset)
+                                            {
+                                                Console.WriteLine(" <- rsp");
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine();
+                                            }
+                                            if (i + 8 >= currentStackBase)
+                                            {
+                                                Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
+                                            }
+                                        }
+                                        if (currentStackBase + 16 < (ulong)processor.Memory.LongLength)
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Blue;
+                                            Console.WriteLine("Return information");
+                                            Console.ResetColor();
+                                            Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
+                                            Console.WriteLine($"│ {currentStackBase:X16} │ Reset rso to {processor.MemReadQWord(currentStackBase):X16} | rsb + 0    | <- rsb");
+                                            Console.WriteLine($"│ {currentStackBase + 8:X16} │ Reset rsb to {processor.MemReadQWord(currentStackBase + 8):X16} | rsb + 8    |");
+                                            Console.WriteLine($"│ {currentStackBase + 16:X16} │ Reset rpo to {processor.MemReadQWord(currentStackBase + 16):X16} | rsb + 16   |");
+                                            Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
+
+                                            ulong parentStackBase = processor.MemReadQWord(currentStackBase + 8);
+                                            for (ulong i = currentStackBase + 24; i < parentStackBase; i += 8)
+                                            {
+                                                if (i == currentStackBase + 24)
+                                                {
+                                                    Console.ForegroundColor = ConsoleColor.Red;
+                                                    Console.WriteLine("Parent stack frame (possibly parameters to this subroutine)");
+                                                    Console.ResetColor();
+                                                    Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
+                                                }
+                                                Console.WriteLine($"│ {i:X16} │ {processor.MemReadQWord(i):X16}              │ rsb + {i - currentStackBase,-4} │");
+                                                if (i + 8 >= parentStackBase)
+                                                {
+                                                    Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                            Console.WriteLine("Bottom of the stack reached - most likely the program is not currently in a subroutine.");
+                                            Console.ResetColor();
+                                        }
                                         continue;
                                     #endregion
                                     #region Debug Dec to Hex
@@ -415,6 +511,7 @@
                                         Console.WriteLine("\nread <byte|word|dword|qword> <address> - Read data at a memory address");
                                         Console.WriteLine("write <mem|reg> <address|register-name> <value> - Modify the value of a memory address or register");
                                         Console.WriteLine("map [limit] - Display all (optionally limited amount) of memory in a grid of bytes");
+                                        Console.WriteLine("stack - Visualise the state of the stack");
                                         Console.WriteLine("dec2hex <dec-number> - Convert a decimal number to hexadecimal");
                                         Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
                                         Console.WriteLine("refresh - Display the instruction to be executed and register states again");
