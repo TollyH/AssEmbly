@@ -505,7 +505,7 @@ namespace AssEmbly
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised shifting low opcode");
                     }
-                    if (opcodeLow is 0x0 or 0x1 or 0x2 or 0x3 ? Registers[targetRegister] < initial : Registers[targetRegister] > initial)
+                    if (opcodeLow <= 0x3 ? Registers[targetRegister] < initial : Registers[targetRegister] > initial)
                     {
                         Registers[Data.Register.rsf] |= 0b10;
                     }
@@ -644,7 +644,7 @@ namespace AssEmbly
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised comparison low opcode");
                     }
-                    if (newValue > Registers[targetRegister])
+                    if (opcodeLow >= 0x4 && newValue > Registers[targetRegister])
                     {
                         Registers[Data.Register.rsf] |= 0b10;
                     }
