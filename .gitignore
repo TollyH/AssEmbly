@@ -361,4 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Launch settings
 /Properties/launchSettings.json
+
+# Compiled AssEmbly
+*.aap
