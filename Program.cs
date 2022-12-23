@@ -576,7 +576,7 @@
                         Environment.Exit(1);
                         return;
                     }
-                    destination = args.Length >= 3 ? args[2] : filename + ".dis.asm";
+                    destination = args.Length >= 3 && args[2] != "--no-strings" ? args[2] : filename + ".dis.asm";
                     File.WriteAllText(destination, disassembledProgram);
                     Console.WriteLine($"Program disassembled successfully. It can be found at: \"{destination}\"");
                     break;
