@@ -90,7 +90,7 @@ namespace AssEmbly
             string mnemonic = split[0];
             // Regex splits on commas surrounded by any amount of whitespace (not including newlines), unless wrapped in unescaped quotes.
             string[] operands = split.Length == 2 ? Regex.Split(
-                split[1], @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
+                split[1].Trim(), @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
             Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string, ulong)> labels = new();
