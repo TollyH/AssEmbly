@@ -452,6 +452,10 @@ namespace AssEmbly
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised division low opcode");
                     }
+                    if ((Registers[Data.Register.rsf] & 0b10) != 0)
+                    {
+                        Registers[Data.Register.rsf] ^= 0b10;
+                    }
                     if (Registers[targetRegister] == 0)
                     {
                         Registers[Data.Register.rsf] |= 0b1;
@@ -590,6 +594,10 @@ namespace AssEmbly
                             break;
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised bitwise low opcode");
+                    }
+                    if ((Registers[Data.Register.rsf] & 0b10) != 0)
+                    {
+                        Registers[Data.Register.rsf] ^= 0b10;
                     }
                     if (Registers[targetRegister] == 0)
                     {
