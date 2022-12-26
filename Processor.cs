@@ -677,7 +677,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x1:  // MVB reg, lit
-                            MemWriteRegister(Registers[Data.Register.rpo], Memory[Registers[Data.Register.rpo] + 1]);
+                            MemWriteRegister(Registers[Data.Register.rpo], 0xFF & MemReadQWord(Registers[Data.Register.rpo] + 1));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x2:  // MVB reg, adr
@@ -693,7 +693,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x5:  // MVB adr, lit
-                            MemWriteBytePointer(Registers[Data.Register.rpo], Memory[Registers[Data.Register.rpo] + 8]);
+                            MemWriteBytePointer(Registers[Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[Data.Register.rpo] + 8)));
                             Registers[Data.Register.rpo] += 16;
                             break;
                         case 0x6:  // MVB ptr, reg
@@ -701,7 +701,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x7:  // MVB ptr, lit
-                            MemWriteRegisterByte(Registers[Data.Register.rpo], Memory[Registers[Data.Register.rpo] + 1]);
+                            MemWriteRegisterByte(Registers[Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[Data.Register.rpo] + 1)));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x8:  // MVW reg, reg
@@ -709,7 +709,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x9:  // MVW reg, lit
-                            MemWriteRegister(Registers[Data.Register.rpo], MemReadWord(Registers[Data.Register.rpo] + 1));
+                            MemWriteRegister(Registers[Data.Register.rpo], 0xFFFF & MemReadQWord(Registers[Data.Register.rpo] + 1));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0xA:  // MVW reg, adr
@@ -725,7 +725,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0xD:  // MVW adr, lit
-                            MemWriteWordPointer(Registers[Data.Register.rpo], MemReadWord(Registers[Data.Register.rpo] + 8));
+                            MemWriteWordPointer(Registers[Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[Data.Register.rpo] + 8)));
                             Registers[Data.Register.rpo] += 16;
                             break;
                         case 0xE:  // MVW ptr, reg
@@ -733,7 +733,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0xF:  // MVW ptr, lit
-                            MemWriteRegisterWord(Registers[Data.Register.rpo], MemReadWord(Registers[Data.Register.rpo] + 1));
+                            MemWriteRegisterWord(Registers[Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[Data.Register.rpo] + 1)));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         default:
@@ -748,7 +748,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x1:  // MVD reg, lit
-                            MemWriteRegister(Registers[Data.Register.rpo], MemReadDWord(Registers[Data.Register.rpo] + 1));
+                            MemWriteRegister(Registers[Data.Register.rpo], 0xFFFFFFFF & MemReadQWord(Registers[Data.Register.rpo] + 1));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x2:  // MVD reg, adr
@@ -764,7 +764,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x5:  // MVD adr, lit
-                            MemWriteDWordPointer(Registers[Data.Register.rpo], MemReadDWord(Registers[Data.Register.rpo] + 8));
+                            MemWriteDWordPointer(Registers[Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[Data.Register.rpo] + 8)));
                             Registers[Data.Register.rpo] += 16;
                             break;
                         case 0x6:  // MVD ptr, reg
@@ -772,7 +772,7 @@ namespace AssEmbly
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x7:  // MVD ptr, lit
-                            MemWriteRegisterDWord(Registers[Data.Register.rpo], MemReadDWord(Registers[Data.Register.rpo] + 1));
+                            MemWriteRegisterDWord(Registers[Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[Data.Register.rpo] + 1)));
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x8:  // MVQ reg, reg
