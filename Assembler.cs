@@ -16,12 +16,18 @@ namespace AssEmbly
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         public static byte[] AssembleLines(string[] lines)
         {
+            List<string> dynamicLines = lines.ToList();
             List<byte> program = new();
             Dictionary<string, ulong> labels = new();
             List<(string, ulong)> labelReferences = new();
-            for (int l = 0; l < lines.Length; l++)
+            Dictionary<string, string> macros = new();
+            for (int l = 0; l < dynamicLines.Count; l++)
             {
-                string line = StripComments(lines[l]);
+                string line = StripComments(dynamicLines[l]);
+                foreach ((string macro, string replacement) in macros)
+                {
+                    line = line.Replace(macro, replacement);
+                }
                 if (line == "")
                 {
                     continue;
@@ -43,7 +49,54 @@ namespace AssEmbly
                         labels[line[1..]] = (uint)program.Count;
                         continue;
                     }
-                    (byte[] newBytes, List<(string, ulong)> newLabels) = AssembleStatement(line);
+                    Match unclosedQuote = Regex.Match(line, @"(?<=^(?>(?:[^""]*""){2})*[^""]*)""(?=[^""]*?$)");
+                    if (unclosedQuote.Success)
+                    {
+                        throw new FormatException($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', unclosedQuote.Index)}^");
+                    }
+                    string[] split = line.Split(' ', 2);
+                    string mnemonic = split[0];
+                    // Regex splits on commas surrounded by any amount of whitespace (not including newlines), unless wrapped in unescaped quotes.
+                    string[] operands = split.Length == 2 ? Regex.Split(
+                        split[1].Trim(), @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
+                    // Check for line-modifying assembler directives
+                    switch (mnemonic.ToUpperInvariant())
+                    {
+                        // Import contents of another file
+                        case "IMP":
+                            if (operands.Length != 1)
+                            {
+                                throw new FormatException($"The IMP mnemonic requires a single operand. {operands.Length} were given.");
+                            }
+                            Data.OperandType operandType = DetermineOperandType(operands[0]);
+                            if (operandType != Data.OperandType.Literal)
+                            {
+                                throw new FormatException($"The operand to the IMP mnemonic must be a literal. An operand of type {operandType} was provided.");
+                            }
+                            if (operands[0][0] != '"')
+                            {
+                                throw new FormatException("The literal operand to the IMP mnemonic must be a string.");
+                            }
+                            byte[] parsedBytes = ParseLiteral(operands[0], true);
+                            string filepath = Encoding.UTF8.GetString(parsedBytes);
+                            if (!File.Exists(filepath))
+                            {
+                                throw new FileNotFoundException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
+                            }
+                            dynamicLines.InsertRange(l + 1, File.ReadAllLines(filepath));
+                            continue;
+                        // Define macro
+                        case "MAC":
+                            if (operands.Length != 2)
+                            {
+                                throw new FormatException($"The MAC mnemonic requires two operands. {operands.Length} were given.");
+                            }
+                            macros[operands[0]] = operands[1];
+                            continue;
+                        default:
+                            break;
+                    }
+                    (byte[] newBytes, List<(string, ulong)> newLabels) = AssembleStatement(mnemonic, operands);
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count));
@@ -78,25 +131,15 @@ namespace AssEmbly
         /// Assemble a single line of AssEmbly to bytecode.
         /// </summary>
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
-        public static (byte[], List<(string, ulong)>) AssembleStatement(string statement)
+        public static (byte[], List<(string, ulong)>) AssembleStatement(string mnemonic, string[] operands)
         {
-            statement = StripComments(statement);
-            Match unclosedQuote = Regex.Match(statement, @"(?<=^(?>(?:[^""]*""){2})*[^""]*)""(?=[^""]*?$)");
-            if (unclosedQuote.Success)
-            {
-                throw new FormatException($"Statement contains an unclosed quote mark:\n    {statement}\n    {new string(' ', unclosedQuote.Index)}^");
-            }
-            string[] split = statement.Split(' ', 2);
-            string mnemonic = split[0];
-            // Regex splits on commas surrounded by any amount of whitespace (not including newlines), unless wrapped in unescaped quotes.
-            string[] operands = split.Length == 2 ? Regex.Split(
-                split[1].Trim(), @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
             Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string, ulong)> labels = new();
-            // Check for assembler directives
+            // Check for byte-inserting assembler directives
             switch (mnemonic.ToUpperInvariant())
             {
+                // Single byte insertion
                 case "DAT":
                     if (operands.Length != 1)
                     {
@@ -111,6 +154,7 @@ namespace AssEmbly
                     return operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0)
                         ? throw new FormatException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
                         : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
+                // 0-padding
                 case "PAD":
                     if (operands.Length != 1)
                     {
@@ -122,6 +166,7 @@ namespace AssEmbly
                             ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
                         : throw new FormatException($"The operand to the PAD mnemonic must be a literal. " +
                             $"An operand of type {operandType} was provided.");
+                // 64-bit number insertion
                 case "NUM":
                     if (operands.Length != 1)
                     {
