@@ -1,3 +1,5 @@
+MAC _ffe, 0b100  ; Create a macro for the file end flag
+
 OFL :FILE_PATH
 ; rg0 - character
 ; rg1 - intermediate number
@@ -20,14 +22,14 @@ ICR rg5
 ADD rg4, 8
 MVQ rg1, 0
 MVQ rg3, 0
-TST rsf, 0b100  ; End of file?
+TST rsf, _ffe  ; End of file?
 JNZ :MAX
 JMP :CHAR_READ_LOOP
 :RESET_INTERS
 ; Next number for same elf
 ADD rg3, rg1
 MVQ rg1, 0
-TST rsf, 0b100  ; End of file?
+TST rsf, _ffe  ; End of file?
 JNZ :NEW_ELF
 JMP :CHAR_READ_LOOP
 :CHAR_PROCESS

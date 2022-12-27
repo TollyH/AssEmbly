@@ -1,3 +1,5 @@
+MAC _ffe, 0b100  ; Create a macro for the file end flag
+
 OFL :FILE_PATH
 ; rg0 - their index
 ; rg1 - our index
@@ -43,7 +45,7 @@ ADD rg5, rg6
 ADD rg5, 1
 ADD rg3, rg5
 ; End of file?
-TST rsf, 0b100
+TST rsf, _ffe
 JZO :READ_LOOP
 CFL
 WCN rg2
