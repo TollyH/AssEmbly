@@ -94,34 +94,48 @@ namespace AssEmbly
             Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string, ulong)> labels = new();
-            if (mnemonic.ToUpperInvariant() == "DAT")
+            // Check for assembler directives
+            switch (mnemonic.ToUpperInvariant())
             {
-                if (operands.Length != 1)
-                {
-                    throw new FormatException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
-                }
-                Data.OperandType operandType = DetermineOperandType(operands[0]);
-                if (operandType != Data.OperandType.Literal)
-                {
-                    throw new FormatException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
-                }
-                byte[] parsedBytes = ParseLiteral(operands[0], true);
-                return operands[0][0] != '"' && parsedBytes[1..].Where(b => b != 0).Any()
-                    ? throw new FormatException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
-                    : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
-            }
-            if (mnemonic.ToUpperInvariant() == "PAD")
-            {
-                if (operands.Length != 1)
-                {
-                    throw new FormatException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
-                }
-                Data.OperandType operandType = DetermineOperandType(operands[0]);
-                return operandType == Data.OperandType.Literal
-                    ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
-                        ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
-                    : throw new FormatException($"The operand to the PAD mnemonic must be a literal. " +
-                        $"An operand of type {operandType} was provided.");
+                case "DAT":
+                    if (operands.Length != 1)
+                    {
+                        throw new FormatException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
+                    }
+                    Data.OperandType operandType = DetermineOperandType(operands[0]);
+                    if (operandType != Data.OperandType.Literal)
+                    {
+                        throw new FormatException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
+                    }
+                    byte[] parsedBytes = ParseLiteral(operands[0], true);
+                    return operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0)
+                        ? throw new FormatException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
+                        : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
+                case "PAD":
+                    if (operands.Length != 1)
+                    {
+                        throw new FormatException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    return operandType == Data.OperandType.Literal
+                        ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
+                            ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
+                        : throw new FormatException($"The operand to the PAD mnemonic must be a literal. " +
+                            $"An operand of type {operandType} was provided.");
+                case "NUM":
+                    if (operands.Length != 1)
+                    {
+                        throw new FormatException($"The NUM mnemonic requires a single operand. {operands.Length} were given.");
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != Data.OperandType.Literal)
+                    {
+                        throw new FormatException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
+                    }
+                    parsedBytes = ParseLiteral(operands[0], false);
+                    return (parsedBytes, new List<(string, ulong)>());
+                default:
+                    break;
             }
             for (int i = 0; i < operands.Length; i++)
             {
