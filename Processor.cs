@@ -472,44 +472,58 @@ namespace AssEmbly
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
                     initial = Registers[targetRegister];
+                    int amount;
                     switch (opcodeLow)
                     {
                         case 0x0:  // SHL reg, reg
-                            Registers[targetRegister] <<= (int)MemReadRegister(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadRegister(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] <<= amount;
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x1:  // SHL reg, lit
-                            Registers[targetRegister] <<= (int)MemReadQWord(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadQWord(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] <<= amount;
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x2:  // SHL reg, adr
-                            Registers[targetRegister] <<= (int)MemReadQWordPointer(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadQWordPointer(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] <<= amount;
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x3:  // SHL reg, ptr
-                            Registers[targetRegister] <<= (int)MemReadRegisterQWord(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadRegisterQWord(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] <<= amount;
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x4:  // SHR reg, reg
-                            Registers[targetRegister] >>= (int)MemReadRegister(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadRegister(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] >>= amount;
                             Registers[Data.Register.rpo] += 2;
                             break;
                         case 0x5:  // SHR reg, lit
-                            Registers[targetRegister] >>= (int)MemReadQWord(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadQWord(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] >>= amount;
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x6:  // SHR reg, adr
-                            Registers[targetRegister] >>= (int)MemReadQWordPointer(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadQWordPointer(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] >>= amount;
                             Registers[Data.Register.rpo] += 9;
                             break;
                         case 0x7:  // SHR reg, ptr
-                            Registers[targetRegister] >>= (int)MemReadRegisterQWord(Registers[Data.Register.rpo] + 1);
+                            amount = (int)MemReadRegisterQWord(Registers[Data.Register.rpo] + 1);
+                            Registers[targetRegister] >>= amount;
                             Registers[Data.Register.rpo] += 2;
                             break;
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised shifting low opcode");
                     }
-                    if (opcodeLow <= 0x3 ? Registers[targetRegister] < initial : Registers[targetRegister] > initial)
+                    if (amount >= 64)
+                    {
+                        Registers[targetRegister] = 0;
+                    }
+                    if (opcodeLow <= 0x3 ? ((amount >= 64 && initial != 0) || (initial >> (64 - amount) << (64 - amount)) != 0) && amount != 0
+                        : (initial & (uint)Math.Pow(2, amount) - 1) != 0)
                     {
                         Registers[Data.Register.rsf] |= 0b10;
                     }
