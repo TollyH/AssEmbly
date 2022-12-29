@@ -28,11 +28,12 @@ JMP :READ_PRINT_CHAR  ; Loop back around
 CFL  ; Close the file
 HLT  ; Stop execution
 
-:FUNC_INPUT
-IMP "input.ext.asm"  ; Import input function
-
 :FILE_PATH
 PAD 256  ; Create a continuous string of 0s, 256 bytes long - will be used to store file path
 
 :PROMPT_STRING
 DAT "Enter file path > "  ; Store string after program data.
+DAT 0  ; End string with a 0 byte so program knows to stop.
+
+:FUNC_INPUT
+IMP "input.ext.asm"  ; Import input function
