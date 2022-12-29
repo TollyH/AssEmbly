@@ -19,11 +19,10 @@ HLT  ; End program printing nothing if file doesn't exist
 :FILE_EXISTS
 OFL :FILE_PATH  ; Open the file
 :READ_PRINT_CHAR
-TST rsf, _ffe  ; Check if the "file end" status bit is set
-JNZ :END  ; If bit is set, stop
 RFC rg0  ; Read a single character from the file
 WCC rg0  ; Write the character to the console
-JMP :READ_PRINT_CHAR  ; Loop back around
+TST rsf, _ffe  ; Check if the "file end" status bit is set
+JZO :READ_PRINT_CHAR  ; If bit isn't set, continue looping
 :END
 CFL  ; Close the file
 HLT  ; Stop execution
