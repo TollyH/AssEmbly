@@ -40,7 +40,11 @@
                         return;
                     }
                     // Change working directory to the location of the specified file.
-                    Environment.CurrentDirectory = Path.GetFullPath(Path.GetDirectoryName(args[1])!);
+                    string parent = Path.GetDirectoryName(args[1])!;
+                    if (parent.Trim() != "")
+                    {
+                        Environment.CurrentDirectory = Path.GetFullPath(parent);
+                    }
                     string filename = string.Join('.', args[1].Split('.')[..^1]);
                     byte[] program;
                     try
@@ -79,7 +83,11 @@
                         return;
                     }
                     // Change working directory to the location of the specified file.
-                    Environment.CurrentDirectory = Path.GetFullPath(Path.GetDirectoryName(args[1])!);
+                    parent = Path.GetDirectoryName(args[1])!;
+                    if (parent.Trim() != "")
+                    {
+                        Environment.CurrentDirectory = Path.GetFullPath(parent);
+                    }
                     ulong memSize = 2046;
                     foreach (string a in args)
                     {
@@ -125,7 +133,11 @@
                         return;
                     }
                     // Change working directory to the location of the specified file.
-                    Environment.CurrentDirectory = Path.GetFullPath(Path.GetDirectoryName(args[1])!);
+                    parent = Path.GetDirectoryName(args[1])!;
+                    if (parent.Trim() != "")
+                    {
+                        Environment.CurrentDirectory = Path.GetFullPath(parent);
+                    }
                     memSize = 2046;
                     foreach (string a in args)
                     {
@@ -183,7 +195,11 @@
                         return;
                     }
                     // Change working directory to the location of the specified file.
-                    Environment.CurrentDirectory = Path.GetFullPath(Path.GetDirectoryName(args[1])!);
+                    parent = Path.GetDirectoryName(args[1])!;
+                    if (parent.Trim() != "")
+                    {
+                        Environment.CurrentDirectory = Path.GetFullPath(parent);
+                    }
                     memSize = 2046;
                     foreach (string a in args)
                     {
@@ -571,7 +587,11 @@
                         return;
                     }
                     // Change working directory to the location of the specified file.
-                    Environment.CurrentDirectory = Path.GetFullPath(Path.GetDirectoryName(args[1])!);
+                    parent = Path.GetDirectoryName(args[1])!;
+                    if (parent.Trim() != "")
+                    {
+                        Environment.CurrentDirectory = Path.GetFullPath(parent);
+                    }
                     filename = string.Join('.', args[1].Split('.')[..^1]);
                     string disassembledProgram;
                     try
