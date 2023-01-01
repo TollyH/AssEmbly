@@ -222,7 +222,7 @@ namespace AssEmbly
             if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out byte opcode))
             {
                 throw new FormatException($"Unrecognised mnemonic and operand combination:\n    {mnemonic} {string.Join(", ", operandTypes)}" +
-                    $"\nConsult the instruction manual for a list of all valid mnemonic/operand combinations.");
+                    $"\nConsult the language reference for a list of all valid mnemonic/operand combinations.");
             }
             operandBytes.Insert(0, opcode);
             return (operandBytes.ToArray(), labels);
