@@ -1222,6 +1222,8 @@ NUM 456
 
 Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
 
+The `IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
+
 Files given to the `IMP` directive **must** be AssEmbly source files, not already assembled binaries. While not a strict requirement, `IMP` statements should be placed at the end of a source file, as they will influence the line numbers shown in error messages, which may make debugging more difficult as the line number in the error messages and the line numbers in the source file will no longer line up after an import.
 
 Consider this example:

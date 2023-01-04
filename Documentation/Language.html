@@ -1577,6 +1577,11 @@ NUM 456</code></pre>
 <p>Meaning that <code>rg0</code> will finish with a value of
 <code>123</code>, and <code>rg1</code> will finish with a value of
 <code>456</code>.</p>
+<p>The <code>IMP</code> directive simply inserts the text contents of a
+file into the current file for assembly. This means that any label names
+in files being imported will be usable in the main file, though imposes
+the added restriction that label names must be unique across the main
+file and all its imported files.</p>
 <p>Files given to the <code>IMP</code> directive <strong>must</strong>
 be AssEmbly source files, not already assembled binaries. While not a
 strict requirement, <code>IMP</code> statements should be placed at the
