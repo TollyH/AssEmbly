@@ -8,7 +8,7 @@ namespace AssEmbly
         /// <summary>
         /// Disassemble a program to AssEmbly code from it's assembled bytecode.
         /// </summary>
-        public static string DisassembleProgram(byte[] program, bool detectStrings)
+        public static string DisassembleProgram(byte[] program, bool detectStrings, bool detectPads)
         {
             int offset = 0;
             List<string> result = new();
@@ -38,16 +38,18 @@ namespace AssEmbly
                     result = result.Select(s => s.Replace($":ADDR_{address:X}", ":INVALID-LABEL")).ToList();
                 }
             }
-            if (detectStrings)
+            if (detectPads || detectStrings)
             {
                 for (int start = 0; start < result.Count; start++)
                 {
-                    if (result[start].StartsWith("DAT ") && result[start][4] != '"' && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
+                    if (detectStrings && result[start].StartsWith("DAT ") && result[start][4] != '"'
+                        && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
                     {
                         int end = result.Count;
                         for (int j = start + 1; j < result.Count; j++)
                         {
-                            if (!result[j].StartsWith("DAT ") || result[j][4] == '"' || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
+                            if (!result[j].StartsWith("DAT ") || result[j][4] == '"'
+                                || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
                             {
                                 end = j;
                                 break;
@@ -61,6 +63,24 @@ namespace AssEmbly
                             newLine += '"';
                             result.RemoveRange(start, end - start);
                             result.Insert(start, newLine);
+                        }
+                    }
+                    if (detectPads && result[start] == "HLT")
+                    {
+                        if (start < result.Count - 1 && result[start + 1] == "HLT")
+                        {
+                            int end = start + 1;
+                            for (int j = start + 1; j < result.Count; j++)
+                            {
+                                if (result[j] != "HLT")
+                                {
+                                    end = j;
+                                    break;
+                                }
+                            }
+                            string newLine = $"PAD {end - start - 1}";
+                            result.RemoveRange(start + 1, end - start - 1);
+                            result.Insert(start + 1, newLine);
                         }
                     }
                 }
@@ -78,20 +98,6 @@ namespace AssEmbly
             bool fallbackToDat = false;
 
             byte opcode = instruction[0];
-            if (opcode == 0)
-            {
-                string padString = "HLT";
-                int byteCount = 1;
-                if (instruction.Length > 1 && instruction[1] == 0)
-                {
-                    for (int i = 1; i < instruction.Length && instruction[i] == 0; i++)
-                    {
-                        byteCount++;
-                    }
-                    padString += $"\nPAD {byteCount - 1}";
-                }
-                return (padString, byteCount, new());
-            }
             IEnumerable<KeyValuePair<(string, Data.OperandType[]), byte>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
             if (!matching.Any())
             {
@@ -164,7 +170,7 @@ namespace AssEmbly
                 }
                 if (!fallbackToDat)
                 {
-                    return ($"{mnemonic} {string.Join(", ", operandStrings)}", totalBytes, referencedAddresses);
+                    return ($"{mnemonic} {string.Join(", ", operandStrings)}".Trim(), totalBytes, referencedAddresses);
                 }
             }
 
