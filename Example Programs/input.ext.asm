@@ -1,5 +1,6 @@
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
+:FUNC_INPUT
 ; Destination address given as parameter is in rfp
 PSH rg0  ; Store value of rg0 so it isn't overwritten permanently
 :FUNC_INPUT_READ

@@ -1,14 +1,7 @@
 MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Print input prompt
-MVQ rg0, :&PROMPT_STRING  ; Move literal address of prompt string to rg0
-:WRITE_PROMPT
-MVB rg1, *rg0  ; Move contents of address stored in rg0 to rg1
-CMP rg1, 0  ; Check if rg1 is 0
-JEQ :END_WRITE  ; If it is, skip ahead and begin next section of program
-ICR rg0  ; Otherwise, increment source address by 1
-WCC rg1  ; Write the character in rg1 to the console
-JMP :WRITE_PROMPT  ; Loop back to print next character
+CAL :FUNC_PRINT, :&PROMPT_STRING
 
 :END_WRITE
 CAL :FUNC_INPUT, :&FILE_PATH  ; Call input function to get file path from user
@@ -34,5 +27,5 @@ PAD 256  ; Create a continuous string of 0s, 256 bytes long - will be used to st
 DAT "Enter file path > "  ; Store string after program data.
 DAT 0  ; End string with a 0 byte so program knows to stop.
 
-:FUNC_INPUT
 IMP "input.ext.asm"  ; Import input function
+IMP "print.ext.asm"  ; Import print function
