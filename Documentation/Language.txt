@@ -10,7 +10,7 @@ such as x86.
 
 AssEmbly was designed and implemented in its entirety by Tolly Hill.
 
-Last revised: 2023-01-02
+Last revised: 2023-01-05
 
 Table of Contents
 
