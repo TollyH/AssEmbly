@@ -49,10 +49,10 @@ namespace AssEmbly
                         labels[line[1..]] = (uint)program.Count;
                         continue;
                     }
-                    Match unclosedQuote = Regex.Match(line, @"(?<=^(?>(?:[^""]*""){2})*[^""]*)""(?=[^""]*?$)");
-                    if (unclosedQuote.Success)
+                    MatchCollection quotes = Regex.Matches(line, @"(?<!\\)""");
+                    if (quotes.Count % 2 != 0)
                     {
-                        throw new FormatException($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', unclosedQuote.Index)}^");
+                        throw new FormatException($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', quotes.Last().Index)}^");
                     }
                     string[] split = line.Split(' ', 2);
                     string mnemonic = split[0];
