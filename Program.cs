@@ -212,6 +212,7 @@
                     try
                     {
                         processor.LoadProgram(File.ReadAllBytes(args[1]));
+                        bool stepInstructions = true;
                         while (true)
                         {
                             void DisplayDebugInfo()
@@ -226,9 +227,12 @@
                                     Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                                 }
                             }
-                            DisplayDebugInfo();
+                            if (stepInstructions)
+                            {
+                                DisplayDebugInfo();
+                            }
                             bool endLoop = false;
-                            while (!endLoop)
+                            while (!endLoop && stepInstructions)
                             {
                                 Console.Write("\nPress ENTER to continue, or type a command: ");
                                 string[] command = Console.ReadLine()!.Trim().ToLower().Split(' ');
@@ -239,6 +243,10 @@
                                     case "refresh":
                                         DisplayDebugInfo();
                                         continue;
+                                    case "run":
+                                        stepInstructions = false;
+                                        endLoop = true;
+                                        break;
                                     #region Debug Read
                                     case "read":
                                         if (command.Length == 3)
@@ -539,6 +547,7 @@
                                         Console.WriteLine("dec2hex <dec-number> - Convert a decimal number to hexadecimal");
                                         Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
                                         Console.WriteLine("refresh - Display the instruction to be executed and register states again");
+                                        Console.WriteLine("run - Run the program without debugging until the next HLT instruction");
                                         continue;
                                     #endregion
                                     default:
@@ -551,10 +560,15 @@
                             }
                             if (processor.Step())
                             {
-                                break;
+                                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                                Console.WriteLine("\n\nHalt instruction reached. You should not continue unless this instruction was placed as a breakpoint.");
+                                Console.ResetColor();
+                                Console.Write("Press any key to continue, or CTRL+C to stop...");
+                                _ = Console.ReadKey();
+                                Console.WriteLine();
+                                stepInstructions = true;
                             }
                         }
-                        Console.WriteLine("\n\nHalt instruction reached. Execution finished.");
                     }
                     catch (Exception e)
                     {
