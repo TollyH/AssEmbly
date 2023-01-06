@@ -173,7 +173,7 @@ following the same basic concepts and constraints seen in mainstream
 architectures such as x86.</p>
 <p>AssEmbly was designed and implemented in its entirety by <a
 href="https://github.com/TollyH">Tolly Hill</a>.</p>
-<p>Last revised: 2023-01-05</p>
+<p>Last revised: 2023-01-06</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#assembly-language-reference">AssEmbly Language
@@ -1160,19 +1160,22 @@ MVQ rg1, 25
 ADD rg1, rg0
 ; rg1 is still 20 now as expected, even though rg0 doesn&#39;t have the value we expect</code></pre>
 <p>If a result of a subtraction has wrapped around (which can be checked
-using the carry flag), then the result can be multiplied by the 64-bit
-integer limit to find the absolute result (the non-negative result):</p>
+using the carry flag), the absolute result (the non-negative result) can
+be found by performing a bitwise not on and incrementing the result by
+1, like so:</p>
 <pre class="text"><code>MVQ rg0, 5
 SUB rg0, 10
-MUL rg0, 18446744073709551615  ; 64-bit integer limit (unsigned)
+NOT rg0
+ICR rg0
 ; rg0 is now 5, carry bit is set</code></pre>
-<p>Using the carry flag, this check can be done conditionally (more in
-the section on branching), as it should not be done on positive
+<p>Using the carry flag, this operation can be done conditionally (more
+in the section on branching), as it should not be done on positive
 results:</p>
 <pre class="text"><code>MVQ rg0, 5
 SUB rg0, rg1  ; Assume rg1 has a value that could cause rg0 to be negative or positive
 JNC :NOT_NEGATIVE  ; Jump to label if carry flag is unset
-MUL rg0, 18446744073709551615  ; This will only run if rg0 wrapped (setting carry flag)
+NOT rg0  ; These will only run if rg0 wrapped (setting carry flag)
+ICR rg0
 :NOT_NEGATIVE
 ; rg0 is now the absolute result</code></pre>
 <h2 id="jumping">Jumping</h2>

@@ -6,7 +6,7 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
-Last revised: 2023-01-05
+Last revised: 2023-01-06
 
 ## Table of Contents
 
@@ -793,22 +793,24 @@ ADD rg1, rg0
 ; rg1 is still 20 now as expected, even though rg0 doesn't have the value we expect
 ```
 
-If a result of a subtraction has wrapped around (which can be checked using the carry flag), then the result can be multiplied by the 64-bit integer limit to find the absolute result (the non-negative result):
+If a result of a subtraction has wrapped around (which can be checked using the carry flag), the absolute result (the non-negative result) can be found by performing a bitwise not on and incrementing the result by 1, like so:
 
 ```text
 MVQ rg0, 5
 SUB rg0, 10
-MUL rg0, 18446744073709551615  ; 64-bit integer limit (unsigned)
+NOT rg0
+ICR rg0
 ; rg0 is now 5, carry bit is set
 ```
 
-Using the carry flag, this check can be done conditionally (more in the section on branching), as it should not be done on positive results:
+Using the carry flag, this operation can be done conditionally (more in the section on branching), as it should not be done on positive results:
 
 ```text
 MVQ rg0, 5
 SUB rg0, rg1  ; Assume rg1 has a value that could cause rg0 to be negative or positive
 JNC :NOT_NEGATIVE  ; Jump to label if carry flag is unset
-MUL rg0, 18446744073709551615  ; This will only run if rg0 wrapped (setting carry flag)
+NOT rg0  ; These will only run if rg0 wrapped (setting carry flag)
+ICR rg0
 :NOT_NEGATIVE
 ; rg0 is now the absolute result
 ```
