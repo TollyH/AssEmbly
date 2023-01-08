@@ -10,32 +10,35 @@ namespace AssEmbly
         /// </summary>
         public static string DisassembleProgram(byte[] program, bool detectStrings, bool detectPads)
         {
-            int offset = 0;
+            ulong offset = 0;
             List<string> result = new();
-            Dictionary<int, int> offsetToLine = new();
+            Dictionary<ulong, int> offsetToLine = new();
             List<(ulong, int)> references = new();
-            while (offset < program.Length)
+            while (offset < (ulong)program.LongLength)
             {
                 offsetToLine[offset] = result.Count;
-                (string line, int additionalOffset, List<ulong> referencedAddresses) = DisassembleInstruction(program[offset..]);
+                (string line, ulong additionalOffset, List<ulong> referencedAddresses) = DisassembleInstruction(program.AsSpan()[(int)offset..]);
                 offset += additionalOffset;
                 references.AddRange(referencedAddresses.Select(x => (x, result.Count)));
                 result.Add(line);
             }
             // Insert label definitions
             references.Sort((a, b) => a.Item1.CompareTo(b.Item1));
-            references = references.DistinctBy(a => a.Item1).ToList();
-            int inserted = 0;
-            foreach ((ulong address, int sourceLineIndex) in references)
+            List<int> inserted = new();
+            foreach ((ulong address, int sourceLineIndex) in references.DistinctBy(a => a.Item1))
             {
-                if (offsetToLine.TryGetValue((int)address, out int destLineIndex))
+                if (offsetToLine.TryGetValue(address, out int destLineIndex))
                 {
-                    result.Insert(destLineIndex + inserted, $":ADDR_{address:X}");
-                    inserted++;
+                    result.Insert(destLineIndex + inserted.Count, $":ADDR_{address:X}");
+                    inserted.Add(destLineIndex);
                 }
                 else
                 {
-                    result = result.Select(s => s.Replace($":ADDR_{address:X}", ":INVALID-LABEL")).ToList();
+                    foreach (int lineIndex in references.Where(a => a.Item1 == address).Select(a => a.Item2))
+                    {
+                        int toReplaceIndex = lineIndex + inserted.Count(l => l <= lineIndex);
+                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", ":INVALID-LABEL");
+                    }
                 }
             }
             if (detectPads || detectStrings)
@@ -69,7 +72,7 @@ namespace AssEmbly
                     {
                         if (start < result.Count - 1 && result[start + 1] == "HLT")
                         {
-                            int end = start + 1;
+                            int end = result.Count;
                             for (int j = start + 1; j < result.Count; j++)
                             {
                                 if (result[j] != "HLT")
@@ -93,7 +96,7 @@ namespace AssEmbly
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
-        public static (string, int, List<ulong>) DisassembleInstruction(byte[] instruction)
+        public static (string, ulong, List<ulong>) DisassembleInstruction(Span<byte> instruction)
         {
             bool fallbackToDat = false;
 
@@ -107,11 +110,11 @@ namespace AssEmbly
             {
                 (string mnemonic, Data.OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
-                int totalBytes = 1;
+                ulong totalBytes = 1;
                 List<ulong> referencedAddresses = new();
                 foreach (Data.OperandType type in operandTypes)
                 {
-                    if (totalBytes >= instruction.Length)
+                    if (totalBytes >= (uint)instruction.Length)
                     {
                         fallbackToDat = true;
                         break;
@@ -119,9 +122,9 @@ namespace AssEmbly
                     switch (type)
                     {
                         case Data.OperandType.Register:
-                            if (Enum.IsDefined((Data.Register)instruction[totalBytes]))
+                            if (Enum.IsDefined((Data.Register)instruction[(int)totalBytes]))
                             {
-                                operandStrings.Add(((Data.Register)instruction[totalBytes]).ToString());
+                                operandStrings.Add(((Data.Register)instruction[(int)totalBytes]).ToString());
                                 totalBytes++;
                             }
                             else
@@ -130,28 +133,28 @@ namespace AssEmbly
                             }
                             break;
                         case Data.OperandType.Literal:
-                            if (totalBytes + 8 > instruction.Length)
+                            if (totalBytes + 8 > (uint)instruction.Length)
                             {
                                 fallbackToDat = true;
                                 break;
                             }
-                            operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]).ToString());
+                            operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..((int)totalBytes + 8)]).ToString());
                             totalBytes += 8;
                             break;
                         case Data.OperandType.Address:
-                            if (totalBytes + 8 > instruction.Length)
+                            if (totalBytes + 8 > (uint)instruction.Length)
                             {
                                 fallbackToDat = true;
                                 break;
                             }
-                            referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction.AsSpan()[totalBytes..(totalBytes + 8)]));
+                            referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..((int)totalBytes + 8)]));
                             operandStrings.Add($":ADDR_{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
                         case Data.OperandType.Pointer:
-                            if (Enum.IsDefined((Data.Register)instruction[totalBytes]))
+                            if (Enum.IsDefined((Data.Register)instruction[(int)totalBytes]))
                             {
-                                operandStrings.Add("*" + ((Data.Register)instruction[totalBytes]).ToString());
+                                operandStrings.Add("*" + ((Data.Register)instruction[(int)totalBytes]).ToString());
                                 totalBytes++;
                             }
                             else
