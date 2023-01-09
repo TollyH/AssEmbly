@@ -105,7 +105,9 @@
                     catch (Exception e)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"\n\nAn error occurred executing your program:\n    {e.Message}\nRegister states:");
+                        string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
+                            ? "An instruction tried to access an invalid memory address." : e.Message;
+                        Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
                         foreach ((Data.Register register, ulong value) in processor.Registers)
                         {
                             Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
@@ -167,7 +169,9 @@
                     catch (Exception e)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"\n\nAn error occurred running your program:\n    {e.Message}\nRegister states:");
+                        string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
+                            ? "An instruction tried to access an invalid memory address." : e.Message;
+                        Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
                         foreach ((Data.Register register, ulong value) in processor.Registers)
                         {
                             Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
@@ -573,7 +577,9 @@
                     catch (Exception e)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"\n\nAn error occurred executing your program:\n    {e.Message}\nRegister states:");
+                        string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
+                            ? "An instruction tried to access an invalid memory address." : e.Message;
+                        Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
                         foreach ((Data.Register register, ulong value) in processor.Registers)
                         {
                             Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");

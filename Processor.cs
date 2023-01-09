@@ -75,6 +75,8 @@ namespace AssEmbly
         /// </summary>
         /// <returns><see langword="true"/> if execution should stop (HLT reached) - otherwise <see langword="false"/></returns>
         /// <exception cref="InvalidOperationException">Thrown if the instruction was invalid, or attempted to perform an invalid operation.</exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown if the instruction tried to access an invalid memory address.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if the instruction tried to access an invalid memory address.</exception>
         public bool Step()
         {
             if (!ProgramLoaded)
