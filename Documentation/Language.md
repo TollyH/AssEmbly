@@ -6,7 +6,7 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
-Last revised: 2023-01-06
+Last revised: 2023-03-16
 
 ## Table of Contents
 
@@ -944,7 +944,8 @@ To repeat that example:
 MVQ rg0, 5
 SUB rg0, rg1  ; Assume rg1 has a value that could cause rg0 to be negative or positive
 JNC :NOT_NEGATIVE  ; Jump to label if carry flag is unset
-MUL rg0, 18446744073709551615  ; This will only run if rg0 wrapped (setting carry flag)
+NOT rg0  ; This will only run if rg0 wrapped (setting carry flag)
+ICR rg0
 :NOT_NEGATIVE
 ; rg0 is now the absolute result
 ```
