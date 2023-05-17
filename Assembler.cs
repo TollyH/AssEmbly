@@ -13,14 +13,20 @@ namespace AssEmbly
         /// Assemble multiple AssEmbly lines at once into executable bytecode.
         /// </summary>
         /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
+        /// <param name="debugInfo">A string to store generated debug information file text in.</param>
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
-        public static byte[] AssembleLines(string[] lines)
+        public static byte[] AssembleLines(string[] lines, out string debugInfo)
         {
             List<string> dynamicLines = lines.ToList();
             List<byte> program = new();
             Dictionary<string, ulong> labels = new();
             List<(string, ulong)> labelReferences = new();
             Dictionary<string, string> macros = new();
+
+            List<(ulong, string)> assembledLines = new();
+            Dictionary<ulong, List<string>> addressLabelNames = new();
+            List<(string, string)> resolvedImports = new();
+
             for (int l = 0; l < dynamicLines.Count; l++)
             {
                 string line = StripComments(dynamicLines[l]);
@@ -42,11 +48,18 @@ namespace AssEmbly
                         {
                             throw new FormatException($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {line}\n     ^");
                         }
-                        if (labels.ContainsKey(line[1..]))
+                        string labelName = line[1..];
+                        if (labels.ContainsKey(labelName))
                         {
-                            throw new FormatException($"Label \"{line[1..]}\" has already been defined. Label names must be unique.");
+                            throw new FormatException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
                         }
-                        labels[line[1..]] = (uint)program.Count;
+                        labels[labelName] = (uint)program.Count;
+
+                        if (!addressLabelNames.ContainsKey((uint)program.Count))
+                        {
+                            addressLabelNames[(uint)program.Count] = new List<string>();
+                        }
+                        addressLabelNames[(uint)program.Count].Add(labelName);
                         continue;
                     }
                     MatchCollection quotes = Regex.Matches(line, @"(?<!\\)""");
@@ -84,6 +97,7 @@ namespace AssEmbly
                                 throw new FileNotFoundException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
                             }
                             dynamicLines.InsertRange(l + 1, File.ReadAllLines(filepath));
+                            resolvedImports.Add((filepath, new FileInfo(filepath).FullName));
                             continue;
                         // Define macro
                         case "MAC":
@@ -101,6 +115,7 @@ namespace AssEmbly
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count));
                     }
+                    assembledLines.Add(((uint)program.Count, line));
                     program.AddRange(newBytes);
                 }
                 catch (Exception e)
@@ -123,6 +138,11 @@ namespace AssEmbly
                 }
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
             }
+
+            debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
+                // Convert dictionary to sorted list
+                addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Item1).ToList(),
+                resolvedImports);
 
             return programBytes;
         }
