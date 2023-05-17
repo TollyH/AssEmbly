@@ -173,7 +173,7 @@ following the same basic concepts and constraints seen in mainstream
 architectures such as x86.</p>
 <p>AssEmbly was designed and implemented in its entirety by <a
 href="https://github.com/TollyH">Tolly Hill</a>.</p>
-<p>Last revised: 2023-03-16</p>
+<p>Last revised: 2023-05-17</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#assembly-language-reference">AssEmbly Language
@@ -2637,7 +2637,7 @@ register, discarding the result</td>
 <td><code>MVB</code></td>
 <td>Move Byte</td>
 <td>Register, Address</td>
-<td>Move the lower 8-bits of the contents of memory at an address in a
+<td>Move 8-bits of the contents of memory starting at an address in a
 label to a register</td>
 <td><code>0x82</code></td>
 </tr>
@@ -2645,7 +2645,7 @@ label to a register</td>
 <td><code>MVB</code></td>
 <td>Move Byte</td>
 <td>Register, Pointer</td>
-<td>Move the lower 8-bits of the contents of memory at an address in a
+<td>Move 8-bits of the contents of memory starting at an address in a
 register to a register</td>
 <td><code>0x83</code></td>
 </tr>
@@ -2700,7 +2700,7 @@ register</td>
 <td><code>MVW</code></td>
 <td>Move Word</td>
 <td>Register, Address</td>
-<td>Move the lower 16-bits (2 bytes) of the contents of memory at an
+<td>Move 16-bits (2 bytes) of the contents of memory starting at an
 address in a label to a register</td>
 <td><code>0x8A</code></td>
 </tr>
@@ -2708,7 +2708,7 @@ address in a label to a register</td>
 <td><code>MVW</code></td>
 <td>Move Word</td>
 <td>Register, Pointer</td>
-<td>Move the lower 16-bits (2 bytes) of the contents of memory at an
+<td>Move 16-bits (2 bytes) of the contents of memory starting at an
 address in a register to a register</td>
 <td><code>0x8B</code></td>
 </tr>
@@ -2763,7 +2763,7 @@ register</td>
 <td><code>MVD</code></td>
 <td>Move Double Word</td>
 <td>Register, Address</td>
-<td>Move the lower 32-bits (4 bytes) of the contents of memory at an
+<td>Move 32-bits (4 bytes) of the contents of memory starting at an
 address in a label to a register</td>
 <td><code>0x92</code></td>
 </tr>
@@ -2771,7 +2771,7 @@ address in a label to a register</td>
 <td><code>MVD</code></td>
 <td>Move Double Word</td>
 <td>Register, Pointer</td>
-<td>Move the lower 32-bits (4 bytes) of the contents of memory at an
+<td>Move 32-bits (4 bytes) of the contents of memory starting at an
 address in a register to a register</td>
 <td><code>0x93</code></td>
 </tr>
@@ -2811,22 +2811,21 @@ memory at an address in a register</td>
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Register, Register</td>
-<td>Move the lower 64-bits (8 bytes) of one register to another</td>
+<td>Move all 64-bits (8 bytes) of one register to another</td>
 <td><code>0x98</code></td>
 </tr>
 <tr class="even">
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Register, Literal</td>
-<td>Move the lower 64-bits (8 bytes) of a literal value to a
-register</td>
+<td>Move all 64-bits (8 bytes) of a literal value to a register</td>
 <td><code>0x99</code></td>
 </tr>
 <tr class="odd">
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Register, Address</td>
-<td>Move the lower 64-bits (8 bytes) of the contents of memory at an
+<td>Move 64-bits (8 bytes) of the contents of memory starting at an
 address in a label to a register</td>
 <td><code>0x9A</code></td>
 </tr>
@@ -2834,7 +2833,7 @@ address in a label to a register</td>
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Register, Pointer</td>
-<td>Move the lower 64-bits (8 bytes) of the contents of memory at an
+<td>Move 64-bits (8 bytes) of the contents of memory starting at an
 address in a register to a register</td>
 <td><code>0x9B</code></td>
 </tr>
@@ -2842,32 +2841,32 @@ address in a register to a register</td>
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Address, Register</td>
-<td>Move the lower 64-bits (8 bytes) of a register to the contents of
-memory at an address in a label</td>
+<td>Move all 64-bits (8 bytes) of a register to the contents of memory
+at an address in a label</td>
 <td><code>0x9C</code></td>
 </tr>
 <tr class="even">
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Address, Literal</td>
-<td>Move the lower 64-bits (8 bytes) of a literal to the contents of
-memory at an address in a label</td>
+<td>Move all 64-bits (8 bytes) of a literal to the contents of memory at
+an address in a label</td>
 <td><code>0x9D</code></td>
 </tr>
 <tr class="odd">
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Pointer, Register</td>
-<td>Move the lower 64-bits (8 bytes) of a register to the contents of
-memory at an address in a register</td>
+<td>Move all 64-bits (8 bytes) of a register to the contents of memory
+at an address in a register</td>
 <td><code>0x9E</code></td>
 </tr>
 <tr class="even">
 <td><code>MVQ</code></td>
 <td>Move Quad Word</td>
 <td>Pointer, Literal</td>
-<td>Move the lower 64-bits (8 bytes) of a literal to the contents of
-memory at an address in a register</td>
+<td>Move all 64-bits (8 bytes) of a literal to the contents of memory at
+an address in a register</td>
 <td><code>0x9F</code></td>
 </tr>
 <tr class="odd">

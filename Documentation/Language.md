@@ -6,7 +6,7 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
-Last revised: 2023-03-16
+Last revised: 2023-05-17
 
 ## Table of Contents
 
@@ -1692,36 +1692,36 @@ RET rfp
 | **Data Moving**                                                                                                                                                                                                               |||||
 | `MVB`         | Move Byte                                           | Register, Register           | Move the lower 8-bits of one register to another                                                                    | `0x80` |
 | `MVB`         | Move Byte                                           | Register, Literal            | Move the lower 8-bits of a literal value to a register                                                              | `0x81` |
-| `MVB`         | Move Byte                                           | Register, Address            | Move the lower 8-bits of the contents of memory at an address in a label to a register                              | `0x82` |
-| `MVB`         | Move Byte                                           | Register, Pointer            | Move the lower 8-bits of the contents of memory at an address in a register to a register                           | `0x83` |
+| `MVB`         | Move Byte                                           | Register, Address            | Move 8-bits of the contents of memory starting at an address in a label to a register                               | `0x82` |
+| `MVB`         | Move Byte                                           | Register, Pointer            | Move 8-bits of the contents of memory starting at an address in a register to a register                            | `0x83` |
 | `MVB`         | Move Byte                                           | Address, Register            | Move the lower 8-bits of a register to the contents of memory at an address in a label                              | `0x84` |
 | `MVB`         | Move Byte                                           | Address, Literal             | Move the lower 8-bits of a literal to the contents of memory at an address in a label                               | `0x85` |
 | `MVB`         | Move Byte                                           | Pointer, Register            | Move the lower 8-bits of a register to the contents of memory at an address in a register                           | `0x86` |
 | `MVB`         | Move Byte                                           | Pointer, Literal             | Move the lower 8-bits of a literal to the contents of memory at an address in a register                            | `0x87` |
 | `MVW`         | Move Word                                           | Register, Register           | Move the lower 16-bits (2 bytes) of one register to another                                                         | `0x88` |
 | `MVW`         | Move Word                                           | Register, Literal            | Move the lower 16-bits (2 bytes) of a literal value to a register                                                   | `0x89` |
-| `MVW`         | Move Word                                           | Register, Address            | Move the lower 16-bits (2 bytes) of the contents of memory at an address in a label to a register                   | `0x8A` |
-| `MVW`         | Move Word                                           | Register, Pointer            | Move the lower 16-bits (2 bytes) of the contents of memory at an address in a register to a register                | `0x8B` |
+| `MVW`         | Move Word                                           | Register, Address            | Move 16-bits (2 bytes) of the contents of memory starting at an address in a label to a register                    | `0x8A` |
+| `MVW`         | Move Word                                           | Register, Pointer            | Move 16-bits (2 bytes) of the contents of memory starting at an address in a register to a register                 | `0x8B` |
 | `MVW`         | Move Word                                           | Address, Register            | Move the lower 16-bits (2 bytes) of a register to the contents of memory at an address in a label                   | `0x8C` |
 | `MVW`         | Move Word                                           | Address, Literal             | Move the lower 16-bits (2 bytes) of a literal to the contents of memory at an address in a label                    | `0x8D` |
 | `MVW`         | Move Word                                           | Pointer, Register            | Move the lower 16-bits (2 bytes) of a register to the contents of memory at an address in a register                | `0x8E` |
 | `MVW`         | Move Word                                           | Pointer, Literal             | Move the lower 16-bits (2 bytes) of a literal to the contents of memory at an address in a register                 | `0x8F` |
 | `MVD`         | Move Double Word                                    | Register, Register           | Move the lower 32-bits (4 bytes) of one register to another                                                         | `0x90` |
 | `MVD`         | Move Double Word                                    | Register, Literal            | Move the lower 32-bits (4 bytes) of a literal value to a register                                                   | `0x91` |
-| `MVD`         | Move Double Word                                    | Register, Address            | Move the lower 32-bits (4 bytes) of the contents of memory at an address in a label to a register                   | `0x92` |
-| `MVD`         | Move Double Word                                    | Register, Pointer            | Move the lower 32-bits (4 bytes) of the contents of memory at an address in a register to a register                | `0x93` |
+| `MVD`         | Move Double Word                                    | Register, Address            | Move 32-bits (4 bytes) of the contents of memory starting at an address in a label to a register                    | `0x92` |
+| `MVD`         | Move Double Word                                    | Register, Pointer            | Move 32-bits (4 bytes) of the contents of memory starting at an address in a register to a register                 | `0x93` |
 | `MVD`         | Move Double Word                                    | Address, Register            | Move the lower 32-bits (4 bytes) of a register to the contents of memory at an address in a label                   | `0x94` |
 | `MVD`         | Move Double Word                                    | Address, Literal             | Move the lower 32-bits (4 bytes) of a literal to the contents of memory at an address in a label                    | `0x95` |
 | `MVD`         | Move Double Word                                    | Pointer, Register            | Move the lower 32-bits (4 bytes) of a register to the contents of memory at an address in a register                | `0x96` |
 | `MVD`         | Move Double Word                                    | Pointer, Literal             | Move the lower 32-bits (4 bytes) of a literal to the contents of memory at an address in a register                 | `0x97` |
-| `MVQ`         | Move Quad Word                                      | Register, Register           | Move the lower 64-bits (8 bytes) of one register to another                                                         | `0x98` |
-| `MVQ`         | Move Quad Word                                      | Register, Literal            | Move the lower 64-bits (8 bytes) of a literal value to a register                                                   | `0x99` |
-| `MVQ`         | Move Quad Word                                      | Register, Address            | Move the lower 64-bits (8 bytes) of the contents of memory at an address in a label to a register                   | `0x9A` |
-| `MVQ`         | Move Quad Word                                      | Register, Pointer            | Move the lower 64-bits (8 bytes) of the contents of memory at an address in a register to a register                | `0x9B` |
-| `MVQ`         | Move Quad Word                                      | Address, Register            | Move the lower 64-bits (8 bytes) of a register to the contents of memory at an address in a label                   | `0x9C` |
-| `MVQ`         | Move Quad Word                                      | Address, Literal             | Move the lower 64-bits (8 bytes) of a literal to the contents of memory at an address in a label                    | `0x9D` |
-| `MVQ`         | Move Quad Word                                      | Pointer, Register            | Move the lower 64-bits (8 bytes) of a register to the contents of memory at an address in a register                | `0x9E` |
-| `MVQ`         | Move Quad Word                                      | Pointer, Literal             | Move the lower 64-bits (8 bytes) of a literal to the contents of memory at an address in a register                 | `0x9F` |
+| `MVQ`         | Move Quad Word                                      | Register, Register           | Move all 64-bits (8 bytes) of one register to another                                                               | `0x98` |
+| `MVQ`         | Move Quad Word                                      | Register, Literal            | Move all 64-bits (8 bytes) of a literal value to a register                                                         | `0x99` |
+| `MVQ`         | Move Quad Word                                      | Register, Address            | Move 64-bits (8 bytes) of the contents of memory starting at an address in a label to a register                    | `0x9A` |
+| `MVQ`         | Move Quad Word                                      | Register, Pointer            | Move 64-bits (8 bytes) of the contents of memory starting at an address in a register to a register                 | `0x9B` |
+| `MVQ`         | Move Quad Word                                      | Address, Register            | Move all 64-bits (8 bytes) of a register to the contents of memory at an address in a label                         | `0x9C` |
+| `MVQ`         | Move Quad Word                                      | Address, Literal             | Move all 64-bits (8 bytes) of a literal to the contents of memory at an address in a label                          | `0x9D` |
+| `MVQ`         | Move Quad Word                                      | Pointer, Register            | Move all 64-bits (8 bytes) of a register to the contents of memory at an address in a register                      | `0x9E` |
+| `MVQ`         | Move Quad Word                                      | Pointer, Literal             | Move all 64-bits (8 bytes) of a literal to the contents of memory at an address in a register                       | `0x9F` |
 | **Stack**                                                                                                                                                                                                                     |||||
 | `PSH`         | Push to Stack                                       | Register                     | Insert the value in a register to the top of the stack                                                              | `0xA0` |
 | `PSH`         | Push to Stack                                       | Literal                      | Insert a literal value to the top of the stack                                                                      | `0xA1` |

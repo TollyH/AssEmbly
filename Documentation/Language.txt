@@ -10,7 +10,7 @@ such as x86.
 
 AssEmbly was designed and implemented in its entirety by Tolly Hill.
 
-Last revised: 2023-03-16
+Last revised: 2023-05-17
 
 Table of Contents
 
@@ -2229,12 +2229,12 @@ Full Instruction Reference
   MVB           Move Byte        Register,   Move the lower 8-bits of a literal    0x81
                                  Literal     value to a register                   
 
-  MVB           Move Byte        Register,   Move the lower 8-bits of the contents 0x82
-                                 Address     of memory at an address in a label to 
+  MVB           Move Byte        Register,   Move 8-bits of the contents of memory 0x82
+                                 Address     starting at an address in a label to  
                                              a register                            
 
-  MVB           Move Byte        Register,   Move the lower 8-bits of the contents 0x83
-                                 Pointer     of memory at an address in a register 
+  MVB           Move Byte        Register,   Move 8-bits of the contents of memory 0x83
+                                 Pointer     starting at an address in a register  
                                              to a register                         
 
   MVB           Move Byte        Address,    Move the lower 8-bits of a register   0x84
@@ -2259,13 +2259,13 @@ Full Instruction Reference
   MVW           Move Word        Register,   Move the lower 16-bits (2 bytes) of a 0x89
                                  Literal     literal value to a register           
 
-  MVW           Move Word        Register,   Move the lower 16-bits (2 bytes) of   0x8A
-                                 Address     the contents of memory at an address  
-                                             in a label to a register              
+  MVW           Move Word        Register,   Move 16-bits (2 bytes) of the         0x8A
+                                 Address     contents of memory starting at an     
+                                             address in a label to a register      
 
-  MVW           Move Word        Register,   Move the lower 16-bits (2 bytes) of   0x8B
-                                 Pointer     the contents of memory at an address  
-                                             in a register to a register           
+  MVW           Move Word        Register,   Move 16-bits (2 bytes) of the         0x8B
+                                 Pointer     contents of memory starting at an     
+                                             address in a register to a register   
 
   MVW           Move Word        Address,    Move the lower 16-bits (2 bytes) of a 0x8C
                                  Register    register to the contents of memory at 
@@ -2289,13 +2289,13 @@ Full Instruction Reference
   MVD           Move Double Word Register,   Move the lower 32-bits (4 bytes) of a 0x91
                                  Literal     literal value to a register           
 
-  MVD           Move Double Word Register,   Move the lower 32-bits (4 bytes) of   0x92
-                                 Address     the contents of memory at an address  
-                                             in a label to a register              
+  MVD           Move Double Word Register,   Move 32-bits (4 bytes) of the         0x92
+                                 Address     contents of memory starting at an     
+                                             address in a label to a register      
 
-  MVD           Move Double Word Register,   Move the lower 32-bits (4 bytes) of   0x93
-                                 Pointer     the contents of memory at an address  
-                                             in a register to a register           
+  MVD           Move Double Word Register,   Move 32-bits (4 bytes) of the         0x93
+                                 Pointer     contents of memory starting at an     
+                                             address in a register to a register   
 
   MVD           Move Double Word Address,    Move the lower 32-bits (4 bytes) of a 0x94
                                  Register    register to the contents of memory at 
@@ -2313,33 +2313,33 @@ Full Instruction Reference
                                  Literal     literal to the contents of memory at  
                                              an address in a register              
 
-  MVQ           Move Quad Word   Register,   Move the lower 64-bits (8 bytes) of   0x98
-                                 Register    one register to another               
+  MVQ           Move Quad Word   Register,   Move all 64-bits (8 bytes) of one     0x98
+                                 Register    register to another                   
 
-  MVQ           Move Quad Word   Register,   Move the lower 64-bits (8 bytes) of a 0x99
+  MVQ           Move Quad Word   Register,   Move all 64-bits (8 bytes) of a       0x99
                                  Literal     literal value to a register           
 
-  MVQ           Move Quad Word   Register,   Move the lower 64-bits (8 bytes) of   0x9A
-                                 Address     the contents of memory at an address  
-                                             in a label to a register              
+  MVQ           Move Quad Word   Register,   Move 64-bits (8 bytes) of the         0x9A
+                                 Address     contents of memory starting at an     
+                                             address in a label to a register      
 
-  MVQ           Move Quad Word   Register,   Move the lower 64-bits (8 bytes) of   0x9B
-                                 Pointer     the contents of memory at an address  
-                                             in a register to a register           
+  MVQ           Move Quad Word   Register,   Move 64-bits (8 bytes) of the         0x9B
+                                 Pointer     contents of memory starting at an     
+                                             address in a register to a register   
 
-  MVQ           Move Quad Word   Address,    Move the lower 64-bits (8 bytes) of a 0x9C
+  MVQ           Move Quad Word   Address,    Move all 64-bits (8 bytes) of a       0x9C
                                  Register    register to the contents of memory at 
                                              an address in a label                 
 
-  MVQ           Move Quad Word   Address,    Move the lower 64-bits (8 bytes) of a 0x9D
+  MVQ           Move Quad Word   Address,    Move all 64-bits (8 bytes) of a       0x9D
                                  Literal     literal to the contents of memory at  
                                              an address in a label                 
 
-  MVQ           Move Quad Word   Pointer,    Move the lower 64-bits (8 bytes) of a 0x9E
+  MVQ           Move Quad Word   Pointer,    Move all 64-bits (8 bytes) of a       0x9E
                                  Register    register to the contents of memory at 
                                              an address in a register              
 
-  MVQ           Move Quad Word   Pointer,    Move the lower 64-bits (8 bytes) of a 0x9F
+  MVQ           Move Quad Word   Pointer,    Move all 64-bits (8 bytes) of a       0x9F
                                  Literal     literal to the contents of memory at  
                                              an address in a register              
 
