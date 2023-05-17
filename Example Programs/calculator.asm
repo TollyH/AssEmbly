@@ -71,6 +71,12 @@ CAL :FUNC_PRINT, :&STR_INVALID_OPERATOR
 JMP :NUM_2_READ_LOOP_END
 
 :PRINTOUT
+JNC :NOT_NEGATIVE
+; If result is negative, print the '-' sign along with the absolute result value
+WCC 45  ; '-'
+NOT rg0
+ICR rg0
+:NOT_NEGATIVE
 WCN rg0
 CMP rg5, 0
 JEQ :END
