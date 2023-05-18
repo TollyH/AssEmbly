@@ -2,10 +2,12 @@
 {
     public static class DebugInfo
     {
+        public static readonly string FormatVersion = "0.1";
+
         public static readonly string Separator = "===============================================================================";
 
         public static readonly string DebugInfoFileHeader = @$"AssEmbly Debug Information File
-Format Version: 0.1
+Format Version: {FormatVersion}
 Date: {{0:yyyy-MM-dd HH:mm:ss}}
 Command Line: {{1}}
 Total Program Size: {{2}} bytes
