@@ -58,7 +58,7 @@
         /// <summary>
         /// A mapping of what byte a mnemonic with a particular set of operands should compile to.
         /// </summary>
-        public static readonly Dictionary<(string, OperandType[]), byte> Mnemonics = new(new MnemonicComparer())
+        public static readonly Dictionary<(string Mnemonic, OperandType[] OperandTypes), byte> Mnemonics = new(new MnemonicComparer())
         {
             // Control
             // HLT (Halt)

@@ -1,15 +1,15 @@
 ﻿namespace AssEmbly
 {
-    public class MnemonicComparer : EqualityComparer<(string, Data.OperandType[])>
+    public class MnemonicComparer : EqualityComparer<(string Mnemonic, Data.OperandType[] OperandTypes)>
     {
-        public override bool Equals((string, Data.OperandType[]) first, (string, Data.OperandType[]) second)
+        public override bool Equals((string Mnemonic, Data.OperandType[] OperandTypes) first, (string Mnemonic, Data.OperandType[] OperandTypes) second)
         {
-            return first.Item1 == second.Item1 && first.Item2.SequenceEqual(second.Item2);
+            return first.Mnemonic == second.Mnemonic && first.OperandTypes.SequenceEqual(second.OperandTypes);
         }
 
-        public override int GetHashCode((string, Data.OperandType[]) obj)
+        public override int GetHashCode((string Mnemonic, Data.OperandType[] OperandTypes) obj)
         {
-            return obj.Item1.GetHashCode();
+            return obj.Mnemonic.GetHashCode();
         }
     }
 }
