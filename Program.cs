@@ -220,6 +220,25 @@
                         }
                     }
                     processor = new(memSize);
+
+                    DebugInfo.DebugInfoFile? debugInfoFile = null;
+                    if (args.Length >= 3 && !args[2].StartsWith('-'))
+                    {
+                        string debugFilePath = args[2];
+                        try
+                        {
+                            string debugInfoText = File.ReadAllText(debugFilePath);
+                            debugInfoFile = DebugInfo.ParseDebugInfoFile(debugInfoText);
+                        }
+                        catch (Exception exc)
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.WriteLine($"An error occurred whilst loading the debug information file:\n\"{exc.Message}\".\n" +
+                                $"Label names and original source lines will not be available.");
+                            Console.ResetColor();
+                        }
+                    }
+
                     try
                     {
                         processor.LoadProgram(File.ReadAllBytes(args[1]));
@@ -230,10 +249,22 @@
                         {
                             void DisplayDebugInfo()
                             {
+                                ulong currentAddress = processor.Registers[Data.Register.rpo];
+                                // Disassemble line on-the-fly, unless a provided debugging file provides the original text for the line
+                                string lineDisassembly = debugInfoFile is null
+                                    || !debugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
+                                        ? Disassembler.DisassembleInstruction(processor.Memory.AsSpan()[(int)currentAddress..]).Line
+                                        : inst;
+
                                 Console.Write($"\n\nAbout to execute instruction:\n    ");
-                                Console.WriteLine(Disassembler.DisassembleInstruction(
-                                    processor.Memory.AsSpan()[(int)processor.Registers[Data.Register.rpo]..]).Line);
+                                Console.WriteLine(lineDisassembly);
                                 Console.WriteLine();
+                                if (debugInfoFile is not null && debugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
+                                {
+                                    Console.Write("This address is referenced by the following labels:\n    ");
+                                    Console.WriteLine(string.Join("\n    ", labels));
+                                    Console.WriteLine();
+                                }
                                 Console.WriteLine("Register states:");
                                 foreach ((Data.Register register, ulong value) in processor.Registers)
                                 {
@@ -678,9 +709,10 @@
                     Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
                     Console.WriteLine();
                     Console.WriteLine("debug - Step through an assembled bytecode file, pausing before each instruction begins execution.");
-                    Console.WriteLine("    Usage: 'AssEmbly debug <file-path> [--mem-size=2046]'");
+                    Console.WriteLine("    Usage: 'AssEmbly debug <file-path> [debug-info-file-path] [--mem-size=2046]'");
                     Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
                     Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
+                    Console.WriteLine("    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.");
                     Console.WriteLine();
                     Console.WriteLine("disassemble - Generate an AssEmbly program listing from already assembled bytecode.");
                     Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path> [destination-path] [--no-strings|--no-pads]'");

@@ -1,4 +1,6 @@
-﻿namespace AssEmbly
+﻿using System.Text.RegularExpressions;
+
+namespace AssEmbly
 {
     public static class DebugInfo
     {
@@ -14,11 +16,33 @@ Total Program Size: {{2}} bytes
 {Separator}
 ";
 
-        public static readonly string AssembledInstructionsHeader = $"\n[1]: Assembled Instructions\n{Separator}";
+        public static readonly string AssembledInstructionsHeader = $"\r\n[1]: Assembled Instructions\r\n{Separator}";
 
-        public static readonly string AddressLabelsHeader = $"\n[2]: Address Labels\n{Separator}";
+        public static readonly string AddressLabelsHeader = $"\r\n[2]: Address Labels\r\n{Separator}";
 
-        public static readonly string ResolvedImportsHeader = $"\n[3]: Resolved Imports\n{Separator}";
+        public static readonly string ResolvedImportsHeader = $"\r\n[3]: Resolved Imports\r\n{Separator}";
+
+        public static readonly Regex DebugFileRegex = new(@"AssEmbly Debug Information File
+Format Version: (?<Version>.+)
+Date: .*
+Command Line: .*
+Total Program Size: .*
+===============================================================================
+
+\[1\]: Assembled Instructions
+===============================================================================
+(?<Instructions>(?:\r\n|.)+?)
+===============================================================================
+
+\[2\]: Address Labels
+===============================================================================
+(?<Labels>(?:\r\n|.)+?)
+===============================================================================
+
+\[3\]: Resolved Imports
+===============================================================================
+(?:\r\n|.)+?
+===============================================================================");
 
         /// <summary>
         /// Generates the contents of a debug information file based on the provided parameters.
@@ -31,31 +55,68 @@ Total Program Size: {{2}} bytes
         /// <param name="resolvedImports">An array of imported file names as seen in AssEmbly code along with the full file path to each one</param>
         /// <returns>A completely formatted debug info file string ready to be saved.</returns>
         public static string GenerateDebugInfoFile(ulong totalProgramSize,
-            IList<(ulong, string)> assembledInstructions, IList<(ulong, List<string>)> addressLabels, IList<(string, string)> resolvedImports)
+            IList<(ulong Address, string Line)> assembledInstructions, IList<(ulong Address, List<string> LabelNames)> addressLabels,
+            IList<(string LocalPath, string FullPath)> resolvedImports)
         {
             string fileText = string.Format(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
             
             fileText += AssembledInstructionsHeader;
             foreach ((ulong address, string instruction) in assembledInstructions)
             {
-                fileText += $"\n{address:X16} @ {instruction}";
+                fileText += $"\r\n{address:X16} @ {instruction}";
             }
 
-            fileText += $"\n{Separator}\n{AddressLabelsHeader}";
+            fileText += $"\r\n{Separator}\r\n{AddressLabelsHeader}";
             foreach ((ulong address, List<string> labels) in addressLabels)
             {
-                fileText += $"\n{address:X16} @ {string.Join(',', labels)}";
+                fileText += $"\r\n{address:X16} @ {string.Join(',', labels)}";
             }
 
-            fileText += $"\n{Separator}\n{ResolvedImportsHeader}";
+            fileText += $"\r\n{Separator}\r\n{ResolvedImportsHeader}";
             foreach ((string sourceName, string resolvedName) in resolvedImports)
             {
-                fileText += $"\n\"{sourceName}\" -> \"{resolvedName}\"";
+                fileText += $"\r\n\"{sourceName}\" -> \"{resolvedName}\"";
             }
 
-            fileText += '\n' + Separator;
+            fileText += "\r\n" + Separator;
 
             return fileText;
+        }
+
+        public readonly record struct DebugInfoFile(
+            Dictionary<ulong, string> AssembledInstructions,
+            Dictionary<ulong, string[]> AddressLabels);
+
+        public static DebugInfoFile ParseDebugInfoFile(string fileText)
+        {
+            Match fileMatch = DebugFileRegex.Match(fileText);
+            if (!fileMatch.Success)
+            {
+                throw new FormatException("The provided debug information file was in an invalid format");
+            }
+            if (fileMatch.Groups["Version"].Value != FormatVersion)
+            {
+                throw new FormatException("The provided debug information file was created for a different version of AssEmbly");
+            }
+
+            List<(ulong Address, string Line)> assembledInstructions = new();
+            List<(ulong Address, string[] LabelNames)> addressLabels = new();
+
+            foreach (string line in fileMatch.Groups["Instructions"].Value.Split('\n'))
+            {
+                string[] split = line.Split(" @ ");
+                assembledInstructions.Add((Convert.ToUInt64(split[0], 16), split[1]));
+            }
+
+            foreach (string line in fileMatch.Groups["Labels"].Value.Split('\n'))
+            {
+                string[] split = line.Split(" @ ");
+                addressLabels.Add((Convert.ToUInt64(split[0], 16), split[1].Split(',')));
+            }
+
+            return new DebugInfoFile(
+                assembledInstructions.ToDictionary(x => x.Address, x => x.Line),
+                addressLabels.ToDictionary(x => x.Address, x => x.LabelNames));
         }
     }
 }
