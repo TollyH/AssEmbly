@@ -20,12 +20,12 @@ namespace AssEmbly
             List<string> dynamicLines = lines.ToList();
             List<byte> program = new();
             Dictionary<string, ulong> labels = new();
-            List<(string, ulong)> labelReferences = new();
+            List<(string LabelName, ulong Address)> labelReferences = new();
             Dictionary<string, string> macros = new();
 
-            List<(ulong, string)> assembledLines = new();
+            List<(ulong Address, string Line)> assembledLines = new();
             Dictionary<ulong, List<string>> addressLabelNames = new();
-            List<(string, string)> resolvedImports = new();
+            List<(string LocalPath, string FullPath)> resolvedImports = new();
 
             for (int l = 0; l < dynamicLines.Count; l++)
             {
@@ -110,7 +110,7 @@ namespace AssEmbly
                         default:
                             break;
                     }
-                    (byte[] newBytes, List<(string, ulong)> newLabels) = AssembleStatement(mnemonic, operands);
+                    (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) = AssembleStatement(mnemonic, operands);
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count));
@@ -141,7 +141,7 @@ namespace AssEmbly
 
             debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
-                addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Item1).ToList(),
+                addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports);
 
             return programBytes;
@@ -151,11 +151,11 @@ namespace AssEmbly
         /// Assemble a single line of AssEmbly to bytecode.
         /// </summary>
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
-        public static (byte[], List<(string, ulong)>) AssembleStatement(string mnemonic, string[] operands)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
         {
             Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
             List<byte> operandBytes = new();
-            List<(string, ulong)> labels = new();
+            List<(string LabelName, ulong AddressOffset)> labels = new();
             // Check for byte-inserting assembler directives
             switch (mnemonic.ToUpperInvariant())
             {

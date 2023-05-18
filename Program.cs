@@ -230,7 +230,7 @@
                             {
                                 Console.Write($"\n\nAbout to execute instruction:\n    ");
                                 Console.WriteLine(Disassembler.DisassembleInstruction(
-                                    processor.Memory.AsSpan()[(int)processor.Registers[Data.Register.rpo]..]).Item1);
+                                    processor.Memory.AsSpan()[(int)processor.Registers[Data.Register.rpo]..]).Line);
                                 Console.WriteLine();
                                 Console.WriteLine("Register states:");
                                 foreach ((Data.Register register, ulong value) in processor.Registers)

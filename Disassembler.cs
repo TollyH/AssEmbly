@@ -13,7 +13,7 @@ namespace AssEmbly
             ulong offset = 0;
             List<string> result = new();
             Dictionary<ulong, int> offsetToLine = new();
-            List<(ulong, int)> references = new();
+            List<(ulong Address, int SourceLineIndex)> references = new();
             while (offset < (ulong)program.LongLength)
             {
                 offsetToLine[offset] = result.Count;
@@ -23,9 +23,9 @@ namespace AssEmbly
                 result.Add(line);
             }
             // Insert label definitions
-            references.Sort((a, b) => a.Item1.CompareTo(b.Item1));
+            references.Sort((a, b) => a.Address.CompareTo(b.Address));
             List<int> inserted = new();
-            foreach ((ulong address, int sourceLineIndex) in references.DistinctBy(a => a.Item1))
+            foreach ((ulong address, int sourceLineIndex) in references.DistinctBy(a => a.Address))
             {
                 if (offsetToLine.TryGetValue(address, out int destLineIndex))
                 {
@@ -34,7 +34,7 @@ namespace AssEmbly
                 }
                 else
                 {
-                    foreach (int lineIndex in references.Where(a => a.Item1 == address).Select(a => a.Item2))
+                    foreach (int lineIndex in references.Where(a => a.Address == address).Select(a => a.SourceLineIndex))
                     {
                         int toReplaceIndex = lineIndex + inserted.Count(l => l <= lineIndex);
                         result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", ":INVALID-LABEL");
@@ -96,7 +96,7 @@ namespace AssEmbly
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
-        public static (string, ulong, List<ulong>) DisassembleInstruction(Span<byte> instruction)
+        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(Span<byte> instruction)
         {
             bool fallbackToDat = false;
 
