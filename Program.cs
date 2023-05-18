@@ -7,7 +7,7 @@
             if (!args.Contains("--no-header"))
             {
                 Console.WriteLine("AssEmbly - A mock assembly language running on .NET");
-                Console.WriteLine("Copyright © 2022  Ptolemy Hill");
+                Console.WriteLine("Copyright © 2022-2023  Ptolemy Hill");
                 Console.WriteLine();
             }
             if (args.Length < 1)
@@ -224,6 +224,8 @@
                     {
                         processor.LoadProgram(File.ReadAllBytes(args[1]));
                         bool stepInstructions = true;
+                        bool runToReturn = false;
+                        ulong? stepOverStackBase = null;
                         while (true)
                         {
                             void DisplayDebugInfo()
@@ -238,14 +240,22 @@
                                     Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                                 }
                             }
-                            if (stepInstructions)
+                            // Only pause for debugging instruction if not running to break, not in a deeper subroutine than we were if stepping over,
+                            // and aren't waiting for a return instruction
+                            bool breakForDebug = stepInstructions && (stepOverStackBase is null || processor.Registers[Data.Register.rsb] >= stepOverStackBase)
+                                // Is the next instruction a return instruction?
+                                && (!runToReturn || processor.Memory[processor.Registers[Data.Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
+
+                            if (breakForDebug)
                             {
+                                runToReturn = false;
+                                stepOverStackBase = null;
                                 DisplayDebugInfo();
                             }
                             bool endLoop = false;
-                            while (!endLoop && stepInstructions)
+                            while (!endLoop && breakForDebug)
                             {
-                                Console.Write("\nPress ENTER to continue, or type a command: ");
+                                Console.Write("\nPress ENTER to continue, or type a command ('help' for command list): ");
                                 string[] command = Console.ReadLine()!.Trim().ToLower().Split(' ');
                                 switch (command[0])
                                 {
@@ -257,6 +267,13 @@
                                     case "run":
                                         stepInstructions = false;
                                         endLoop = true;
+                                        break;
+                                    case "over":
+                                        stepOverStackBase = processor.Registers[Data.Register.rsb];
+                                        break;
+                                    case "return":
+                                        stepOverStackBase = processor.Registers[Data.Register.rsb];
+                                        runToReturn = true;
                                         break;
                                     #region Debug Read
                                     case "read":
@@ -559,6 +576,8 @@
                                         Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
                                         Console.WriteLine("refresh - Display the instruction to be executed and register states again");
                                         Console.WriteLine("run - Run the program without debugging until the next HLT instruction");
+                                        Console.WriteLine("over - Continue to the next instruction in the current subroutine");
+                                        Console.WriteLine("return - Continue to the next return instruction in this subroutine or higher");
                                         continue;
                                     #endregion
                                     default:
