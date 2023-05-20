@@ -216,7 +216,7 @@ namespace AssEmbly
                     break;
                 case 0x1:  // Addition
                     Data.Register targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -265,7 +265,7 @@ namespace AssEmbly
                     break;
                 case 0x2:  // Subtraction
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -314,7 +314,7 @@ namespace AssEmbly
                     break;
                 case 0x3:  // Multiplication
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -359,7 +359,7 @@ namespace AssEmbly
                     break;
                 case 0x4:  // Division
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -451,7 +451,7 @@ namespace AssEmbly
                     break;
                 case 0x5:  // Shifting
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -526,7 +526,7 @@ namespace AssEmbly
                     break;
                 case 0x6:  // Bitwise
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -608,7 +608,7 @@ namespace AssEmbly
                     break;
                 case 0x7:  // Test
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (!Data.WritableRegisters.Contains(targetRegister))
+                    if (targetRegister == Data.Register.rpo)
                     {
                         throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
                     }
@@ -1378,7 +1378,7 @@ namespace AssEmbly
         public void MemWriteRegister(ulong offset, ulong value)
         {
             Data.Register registerType = MemReadRegisterType(offset);
-            if (!Data.WritableRegisters.Contains(registerType))
+            if (registerType == Data.Register.rpo)
             {
                 throw new InvalidOperationException($"Cannot write to read-only register {registerType}");
             }

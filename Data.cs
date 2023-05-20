@@ -34,28 +34,6 @@
         }
 
         /// <summary>
-        /// The set of registers that can be assigned a value by a program.
-        /// </summary>
-        public static readonly HashSet<Register> WritableRegisters = new()
-        {
-            Register.rso,
-            Register.rsb,
-            Register.rsf,
-            Register.rrv,
-            Register.rfp,
-            Register.rg0,
-            Register.rg1,
-            Register.rg2,
-            Register.rg3,
-            Register.rg4,
-            Register.rg5,
-            Register.rg6,
-            Register.rg7,
-            Register.rg8,
-            Register.rg9,
-        };
-
-        /// <summary>
         /// A mapping of what byte a mnemonic with a particular set of operands should compile to.
         /// </summary>
         public static readonly Dictionary<(string Mnemonic, OperandType[] OperandTypes), byte> Mnemonics = new(new MnemonicComparer())
