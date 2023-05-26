@@ -118,7 +118,7 @@
                         foreach (int register in Enum.GetValues(typeof(Data.Register)))
                         {
                             ulong value = processor.Registers[register];
-                            Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                            Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                         }
                         Console.ResetColor();
                     }
@@ -183,7 +183,7 @@
                         foreach (int register in Enum.GetValues(typeof(Data.Register)))
                         {
                             ulong value = processor.Registers[register];
-                            Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                            Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                         }
                         Console.ResetColor();
                     }
@@ -271,7 +271,7 @@
                                 foreach (int register in Enum.GetValues(typeof(Data.Register)))
                                 {
                                     ulong value = processor.Registers[register];
-                                    Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                                    Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                                 }
                             }
                             // Only pause for debugging instruction if not running to break, not in a deeper subroutine than we were if stepping over,
@@ -398,7 +398,7 @@
                                                     continue;
                                                 }
                                                 processor.Registers[(int)register] = value;
-                                                Console.WriteLine($"Successfully set value of register {register} to {value}");
+                                                Console.WriteLine($"Successfully set value of register {Enum.GetName((Data.Register)register)} to {value}");
                                             }
                                             else
                                             {
@@ -643,7 +643,7 @@
                         foreach (int register in Enum.GetValues(typeof(Data.Register)))
                         {
                             ulong value = processor.Registers[register];
-                            Console.WriteLine($"    {register}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                            Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                         }
                         Console.ResetColor();
                     }
