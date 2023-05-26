@@ -21,6 +21,8 @@ namespace AssEmbly
         {
             Memory = new byte[memorySize];
             Registers = new ulong[Enum.GetNames(typeof(Data.Register)).Length];
+            Registers[(int)Data.Register.rso] = memorySize;
+            Registers[(int)Data.Register.rsb] = memorySize;
             ProgramLoaded = false;
         }
 
