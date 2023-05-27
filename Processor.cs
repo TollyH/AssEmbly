@@ -73,7 +73,9 @@ namespace AssEmbly
             }
             bool halt = false;
             byte opcode = Memory[Registers[(int)Data.Register.rpo]];
+            // Upper 4-bytes (general category of instruction)
             byte opcodeHigh = (byte)((0xF0 & opcode) >> 4);
+            // Lower 4-bytes (specific operation and operand types)
             byte opcodeLow = (byte)(0x0F & opcode);
             Registers[(int)Data.Register.rpo]++;
             switch (opcodeHigh)

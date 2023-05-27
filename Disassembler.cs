@@ -45,6 +45,7 @@ namespace AssEmbly
             {
                 for (int start = 0; start < result.Count; start++)
                 {
+                    // If an ASCII character is found, keep looping over any other contiguous ASCII characters
                     if (detectStrings && result[start].StartsWith("DAT ") && result[start][4] != '"'
                         && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
                     {
@@ -68,6 +69,7 @@ namespace AssEmbly
                             result.Insert(start, newLine);
                         }
                     }
+                    // Replace large blocks of HLT (0x00) with PAD directives
                     if (detectPads && result[start] == "HLT")
                     {
                         if (start < result.Count - 1 && result[start + 1] == "HLT")

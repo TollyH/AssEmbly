@@ -17,12 +17,19 @@ namespace AssEmbly
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         public static byte[] AssembleLines(string[] lines, out string debugInfo)
         {
+            // The lines to assemble may change during assembly, for example importing a file
+            // will extend the list of lines to assemble as and when the import is reached.
             List<string> dynamicLines = lines.ToList();
+            // Final compiled byte list
             List<byte> program = new();
+            // Map of label names to final memory addresses
             Dictionary<string, ulong> labels = new();
+            // List of references to labels by name along with the address to insert the relevant address in to
             List<(string LabelName, ulong Address)> labelReferences = new();
+            // string -> replacement
             Dictionary<string, string> macros = new();
 
+            // Used for debug files
             List<(ulong Address, string Line)> assembledLines = new();
             Dictionary<ulong, List<string>> addressLabelNames = new();
             List<(string LocalPath, string FullPath)> resolvedImports = new();
@@ -40,6 +47,7 @@ namespace AssEmbly
                 }
                 try
                 {
+                    // Lines starting with ':' are label definitions
                     if (line.StartsWith(':'))
                     {
                         // Will throw an error if label is not valid
@@ -63,6 +71,7 @@ namespace AssEmbly
                         continue;
                     }
                     MatchCollection quotes = Regex.Matches(line, @"(?<!\\)""");
+                    // All quotes must be paired up, not including escaped quotes
                     if (quotes.Count % 2 != 0)
                     {
                         throw new FormatException($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', quotes.Last().Index)}^");
@@ -96,6 +105,7 @@ namespace AssEmbly
                             {
                                 throw new FileNotFoundException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
                             }
+                            // Insert the contents of the imported file so they are assembled next
                             dynamicLines.InsertRange(l + 1, File.ReadAllLines(filepath));
                             resolvedImports.Add((filepath, new FileInfo(filepath).FullName));
                             continue;
@@ -136,6 +146,7 @@ namespace AssEmbly
                         $"Have you missed a definition?";
                     throw e;
                 }
+                // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
             }
 
@@ -182,6 +193,7 @@ namespace AssEmbly
                     }
                     operandType = DetermineOperandType(operands[0]);
                     return operandType == Data.OperandType.Literal
+                        // Generate an array of 0-bytes with the specified length
                         ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
                             ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
                         : throw new FormatException($"The operand to the PAD mnemonic must be a literal. " +
@@ -234,6 +246,7 @@ namespace AssEmbly
                         }
                         break;
                     case Data.OperandType.Pointer:
+                        // Convert register name to associated byte value
                         operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i][1..].ToLowerInvariant()));
                         break;
                     default: break;
@@ -329,6 +342,7 @@ namespace AssEmbly
             ulong number;
             try
             {
+                // Hex (0x), Binary (0b), and Decimal literals are all supported
                 number = operand.StartsWith("0x")
                     ? Convert.ToUInt64(operand[2..], 16)
                     : operand.StartsWith("0b")
