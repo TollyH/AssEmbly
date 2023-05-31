@@ -32,7 +32,7 @@ namespace AssEmbly
             // Used for debug files
             List<(ulong Address, string Line)> assembledLines = new();
             Dictionary<ulong, List<string>> addressLabelNames = new();
-            List<(string LocalPath, string FullPath)> resolvedImports = new();
+            List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
 
             for (int l = 0; l < dynamicLines.Count; l++)
             {
@@ -107,7 +107,7 @@ namespace AssEmbly
                             }
                             // Insert the contents of the imported file so they are assembled next
                             dynamicLines.InsertRange(l + 1, File.ReadAllLines(filepath));
-                            resolvedImports.Add((filepath, new FileInfo(filepath).FullName));
+                            resolvedImports.Add((filepath, new FileInfo(filepath).FullName, (uint)program.Count));
                             continue;
                         // Define macro
                         case "MAC":

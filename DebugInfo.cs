@@ -4,7 +4,7 @@ namespace AssEmbly
 {
     public static class DebugInfo
     {
-        public static readonly string FormatVersion = "0.1";
+        public static readonly string FormatVersion = "0.2";
 
         public static readonly string Separator = "===============================================================================";
 
@@ -39,7 +39,7 @@ Total Program Size: .*
 
 \[3\]: Resolved Imports
 ===============================================================================
-(?:\r\n|.)*?(?:\r\n)?===============================================================================");
+(?<Imports>(?:\r\n|.)*?)(?:\r\n)?===============================================================================");
 
         /// <summary>
         /// Generates the contents of a debug information file based on the provided parameters.
@@ -49,11 +49,13 @@ Total Program Size: .*
         /// <param name="totalProgramSize">The total size in bytes of the generated file</param>
         /// <param name="assembledInstructions">An array of addresses and the corresponding line of AssEmbly that generated them</param>
         /// <param name="addressLabels">An array of addresses combined with an array of label names pointing to that address</param>
-        /// <param name="resolvedImports">An array of imported file names as seen in AssEmbly code along with the full file path to each one</param>
+        /// <param name="resolvedImports">
+        /// An array of imported file names as seen in AssEmbly code along with the full file path to each one, and the address they were inserted to
+        /// </param>
         /// <returns>A completely formatted debug info file string ready to be saved.</returns>
         public static string GenerateDebugInfoFile(ulong totalProgramSize,
             IList<(ulong Address, string Line)> assembledInstructions, IList<(ulong Address, List<string> LabelNames)> addressLabels,
-            IList<(string LocalPath, string FullPath)> resolvedImports)
+            IList<(string LocalPath, string FullPath, ulong Address)> resolvedImports)
         {
             string fileText = string.Format(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
             
@@ -70,9 +72,9 @@ Total Program Size: .*
             }
 
             fileText += $"\r\n{Separator}\r\n{ResolvedImportsHeader}";
-            foreach ((string sourceName, string resolvedName) in resolvedImports)
+            foreach ((string sourceName, string resolvedName, ulong address) in resolvedImports)
             {
-                fileText += $"\r\n\"{sourceName}\" -> \"{resolvedName}\"";
+                fileText += $"\r\n{address:X16} @ \"{sourceName}\" -> \"{resolvedName}\"";
             }
 
             fileText += "\r\n" + Separator;
@@ -82,7 +84,8 @@ Total Program Size: .*
 
         public readonly record struct DebugInfoFile(
             Dictionary<ulong, string> AssembledInstructions,
-            Dictionary<ulong, string[]> AddressLabels);
+            Dictionary<ulong, string[]> AddressLabels,
+            Dictionary<ulong, string> ImportLocations);
 
         public static DebugInfoFile ParseDebugInfoFile(string fileText)
         {
@@ -98,6 +101,7 @@ Total Program Size: .*
 
             List<(ulong Address, string Line)> assembledInstructions = new();
             List<(ulong Address, string[] LabelNames)> addressLabels = new();
+            List<(ulong Address, string ImportName)> importLocations = new();
 
             foreach (string line in fileMatch.Groups["Instructions"].Value.Split('\n'))
             {
@@ -111,9 +115,16 @@ Total Program Size: .*
                 addressLabels.Add((Convert.ToUInt64(split[0], 16), split[1].Split(',')));
             }
 
+            foreach (string line in fileMatch.Groups["Imports"].Value.Split('\n'))
+            {
+                string[] split = line.Split(" @ ");
+                importLocations.Add((Convert.ToUInt64(split[0], 16), split[1].Split(" -> ")[0].Trim('"')));
+            }
+
             return new DebugInfoFile(
                 assembledInstructions.ToDictionary(x => x.Address, x => x.Line),
-                addressLabels.ToDictionary(x => x.Address, x => x.LabelNames));
+                addressLabels.ToDictionary(x => x.Address, x => x.LabelNames),
+                importLocations.ToDictionary(x => x.Address, x => x.ImportName));
         }
     }
 }
