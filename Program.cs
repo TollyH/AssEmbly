@@ -261,11 +261,20 @@
                                 Console.Write($"\n\nAbout to execute instruction:\n    ");
                                 Console.WriteLine(lineDisassembly);
                                 Console.WriteLine();
-                                if (debugInfoFile is not null && debugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
+                                if (debugInfoFile is not null)
                                 {
-                                    Console.Write("This address is referenced by the following labels:\n    ");
-                                    Console.WriteLine(string.Join("\n    ", labels));
-                                    Console.WriteLine();
+                                    if (debugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
+                                    {
+                                        Console.Write("This address is referenced by the following labels:\n    ");
+                                        Console.WriteLine(string.Join("\n    ", labels));
+                                        Console.WriteLine();
+                                    }
+                                    if (debugInfoFile.Value.ImportLocations.TryGetValue(currentAddress, out string? importName))
+                                    {
+                                        Console.Write("The following file was imported here:\n    ");
+                                        Console.WriteLine(importName);
+                                        Console.WriteLine();
+                                    }
                                 }
                                 Console.WriteLine("Register states:");
                                 foreach (int register in Enum.GetValues(typeof(Data.Register)))
