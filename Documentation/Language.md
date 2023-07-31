@@ -6,7 +6,7 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
-Last revised: 2023-05-17
+Last revised: 2023-07-31
 
 ## Table of Contents
 
@@ -927,7 +927,7 @@ This would be done like so:
 :READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
 
 This program will keep looping until the third bit of `rsf` becomes `1`. meaning that the end of the file has been reached.
@@ -1423,7 +1423,7 @@ To read all characters until the end of a file, you will need to continually rea
 :READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
 
 ### Other Operations

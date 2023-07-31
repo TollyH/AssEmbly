@@ -7,9 +7,6 @@
   <title>Language</title>
   <style>
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -28,13 +25,16 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
+      html {
+        background-color: white;
+      }
       body {
         background-color: transparent;
         color: black;
@@ -84,9 +84,10 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -151,8 +152,11 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
@@ -173,7 +177,7 @@ following the same basic concepts and constraints seen in mainstream
 architectures such as x86.</p>
 <p>AssEmbly was designed and implemented in its entirety by <a
 href="https://github.com/TollyH">Tolly Hill</a>.</p>
-<p>Last revised: 2023-05-17</p>
+<p>Last revised: 2023-07-31</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#assembly-language-reference">AssEmbly Language
@@ -1298,7 +1302,7 @@ that checks this flag.</p>
 <pre class="text"><code>:READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn&#39;t 0 (i.e. it is set to 1), jump back to READ</code></pre>
+JZO :READ  ; If it isn&#39;t set (i.e. it is equal to 0), jump back to READ</code></pre>
 <p>This program will keep looping until the third bit of
 <code>rsf</code> becomes <code>1</code>. meaning that the end of the
 file has been reached.</p>
@@ -1777,7 +1781,7 @@ this example from the bit testing section:</p>
 <pre class="text"><code>:READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn&#39;t 0 (i.e. it is set to 1), jump back to READ</code></pre>
+JZO :READ  ; If it isn&#39;t set (i.e. it is equal to 0), jump back to READ</code></pre>
 <h3 id="other-operations">Other Operations</h3>
 <p>As well as reading and writing, there are also instructions for
 checking whether a file exists (<code>FEX</code>), and deleting a file
