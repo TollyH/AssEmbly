@@ -31,6 +31,7 @@ MAC MagicBytes, 0x66696F71
 ; rg1 - data pointer
 ; rg2 - length of source data
 ; rg3 - Exit status
+; rg4 - pixel count
 PSH rg0
 PSH rg1
 PSH rg2
@@ -52,12 +53,14 @@ JNE :QOI_DECODE_EXIT
 
 ; Width
 MVD rg0, *rfp
+MVD rg4, rg0
 MVD *rg1, rg0
 ADD rfp, 4
 ADD rg1, 4
 
 ; Height
 MVD rg0, *rfp
+MUL rg4, rg0
 MVD *rg1, rg0
 ADD rfp, 4
 ADD rg1, 4
@@ -85,7 +88,12 @@ ICR rfp
 ICR rg1
 
 ; Pixels
-
+PSH rg4
+PSH rg1
+MVQ rg0, rg2
+SUB rg0, 14
+PSH rg0
+CAL :FUNC_QOI_DECODE_PIXELS, rfp
 
 ICR rg3
 :QOI_DECODE_EXIT
