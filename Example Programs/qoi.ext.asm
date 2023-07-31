@@ -16,12 +16,13 @@ MAC MagicBytes, 0x66696F71
 ;   uint8     Colorspace (0 - sRGB, 1 - Linear)
 ;   Pixel  [] Pixels
 ;   unknown[] TrailingData
+;   uint64    TrailingData Length
 ; }
 
 ; +==============FUNCTION==============+
 ; |   Decode a QOI image byte stream.  |
 ; +-------------PARAMETERS-------------+
-; | rfp - Address to source data       |
+; | rfp      - Address to source data  |
 ; | stack[0] - Length of source data   |
 ; | stack[1] - Address to destination  |
 ; +--------------RETURNS---------------+
@@ -37,27 +38,32 @@ PSH rg1
 PSH rg2
 PSH rg3
 XOR rg3, rg3
+
 ; Get stack parameters
 MVQ rg1, rsb
 ADD rg1, 24
 MVQ rg2, *rg1
 ADD rg1, 8
 MVQ rg1, *rg1
+
 ; Check that magic bytes are present and correct
 MVD rg0, *rfp
 ADD rfp, 4
 CMP rg0, MagicBytes
 JNE :QOI_DECODE_EXIT
+
 ; Width
 MVD rg0, *rfp
 MVD *rg1, rg0
 ADD rfp, 4
 ADD rg1, 4
+
 ; Height
 MVD rg0, *rfp
 MVD *rg1, rg0
 ADD rfp, 4
 ADD rg1, 4
+
 ; Channels
 MVB rg0, *rfp
 CMP rg0, 3
@@ -68,6 +74,7 @@ JNE :QOI_DECODE_EXIT
 MVB *rg1, rg0
 ICR rfp
 ICR rg1
+
 ; Colorspace
 MVB rg0, *rfp
 CMP rg0, 3
@@ -78,6 +85,7 @@ JNE :QOI_DECODE_EXIT
 MVB *rg1, rg0
 ICR rfp
 ICR rg1
+
 ; Pixels
 
 ; Trailing data
