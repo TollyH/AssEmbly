@@ -15,8 +15,6 @@ MAC MagicBytes, 0x66696F71
 ;   uint8     Channels (3 - RGB, 4 - RGBA)
 ;   uint8     Colorspace (0 - sRGB, 1 - Linear)
 ;   Pixel  [] Pixels
-;   unknown[] TrailingData
-;   uint64    TrailingData Length
 ; }
 
 ; +==============FUNCTION==============+
