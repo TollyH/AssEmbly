@@ -86,13 +86,52 @@ ICR rg1
 
 ; Pixels
 
-; Trailing data
 
 ICR rg3
 :QOI_DECODE_EXIT
 MVQ rrv, rg3
 POP rg3
 POP rg2
+POP rg1
+POP rg0
+RET
+
+
+; +==============FUNCTION==============+
+; |  Generate a hash for a QOI pixel.  |
+; +-------------PARAMETERS-------------+
+; | rfp - Pixel                        |
+; +--------------RETURNS---------------+
+; | rrv - Hash value                   |
+; +====================================+
+:FUNC_QOI_HASH
+PSH rg0
+PSH rg1
+
+MVD rg0, rfp
+AND rg0, 0b11000000
+SHR rg0, 6
+MUL rg0, 3
+
+MVD rg1, rfp
+AND rg1, 0b00110000
+SHR rg1, 4
+MUL rg1, 5
+ADD rg0, rg1
+
+MVD rg1, rfp
+AND rg1, 0b00001100
+SHR rg1, 2
+MUL rg1, 7
+ADD rg0, rg1
+
+MVD rg1, rfp
+AND rg1, 0b00000011
+MUL rg1, 11
+ADD rg0, rg1
+
+REM rg0, 64
+MVQ rrv, rg0
 POP rg1
 POP rg0
 RET
