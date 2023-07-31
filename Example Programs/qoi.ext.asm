@@ -10,11 +10,11 @@ MAC MagicBytes, 0x66696F71
 ; }
 ;
 ; QOIImage {
-;   uint32    Width
-;   uint32    Height
-;   uint8     Channels (3 - RGB, 4 - RGBA)
-;   uint8     Colorspace (0 - sRGB, 1 - Linear)
-;   Pixel  [] Pixels
+;   uint32  Width
+;   uint32  Height
+;   uint8   Channels (3 - RGB, 4 - RGBA)
+;   uint8   Colorspace (0 - sRGB, 1 - Linear)
+;   Pixel[] Pixels
 ; }
 
 ; +==============FUNCTION==============+
