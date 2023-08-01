@@ -426,10 +426,21 @@
                                     #endregion
                                     #region Debug Map
                                     case "map":
-                                        ulong limit = ulong.MaxValue;
-                                        if (command.Length == 2)
+                                        ulong offset = 0;
+                                        ulong limit = uint.MaxValue;
+                                        if (command.Length >= 2)
                                         {
-                                            if (!ulong.TryParse(command[1], out limit))
+                                            if (!ulong.TryParse(command[1], out offset))
+                                            {
+                                                Console.ForegroundColor = ConsoleColor.Red;
+                                                Console.WriteLine($"\"{command[1]}\" is not a valid offset. Run 'help' for more info.");
+                                                Console.ResetColor();
+                                                continue;
+                                            }
+                                        }
+                                        if (command.Length == 3)
+                                        {
+                                            if (!ulong.TryParse(command[2], out limit))
                                             {
                                                 Console.ForegroundColor = ConsoleColor.Red;
                                                 Console.WriteLine($"\"{command[1]}\" is not a valid limit. Run 'help' for more info.");
@@ -437,17 +448,18 @@
                                                 continue;
                                             }
                                         }
-                                        else if (command.Length != 1)
+                                        if (command.Length is not 1 and > 3)
                                         {
                                             Console.ForegroundColor = ConsoleColor.Red;
-                                            Console.WriteLine("This command requires 0 or 1 arguments. Run 'help' for more info.");
+                                            Console.WriteLine("This command requires 0 to 2 arguments. Run 'help' for more info.");
                                             Console.ResetColor();
                                             continue;
                                         }
                                         Console.Write("Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n" +
                                             "─────────────────┼────────────────────────────────────────────────");
-                                        ulong min = (ulong)processor.Memory.LongLength < limit ? (ulong)processor.Memory.LongLength : limit;
-                                        for (ulong i = 0; i < min; i++)
+                                        ulong start = offset - (offset % 16);  // Ensure offset is a multiple of 16
+                                        ulong end = (ulong)processor.Memory.LongLength < (limit + start) ? (ulong)processor.Memory.LongLength : (limit + start);
+                                        for (ulong i = start; i < end; i++)
                                         {
                                             if (i % 16 == 0)
                                             {
@@ -613,7 +625,7 @@
                                     case "help":
                                         Console.WriteLine("\nread <byte|word|dword|qword> <address> - Read data at a memory address");
                                         Console.WriteLine("write <mem|reg> <address|register-name> <value> - Modify the value of a memory address or register");
-                                        Console.WriteLine("map [limit] - Display all (optionally limited amount) of memory in a grid of bytes");
+                                        Console.WriteLine("map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes");
                                         Console.WriteLine("stack - Visualise the state of the stack");
                                         Console.WriteLine("dec2hex <dec-number> - Convert a decimal number to hexadecimal");
                                         Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
