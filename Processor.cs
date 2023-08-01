@@ -818,23 +818,23 @@ namespace AssEmbly
                     switch (opcodeLow)
                     {
                         case 0x0:  // PSH reg
+                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegister(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rso] -= 8;
-                            MemWriteQWord(Registers[(int)Data.Register.rso], MemReadRegister(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x1:  // PSH lit
+                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWord(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rso] -= 8;
-                            MemWriteQWord(Registers[(int)Data.Register.rso], MemReadQWord(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x2:  // PSH adr
+                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rso] -= 8;
-                            MemWriteQWord(Registers[(int)Data.Register.rso], MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x3:  // PSH ptr
+                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rso] -= 8;
-                            MemWriteQWord(Registers[(int)Data.Register.rso], MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x4:  // POP reg
