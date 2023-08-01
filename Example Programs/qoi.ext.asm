@@ -52,19 +52,55 @@ ADD rfp, 4
 CMP rg0, MagicBytes
 JNE :QOI_DECODE_EXIT
 
-; Width
-MVD rg0, *rfp
-MVD rg4, rg0
-MVD *rg1, rg0
-ADD rfp, 4
-ADD rg1, 4
+; Width (stored in big endian)
+MVB rg0, *rfp
+SHL rg0, 24
+MVB rg4, rg0
+ICR rfp
 
-; Height
-MVD rg0, *rfp
-MUL rg4, rg0
-MVD *rg1, rg0
-ADD rfp, 4
+MVB rg0, *rfp
+SHL rg0, 16
+ORR rg4, rg0
+ICR rfp
+
+MVB rg0, *rfp
+SHL rg0, 8
+ORR rg4, rg0
+ICR rfp
+
+MVB rg0, *rfp
+ORR rg4, rg0
+ICR rfp
+
+MVB *rg1, rg4
 ADD rg1, 4
+; Store width in stack to multiply after height is read
+PSH rg4
+
+; Height (stored in big endian)
+MVB rg0, *rfp
+SHL rg0, 24
+MVB rg4, rg0
+ICR rfp
+
+MVB rg0, *rfp
+SHL rg0, 16
+ORR rg4, rg0
+ICR rfp
+
+MVB rg0, *rfp
+SHL rg0, 8
+ORR rg4, rg0
+ICR rfp
+
+MVB rg0, *rfp
+ORR rg4, rg0
+ICR rfp
+
+MVB *rg1, rg4
+ADD rg1, 4
+POP rg0
+MUL rg4, rg0
 
 ; Channels
 MVB rg0, *rfp
