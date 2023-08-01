@@ -6,7 +6,7 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
-Last revised: 2023-05-17
+Last revised: 2023-08-01
 
 ## Table of Contents
 
@@ -927,7 +927,7 @@ This would be done like so:
 :READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
 
 This program will keep looping until the third bit of `rsf` becomes `1`. meaning that the end of the file has been reached.
@@ -1423,12 +1423,12 @@ To read all characters until the end of a file, you will need to continually rea
 :READ
 RFC rg0  ; Read the next character from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
-JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
 
 ### Other Operations
 
-As well as reading and writing, there are also instructions for checking whether a file exists (`FEX`), and deleting a file (`DFL`). They both take a path in the same way `OFL` does, `DFL` having no effect other than deleting the file, and `FEX` first taking a register operand to store `1` in if the file exists, `0` if not.
+As well as reading and writing, there are also instructions for checking whether a file exists (`FEX`), getting the size of a file (`FSZ`), and deleting a file (`DFL`). They all take a path in the same way `OFL` does. `DFL` has no effect other than deleting the file. `FEX` and `FSZ` first take a register operand to store their result in, then the path to the file as the second operand. `FEX` stores `1` in the register if the file exists, `0` if not. `FSZ` stores the total size of the file in bytes.
 
 ## The Stack
 
@@ -1786,6 +1786,8 @@ RET rfp
 | `DFL`         | Delete File                                         | Pointer                      | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address in a register  | `0xE4` |
 | `FEX`         | File Exists                                         | Register, Address            | Store `1` in a register if the filepath specified in memory starting at an address in a label exists, else `0`      | `0xE5` |
 | `FEX`         | File Exists                                         | Register, Pointer            | Store `1` in a register if the filepath specified in memory starting at an address in a register exists, else `0`   | `0xE6` |
+| `FSZ`         | Get File Size                                       | Register, Address            | In a register, store the byte size of the file at the path specified in memory starting at an address in a label    | `0xE7` |
+| `FSZ`         | Get File Size                                       | Register, Pointer            | In a register, store the byte size of the file at the path specified in memory starting at an address in a register | `0xE8` |
 | **Reading**                                                                                                                                                                                                                   |||||
 | `RCC`         | Read Character from Console                         | Register                     | Read a character from the console as a byte, storing it in a register                                               | `0xF0` |
 | `RFC`         | Read Character from File                            | Register                     | Read the next character from the currently open file as a byte, storing it in a register                            | `0xF1` |

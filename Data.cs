@@ -308,6 +308,10 @@
             { ("FEX", new OperandType[2] { OperandType.Register, OperandType.Address }), 0xE5 },
             { ("FEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), 0xE6 },
 
+            // FSZ (Get Size of File at Path Specified by 0x00 Terminated String in Memory)
+            { ("FSZ", new OperandType[2] { OperandType.Register, OperandType.Address }), 0xE7 },
+            { ("FSZ", new OperandType[2] { OperandType.Register, OperandType.Pointer }), 0xE8 },
+
             // Reading
             // RCC (Read Character from Console as a Byte)
             { ("RCC", new OperandType[1] { OperandType.Register }), 0xF0 },

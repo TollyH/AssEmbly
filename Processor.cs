@@ -1151,7 +1151,7 @@ namespace AssEmbly
                             {
                                 filepath += (char)Memory[i];
                             }
-                            Registers[(int)Data.Register.rpo] += 8;
+                            Registers[(int)Data.Register.rpo]++;
                             openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                             fileWrite = new StreamWriter(openFile);
                             fileRead = new StreamReader(openFile);
@@ -1191,7 +1191,7 @@ namespace AssEmbly
                             {
                                 filepath += (char)Memory[i];
                             }
-                            Registers[(int)Data.Register.rpo] += 8;
+                            Registers[(int)Data.Register.rpo]++;
                             File.Delete(filepath);
                             break;
                         case 0x5:  // FEX reg, adr
@@ -1210,6 +1210,24 @@ namespace AssEmbly
                                 filepath += (char)Memory[i];
                             }
                             MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
+                            Registers[(int)Data.Register.rpo] += 2;
+                            break;
+                        case 0x7:  // FSZ reg, adr
+                            filepath = "";
+                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
+                            Registers[(int)Data.Register.rpo] += 9;
+                            break;
+                        case 0x8:  // FSZ reg, ptr
+                            filepath = "";
+                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:

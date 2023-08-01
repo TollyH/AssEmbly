@@ -10,7 +10,7 @@ such as x86.
 
 AssEmbly was designed and implemented in its entirety by Tolly Hill.
 
-Last revised: 2023-05-17
+Last revised: 2023-08-01
 
 Table of Contents
 
@@ -1134,7 +1134,7 @@ This would be done like so:
     :READ
     RFC rg0  ; Read the next character from the open file to rg0
     TST rsf, 0b100  ; Check if the third bit is set
-    JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+    JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
 This program will keep looping until the third bit of rsf becomes 1.
 meaning that the end of the file has been reached.
@@ -1705,15 +1705,17 @@ from the bit testing section:
     :READ
     RFC rg0  ; Read the next character from the open file to rg0
     TST rsf, 0b100  ; Check if the third bit is set
-    JZO :READ  ; If it isn't 0 (i.e. it is set to 1), jump back to READ
+    JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
 Other Operations
 
 As well as reading and writing, there are also instructions for checking
-whether a file exists (FEX), and deleting a file (DFL). They both take a
-path in the same way OFL does, DFL having no effect other than deleting
-the file, and FEX first taking a register operand to store 1 in if the
-file exists, 0 if not.
+whether a file exists (FEX), getting the size of a file (FSZ), and
+deleting a file (DFL). They all take a path in the same way OFL does.
+DFL has no effect other than deleting the file. FEX and FSZ first take a
+register operand to store their result in, then the path to the file as
+the second operand. FEX stores 1 in the register if the file exists, 0
+if not. FSZ stores the total size of the file in bytes.
 
 The Stack
 
@@ -2583,6 +2585,16 @@ Full Instruction Reference
   FEX           File Exists      Register,   Store 1 in a register if the filepath 0xE6
                                  Pointer     specified in memory starting at an    
                                              address in a register exists, else 0  
+
+  FSZ           Get File Size    Register,   In a register, store the byte size of 0xE7
+                                 Address     the file at the path specified in     
+                                             memory starting at an address in a    
+                                             label                                 
+
+  FSZ           Get File Size    Register,   In a register, store the byte size of 0xE8
+                                 Pointer     the file at the path specified in     
+                                             memory starting at an address in a    
+                                             register                              
 
   Reading                                                                          
 
