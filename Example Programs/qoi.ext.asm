@@ -369,7 +369,7 @@ ADD rg1, 24
 MVQ rg1, *rg1
 
 ; Allocate space in stack for file to be read to
-FSZ rg2, rfp
+FSZ rg2, *rfp
 SUB rso, rg2
 
 ; Read entire input file
