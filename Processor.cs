@@ -12,8 +12,9 @@ namespace AssEmbly
         public bool ProgramLoaded { get; private set; }
 
         private FileStream? openFile;
-        private StreamReader? fileRead;
-        private StreamWriter? fileWrite;
+        private BinaryReader? fileRead;
+        private BinaryWriter? fileWrite;
+        private long openFileSize = 0;
 
         private Random rng = new();
 
@@ -1130,9 +1131,10 @@ namespace AssEmbly
                             }
                             Registers[(int)Data.Register.rpo] += 8;
                             openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                            fileWrite = new StreamWriter(openFile);
-                            fileRead = new StreamReader(openFile);
-                            if (fileRead.EndOfStream)
+                            openFileSize = openFile.Length;
+                            fileWrite = new BinaryWriter(openFile);
+                            fileRead = new BinaryReader(openFile);
+                            if (fileRead.BaseStream.Position >= openFileSize)
                             {
                                 Registers[(int)Data.Register.rsf] |= 0b100;
                             }
@@ -1153,9 +1155,10 @@ namespace AssEmbly
                             }
                             Registers[(int)Data.Register.rpo]++;
                             openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                            fileWrite = new StreamWriter(openFile);
-                            fileRead = new StreamReader(openFile);
-                            if (fileRead.EndOfStream)
+                            openFileSize = openFile.Length;
+                            fileWrite = new BinaryWriter(openFile);
+                            fileRead = new BinaryReader(openFile);
+                            if (fileRead.BaseStream.Position >= openFileSize)
                             {
                                 Registers[(int)Data.Register.rsf] |= 0b100;
                             }
@@ -1175,6 +1178,7 @@ namespace AssEmbly
                             fileRead = null;
                             openFile!.Close();
                             openFile = null;
+                            openFileSize = 0;
                             break;
                         case 0x3:  // DFL adr
                             filepath = "";
@@ -1249,8 +1253,8 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x1:  // RFC reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], (char)fileRead!.Read());
-                            if (fileRead.EndOfStream)
+                            MemWriteRegister(Registers[(int)Data.Register.rpo], fileRead!.ReadByte());
+                            if (fileRead.BaseStream.Position >= openFileSize)
                             {
                                 Registers[(int)Data.Register.rsf] |= 0b100;
                             }
