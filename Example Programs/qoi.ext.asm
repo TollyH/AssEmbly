@@ -1,3 +1,6 @@
+; An AssEmbly library for decoding (TODO: encoding) QOI image files
+; https://qoiformat.org/ (Website)
+; https://qoiformat.org/qoi-specification.pdf (Specification)
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
 MAC MagicBytes, 0x66696F71
