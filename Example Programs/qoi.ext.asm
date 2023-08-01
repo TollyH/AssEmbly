@@ -1,6 +1,7 @@
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
 MAC MagicBytes, 0x66696F71
+MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Pixel {
 ;   uint8 Red
@@ -338,6 +339,59 @@ POP rg6
 POP rg5
 POP rg4
 POP rg3
+POP rg2
+POP rg1
+POP rg0
+RET
+
+
+; +=====================FUNCTION=====================+
+; |             Decode a QOI image file.             |
+; +--------------------PARAMETERS--------------------+
+; | rfp      - Address of zero terminated path       |
+; | stack[0] - Address to destination for pixel data |
+; +---------------------RETURNS----------------------+
+; |        rrv - 0 if failed, 1+ if succeeded        |
+; +==================================================+
+:FUNC_QOI_DECODE_FILE
+; rg0 - temp storage
+; rg1 - data pointer
+; rg2 - length of source data
+; rg4 - stack array pointer
+PSH rg0
+PSH rg1
+PSH rg2
+PSH rg4
+
+; Get stack parameters
+MVQ rg1, rsb
+ADD rg1, 24
+MVQ rg1, *rg1
+
+; Allocate space in stack for file to be read to
+FSZ rg2, rfp
+SUB rso, rg2
+
+; Read entire input file
+OFL *rfp
+MVQ rg4, rso
+:FUNC_QOI_DECODE_FILE_READ_LOOP
+TST rsf, _ffe
+JNZ :FUNC_QOI_DECODE_FILE_READ_LOOP_END
+RFC rg0
+MVB *rg4, rg0
+ICR rg4
+JMP :FUNC_QOI_DECODE_FILE_READ_LOOP
+:FUNC_QOI_DECODE_FILE_READ_LOOP_END
+CFL
+
+PSH rg1
+PSH rg2
+CAL :FUNC_QOI_DECODE, rso
+ADD rso, 16  ; Remove pushed parameters from stack
+
+ADD rso, rg2  ; Quickly remove entire read file from stack
+POP rg4
 POP rg2
 POP rg1
 POP rg0
