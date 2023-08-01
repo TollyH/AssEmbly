@@ -179,7 +179,9 @@ ADD rg4, 8
 MVQ rg1, *rg4
 ADD rg4, 8
 MVQ rg4, *rg4
-ADD rg4, rg1  ; Convert length to the end index + 1
+; Convert length to the end index + 1
+MUL rg4, 4
+ADD rg4, rg1
 
 ; Initialise 256 byte array in stack (64 pixels) for color index
 MVQ rg0, rso
