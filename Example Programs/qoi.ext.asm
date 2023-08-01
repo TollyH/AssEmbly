@@ -72,7 +72,7 @@ MVB rg0, *rfp
 ORR rg4, rg0
 ICR rfp
 
-MVB *rg1, rg4
+MVD *rg1, rg4
 ADD rg1, 4
 ; Store width in stack to multiply after height is read
 PSH rg4
@@ -97,7 +97,7 @@ MVB rg0, *rfp
 ORR rg4, rg0
 ICR rfp
 
-MVB *rg1, rg4
+MVD *rg1, rg4
 ADD rg1, 4
 POP rg0
 MUL rg4, rg0
@@ -230,7 +230,7 @@ MVB *rg1, rg0
 ICR rg1
 ; Alpha
 ADD rg3, 3
-MVB rg0, *rg3
+MVB rg0, rg3
 MVB *rg1, rg0
 SUB rg3, 3
 ICR rg1
@@ -273,7 +273,7 @@ MVQ rg0, *rfp
 AND rg0, 0b00110000
 SHR rg0, 4
 SUB rg0, 2
-MVB rg6, *rg3
+MVB rg6, rg3
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
@@ -283,7 +283,7 @@ AND rg0, 0b00001100
 SHR rg0, 2
 SUB rg0, 2
 ICR rg3
-MVB rg6, *rg3
+MVB rg6, rg3
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
@@ -292,13 +292,13 @@ MVQ rg0, *rfp
 AND rg0, 0b00000011
 SUB rg0, 2
 ICR rg3
-MVB rg6, *rg3
+MVB rg6, rg3
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Alpha
 ICR rg3
-MVB rg0, *rg3
+MVB rg0, rg3
 MVB *rg1, rg0
 SUB rg3, 3
 ICR rg1
@@ -315,14 +315,14 @@ MVQ rg0, *rfp
 AND rg0, 0b11110000
 SHR rg0, 4
 SUB rg0, 8
-MVB rg7, *rg3
+MVB rg7, rg3
 ADD rg0, rg7
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Green
 ICR rg3
-MVB rg0, *rg3
+MVB rg0, rg3
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
@@ -331,14 +331,14 @@ MVQ rg0, *rfp
 AND rg0, 0b00001111
 SUB rg0, 8
 ICR rg3
-MVB rg7, *rg3
+MVB rg7, rg3
 ADD rg0, rg7
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Alpha
 ICR rg3
-MVB rg0, *rg3
+MVB rg0, rg3
 MVB *rg1, rg0
 SUB rg3, 3
 ICR rg1
@@ -362,9 +362,12 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 SUB rg1, 4
 MVD rg3, *rg1
 ADD rg1, 4
+PSH rfp
 CAL :FUNC_QOI_HASH, rg3
-MVQ rg0, rso
-ADD rg0, rrv
+POP rfp
+MVQ rg0, rrv
+MUL rg0, 4  ; Multiply hash index by 4 as pixels are 4 bytes wide
+ADD rg0, rso
 MVD *rg0, rg3
 ICR rfp
 JMP :QOI_DECODE_PIXELS_DECODER_LOOP
@@ -448,24 +451,24 @@ PSH rg0
 PSH rg1
 
 MVD rg0, rfp
-AND rg0, 0b11000000
-SHR rg0, 6
+AND rg0, 0x000000FF
 MUL rg0, 3
 
 MVD rg1, rfp
-AND rg1, 0b00110000
-SHR rg1, 4
+AND rg1, 0x0000FF00
+SHR rg1, 8
 MUL rg1, 5
 ADD rg0, rg1
 
 MVD rg1, rfp
-AND rg1, 0b00001100
-SHR rg1, 2
+AND rg1, 0x00FF0000
+SHR rg1, 16
 MUL rg1, 7
 ADD rg0, rg1
 
 MVD rg1, rfp
-AND rg1, 0b00000011
+AND rg1, 0xFF000000
+SHR rg1, 24
 MUL rg1, 11
 ADD rg0, rg1
 
