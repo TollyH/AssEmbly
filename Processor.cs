@@ -1049,35 +1049,59 @@ namespace AssEmbly
                     switch (opcodeLow)
                     {
                         case 0x0:  // WFN reg
-                            fileWrite!.Write(MemReadRegister(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadRegister(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x1:  // WFN lit
-                            fileWrite!.Write(MemReadQWord(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadQWord(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x2:  // WFN adr
-                            fileWrite!.Write(MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadQWordPointer(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x3:  // WFN ptr
-                            fileWrite!.Write(MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadRegisterQWord(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x4:  // WFB reg
-                            fileWrite!.Write(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in (0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x5:  // WFB lit
-                            fileWrite!.Write(Memory[Registers[(int)Data.Register.rpo]]);
+                            foreach (char digit in Memory[Registers[(int)Data.Register.rpo]].ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x6:  // WFB adr
-                            fileWrite!.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadBytePointer(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0x7:  // WFB ptr
-                            fileWrite!.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                            foreach (char digit in MemReadRegisterByte(Registers[(int)Data.Register.rpo]).ToString())
+                            {
+                                fileWrite!.Write(digit);
+                            }
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0x8:  // WFX reg
@@ -1097,19 +1121,19 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0xC:  // WFC reg
-                            fileWrite!.Write((char)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                            fileWrite!.Write((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         case 0xD:  // WFC lit
-                            fileWrite!.Write((char)Memory[Registers[(int)Data.Register.rpo]]);
+                            fileWrite!.Write(Memory[Registers[(int)Data.Register.rpo]]);
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0xE:  // WFC adr
-                            fileWrite!.Write((char)MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                            fileWrite!.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo] += 8;
                             break;
                         case 0xF:  // WFC ptr
-                            fileWrite!.Write((char)MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                            fileWrite!.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
