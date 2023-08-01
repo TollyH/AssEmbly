@@ -1151,7 +1151,7 @@ namespace AssEmbly
                             {
                                 filepath += (char)Memory[i];
                             }
-                            Registers[(int)Data.Register.rpo] += 8;
+                            Registers[(int)Data.Register.rpo]++;
                             openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                             fileWrite = new StreamWriter(openFile);
                             fileRead = new StreamReader(openFile);
@@ -1191,7 +1191,7 @@ namespace AssEmbly
                             {
                                 filepath += (char)Memory[i];
                             }
-                            Registers[(int)Data.Register.rpo] += 8;
+                            Registers[(int)Data.Register.rpo]++;
                             File.Delete(filepath);
                             break;
                         case 0x5:  // FEX reg, adr
