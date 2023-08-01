@@ -79,9 +79,9 @@ ICR rg1
 
 ; Colorspace
 MVB rg0, *rfp
-CMP rg0, 3
+CMP rg0, 0
 JEQ :QOI_DECODE_VALID_COLORSPACE
-CMP rg0, 4
+CMP rg0, 1
 JNE :QOI_DECODE_EXIT
 :QOI_DECODE_VALID_COLORSPACE
 MVB *rg1, rg0
@@ -385,9 +385,10 @@ JMP :FUNC_QOI_DECODE_FILE_READ_LOOP
 :FUNC_QOI_DECODE_FILE_READ_LOOP_END
 CFL
 
+MVQ rfp, rso
 PSH rg1
 PSH rg2
-CAL :FUNC_QOI_DECODE, rso
+CAL :FUNC_QOI_DECODE
 ADD rso, 16  ; Remove pushed parameters from stack
 
 ADD rso, rg2  ; Quickly remove entire read file from stack
