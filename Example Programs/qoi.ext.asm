@@ -131,6 +131,7 @@ MVQ rg0, rg2
 SUB rg0, 14
 PSH rg0
 CAL :FUNC_QOI_DECODE_PIXELS, rfp
+ADD rso, 24  ; Remove parameters from stack
 
 ICR rg3
 :QOI_DECODE_EXIT
