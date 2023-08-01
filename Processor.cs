@@ -1212,6 +1212,24 @@ namespace AssEmbly
                             MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
+                        case 0x7:  // FSZ reg, adr
+                            filepath = "";
+                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
+                            Registers[(int)Data.Register.rpo] += 9;
+                            break;
+                        case 0x8:  // FSZ reg, ptr
+                            filepath = "";
+                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                            {
+                                filepath += (char)Memory[i];
+                            }
+                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
+                            Registers[(int)Data.Register.rpo] += 2;
+                            break;
                         default:
                             throw new InvalidOperationException($"{opcodeLow:X} is not a recognised file operation low opcode");
                     }
