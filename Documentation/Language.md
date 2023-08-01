@@ -6,6 +6,8 @@ AssEmbly is a mock processor architecture and assembly language written in C# an
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
+For the purposes of this documentation, a "character" is synonymous with a "byte".
+
 Last revised: 2023-08-01
 
 ## Table of Contents

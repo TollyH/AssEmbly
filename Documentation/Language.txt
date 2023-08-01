@@ -10,6 +10,9 @@ such as x86.
 
 AssEmbly was designed and implemented in its entirety by Tolly Hill.
 
+For the purposes of this documentation, a “character” is synonymous with
+a “byte”.
+
 Last revised: 2023-08-01
 
 Table of Contents
