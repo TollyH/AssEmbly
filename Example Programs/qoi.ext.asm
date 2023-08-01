@@ -231,10 +231,10 @@ MVB rg0, *rfp
 MVB *rg1, rg0
 ICR rg1
 ; Alpha
-ADD rg3, 3
-MVB rg0, rg3
+MVQ rg0, rg3
+AND rg0, 0xFF000000
+SHR rg0, 24
 MVB *rg1, rg0
-SUB rg3, 3
 ICR rg1
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
@@ -263,6 +263,7 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_INDEX
 MVB rg0, *rfp
+MUL rg0, 4 ; Multiply hash index by 4 as pixels are 4 bytes wide
 ADD rg0, rso
 MVD rg0, *rg0
 MVD *rg1, rg0
@@ -284,8 +285,9 @@ MVQ rg0, *rfp
 AND rg0, 0b00001100
 SHR rg0, 2
 SUB rg0, 2
-ICR rg3
-MVB rg6, rg3
+MVQ rg6, rg3
+AND rg6, 0x0000FF00
+SHR rg6, 8
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
@@ -293,16 +295,17 @@ ICR rg1
 MVQ rg0, *rfp
 AND rg0, 0b00000011
 SUB rg0, 2
-ICR rg3
-MVB rg6, rg3
+MVQ rg6, rg3
+AND rg6, 0x00FF0000
+SHR rg6, 16
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Alpha
-ICR rg3
-MVB rg0, rg3
+MVQ rg0, rg3
+AND rg0, 0xFF000000
+SHR rg0, 24
 MVB *rg1, rg0
-SUB rg3, 3
 ICR rg1
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
@@ -323,8 +326,9 @@ ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Green
-ICR rg3
-MVB rg0, rg3
+MVQ rg0, rg3
+AND rg0, 0x0000FF00
+SHR rg0, 8
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
@@ -332,17 +336,18 @@ ICR rg1
 MVQ rg0, *rfp
 AND rg0, 0b00001111
 SUB rg0, 8
-ICR rg3
-MVB rg7, rg3
+MVQ rg7, rg3
+AND rg7, 0x00FF0000
+SHR rg7, 16
 ADD rg0, rg7
 ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Alpha
-ICR rg3
-MVB rg0, rg3
+MVQ rg0, rg3
+AND rg0, 0xFF000000
+SHR rg0, 24
 MVB *rg1, rg0
-SUB rg3, 3
 ICR rg1
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
