@@ -105,18 +105,30 @@ Total Program Size: .*
 
             foreach (string line in fileMatch.Groups["Instructions"].Value.Split('\n'))
             {
+                if (line.Trim() == string.Empty)
+                {
+                    continue;
+                }
                 string[] split = line.Split(" @ ");
                 assembledInstructions.Add((Convert.ToUInt64(split[0], 16), split[1]));
             }
 
             foreach (string line in fileMatch.Groups["Labels"].Value.Split('\n'))
             {
+                if (line.Trim() == string.Empty)
+                {
+                    continue;
+                }
                 string[] split = line.Split(" @ ");
                 addressLabels.Add((Convert.ToUInt64(split[0], 16), split[1].Split(',')));
             }
 
             foreach (string line in fileMatch.Groups["Imports"].Value.Split('\n'))
             {
+                if (line.Trim() == string.Empty)
+                {
+                    continue;
+                }
                 string[] split = line.Split(" @ ");
                 importLocations.Add((Convert.ToUInt64(split[0], 16), split[1].Split(" -> ")[0].Trim('"')));
             }
