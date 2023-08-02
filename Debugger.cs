@@ -9,6 +9,8 @@
         public bool RunToReturn { get; set; } = false;
         public ulong? StepOverStackBase { get; set; } = null;
 
+        public List<(Data.Register Register, ulong Value)> Breakpoints { get; set; } = new();
+
         public Debugger()
         {
             DebuggingProcessor = new(2046);
@@ -87,8 +89,22 @@
                     // Is the next instruction a return instruction?
                         && (!RunToReturn || DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Data.Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
 
+                    foreach ((Data.Register register, ulong value) in Breakpoints)
+                    {
+                        if (DebuggingProcessor.Registers[(int)register] == value)
+                        {
+                            Console.BackgroundColor = ConsoleColor.Red;
+                            Console.ForegroundColor = ConsoleColor.Black;
+                            Console.Write($"Breakpoint hit! {register} == {value}");
+                            Console.ResetColor();
+                            breakForDebug = true;
+                            break;
+                        }
+                    }
+
                     if (breakForDebug)
                     {
+                        StepInstructions = true;
                         RunToReturn = false;
                         StepOverStackBase = null;
                         DisplayDebugInfo();
@@ -123,7 +139,7 @@
                                 CommandReadMemory(command);
                                 break;
                             case "write":
-                                CommandWriteMemory(command);
+                                CommandWriteMemReg(command);
                                 break;
                             case "map":
                                 CommandMapMemory(command);
@@ -136,6 +152,9 @@
                                 break;
                             case "hex2dec":
                                 CommandHexadecimalToDecimal(command);
+                                break;
+                            case "breakpoint":
+                                CommandBreakpointManage(command);
                                 break;
                             case "help":
                                 CommandDebugHelp();
@@ -216,7 +235,7 @@
             }
         }
 
-        private void CommandWriteMemory(string[] command)
+        private void CommandWriteMemReg(string[] command)
         {
             if (command.Length == 4)
             {
@@ -477,12 +496,83 @@
             }
         }
 
+        private void CommandBreakpointManage(string[] command)
+        {
+            if (command.Length == 1)
+            {
+                Console.WriteLine("Current breakpoints:");
+                foreach ((Data.Register register, ulong value) in Breakpoints)
+                {
+                    Console.WriteLine($"{register}: {value}");
+                }
+            }
+            else if (command.Length == 4)
+            {
+                string action = command[1].ToLower();
+                if (!Enum.TryParse(command[2], out Data.Register register))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\"{command[2]}\" is not a valid register. Run 'help' for more info.");
+                    Console.ResetColor();
+                    return;
+                }
+                if (!ulong.TryParse(command[3], out ulong value))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\"{command[3]}\" is not a valid value to break on.");
+                    Console.ResetColor();
+                    return;
+                }
+                switch (action)
+                {
+                    case "add":
+                        if (!Breakpoints.Contains((register, value)))
+                        {
+                            Breakpoints.Add((register, value));
+                            Console.WriteLine($"Breakpoint added for {register} with value {value}");
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.WriteLine($"There is already a breakpoint added for {register} with value {value}.");
+                            Console.ResetColor();
+                        }
+                        break;
+                    case "remove":
+                        if (Breakpoints.RemoveAll(x => x.Register == register && x.Value == value) == 0)
+                        {
+                            Console.ForegroundColor = ConsoleColor.DarkYellow;
+                            Console.WriteLine("There were no matching breakpoints to remove.");
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Breakpoint removed for {register} with value {value}");
+                        }
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"\"{command[1]}\" is not a valid breakpoint action. Run 'help' for more info.");
+                        Console.ResetColor();
+                        break;
+                }
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("This command requires either 3 arguments to add or remove a breakpoint, or none to list them. Run 'help' for more info.");
+                Console.ResetColor();
+                return;
+            }
+        }
+
         private static void CommandDebugHelp()
         {
             Console.WriteLine("\nread <byte|word|dword|qword> <address> - Read data at a memory address");
             Console.WriteLine("write <mem|reg> <address|register-name> <value> - Modify the value of a memory address or register");
             Console.WriteLine("map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes");
             Console.WriteLine("stack - Visualise the state of the stack");
+            Console.WriteLine("breakpoint [<add|remove> <register> <value>] - Add or remove a breakpoint for when a register is equal to a value");
             Console.WriteLine("dec2hex <dec-number> - Convert a decimal number to hexadecimal");
             Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
             Console.WriteLine("refresh - Display the instruction to be executed and register states again");
