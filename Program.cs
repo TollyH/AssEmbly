@@ -4,9 +4,11 @@
     {
         static void Main(string[] args)
         {
+            Version? version = typeof(Program).Assembly.GetName().Version;
+
             if (!args.Contains("--no-header"))
             {
-                Console.WriteLine("AssEmbly - A mock assembly language running on .NET");
+                Console.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Revision} - A mock assembly language running on .NET");
                 Console.WriteLine("Copyright © 2022-2023  Ptolemy Hill");
                 Console.WriteLine();
             }
