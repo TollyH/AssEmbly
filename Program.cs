@@ -6,9 +6,14 @@
         {
             Version? version = typeof(Program).Assembly.GetName().Version;
 
+            if (args.Contains("--version"))
+            {
+                Console.WriteLine(version?.ToString());
+                return;
+            }
             if (!args.Contains("--no-header"))
             {
-                Console.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Revision} - A mock assembly language running on .NET");
+                Console.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} - A mock assembly language running on .NET");
                 Console.WriteLine("Copyright © 2022-2023  Ptolemy Hill");
                 Console.WriteLine();
             }
@@ -719,6 +724,7 @@
                 case "help":
                     Console.WriteLine("Usage: 'AssEmbly <operation> <required-parameters (if any)> [optional-parameters]'");
                     Console.WriteLine("Any command can take the '--no-header' optional parameter to disable the copyright printout.");
+                    Console.WriteLine("Using the '--version' optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.");
                     Console.WriteLine();
                     Console.WriteLine("Operations:");
                     Console.WriteLine("assemble - Take a program written in AssEmbly and assemble it down to executable bytecode");
