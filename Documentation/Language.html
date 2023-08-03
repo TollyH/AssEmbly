@@ -169,8 +169,8 @@
 </head>
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
-<p>Applies to versions: <code>1.0.0</code></p>
-<p>Last revised: 2023-08-02</p>
+<p>Applies to versions: <code>1.1.0</code></p>
+<p>Last revised: 2023-08-03</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -1594,41 +1594,16 @@ in files being imported will be usable in the main file, though imposes
 the added restriction that label names must be unique across the main
 file and all its imported files.</p>
 <p>Files given to the <code>IMP</code> directive <strong>must</strong>
-be AssEmbly source files, not already assembled binaries. While not a
-strict requirement, <code>IMP</code> statements should be placed at the
-end of a source file, as they will influence the line numbers shown in
-error messages, which may make debugging more difficult as the line
-number in the error messages and the line numbers in the source file
-will no longer line up after an import.</p>
-<p>Consider this example:</p>
-<pre class="text"><code>IMP &quot;file.asm&quot;
-INV  ; INV isn&#39;t a valid mnemonic, will result in an error</code></pre>
-<p><code>file.asm</code>:</p>
-<pre class="text"><code>MVQ rg0, 5
-MVQ rg1, 6
-ADD rg1, rg0</code></pre>
-<p>Assembling the first file will output the following error
-message:</p>
-<pre class="text"><code>Error on line 5
-    &quot;INV&quot;
-Unrecognised mnemonic and operand combination:
-    INV
-Consult the language reference for a list of all valid mnemonic/operand combinations.</code></pre>
-<p>Note that the error message claims that the error is located on line
-5, despite the fact that it is only line 2 in the original file. This
-has occurred because the <code>IMP</code> directive offset the line that
-contained the error, like so:</p>
-<pre class="text"><code>IMP &quot;file.asm&quot;
-MVQ rg0, 5
-MVQ rg1, 6
-ADD rg1, rg0
-INV  ; INV isn&#39;t a valid mnemonic, will result in an error</code></pre>
+be AssEmbly source files, not already assembled binaries. It is
+recommended, though not a strict requirement, that import statements are
+placed at the end of a file, as that will make it easier to ensure that
+the imported contents of a file aren’t executed by mistake as part of
+the main program.</p>
 <p>Care should be taken to ensure that a file does not end up depending
 on itself, even if it is through other files, as this will result in an
-infinite loop of imports (also known as a circular dependency). AssEmbly
-has no built-in way to detect these, so if a file seems to be taking
-longer than expected to assemble, it is a good idea to check your
-imports to ensure that a file has not ended up depending on itself.</p>
+infinite loop of imports (also known as a circular dependency). The
+AssEmbly assembler will detect these and throw an error should one
+occur.</p>
 <p>An example of a circular dependency:</p>
 <p><code>file_one.asm</code>:</p>
 <pre class="text"><code>IMP &quot;file_two.asm&quot;</code></pre>
@@ -1636,9 +1611,9 @@ imports to ensure that a file has not ended up depending on itself.</p>
 <pre class="text"><code>IMP &quot;file_three.asm&quot;</code></pre>
 <p><code>file_three.asm</code>:</p>
 <pre class="text"><code>IMP &quot;file_one.asm&quot;</code></pre>
-<p>Attempting to assemble any of these three files would put the
-assembler into an infinite loop, as each file ends up depending on
-itself as it resolves its import.</p>
+<p>Attempting to assemble any of these three files would result in the
+assembler throwing an error, as each file ends up depending on itself as
+it resolves its import.</p>
 <h2 id="console-input-and-output">Console Input and Output</h2>
 <p>AssEmbly has native support for reading and writing from the console.
 There are four types of write that can be performed: 64-bit number in

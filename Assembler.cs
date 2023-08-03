@@ -9,6 +9,20 @@ namespace AssEmbly
     /// </summary>
     public static class Assembler
     {
+        public class ImportStackFrame
+        {
+            public string ImportPath { get; set; }
+            public int CurrentLine { get; set; }
+            public int TotalLines { get; set; }
+
+            public ImportStackFrame(string importPath, int currentLine, int totalLines)
+            {
+                ImportPath = importPath;
+                CurrentLine = currentLine;
+                TotalLines = totalLines;
+            }
+        }
+
         /// <summary>
         /// Assemble multiple AssEmbly lines at once into executable bytecode.
         /// </summary>
@@ -34,8 +48,37 @@ namespace AssEmbly
             Dictionary<ulong, List<string>> addressLabelNames = new();
             List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
 
+            // For detecting circular imports and tracking imported line numbers
+            Stack<ImportStackFrame> importStack = new();
+            int baseFileLine = 0;
+
             for (int l = 0; l < dynamicLines.Count; l++)
             {
+                if (importStack.TryPeek(out ImportStackFrame? currentImport))
+                {
+                    // Currently inside an imported file
+                    currentImport.CurrentLine++;
+                    while (currentImport.CurrentLine > currentImport.TotalLines)
+                    {
+                        // Reached the end of an imported file.
+                        // Pop from the import stack until we reach an import that hasn't ended yet,
+                        // or the base file.
+                        _ = importStack.Pop();
+                        if (importStack.TryPeek(out currentImport))
+                        {
+                            currentImport.CurrentLine++;
+                        }
+                        else
+                        {
+                            baseFileLine++;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    baseFileLine++;
+                }
                 string line = StripComments(dynamicLines[l]);
                 foreach ((string macro, string replacement) in macros)
                 {
@@ -100,14 +143,20 @@ namespace AssEmbly
                                 throw new FormatException("The literal operand to the IMP mnemonic must be a string.");
                             }
                             byte[] parsedBytes = ParseLiteral(operands[0], true);
-                            string filepath = Encoding.UTF8.GetString(parsedBytes);
+                            string filepath = Path.GetFullPath(Encoding.UTF8.GetString(parsedBytes));
                             if (!File.Exists(filepath))
                             {
                                 throw new FileNotFoundException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
                             }
+                            if (importStack.Any(x => x.ImportPath.ToLower() == filepath.ToLower()))
+                            {
+                                throw new FormatException($"Circular import detected: attempted import from \"{filepath}\" when it is already in import stack.");
+                            }
+                            string[] linesToImport = File.ReadAllLines(filepath);
+                            importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
                             // Insert the contents of the imported file so they are assembled next
-                            dynamicLines.InsertRange(l + 1, File.ReadAllLines(filepath));
-                            resolvedImports.Add((filepath, new FileInfo(filepath).FullName, (uint)program.Count));
+                            dynamicLines.InsertRange(l + 1, linesToImport);
+                            resolvedImports.Add((filepath, filepath, (uint)program.Count));
                             continue;
                         // Define macro
                         case "MAC":
@@ -130,7 +179,21 @@ namespace AssEmbly
                 }
                 catch (Exception e)
                 {
-                    e.Data["UserMessage"] = $"Error on line {l + 1}\n    \"{line}\"\n{e.Message}";
+                    if (currentImport is null)
+                    {
+                        e.Data["UserMessage"] = $"Error on line {baseFileLine} in base file\n    \"{line}\"\n{e.Message}";
+                    }
+                    else
+                    {
+                        string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{line}\"";
+                        _ = importStack.Pop();  // Remove already printed frame from stack
+                        while (importStack.TryPop(out ImportStackFrame? nestedImport))
+                        {
+                            newMessage += $"\nImported on line {nestedImport.CurrentLine} of \"{nestedImport.ImportPath}\"";
+                        }
+                        newMessage += $"\nImported on line {baseFileLine} of base file\n\n{e.Message}";
+                        e.Data["UserMessage"] = newMessage;
+                    }
                     throw;
                 }
             }
