@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Company>Tolly Hill</Company>
-    <Copyright>Copyright © 2022  Ptolemy Hill</Copyright>
+    <Copyright>Copyright © 2022-2023  Ptolemy Hill</Copyright>
     <Description>A mock assembly language running on .NET</Description>
     <PackageProjectUrl>https://github.com/TollyH/AssEmbly</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TollyH/AssEmbly</RepositoryUrl>
