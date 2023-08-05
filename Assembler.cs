@@ -29,6 +29,15 @@ namespace AssEmbly
         /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
         /// <param name="debugInfo">A string to store generated debug information file text in.</param>
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
+        /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
+        /// <exception cref="LabelNameException">
+        /// Thrown when the same label name is defined multiple times, or when a reference is made to a non-existent label.
+        /// </exception>
+        /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
+        /// <exception cref="ImportException">
+        /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
+        /// </exception>
+        /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static byte[] AssembleLines(string[] lines, out string debugInfo)
         {
             // The lines to assemble may change during assembly, for example importing a file
@@ -97,12 +106,12 @@ namespace AssEmbly
                         _ = DetermineOperandType(line);
                         if (line[1] == '&')
                         {
-                            throw new FormatException($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {line}\n     ^");
+                            throw new SyntaxError($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {line}\n     ^");
                         }
                         string labelName = line[1..];
                         if (labels.ContainsKey(labelName))
                         {
-                            throw new FormatException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
+                            throw new LabelNameException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
                         }
                         labels[labelName] = (uint)program.Count;
 
@@ -117,7 +126,7 @@ namespace AssEmbly
                     // All quotes must be paired up, not including escaped quotes
                     if (quotes.Count % 2 != 0)
                     {
-                        throw new FormatException($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', quotes.Last().Index)}^");
+                        throw new SyntaxError($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', quotes.Last().Index)}^");
                     }
                     string[] split = line.Split(' ', 2);
                     string mnemonic = split[0];
@@ -131,26 +140,26 @@ namespace AssEmbly
                         case "IMP":
                             if (operands.Length != 1)
                             {
-                                throw new FormatException($"The IMP mnemonic requires a single operand. {operands.Length} were given.");
+                                throw new OperandException($"The IMP mnemonic requires a single operand. {operands.Length} were given.");
                             }
                             Data.OperandType operandType = DetermineOperandType(operands[0]);
                             if (operandType != Data.OperandType.Literal)
                             {
-                                throw new FormatException($"The operand to the IMP mnemonic must be a literal. An operand of type {operandType} was provided.");
+                                throw new OperandException($"The operand to the IMP mnemonic must be a literal. An operand of type {operandType} was provided.");
                             }
                             if (operands[0][0] != '"')
                             {
-                                throw new FormatException("The literal operand to the IMP mnemonic must be a string.");
+                                throw new OperandException("The literal operand to the IMP mnemonic must be a string.");
                             }
                             byte[] parsedBytes = ParseLiteral(operands[0], true);
                             string filepath = Path.GetFullPath(Encoding.UTF8.GetString(parsedBytes));
                             if (!File.Exists(filepath))
                             {
-                                throw new FileNotFoundException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
+                                throw new ImportException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
                             }
                             if (importStack.Any(x => x.ImportPath.ToLower() == filepath.ToLower()))
                             {
-                                throw new FormatException($"Circular import detected: attempted import from \"{filepath}\" when it is already in import stack.");
+                                throw new ImportException($"Circular import detected: attempted import from \"{filepath}\" when it is already in import stack.");
                             }
                             string[] linesToImport = File.ReadAllLines(filepath);
                             importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
@@ -162,7 +171,7 @@ namespace AssEmbly
                         case "MAC":
                             if (operands.Length != 2)
                             {
-                                throw new FormatException($"The MAC mnemonic requires two operands. {operands.Length} were given.");
+                                throw new OperandException($"The MAC mnemonic requires two operands. {operands.Length} were given.");
                             }
                             macros[operands[0]] = operands[1];
                             continue;
@@ -177,11 +186,11 @@ namespace AssEmbly
                     assembledLines.Add(((uint)program.Count, line));
                     program.AddRange(newBytes);
                 }
-                catch (Exception e)
+                catch (AssemblerException e)
                 {
                     if (currentImport is null)
                     {
-                        e.Data["UserMessage"] = $"Error on line {baseFileLine} in base file\n    \"{line}\"\n{e.Message}";
+                        e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{line}\"\n{e.Message}";
                     }
                     else
                     {
@@ -192,7 +201,7 @@ namespace AssEmbly
                             newMessage += $"\nImported on line {nestedImport.CurrentLine} of \"{nestedImport.ImportPath}\"";
                         }
                         newMessage += $"\nImported on line {baseFileLine} of base file\n\n{e.Message}";
-                        e.Data["UserMessage"] = newMessage;
+                        e.ConsoleMessage = newMessage;
                     }
                     throw;
                 }
@@ -204,10 +213,8 @@ namespace AssEmbly
             {
                 if (!labels.TryGetValue(labelName, out ulong targetOffset))
                 {
-                    FormatException e = new();
-                    e.Data["UserMessage"] = $"A label with the name {labelName} does not exist, but a reference was made to it. " +
-                        $"Have you missed a definition?";
-                    throw e;
+                    throw new LabelNameException($"A label with the name {labelName} does not exist, but a reference was made to it. " +
+                        $"Have you missed a definition?");
                 }
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
@@ -225,6 +232,8 @@ namespace AssEmbly
         /// Assemble a single line of AssEmbly to bytecode.
         /// </summary>
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
+        /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
+        /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
         {
             Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
@@ -237,40 +246,40 @@ namespace AssEmbly
                 case "DAT":
                     if (operands.Length != 1)
                     {
-                        throw new FormatException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     Data.OperandType operandType = DetermineOperandType(operands[0]);
                     if (operandType != Data.OperandType.Literal)
                     {
-                        throw new FormatException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
+                        throw new OperandException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
                     byte[] parsedBytes = ParseLiteral(operands[0], true);
                     return operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0)
-                        ? throw new FormatException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
+                        ? throw new OperandException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
                         : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
                 // 0-padding
                 case "PAD":
                     if (operands.Length != 1)
                     {
-                        throw new FormatException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     operandType = DetermineOperandType(operands[0]);
                     return operandType == Data.OperandType.Literal
                         // Generate an array of 0-bytes with the specified length
                         ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
                             ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
-                        : throw new FormatException($"The operand to the PAD mnemonic must be a literal. " +
+                        : throw new OperandException($"The operand to the PAD mnemonic must be a literal. " +
                             $"An operand of type {operandType} was provided.");
                 // 64-bit number insertion
                 case "NUM":
                     if (operands.Length != 1)
                     {
-                        throw new FormatException($"The NUM mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException($"The NUM mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     operandType = DetermineOperandType(operands[0]);
                     if (operandType != Data.OperandType.Literal)
                     {
-                        throw new FormatException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
+                        throw new OperandException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
                     parsedBytes = ParseLiteral(operands[0], false);
                     return (parsedBytes, new List<(string, ulong)>());
@@ -317,7 +326,7 @@ namespace AssEmbly
             }
             if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out byte opcode))
             {
-                throw new FormatException($"Unrecognised mnemonic and operand combination:\n    {mnemonic} {string.Join(", ", operandTypes)}" +
+                throw new OpcodeException($"Unrecognised mnemonic and operand combination:\n    {mnemonic} {string.Join(", ", operandTypes)}" +
                     $"\nConsult the language reference for a list of all valid mnemonic/operand combinations.");
             }
             operandBytes.Insert(0, opcode);
@@ -338,7 +347,7 @@ namespace AssEmbly
         /// </summary>
         /// <param name="operand">A single operand with no comments or whitespace.</param>
         /// <remarks>Operands will also be validated here.</remarks>
-        /// <exception cref="FormatException">Operand was not valid for the type it appeared to be, or type could not be determined.</exception>
+        /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
         public static Data.OperandType DetermineOperandType(string operand)
         {
             if (operand[0] == ':')
@@ -347,7 +356,7 @@ namespace AssEmbly
                 Match invalidMatch = Regex.Match(operand[offset..], @"^[0-9]|[^A-Za-z0-9_]");
                 // Operand is a label reference - will assemble down to address
                 return invalidMatch.Success
-                    ? throw new FormatException($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
+                    ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
                         $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
                     : operand[1] == '&' ? Data.OperandType.Literal : Data.OperandType.Address;
             }
@@ -359,7 +368,7 @@ namespace AssEmbly
                     ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
                     : Regex.Match(operand, "[^0-9_]");
                 return invalidMatch.Success
-                    ? throw new FormatException($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
+                    ? throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
                         $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?")
                     : Data.OperandType.Literal;
             }
@@ -372,7 +381,7 @@ namespace AssEmbly
                 int offset = operand[0] == '*' ? 1 : 0;
                 return Enum.TryParse<Data.Register>(operand[offset..].ToLowerInvariant(), out _)
                     ? operand[0] == '*' ? Data.OperandType.Pointer : Data.OperandType.Register
-                    : throw new FormatException($"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
+                    : throw new SyntaxError($"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
             }
         }
 
@@ -381,22 +390,23 @@ namespace AssEmbly
         /// </summary>
         /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
-        /// <exception cref="FormatException">String literal is invalid, or numeric literal was too large for UInt64.</exception>
+        /// <exception cref="SyntaxError">Thrown when there are invalid characters in the literal or the literal is in an invalid format.</exception>
+        /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
         public static byte[] ParseLiteral(string operand, bool allowString)
         {
             if (operand[0] == '"')
             {
                 if (!allowString)
                 {
-                    throw new FormatException("A string literal is not a valid operand in this context.");
+                    throw new SyntaxError("A string literal is not a valid operand in this context.");
                 }
                 if (Regex.Matches(operand, @"(?<!\\)""").Count > 2)
                 {
-                    throw new FormatException("An operand can only contain a single string literal. Did you forget to escape a quote mark?");
+                    throw new SyntaxError("An operand can only contain a single string literal. Did you forget to escape a quote mark?");
                 }
                 if (operand[^1] != '"')
                 {
-                    throw new FormatException("String literal contains characters after closing quote mark.");
+                    throw new SyntaxError("String literal contains characters after closing quote mark.");
                 }
                 string str = operand.Trim('"').Replace("\\\"", "\"");
                 return Encoding.UTF8.GetBytes(str);
@@ -414,7 +424,7 @@ namespace AssEmbly
             }
             catch (OverflowException)
             {
-                throw new FormatException($"Numeric literal too large. 18,446,744,073,709,551,615 is the maximum value:\n    {operand}");
+                throw new OperandException($"Numeric literal too large. 18,446,744,073,709,551,615 is the maximum value:\n    {operand}");
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, number);

@@ -89,7 +89,14 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Data["UserMessage"]);
+                if (e is AssemblerException assemblerException)
+                {
+                    Console.WriteLine(assemblerException.ConsoleMessage);
+                }
+                else
+                {
+                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
+                }
                 Console.ResetColor();
                 Environment.Exit(1);
                 return;
@@ -146,13 +153,21 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
-                    ? "An instruction tried to access an invalid memory address." : e.Message;
-                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException)
                 {
-                    ulong value = processor.Registers[register];
-                    Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    string message = e is RuntimeException runtimeException
+                        ? runtimeException.ConsoleMessage
+                        : "An instruction tried to access an invalid memory address.";
+                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
+                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    {
+                        ulong value = processor.Registers[register];
+                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
                 }
                 Console.ResetColor();
             }
@@ -199,7 +214,14 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Data["UserMessage"]);
+                if (e is AssemblerException assemblerException)
+                {
+                    Console.WriteLine(assemblerException.ConsoleMessage);
+                }
+                else
+                {
+                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
+                }
                 Console.ResetColor();
                 Environment.Exit(1);
                 return;
@@ -212,13 +234,21 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
-                    ? "An instruction tried to access an invalid memory address." : e.Message;
-                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException)
                 {
-                    ulong value = processor.Registers[register];
-                    Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    string message = e is RuntimeException runtimeException
+                        ? runtimeException.ConsoleMessage
+                        : "An instruction tried to access an invalid memory address.";
+                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
+                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    {
+                        ulong value = processor.Registers[register];
+                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
                 }
                 Console.ResetColor();
             }
@@ -264,7 +294,7 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n\nAn error occurred loading your program:\n    {e.Message}");
+                Console.WriteLine($"\n\nAn unexpected error occurred loading your program:\n    {e.GetType().Name}: {e.Message}");
                 Console.ResetColor();
                 Environment.Exit(1);
                 return;
@@ -312,7 +342,7 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(e.Data["UserMessage"]);
+                Console.WriteLine($"An unexpected error occurred during disassembly:\n    {e.GetType().Name}: {e.Message}");
                 Console.ResetColor();
                 Environment.Exit(1);
                 return;

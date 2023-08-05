@@ -10,7 +10,12 @@
     /// </remarks>
     public class AssEmblyException : Exception
     {
-        public string? ConsoleMessage { get; set; }
+        private string? _consoleMessage = null;
+        [System.Diagnostics.CodeAnalysis.AllowNull]
+        public string ConsoleMessage {
+            get => _consoleMessage ?? Message;
+            set => _consoleMessage = value;
+        }
 
         public AssEmblyException() : base() { }
         public AssEmblyException(string message) : base(message) { }
@@ -75,6 +80,30 @@
         public ImportException(string message, Exception inner) : base(message, inner) { }
         public ImportException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public ImportException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when an error is encountered whilst attempting to retrieve the opcode for an instruction.
+    /// </summary>
+    public class OpcodeException : AssemblerException
+    {
+        public OpcodeException() : base() { }
+        public OpcodeException(string message) : base(message) { }
+        public OpcodeException(string message, Exception inner) : base(message, inner) { }
+        public OpcodeException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public OpcodeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when an error is encountered with an otherwise valid label name during assembly.
+    /// </summary>
+    public class LabelNameException : AssemblerException
+    {
+        public LabelNameException() : base() { }
+        public LabelNameException(string message) : base(message) { }
+        public LabelNameException(string message, Exception inner) : base(message, inner) { }
+        public LabelNameException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public LabelNameException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     // DEBUGGER EXCEPTIONS

@@ -92,11 +92,11 @@ Total Program Size: .*
             Match fileMatch = DebugFileRegex.Match(fileText);
             if (!fileMatch.Success)
             {
-                throw new FormatException("The provided debug information file was in an invalid format");
+                throw new DebugFileException("The provided debug information file was in an invalid format");
             }
             if (fileMatch.Groups["Version"].Value != FormatVersion)
             {
-                throw new FormatException("The provided debug information file was created for a different version of AssEmbly");
+                throw new DebugFileException("The provided debug information file was created for a different version of AssEmbly");
             }
 
             List<(ulong Address, string Line)> assembledInstructions = new();

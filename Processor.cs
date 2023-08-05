@@ -16,7 +16,7 @@ namespace AssEmbly
         private BinaryWriter? fileWrite;
         private long openFileSize = 0;
 
-        private Random rng = new();
+        private readonly Random rng = new();
 
         public Processor(ulong memorySize)
         {
@@ -31,8 +31,10 @@ namespace AssEmbly
         /// Loads a provided compiled program and its data into this processor's memory to be executed.
         /// </summary>
         /// <param name="programData">The entire program, including any data, to load into memory.</param>
-        /// <exception cref="InvalidOperationException">Thrown in a program has already been loaded.</exception>
-        /// <exception cref="OutOfMemoryException">Thrown if the program is too large to fit into memory.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if a program has already been loaded into this processor,
+        /// or the program is too large to be loaded given the amount of allocated memory.
+        /// </exception>
         public void LoadProgram(byte[] programData)
         {
             if (ProgramLoaded)
@@ -41,7 +43,7 @@ namespace AssEmbly
             }
             if (programData.LongLength > Memory.LongLength)
             {
-                throw new OutOfMemoryException($"Program too large to fit in allocated memory. {Memory.LongLength} bytes available, {programData.LongLength} given.");
+                throw new InvalidOperationException($"Program too large to fit in allocated memory. {Memory.LongLength} bytes available, {programData.LongLength} given.");
             }
             Array.Copy(programData, Memory, programData.LongLength);
             ProgramLoaded = true;
@@ -50,6 +52,18 @@ namespace AssEmbly
         /// <summary>
         /// Execute the program until a halt instruction is reached. If a halt instruction has already been reached, continue from after it.
         /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if a program hasn't been loaded into this processor, or the processor has reached the end of allocated memory.
+        /// </exception>
+        /// <exception cref="InvalidOpcodeException">
+        /// Thrown if the processor encounters an opcode to execute that didn't match any known opcodes.
+        /// </exception>
+        /// <exception cref="ReadOnlyRegisterException">Thrown if an instruction attempts to write to a read-only register.</exception>
+        /// <exception cref="FileOperationException">
+        /// Thrown when a file operation is attempted but is not valid given the current state of the processor.
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
         public void Execute()
         {
             while (!Step()) { }
@@ -59,9 +73,18 @@ namespace AssEmbly
         /// Execute a single instruction.
         /// </summary>
         /// <returns><see langword="true"/> if execution should stop (HLT reached) - otherwise <see langword="false"/></returns>
-        /// <exception cref="InvalidOperationException">Thrown if the instruction was invalid, or attempted to perform an invalid operation.</exception>
-        /// <exception cref="IndexOutOfRangeException">Thrown if the instruction tried to access an invalid memory address.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if the instruction tried to access an invalid memory address.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if a program hasn't been loaded into this processor, or the processor has reached the end of allocated memory.
+        /// </exception>
+        /// <exception cref="InvalidOpcodeException">
+        /// Thrown if the processor encounters an opcode to execute that didn't match any known opcodes.
+        /// </exception>
+        /// <exception cref="ReadOnlyRegisterException">Thrown if an instruction attempts to write to a read-only register.</exception>
+        /// <exception cref="FileOperationException">
+        /// Thrown when a file operation is attempted but is not valid given the current state of the processor.
+        /// </exception>
+        /// <exception cref="IndexOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
         public bool Step()
         {
             if (!ProgramLoaded)
@@ -216,14 +239,14 @@ namespace AssEmbly
                             }
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised control low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised control low opcode");
                     }
                     break;
                 case 0x1:  // Addition
                     Data.Register targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     ulong initial = Registers[(int)targetRegister];
                     switch (opcodeLow)
@@ -249,7 +272,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised addition low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised addition low opcode");
                     }
                     if (Registers[(int)targetRegister] < initial)
                     {
@@ -272,7 +295,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     initial = Registers[(int)targetRegister];
                     switch (opcodeLow)
@@ -298,7 +321,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised subtraction low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subtraction low opcode");
                     }
                     if (Registers[(int)targetRegister] > initial)
                     {
@@ -321,7 +344,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     initial = Registers[(int)targetRegister];
                     switch (opcodeLow)
@@ -343,7 +366,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised multiplication low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised multiplication low opcode");
                     }
                     if (Registers[(int)targetRegister] < initial)
                     {
@@ -366,7 +389,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     switch (opcodeLow)
                     {
@@ -439,7 +462,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised division low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised division low opcode");
                     }
                     if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
                     {
@@ -458,7 +481,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     initial = Registers[(int)targetRegister];
                     int amount;
@@ -505,14 +528,14 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised shifting low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised shifting low opcode");
                     }
                     if (amount >= 64)
                     {
                         Registers[(int)targetRegister] = 0;
                     }
                     if (opcodeLow <= 0x3 ? ((amount >= 64 && initial != 0) || (initial >> (64 - amount) << (64 - amount)) != 0) && amount != 0
-                        : (initial & (uint)Math.Pow(2, amount) - 1) != 0)
+                        : (initial & ((uint)Math.Pow(2, amount) - 1)) != 0)
                     {
                         Registers[(int)Data.Register.rsf] |= 0b10;
                     }
@@ -533,7 +556,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     switch (opcodeLow)
                     {
@@ -596,7 +619,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised bitwise low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised bitwise low opcode");
                     }
                     if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
                     {
@@ -615,7 +638,7 @@ namespace AssEmbly
                     targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
                     if (targetRegister == Data.Register.rpo)
                     {
-                        throw new InvalidOperationException($"Cannot write to read-only register {targetRegister}");
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
                     ulong newValue;
                     switch (opcodeLow)
@@ -653,7 +676,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised comparison low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised comparison low opcode");
                     }
                     if (opcodeLow >= 0x4 && newValue > Registers[(int)targetRegister])
                     {
@@ -740,7 +763,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 9;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised small move low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised small move low opcode");
                     }
                     break;
                 case 0x9:  // Large Move
@@ -811,7 +834,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 9;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised large move low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised large move low opcode");
                     }
                     break;
                 case 0xA:  // Stack
@@ -843,7 +866,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised stack low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised stack low opcode");
                     }
                     break;
                 case 0xB:  // Subroutines
@@ -967,7 +990,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised subroutine low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subroutine low opcode");
                     }
                     break;
                 case 0xC:  // Console Write
@@ -1038,13 +1061,13 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised console write low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised console write low opcode");
                     }
                     break;
                 case 0xD:  // File Write
                     if (openFile is null)
                     {
-                        throw new InvalidOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                        throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
                     }
                     switch (opcodeLow)
                     {
@@ -1137,7 +1160,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised file write low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file write low opcode");
                     }
                     break;
                 case 0xE:  // File Operations
@@ -1146,7 +1169,7 @@ namespace AssEmbly
                         case 0x0:  // OFL adr
                             if (openFile is not null)
                             {
-                                throw new InvalidOperationException("Cannot execute open file instruction if a file is already open");
+                                throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                             }
                             string filepath = "";
                             for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
@@ -1170,7 +1193,7 @@ namespace AssEmbly
                         case 0x1:  // OFL ptr
                             if (openFile is not null)
                             {
-                                throw new InvalidOperationException("Cannot execute open file instruction if a file is already open");
+                                throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                             }
                             filepath = "";
                             for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
@@ -1194,7 +1217,7 @@ namespace AssEmbly
                         case 0x2:  // CFL
                             if (openFile is null)
                             {
-                                throw new InvalidOperationException("Cannot execute close file instruction if a file is not open");
+                                throw new FileOperationException("Cannot execute close file instruction if a file is not open");
                             }
                             fileWrite!.Close();
                             fileWrite = null;
@@ -1259,7 +1282,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] += 2;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised file operation low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file operation low opcode");
                     }
                     break;
                 case 0xF:  // Reading
@@ -1285,11 +1308,11 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo]++;
                             break;
                         default:
-                            throw new InvalidOperationException($"{opcodeLow:X} is not a recognised reading low opcode");
+                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised reading low opcode");
                     }
                     break;
                 default:
-                    throw new InvalidOperationException($"{opcodeHigh:X} is not a recognised high opcode");
+                    throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode");
             }
             return halt;
         }
@@ -1430,7 +1453,7 @@ namespace AssEmbly
             Data.Register registerType = MemReadRegisterType(offset);
             if (registerType == Data.Register.rpo)
             {
-                throw new InvalidOperationException($"Cannot write to read-only register {registerType}");
+                throw new ReadOnlyRegisterException($"Cannot write to read-only register {registerType}");
             }
             Registers[(int)registerType] = value;
         }

@@ -36,7 +36,7 @@
             catch (Exception exc)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine($"An error occurred whilst loading the debug information file:\n\"{exc.Message}\".\n" +
+                Console.WriteLine($"An error occurred whilst loading the debug information file:\n\"{exc.GetType().Name}: {exc.Message}\".\n" +
                     $"Label names and original source lines will not be available.");
                 Console.ResetColor();
             }
@@ -181,13 +181,21 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                string message = e.GetType() == typeof(IndexOutOfRangeException) || e.GetType() == typeof(ArgumentOutOfRangeException)
-                    ? "An instruction tried to access an invalid memory address." : e.Message;
-                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException)
                 {
-                    ulong value = DebuggingProcessor.Registers[register];
-                    Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    string message = e is RuntimeException runtimeException
+                        ? runtimeException.ConsoleMessage
+                        : "An instruction tried to access an invalid memory address.";
+                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
+                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    {
+                        ulong value = DebuggingProcessor.Registers[register];
+                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
                 }
                 Console.ResetColor();
             }
