@@ -391,6 +391,13 @@ namespace AssEmbly
                     {
                         throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                     }
+                    // Only used to store remainder in DVR, set to an unused default otherwise
+                    Data.Register secondTarget = Data.Register.rpo;
+                    if (opcodeLow is >= 0x4 and <= 0x7 &&  // DVR
+                        (secondTarget = MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)) == Data.Register.rpo)
+                    {
+                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {secondTarget}");
+                    }
                     switch (opcodeLow)
                     {
                         case 0x0:  // DIV reg, reg
@@ -415,7 +422,7 @@ namespace AssEmbly
                             ulong div = dividend / divisor;
                             ulong rem = dividend % divisor;
                             Registers[(int)targetRegister] = div;
-                            Registers[(int)MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)] = rem;
+                            Registers[(int)secondTarget] = rem;
                             Registers[(int)Data.Register.rpo] += 3;
                             break;
                         case 0x5:  // DVR reg, reg, lit
@@ -424,7 +431,7 @@ namespace AssEmbly
                             div = dividend / divisor;
                             rem = dividend % divisor;
                             Registers[(int)targetRegister] = div;
-                            Registers[(int)MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)] = rem;
+                            Registers[(int)secondTarget] = rem;
                             Registers[(int)Data.Register.rpo] += 10;
                             break;
                         case 0x6:  // DVR reg, reg, adr
@@ -433,7 +440,7 @@ namespace AssEmbly
                             div = dividend / divisor;
                             rem = dividend % divisor;
                             Registers[(int)targetRegister] = div;
-                            Registers[(int)MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)] = rem;
+                            Registers[(int)secondTarget] = rem;
                             Registers[(int)Data.Register.rpo] += 10;
                             break;
                         case 0x7:  // DVR reg, reg, ptr
@@ -442,7 +449,7 @@ namespace AssEmbly
                             div = dividend / divisor;
                             rem = dividend % divisor;
                             Registers[(int)targetRegister] = div;
-                            Registers[(int)MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)] = rem;
+                            Registers[(int)secondTarget] = rem;
                             Registers[(int)Data.Register.rpo] += 3;
                             break;
                         case 0x8:  // REM reg, reg
