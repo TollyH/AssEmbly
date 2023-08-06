@@ -33,6 +33,16 @@
             rg9,  // General 9
         }
 
+        [Flags]
+        public enum StatusFlags
+        {
+            Zero = 0b1,
+            Carry = 0b10,
+            FileEnd = 0b100,
+
+            ZeroAndCarry = Zero | Carry,
+        }
+
         /// <summary>
         /// A mapping of what byte a mnemonic with a particular set of operands should compile to.
         /// </summary>

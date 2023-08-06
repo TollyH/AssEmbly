@@ -119,7 +119,7 @@ namespace AssEmbly
                             Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             break;
                         case 0x4:  // JEQ adr (Jump If Equal To - Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -129,7 +129,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0x5:  // JEQ ptr (Jump If Equal To - Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -139,7 +139,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0x6:  // JNE adr (Jump If Not Equal To - Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b1) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -149,7 +149,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0x7:  // JNE ptr (Jump If Not Equal To - Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b1) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -159,7 +159,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0x8:  // JLT adr (Jump If Less Than - Carry Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -169,7 +169,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0x9:  // JLT ptr (Jump If Less Than - Carry Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -179,7 +179,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xA:  // JLE adr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b11) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -189,7 +189,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xB:  // JLE ptr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & 0b11) != 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -199,7 +199,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xC:  // JGT adr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b11) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -209,7 +209,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xD:  // JGT ptr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b11) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -219,7 +219,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xE:  // JGE adr (Jump If Greater Than or Equal To - Carry Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b10) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
                             }
@@ -229,7 +229,7 @@ namespace AssEmbly
                             }
                             break;
                         case 0xF:  // JGE ptr (Jump If Greater Than or Equal To - Carry Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & 0b10) == 0)
+                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
                             {
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
                             }
@@ -276,19 +276,19 @@ namespace AssEmbly
                     }
                     if (Registers[(int)targetRegister] < initial)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b10;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     }
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x2:  // Subtraction
@@ -325,19 +325,19 @@ namespace AssEmbly
                     }
                     if (Registers[(int)targetRegister] > initial)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b10;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     }
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x3:  // Multiplication
@@ -370,19 +370,19 @@ namespace AssEmbly
                     }
                     if (Registers[(int)targetRegister] < initial)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b10;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     }
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x4:  // Division
@@ -464,17 +464,14 @@ namespace AssEmbly
                         default:
                             throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised division low opcode");
                     }
-                    if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
-                    {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
-                    }
+                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x5:  // Shifting
@@ -530,26 +527,32 @@ namespace AssEmbly
                         default:
                             throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised shifting low opcode");
                     }
+                    // As registers are only 64 bits, shifting by 64 bits or more will always result in 0
                     if (amount >= 64)
                     {
                         Registers[(int)targetRegister] = 0;
                     }
+                    // If shifting left (opcodeLow <= 0x3), then we will always overflow if shifting by more than 64 bits when the initial value is non-zero.
+                    // Otherwise, "(initial >> (64 - amount) << (64 - amount)) != 0" checks if there are any 1 bits in the portion of the number that will be
+                    // cutoff during the left shift by cutting off the bits that will remain.
+                    // If shifting right, then we can check for overflow by masking out all the bits that will be cutoff and checking if any of them are 1.
+                    // (bit number to the power of 2 subtract 1 will return the binary number with all these lower bits set).
                     if (opcodeLow <= 0x3 ? ((amount >= 64 && initial != 0) || (initial >> (64 - amount) << (64 - amount)) != 0) && amount != 0
                         : (initial & ((uint)Math.Pow(2, amount) - 1)) != 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b10;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     }
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x6:  // Bitwise
@@ -621,17 +624,14 @@ namespace AssEmbly
                         default:
                             throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised bitwise low opcode");
                     }
-                    if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
-                    {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
-                    }
+                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     if (Registers[(int)targetRegister] == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x7:  // Test
@@ -680,19 +680,19 @@ namespace AssEmbly
                     }
                     if (opcodeLow >= 0x4 && newValue > Registers[(int)targetRegister])
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b10;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b10) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b10;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
                     }
                     if (newValue == 0)
                     {
-                        Registers[(int)Data.Register.rsf] |= 0b1;
+                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
                     }
-                    else if ((Registers[(int)Data.Register.rsf] & 0b1) != 0)
+                    else
                     {
-                        Registers[(int)Data.Register.rsf] ^= 0b1;
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
                     }
                     break;
                 case 0x8:  // Small Move
@@ -1183,11 +1183,11 @@ namespace AssEmbly
                             fileRead = new BinaryReader(openFile);
                             if (fileRead.BaseStream.Position >= openFileSize)
                             {
-                                Registers[(int)Data.Register.rsf] |= 0b100;
+                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
                             }
-                            else if ((Registers[(int)Data.Register.rsf] & 0b100) != 0)
+                            else
                             {
-                                Registers[(int)Data.Register.rsf] ^= 0b100;
+                                Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
                             }
                             break;
                         case 0x1:  // OFL ptr
@@ -1207,11 +1207,11 @@ namespace AssEmbly
                             fileRead = new BinaryReader(openFile);
                             if (fileRead.BaseStream.Position >= openFileSize)
                             {
-                                Registers[(int)Data.Register.rsf] |= 0b100;
+                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
                             }
-                            else if ((Registers[(int)Data.Register.rsf] & 0b100) != 0)
+                            else
                             {
-                                Registers[(int)Data.Register.rsf] ^= 0b100;
+                                Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
                             }
                             break;
                         case 0x2:  // CFL
@@ -1303,7 +1303,7 @@ namespace AssEmbly
                             MemWriteRegister(Registers[(int)Data.Register.rpo], fileRead!.ReadByte());
                             if (fileRead.BaseStream.Position >= openFileSize)
                             {
-                                Registers[(int)Data.Register.rsf] |= 0b100;
+                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
                             }
                             Registers[(int)Data.Register.rpo]++;
                             break;
