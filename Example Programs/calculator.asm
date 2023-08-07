@@ -5,9 +5,9 @@
 ; rg4 - operator
 ; rg5 - remainder (if dividing)
 CAL :FUNC_PRINT, :&STR_NUM_1_PROMPT
-CAL :FUNC_INPUT, :&INPUT_BUFFER
+CAL :FUNC_INPUT, :&INPUT_BUFFER_1
 
-MVQ rg2, :&INPUT_BUFFER
+MVQ rg2, :&INPUT_BUFFER_1
 :NUM_1_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
@@ -21,9 +21,9 @@ JMP :NUM_1_READ_LOOP
 
 :NUM_1_READ_LOOP_END
 CAL :FUNC_PRINT, :&STR_NUM_2_PROMPT
-CAL :FUNC_INPUT, :&INPUT_BUFFER
+CAL :FUNC_INPUT, :&INPUT_BUFFER_2
 
-MVQ rg2, :&INPUT_BUFFER
+MVQ rg2, :&INPUT_BUFFER_2
 :NUM_2_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
@@ -86,8 +86,10 @@ WCN rg5
 :END
 HLT  ; Stop program to prevent execution of data as executable code
 
-:INPUT_BUFFER
-PAD 256
+:INPUT_BUFFER_1
+PAD 64
+:INPUT_BUFFER_2
+PAD 64
 
 :STR_NUM_1_PROMPT
 DAT "Enter first number > "
