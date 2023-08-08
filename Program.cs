@@ -153,11 +153,13 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException)
+                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
                 {
                     string message = e is RuntimeException runtimeException
                         ? runtimeException.ConsoleMessage
-                        : "An instruction tried to access an invalid memory address.";
+                        : e is DivideByZeroException
+                            ? "An instruction attempted to divide by zero."
+                            : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
                     foreach (int register in Enum.GetValues(typeof(Data.Register)))
                     {
@@ -234,11 +236,13 @@
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException)
+                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
                 {
                     string message = e is RuntimeException runtimeException
                         ? runtimeException.ConsoleMessage
-                        : "An instruction tried to access an invalid memory address.";
+                        : e is DivideByZeroException
+                            ? "An instruction attempted to divide by zero."
+                            : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
                     foreach (int register in Enum.GetValues(typeof(Data.Register)))
                     {
