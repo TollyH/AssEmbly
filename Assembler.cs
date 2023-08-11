@@ -47,8 +47,9 @@ namespace AssEmbly
             List<byte> program = new();
             // Map of label names to final memory addresses
             Dictionary<string, ulong> labels = new();
-            // List of references to labels by name along with the address to insert the relevant address in to
-            List<(string LabelName, ulong Address)> labelReferences = new();
+            // List of references to labels by name along with the address to insert the relevant address in to.
+            // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
+            List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
             // string -> replacement
             Dictionary<string, string> macros = new();
 
@@ -181,7 +182,8 @@ namespace AssEmbly
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) = AssembleStatement(mnemonic, operands);
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
-                        labelReferences.Add((label, relativeOffset + (uint)program.Count));
+                        labelReferences.Add((label, relativeOffset + (uint)program.Count, currentImport?.ImportPath,
+                            currentImport is null ? baseFileLine : currentImport.CurrentLine));
                     }
                     assembledLines.Add(((uint)program.Count, line));
                     program.AddRange(newBytes);
@@ -209,11 +211,12 @@ namespace AssEmbly
 
             byte[] programBytes = program.ToArray();
 
-            foreach ((string labelName, ulong insertOffset) in labelReferences)
+            foreach ((string labelName, ulong insertOffset, string? filePath, int line) in labelReferences)
             {
                 if (!labels.TryGetValue(labelName, out ulong targetOffset))
                 {
-                    throw new LabelNameException($"A label with the name {labelName} does not exist, but a reference was made to it. " +
+                    throw new LabelNameException($"Error on line {line} in {filePath ?? "base file"}\n\n" +
+                        $"A label with the name \"{labelName}\" does not exist, but a reference was made to it. " +
                         $"Have you missed a definition?");
                 }
                 // Write the now known address of the label to where it is required within the program
