@@ -540,13 +540,19 @@ namespace AssEmbly
                     {
                         Registers[(int)targetRegister] = 0;
                     }
-                    // If shifting left (opcodeLow <= 0x3), then we will always overflow if shifting by more than 64 bits when the initial value is non-zero.
-                    // Otherwise, "(initial >> (64 - amount) << (64 - amount)) != 0" checks if there are any 1 bits in the portion of the number that will be
-                    // cutoff during the left shift by cutting off the bits that will remain.
-                    // If shifting right, then we can check for overflow by masking out all the bits that will be cutoff and checking if any of them are 1.
-                    // (bit number to the power of 2 subtract 1 will return the binary number with all these lower bits set).
-                    if (opcodeLow <= 0x3 ? ((amount >= 64 && initial != 0) || (initial >> (64 - amount) << (64 - amount)) != 0) && amount != 0
-                        : (initial & ((uint)Math.Pow(2, amount) - 1)) != 0)
+                    // We will never overflow when shifting by 0 bits or if the initial value is 0.
+                    // We will always overflow if shifting by 64 bits or more as long as the above isn't the case.
+                    //
+                    // Otherwise, if shifting left (opcodeLow <= 0x3), "(initial >> (64 - amount)) != 0" checks if there are any 1 bits
+                    // in the portion of the number that will be cutoff during the left shift by cutting off the bits that will remain.
+                    // 8-bit e.g: 0b11001001 << 3 |> (0b11001001 >> (8 - 3)), (0b11001001 >> 5) = 0b00000110, result != 0, therefore set carry.
+                    //
+                    // If shifting right, "(initial << (64 - amount)) != 0" checks if there are any 1 bits
+                    // in the portion of the number that will be cutoff during the right shift by cutting off the bits that will remain.
+                    // 8-bit e.g: 0b11001001 >> 3 |> (0b11001001 << (8 - 3)), (0b11001001 << 5) = 0b00100000, result != 0, therefore set carry.
+                    if (amount != 0 && initial != 0 && (amount >= 64 || opcodeLow <= 0x3
+                        ? (initial >> (64 - amount)) != 0
+                        : (initial << (64 - amount)) != 0))
                     {
                         Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
                     }
