@@ -14,8 +14,6 @@
         public readonly int Code;
         public readonly string File;
         public readonly int Line;
-        public readonly int ColumnStart;
-        public readonly int ColumnEnd;
 
         /// <summary>
         /// Index 0 will always be mnemonic. Index 1 and onwards are opcodes, if any.
@@ -24,14 +22,12 @@
 
         public readonly string Message => string.Format(AssemblerWarnings.GetMessagesForSeverity(Severity)[Code], InstructionElements);
 
-        public Warning(WarningSeverity severity, int code, string file, int line, int columnStart, int columnEnd, string mnemonic, string[] operands)
+        public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands)
         {
             Severity = severity;
             Code = code;
             File = file;
             Line = line;
-            ColumnStart = columnStart;
-            ColumnEnd = columnEnd;
 
             InstructionElements = new string[operands.Length + 1];
             InstructionElements[0] = mnemonic;
