@@ -395,8 +395,9 @@ namespace AssEmbly
         /// <returns>The bytes representing the literal to be added to a program.</returns>
         /// <exception cref="SyntaxError">Thrown when there are invalid characters in the literal or the literal is in an invalid format.</exception>
         /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
-        public static byte[] ParseLiteral(string operand, bool allowString)
+        public static byte[] ParseLiteral(string operand, bool allowString, out ulong parsedNumber)
         {
+            parsedNumber = 0;
             if (operand[0] == '"')
             {
                 if (!allowString)
@@ -415,11 +416,10 @@ namespace AssEmbly
                 return Encoding.UTF8.GetBytes(str);
             }
             operand = operand.ToLowerInvariant().Replace("_", "");
-            ulong number;
             try
             {
                 // Hex (0x), Binary (0b), and Decimal literals are all supported
-                number = operand.StartsWith("0x")
+                parsedNumber = operand.StartsWith("0x")
                     ? Convert.ToUInt64(operand[2..], 16)
                     : operand.StartsWith("0b")
                         ? Convert.ToUInt64(operand[2..], 2)
@@ -430,8 +430,20 @@ namespace AssEmbly
                 throw new OperandException($"Numeric literal too large. 18,446,744,073,709,551,615 is the maximum value:\n    {operand}");
             }
             byte[] result = new byte[8];
-            BinaryPrimitives.WriteUInt64LittleEndian(result, number);
+            BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);
             return result;
+        }
+
+        /// <summary>
+        /// Parse a operand of literal type to its representation as bytes. 
+        /// </summary>
+        /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
+        /// <returns>The bytes representing the literal to be added to a program.</returns>
+        /// <exception cref="SyntaxError">Thrown when there are invalid characters in the literal or the literal is in an invalid format.</exception>
+        /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
+        public static byte[] ParseLiteral(string operand, bool allowString)
+        {
+            return ParseLiteral(operand, allowString, out _);
         }
     }
 }
