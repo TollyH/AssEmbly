@@ -2,6 +2,7 @@
 {
     public enum WarningSeverity
     {
+        FatalError,
         NonFatalError,
         Warning,
         Suggestion
@@ -36,7 +37,7 @@
     }
 
     public delegate bool RollingWarningAnalyzer(byte[] newBytes, string mnemonic, string[] operands);
-    public delegate bool FinalWarningAnalyzer();
+    public delegate List<Warning> FinalWarningAnalyzer();
 
     public partial class AssemblerWarnings
     {
@@ -65,7 +66,43 @@
         /// <returns>An array of any warnings caused by the new instruction.</returns>
         public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file)
         {
+            List<Warning> warnings = new();
 
+            foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in nonFatalErrorRollingAnalyzers)
+            {
+                if (DisabledNonFatalErrors.Contains(code))
+                {
+                    continue;
+                }
+                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                {
+                    warnings.Add(new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands));
+                }
+            }
+            foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in warningRollingAnalyzers)
+            {
+                if (DisabledWarnings.Contains(code))
+                {
+                    continue;
+                }
+                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                {
+                    warnings.Add(new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands));
+                }
+            }
+            foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in suggestionRollingAnalyzers)
+            {
+                if (DisabledSuggestions.Contains(code))
+                {
+                    continue;
+                }
+                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                {
+                    warnings.Add(new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands));
+                }
+            }
+
+            return warnings.ToArray();
         }
 
         /// <summary>
@@ -75,7 +112,34 @@
         /// <returns>An array of any warnings caused by final analysis.</returns>
         public Warning[] Finalize()
         {
+            List<Warning> warnings = new();
 
+            foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in nonFatalErrorFinalAnalyzers)
+            {
+                if (DisabledNonFatalErrors.Contains(code))
+                {
+                    continue;
+                }
+                warnings.AddRange(finalAnalyzer());
+            }
+            foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in warningFinalAnalyzers)
+            {
+                if (DisabledWarnings.Contains(code))
+                {
+                    continue;
+                }
+                warnings.AddRange(finalAnalyzer());
+            }
+            foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in suggestionFinalAnalyzers)
+            {
+                if (DisabledSuggestions.Contains(code))
+                {
+                    continue;
+                }
+                warnings.AddRange(finalAnalyzer());
+            }
+
+            return warnings.ToArray();
         }
 
         public AssemblerWarnings()
@@ -156,7 +220,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0002()
+        private List<Warning> Analyzer_Final_Warning_0002()
         {
 
         }
@@ -166,7 +230,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0003()
+        private List<Warning> Analyzer_Final_Warning_0003()
         {
 
         }
@@ -176,7 +240,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0004()
+        private List<Warning> Analyzer_Final_Warning_0004()
         {
 
         }
@@ -186,7 +250,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0005()
+        private List<Warning> Analyzer_Final_Warning_0005()
         {
 
         }
@@ -206,7 +270,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0008()
+        private List<Warning> Analyzer_Final_Warning_0008()
         {
 
         }
@@ -216,7 +280,7 @@
 
         }
 
-        private bool Analyzer_Final_Warning_0009()
+        private List<Warning> Analyzer_Final_Warning_0009()
         {
 
         }
@@ -256,7 +320,7 @@
 
         }
 
-        private bool Analyzer_Final_Suggestion_0003()
+        private List<Warning> Analyzer_Final_Suggestion_0003()
         {
 
         }
@@ -266,7 +330,7 @@
 
         }
 
-        private bool Analyzer_Final_Suggestion_0004()
+        private List<Warning> Analyzer_Final_Suggestion_0004()
         {
 
         }
