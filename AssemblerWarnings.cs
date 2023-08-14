@@ -26,37 +26,38 @@
         }
     }
 
-    public delegate bool WarningAnalyzer(byte[] newBytes);
+    public delegate bool RollingWarningAnalyzer(byte[] newBytes, string mnemonic, string[] operands);
+    public delegate bool FinalWarningAnalyzer();
 
     public partial class AssemblerWarnings
     {
 
-        private static readonly Dictionary<int, WarningAnalyzer> nonFatalErrorRollingAnalyzers = new()
+        private static readonly Dictionary<int, RollingWarningAnalyzer> nonFatalErrorRollingAnalyzers = new()
         {
             // TODO: Implement
         };
 
-        private static readonly Dictionary<int, WarningAnalyzer> warningRollingAnalyzers = new()
+        private static readonly Dictionary<int, RollingWarningAnalyzer> warningRollingAnalyzers = new()
         {
             // TODO: Implement
         };
 
-        private static readonly Dictionary<int, WarningAnalyzer> suggestionRollingAnalyzers = new()
+        private static readonly Dictionary<int, RollingWarningAnalyzer> suggestionRollingAnalyzers = new()
         {
             // TODO: Implement
         };
 
-        private static readonly Dictionary<int, WarningAnalyzer> nonFatalErrorFinalAnalyzers = new()
+        private static readonly Dictionary<int, FinalWarningAnalyzer> nonFatalErrorFinalAnalyzers = new()
         {
             // TODO: Implement
         };
 
-        private static readonly Dictionary<int, WarningAnalyzer> warningFinalAnalyzers = new()
+        private static readonly Dictionary<int, FinalWarningAnalyzer> warningFinalAnalyzers = new()
         {
             // TODO: Implement
         };
 
-        private static readonly Dictionary<int, WarningAnalyzer> suggestionFinalAnalyzers = new()
+        private static readonly Dictionary<int, FinalWarningAnalyzer> suggestionFinalAnalyzers = new()
         {
             // TODO: Implement
         };
@@ -80,8 +81,10 @@
         /// Update the state of the class instance with the next instruction in the program being analyzed.
         /// </summary>
         /// <param name="newBytes">The bytes of the next instruction to check for warnings.</param>
+        /// <param name="mnemonic">The mnemonic that was used in the instruction.</param>
+        /// <param name="operands">The operands that were used in the instruction.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
-        public Warning[] NextInstruction(byte[] newBytes)
+        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands)
         {
 
         }
