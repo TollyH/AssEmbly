@@ -40,41 +40,16 @@
 
     public partial class AssemblerWarnings
     {
+        private readonly Dictionary<int, RollingWarningAnalyzer> nonFatalErrorRollingAnalyzers;
+        private readonly Dictionary<int, RollingWarningAnalyzer> warningRollingAnalyzers;
+        private readonly Dictionary<int, RollingWarningAnalyzer> suggestionRollingAnalyzers;
 
-        private static readonly Dictionary<int, RollingWarningAnalyzer> nonFatalErrorRollingAnalyzers = new()
-        {
-            // TODO: Implement
-        };
-
-        private static readonly Dictionary<int, RollingWarningAnalyzer> warningRollingAnalyzers = new()
-        {
-            // TODO: Implement
-        };
-
-        private static readonly Dictionary<int, RollingWarningAnalyzer> suggestionRollingAnalyzers = new()
-        {
-            // TODO: Implement
-        };
-
-        private static readonly Dictionary<int, FinalWarningAnalyzer> nonFatalErrorFinalAnalyzers = new()
-        {
-            // TODO: Implement
-        };
-
-        private static readonly Dictionary<int, FinalWarningAnalyzer> warningFinalAnalyzers = new()
-        {
-            // TODO: Implement
-        };
-
-        private static readonly Dictionary<int, FinalWarningAnalyzer> suggestionFinalAnalyzers = new()
-        {
-            // TODO: Implement
-        };
+        private readonly Dictionary<int, FinalWarningAnalyzer> nonFatalErrorFinalAnalyzers;
+        private readonly Dictionary<int, FinalWarningAnalyzer> warningFinalAnalyzers;
+        private readonly Dictionary<int, FinalWarningAnalyzer> suggestionFinalAnalyzers;
 
         public HashSet<int> DisabledNonFatalErrors = new();
-
         public HashSet<int> DisabledWarnings = new();
-
         public HashSet<int> DisabledSuggestions = new();
 
         /// <summary>
@@ -99,6 +74,249 @@
         /// </summary>
         /// <returns>An array of any warnings caused by final analysis.</returns>
         public Warning[] Finalize()
+        {
+
+        }
+
+        public AssemblerWarnings()
+        {
+            nonFatalErrorRollingAnalyzers = new()
+            {
+                { 0001, Analyzer_Rolling_NonFatalError_0001 },
+                { 0002, Analyzer_Rolling_NonFatalError_0002 },
+            };
+            warningRollingAnalyzers = new()
+            {
+                { 0001, Analyzer_Rolling_Warning_0001 },
+                { 0002, Analyzer_Rolling_Warning_0002 },
+                { 0003, Analyzer_Rolling_Warning_0003 },
+                { 0004, Analyzer_Rolling_Warning_0004 },
+                { 0005, Analyzer_Rolling_Warning_0005 },
+                { 0006, Analyzer_Rolling_Warning_0006 },
+                { 0007, Analyzer_Rolling_Warning_0007 },
+                { 0008, Analyzer_Rolling_Warning_0008 },
+                { 0009, Analyzer_Rolling_Warning_0009 },
+                { 0010, Analyzer_Rolling_Warning_0010 },
+                { 0011, Analyzer_Rolling_Warning_0011 },
+                { 0012, Analyzer_Rolling_Warning_0012 },
+                { 0013, Analyzer_Rolling_Warning_0013 },
+            };
+            suggestionRollingAnalyzers = new()
+            {
+                { 0001, Analyzer_Rolling_Suggestion_0001 },
+                { 0002, Analyzer_Rolling_Suggestion_0002 },
+                { 0003, Analyzer_Rolling_Suggestion_0003 },
+                { 0004, Analyzer_Rolling_Suggestion_0004 },
+                { 0005, Analyzer_Rolling_Suggestion_0005 },
+                { 0006, Analyzer_Rolling_Suggestion_0006 },
+                { 0007, Analyzer_Rolling_Suggestion_0007 },
+                { 0008, Analyzer_Rolling_Suggestion_0008 },
+                { 0009, Analyzer_Rolling_Suggestion_0009 },
+                { 0010, Analyzer_Rolling_Suggestion_0010 },
+                { 0011, Analyzer_Rolling_Suggestion_0011 },
+                { 0012, Analyzer_Rolling_Suggestion_0012 },
+                { 0013, Analyzer_Rolling_Suggestion_0013 },
+                { 0014, Analyzer_Rolling_Suggestion_0014 },
+            };
+
+            nonFatalErrorFinalAnalyzers = new();
+            warningFinalAnalyzers = new()
+            {
+                { 0002, Analyzer_Final_Warning_0002 },
+                { 0003, Analyzer_Final_Warning_0003 },
+                { 0004, Analyzer_Final_Warning_0004 },
+                { 0005, Analyzer_Final_Warning_0005 },
+                { 0008, Analyzer_Final_Warning_0008 },
+                { 0009, Analyzer_Final_Warning_0009 },
+            };
+            suggestionFinalAnalyzers = new()
+            {
+                { 0003, Analyzer_Final_Suggestion_0003 },
+                { 0004, Analyzer_Final_Suggestion_0004 },
+            };
+        }
+
+        private bool Analyzer_Rolling_NonFatalError_0001(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_NonFatalError_0002(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0001(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0002(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0002()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0003(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0003()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0004(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0004()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0005(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0005()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0006(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0007(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0008(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0008()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0009(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Warning_0009()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0010(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0011(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0012(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Warning_0013(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0001(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0002(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0003(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Suggestion_0003()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0004(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Final_Suggestion_0004()
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0005(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0006(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0007(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0008(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0009(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0010(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0011(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0012(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0013(byte[] newBytes, string mnemonic, string[] operands)
+        {
+
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0014(byte[] newBytes, string mnemonic, string[] operands)
         {
 
         }

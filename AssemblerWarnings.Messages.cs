@@ -15,7 +15,7 @@
             { 0003, "Jump/Call target label points to end of file, not executable code." },
             { 0004, "Instruction writes to a label pointing to executable code." },
             { 0005, "Instruction reads from a label pointing to executable code in a context that likely expects data." },
-            { 0006, "Labelled string insertion is not immediately followed by a 0 (null) byte." },
+            { 0006, "String insertion is not immediately followed by a 0 (null) byte." },
             { 0007, "Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime." },
             { 0008, "Unreachable code detected." },
             { 0009, "Program runs to end of file without being terminated by an unconditional jump, return, or halt instruction." },
