@@ -12,17 +12,30 @@
     {
         public readonly WarningSeverity Severity;
         public readonly int Code;
+        public readonly string File;
         public readonly int Line;
-        public readonly int Column;
+        public readonly int ColumnStart;
+        public readonly int ColumnEnd;
 
-        public string Message => AssemblerWarnings.GetMessagesForSeverity(Severity)[Code];
+        /// <summary>
+        /// Index 0 will always be mnemonic. Index 1 and onwards are opcodes, if any.
+        /// </summary>
+        public readonly string[] InstructionElements;
 
-        public Warning(WarningSeverity severity, int code, int line, int column)
+        public readonly string Message => string.Format(AssemblerWarnings.GetMessagesForSeverity(Severity)[Code], InstructionElements);
+
+        public Warning(WarningSeverity severity, int code, string file, int line, int columnStart, int columnEnd, string mnemonic, string[] operands)
         {
             Severity = severity;
             Code = code;
+            File = file;
             Line = line;
-            Column = column;
+            ColumnStart = columnStart;
+            ColumnEnd = columnEnd;
+
+            InstructionElements = new string[operands.Length + 1];
+            InstructionElements[0] = mnemonic;
+            Array.Copy(operands, 0, InstructionElements, 1, operands.Length);
         }
     }
 
@@ -83,8 +96,12 @@
         /// <param name="newBytes">The bytes of the next instruction to check for warnings.</param>
         /// <param name="mnemonic">The mnemonic that was used in the instruction.</param>
         /// <param name="operands">The operands that were used in the instruction.</param>
+        /// <param name="line">The file-based 0-indexed line that the instruction was assembled from.</param>
+        /// <param name="file">
+        /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
+        /// </param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
-        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands)
+        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file)
         {
 
         }
