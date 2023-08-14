@@ -1,4 +1,6 @@
-﻿namespace AssEmbly
+﻿using System.Buffers.Binary;
+
+namespace AssEmbly
 {
     public enum WarningSeverity
     {
@@ -57,8 +59,12 @@
         /// Update the state of the class instance with the next instruction in the program being analyzed.
         /// </summary>
         /// <param name="newBytes">The bytes of the next instruction to check for warnings.</param>
-        /// <param name="mnemonic">The mnemonic that was used in the instruction.</param>
-        /// <param name="operands">The operands that were used in the instruction.</param>
+        /// <param name="mnemonic">
+        /// The mnemonic that was used in the instruction. It should be stripped of whitespace before being passed.
+        /// </param>
+        /// <param name="operands">
+        /// The operands that were used in the instruction. They should be stripped of whitespace before being passed.
+        /// </param>
         /// <param name="line">The file-based 0-indexed line that the instruction was assembled from.</param>
         /// <param name="file">
         /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
@@ -180,7 +186,6 @@
                 { 0011, Analyzer_Rolling_Suggestion_0011 },
                 { 0012, Analyzer_Rolling_Suggestion_0012 },
                 { 0013, Analyzer_Rolling_Suggestion_0013 },
-                { 0014, Analyzer_Rolling_Suggestion_0014 },
             };
 
             nonFatalErrorFinalAnalyzers = new();
@@ -202,12 +207,29 @@
 
         private bool Analyzer_Rolling_NonFatalError_0001(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Non-Fatal Error 0001: Instruction writes to the rpo register.
+            if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+            {
+                foreach (int operandIndex in writtenOperands)
+                {
+                    if (operands[operandIndex].ToLower() == "rpo")
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_NonFatalError_0002(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Non-Fatal Error 0002: Division by constant 0.
+            if (divisionByLiteral.TryGetValue(newBytes[0], out int literalOperandIndex))
+            {
+                _ = Assembler.ParseLiteral(operands[literalOperandIndex], false, out ulong number);
+                return number == 0;
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Warning_0001(byte[] newBytes, string mnemonic, string[] operands)
@@ -262,7 +284,17 @@
 
         private bool Analyzer_Rolling_Warning_0007(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Warning 0007: Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.
+            if (moveLiteral.Contains(newBytes[0]) && moveBitCounts.TryGetValue(newBytes[0], out int maxBits))
+            {
+                _ = Assembler.ParseLiteral(operands[1], false, out ulong number);
+                if (number == 0)
+                {
+                    return false;
+                }
+                return (int)Math.Log(number, 2) + 1 > maxBits;
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Warning_0008(byte[] newBytes, string mnemonic, string[] operands)
@@ -292,22 +324,45 @@
 
         private bool Analyzer_Rolling_Warning_0011(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Warning 0011: Instruction writes to the rsf register.
+            if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+            {
+                foreach (int operandIndex in writtenOperands)
+                {
+                    if (operands[operandIndex].ToLower() == "rsf")
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Warning_0012(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Warning 0012: Instruction writes to the rsb register.
+            if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+            {
+                foreach (int operandIndex in writtenOperands)
+                {
+                    if (operands[operandIndex].ToLower() == "rsb")
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Warning_0013(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            
         }
 
         private bool Analyzer_Rolling_Suggestion_0001(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0001: Avoid use of NOP instruction.
+            return newBytes[0] == 0x01;
         }
 
         private bool Analyzer_Rolling_Suggestion_0002(byte[] newBytes, string mnemonic, string[] operands)
@@ -337,22 +392,26 @@
 
         private bool Analyzer_Rolling_Suggestion_0005(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0005: Use `TST {reg}, {reg}` instead of `CMP {reg}, 0`, as it results in less bytes.
+            return newBytes[0] == 0x75 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
         }
 
         private bool Analyzer_Rolling_Suggestion_0006(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0006: Use `XOR {reg}, {reg}` instead of `MV{B|W|D|Q} {reg}, 0`, as it results in less bytes.
+            return moveRegLit.Contains(newBytes[0]) && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
         }
 
         private bool Analyzer_Rolling_Suggestion_0007(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0007: Use `INC {reg}` instead of `ADD {reg}, 1`, as it results in less bytes.
+            return newBytes[0] == 0x11 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0008(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0008: Use `DEC {reg}` instead of `SUB {reg}, 1`, as it results in less bytes.
+            return newBytes[0] == 0x21 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0009(byte[] newBytes, string mnemonic, string[] operands)
@@ -362,27 +421,74 @@
 
         private bool Analyzer_Rolling_Suggestion_0010(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0010: Operation has no effect.
+            switch (newBytes[0])
+            {
+                // Add, Subtract, Shift, Or, or Xor by 0
+                case 0x11:
+                case 0x21:
+                case 0x51:
+                case 0x55:
+                case 0x65:
+                case 0x69:
+                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0)
+                    {
+                        return true;
+                    }
+                    break;
+                // Multiply by 1
+                case 0x31:
+                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1)
+                    {
+                        return true;
+                    }
+                    break;
+                // And by all 1 bits
+                case 0x61:
+                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == ulong.MaxValue)
+                    {
+                        return true;
+                    }
+                    break;
+            }
+            if (divisionByLiteral.TryGetValue(newBytes[0], out int literalOperandIndex))
+            {
+                _ = Assembler.ParseLiteral(operands[literalOperandIndex], false, out ulong number);
+                // Division by 1
+                return number == 1;
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Suggestion_0011(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0011: Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {reg}, {reg}` instead.
+            return shiftByLiteral.Contains(newBytes[0]) && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) >= 64;
         }
 
         private bool Analyzer_Rolling_Suggestion_0012(byte[] newBytes, string mnemonic, string[] operands)
         {
-
+            // Suggestion 0012: Remove leading 0 digits from denary number.
+            foreach (string operand in operands)
+            {
+                string operandClean = operand.Replace("_", "");
+                if (ulong.TryParse(operandClean, out _) && operandClean[0] == '0')
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Suggestion_0013(byte[] newBytes, string mnemonic, string[] operands)
         {
-
-        }
-
-        private bool Analyzer_Rolling_Suggestion_0014(byte[] newBytes, string mnemonic, string[] operands)
-        {
-
+            // Suggestion 0013: Remove useless `PAD 0` directive.
+            if (mnemonic.ToUpper() == "PAD")
+            {
+                _ = Assembler.ParseLiteral(operands[0], false, out ulong number);
+                return number == 0;
+            }
+            return false;
         }
     }
 }

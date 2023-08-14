@@ -2,8 +2,6 @@
 {
     public partial class AssemblerWarnings
     {
-        internal const byte nopOpcode = 0x01;
-
         /// <summary>
         /// A dictionary of opcodes to an array of the 0-based indices of all operands to that opcode that are written to.
         /// Only opcodes that result in at least one operand being written to are included.
@@ -141,6 +139,13 @@
         /// All opcodes that shift the bits of a register by a literal value. The literal value is always the second operand.
         /// </summary>
         internal static readonly HashSet<byte> shiftByLiteral = new() { 0x51, 0x55 };
+        /// <summary>
+        /// All opcodes that perform a division by a literal value. The mapped value is the index of the literal in the operands.
+        /// </summary>
+        internal static readonly Dictionary<byte, int> divisionByLiteral = new()
+        {
+            { 0x41, 1 }, { 0x45, 2 }, { 0x49, 1 },
+        };
 
         /// <summary>
         /// The number of bits moved by each movement opcode.

@@ -32,15 +32,14 @@
             { 0003, "Put IMP directives at the end of the file, unless the position of the directive is important given the file's contents." },
             { 0004, "Put data at the end of the file, unless the position of the data is important." },
             { 0005, "Use `TST {1}, {1}` instead of `CMP {1}, 0`, as it results in less bytes." },
-            { 0006, "Use `TST {2}, {2}` instead of `CMP 0, {2}`, as it results in less bytes." },
-            { 0007, "Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes." },
-            { 0008, "Use `INC {1}` instead of `ADD {1}, 1`, as it results in less bytes." },
-            { 0009, "Use `DEC {1}` instead of `SUB {1}, 1`, as it results in less bytes." },
-            { 0010, "Put CMP and TST instructions directly before their respective conditional jumps for clarity." },
-            { 0011, "Operation has no effect." },
-            { 0012, "Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {1}, {1}` instead." },
-            { 0013, "Remove leading 0 digits from denary number." },
-            { 0014, "Remove useless `PAD 0` directive." },
+            { 0006, "Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes." },
+            { 0007, "Use `INC {1}` instead of `ADD {1}, 1`, as it results in less bytes." },
+            { 0008, "Use `DEC {1}` instead of `SUB {1}, 1`, as it results in less bytes." },
+            { 0009, "Put CMP and TST instructions directly before their respective conditional jumps for clarity." },
+            { 0010, "Operation has no effect." },
+            { 0011, "Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {1}, {1}` instead." },
+            { 0012, "Remove leading 0 digits from denary number." },
+            { 0013, "Remove useless `PAD 0` directive." },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)
