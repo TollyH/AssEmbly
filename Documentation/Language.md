@@ -2,7 +2,7 @@
 
 Applies to versions: `1.1.0`
 
-Last revised: 2023-08-03
+Last revised: 2023-08-14
 
 ## Introduction
 
@@ -309,7 +309,7 @@ For example, in the instruction:
 MVQ rg0, rpo
 ```
 
-Before execution of the instruction begins, `rpo` will point to the opcode corresponding to `MVQ` with a register and literal. Once the processor reads this, it increments `rpo` by 1. `rpo` now points to the first operand: `rg0`. This value will be retained until after the instruction has completed, when `rpo` will be increased by `3` (`1` for the opcode, `1` for each register operand).
+Before execution of the instruction begins, `rpo` will point to the opcode corresponding to `MVQ` with a register and literal. Once the processor reads this, it increments `rpo` by `1`. `rpo` now points to the first operand: `rg0`. This value will be retained until after the instruction has completed, when `rpo` will be increased by `2` (`1` for each register operand). This means there was an increase of `3` overall when including the initial increment by `1` for the opcode.
 
 ### `rsf` — Status Flags
 

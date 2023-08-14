@@ -60,6 +60,10 @@
     img {
       max-width: 100%;
     }
+    svg {
+      height; auto;
+      max-width: 100%;
+    }
     h1, h2, h3, h4, h5, h6 {
       margin-top: 1.4em;
     }
@@ -170,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-03</p>
+<p>Last revised: 2023-08-14</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -696,11 +700,12 @@ address of the opcode</strong>. It will not be incremented again until
 <p>Before execution of the instruction begins, <code>rpo</code> will
 point to the opcode corresponding to <code>MVQ</code> with a register
 and literal. Once the processor reads this, it increments
-<code>rpo</code> by 1. <code>rpo</code> now points to the first operand:
-<code>rg0</code>. This value will be retained until after the
-instruction has completed, when <code>rpo</code> will be increased by
-<code>3</code> (<code>1</code> for the opcode, <code>1</code> for each
-register operand).</p>
+<code>rpo</code> by <code>1</code>. <code>rpo</code> now points to the
+first operand: <code>rg0</code>. This value will be retained until after
+the instruction has completed, when <code>rpo</code> will be increased
+by <code>2</code> (<code>1</code> for each register operand). This means
+there was an increase of <code>3</code> overall when including the
+initial increment by <code>1</code> for the opcode.</p>
 <h3 id="rsf-status-flags"><code>rsf</code> — Status Flags</h3>
 <p>The status flags register is used to mark some information about
 previously executed instructions. While it stores a 64-bit number just
