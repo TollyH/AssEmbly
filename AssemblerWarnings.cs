@@ -75,20 +75,11 @@
             // TODO: Implement
         };
 
-        public HashSet<bool> EnabledNonFatalErrors = new()
-        {
-            // TODO: All by default
-        };
+        public HashSet<int> DisabledNonFatalErrors = new();
 
-        public HashSet<bool> EnabledWarnings = new()
-        {
-            // TODO: All by default
-        };
+        public HashSet<int> DisabledWarnings = new();
 
-        public HashSet<bool> EnabledSuggestions = new()
-        {
-            // TODO: All by default
-        };
+        public HashSet<int> DisabledSuggestions = new();
 
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
