@@ -2,13 +2,13 @@
 {
     public partial class AssemblerWarnings
     {
-        public const ulong Zero = 0;
+        internal const byte nopOpcode = 0x01;
 
         /// <summary>
         /// A dictionary of opcodes to an array of the 0-based indices of all operands to that opcode that are written to.
         /// Only opcodes that result in at least one operand being written to are included.
         /// </summary>
-        public static readonly Dictionary<byte, int[]> WritingInstructions = new()
+        internal static readonly Dictionary<byte, int[]> writingInstructions = new()
         {
             { 0x10, new int[] { 0 } },  // ADD reg, reg
             { 0x11, new int[] { 0 } },  // ADD reg, lit
@@ -107,6 +107,82 @@
 
             { 0xF0, new int[] { 0 } },  // RCC reg
             { 0xF1, new int[] { 0 } },  // RFC reg
+        };
+
+        /// <summary>
+        /// Directives that result in data (non-code bytes) being inserted into the assembly.
+        /// </summary>
+        internal static readonly HashSet<string> dataInsertionDirectives = new() { "DAT", "PAD", "NUM" };
+        /// <summary>
+        /// Every opcode that results in the location of execution being moved to the address of a label.
+        /// As of current, the address to jump to is always the first operand to these opcodes.
+        /// </summary>
+        internal static readonly HashSet<byte> jumpCallToLabelOpcodes = new()
+        {
+            0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E,  // Jumps
+            0xB0, 0xB2, 0xB3, 0xB4, 0xB5  // Calls
+        };
+        /// <summary>
+        /// Any instruction that can be used to prevent execution flowing onwards 100% of the time.
+        /// i.e. Unconditional jump, return, halt
+        /// </summary>
+        internal static readonly HashSet<byte> terminators = new() { 0x00, 0x02, 0x03, 0xBA, 0xBB, 0xBC, 0xBD, 0xBE };
+
+        /// <summary>
+        /// All opcodes that move a literal value into a register. The literal value is always the second operand.
+        /// </summary>
+        internal static readonly HashSet<byte> moveRegLit = new() { 0x81, 0x89, 0x91, 0x99 };
+
+        /// <summary>
+        /// All opcodes that move a literal value. The literal value is always the second operand.
+        /// </summary>
+        internal static readonly HashSet<byte> moveLiteral = new() { 0x81, 0x85, 0x87, 0x89, 0x8D, 0x8F, 0x91, 0x95, 0x97, 0x99, 0x9D, 0x9F };
+        /// <summary>
+        /// All opcodes that shift the bits of a register by a literal value. The literal value is always the second operand.
+        /// </summary>
+        internal static readonly HashSet<byte> shiftByLiteral = new() { 0x51, 0x55 };
+
+        /// <summary>
+        /// The number of bits moved by each movement opcode.
+        /// </summary>
+        internal static readonly Dictionary<byte, int> moveBitCounts = new()
+        {
+            // MVB
+            { 0x80, 8 },
+            { 0x81, 8 },
+            { 0x82, 8 },
+            { 0x83, 8 },
+            { 0x84, 8 },
+            { 0x85, 8 },
+            { 0x86, 8 },
+            { 0x87, 8 },
+            // MVW
+            { 0x88, 16 },
+            { 0x89, 16 },
+            { 0x8A, 16 },
+            { 0x8B, 16 },
+            { 0x8C, 16 },
+            { 0x8D, 16 },
+            { 0x8E, 16 },
+            { 0x8F, 16 },
+            // MVD
+            { 0x90, 32 },
+            { 0x91, 32 },
+            { 0x92, 32 },
+            { 0x93, 32 },
+            { 0x94, 32 },
+            { 0x95, 32 },
+            { 0x96, 32 },
+            { 0x97, 32 },
+            // MVQ
+            { 0x98, 64 },
+            { 0x99, 64 },
+            { 0x9A, 64 },
+            { 0x9B, 64 },
+            { 0x9C, 64 },
+            { 0x9D, 64 },
+            { 0x9E, 64 },
+            { 0x9F, 64 },
         };
     }
 }
