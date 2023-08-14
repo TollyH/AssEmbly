@@ -40,6 +40,7 @@
             { 0011, "Operation has no effect." },
             { 0012, "Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {1}, {1}` instead." },
             { 0013, "Remove leading 0 digits from denary number." },
+            { 0014, "Remove useless `PAD 0` directive." },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)
