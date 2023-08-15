@@ -298,7 +298,7 @@ namespace AssEmbly
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
             }
-            warnings.AddRange(warningGenerator.Finalize());
+            warnings.AddRange(warningGenerator.Finalize(programBytes));
 
             debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
@@ -470,8 +470,9 @@ namespace AssEmbly
         /// </summary>
         /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
-        /// <exception cref="SyntaxError">Thrown when there are invalid characters in the literal or the literal is in an invalid format.</exception>
+        /// <exception cref="SyntaxError">Thrown when there are invalid characters in a string literal or the string literal is in an invalid format.</exception>
         /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
+        /// <exception cref="FormatException">Thrown when there are invalid characters in a numeric literal or the numeric literal is in an invalid format.</exception>
         public static byte[] ParseLiteral(string operand, bool allowString, out ulong parsedNumber)
         {
             parsedNumber = 0;
