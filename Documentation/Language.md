@@ -1277,6 +1277,8 @@ CMP rg0, 0  ; still generates no suggestion
 CMP rg0, 0  ; generates suggestion 0005 again
 ```
 
+Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `#analyzer` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
+
 ## Console Input and Output
 
 AssEmbly has native support for reading and writing from the console. There are four types of write that can be performed: 64-bit number in decimal; byte in decimal; byte in hexadecimal; and byte as a character. There is only a single type of read: a character as a byte. There is no native support for reading numbers in any base, nor is there support for reading or writing multiple numbers/characters at once.

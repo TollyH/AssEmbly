@@ -1536,6 +1536,12 @@ For example:
 
     CMP rg0, 0  ; generates suggestion 0005 again
 
+Be aware that some analyzers do not run until the end of the assembly
+process and so cannot be re-enabled without inadvertently causing the
+warning to re-appear. This can be overcome by placing the disabling
+#analyzer directive at the end of the base file for any analyzers where
+this behaviour is an issue, or by simply not re-enabling the analyzer.
+
 Console Input and Output
 
 AssEmbly has native support for reading and writing from the console.
