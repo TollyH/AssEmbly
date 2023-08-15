@@ -149,7 +149,7 @@ namespace AssEmbly
                     // Regex splits on commas surrounded by any amount of whitespace (not including newlines), unless wrapped in unescaped quotes.
                     string[] operands = split.Length == 2 ? Regex.Split(
                         split[1].Trim(), @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
-                    // Check for line-modifying assembler directives
+                    // Check for line-modifying/state altering assembler directives
                     switch (mnemonic.ToUpperInvariant())
                     {
                         // Import contents of another file
@@ -197,6 +197,55 @@ namespace AssEmbly
                             }
                             macros[operands[0]] = operands[1];
                             lineIsLabelled = false;
+                            continue;
+                        // Toggle warnings
+                        case "#ANALYZER":
+                            if (operands.Length != 3)
+                            {
+                                throw new OperandException($"The #analyzer directive requires 3 operands. {operands.Length} were given.");
+                            }
+                            HashSet<int> disabledSet = operands[0].ToUpperInvariant() switch
+                            {
+                                "ERROR" => warningGenerator.DisabledNonFatalErrors,
+                                "WARNING" => warningGenerator.DisabledWarnings,
+                                "SUGGESTION" => warningGenerator.DisabledSuggestions,
+                                _ => throw new OperandException("The first operand to the #analyzer directive must be one of 'error', 'warning' or 'suggestion'.")
+                            };
+                            IReadOnlySet<int> initialSet = operands[0].ToUpperInvariant() switch
+                            {
+                                "ERROR" => disabledNonFatalErrors,
+                                "WARNING" => disabledWarnings,
+                                "SUGGESTION" => disabledSuggestions,
+                                _ => throw new OperandException("The first operand to the #analyzer directive must be one of 'error', 'warning' or 'suggestion'.")
+                            };
+                            if (!int.TryParse(operands[1], out int code))
+                            {
+                                throw new OperandException("The second operand to the #analyzer directive must be an integer.");
+                            }
+                            switch (operands[2].ToUpperInvariant())
+                            {
+                                // Disable
+                                case "0":
+                                    _ = disabledSet.Add(code);
+                                    break;
+                                // Enable
+                                case "1":
+                                    _ = disabledSet.Remove(code);
+                                    break;
+                                // Restore
+                                case "R":
+                                    if (initialSet.Contains(code))
+                                    {
+                                        _ = disabledSet.Add(code);
+                                    }
+                                    else
+                                    {
+                                        _ = disabledSet.Remove(code);
+                                    }
+                                    break;
+                                default:
+                                    throw new OperandException("The third operand to the #analyzer directive must be one of '0', '1', or 'r'.");
+                            }
                             continue;
                         default:
                             break;

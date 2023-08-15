@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-14</p>
+<p>Last revised: 2023-08-15</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -264,6 +264,9 @@ Insertion</a></li>
 Definition</a></li>
 <li><a href="#imp--file-importing"><code>IMP</code> — File
 Importing</a></li>
+<li><a
+href="#analyzer--toggling-assembler-warnings"><code>#analyzer</code> —
+Toggling Assembler Warnings</a></li>
 </ul></li>
 <li><a href="#console-input-and-output">Console Input and
 Output</a></li>
@@ -1619,6 +1622,31 @@ occur.</p>
 <p>Attempting to assemble any of these three files would result in the
 assembler throwing an error, as each file ends up depending on itself as
 it resolves its import.</p>
+<h3 id="analyzer-toggling-assembler-warnings"><code>#analyzer</code> —
+Toggling Assembler Warnings</h3>
+<p>The AssEmbly assembler checks for common issues with your source code
+when you assemble it in order to alert you of potential issues and
+improvements that can be made. There may be some situations, however,
+where you want to suppress these issues from being detected. This can be
+done within the source code using the <code>#analyzer</code> directive.
+The directive takes three operands: the severity of the warning (either
+<code>error</code>, <code>warning</code>, or <code>suggestion</code>);
+the numerical code for the warning (this is a 4-digit number printed
+alongside the message); and whether to enable (<code>1</code>), disable
+(<code>0</code>) or restore the warning to its state as it was at the
+beginning of assembly (<code>r</code>).</p>
+<p>After using the directive, its effect remains active until assembly
+ends, or the same warning is toggled again with the directive further on
+in the code.</p>
+<p>For example:</p>
+<pre class="text"><code>CMP rg0, 0  ; generates suggestion 0005
+
+#analyzer suggestion, 0005, 0
+CMP rg0, 0  ; generates no suggestion
+CMP rg0, 0  ; still generates no suggestion
+#analyzer suggestion, 0005, 1  ; &#39;r&#39; would also work if the suggestion isn&#39;t disabled via a CLI argument
+
+CMP rg0, 0  ; generates suggestion 0005 again</code></pre>
 <h2 id="console-input-and-output">Console Input and Output</h2>
 <p>AssEmbly has native support for reading and writing from the console.
 There are four types of write that can be performed: 64-bit number in
