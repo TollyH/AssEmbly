@@ -27,7 +27,11 @@ namespace AssEmbly
         /// Assemble multiple AssEmbly lines at once into executable bytecode.
         /// </summary>
         /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
+        /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
+        /// <param name="disabledWarnings">A set of warning codes to disable.</param>
+        /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
         /// <param name="debugInfo">A string to store generated debug information file text in.</param>
+        /// <param name="warnings">A list to store any generated warnings in.</param>
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
         /// <exception cref="LabelNameException">
@@ -38,7 +42,9 @@ namespace AssEmbly
         /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
         /// </exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static byte[] AssembleLines(string[] lines, out string debugInfo)
+        public static byte[] AssembleLines(string[] lines,
+            IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions,
+            out string debugInfo, out List<Warning> warnings)
         {
             // The lines to assemble may change during assembly, for example importing a file
             // will extend the list of lines to assemble as and when the import is reached.
@@ -61,6 +67,13 @@ namespace AssEmbly
             // For detecting circular imports and tracking imported line numbers
             Stack<ImportStackFrame> importStack = new();
             int baseFileLine = 0;
+
+            bool lineIsLabelled = false;
+            AssemblerWarnings warningGenerator = new();
+            warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
+            warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
+            warningGenerator.DisabledSuggestions.UnionWith(disabledSuggestions);
+            warnings = new List<Warning>();
 
             for (int l = 0; l < dynamicLines.Count; l++)
             {
@@ -121,6 +134,8 @@ namespace AssEmbly
                             addressLabelNames[(uint)program.Count] = new List<string>();
                         }
                         addressLabelNames[(uint)program.Count].Add(labelName);
+
+                        lineIsLabelled = true;
                         continue;
                     }
                     MatchCollection quotes = Regex.Matches(line, @"(?<!\\)""");
@@ -167,6 +182,12 @@ namespace AssEmbly
                             // Insert the contents of the imported file so they are assembled next
                             dynamicLines.InsertRange(l + 1, linesToImport);
                             resolvedImports.Add((filepath, filepath, (uint)program.Count));
+
+                            warnings.AddRange(warningGenerator.NextInstruction(
+                                Array.Empty<byte>(), mnemonic, operands,
+                                currentImport is null ? baseFileLine : currentImport.CurrentLine,
+                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled));
+                            lineIsLabelled = false;
                             continue;
                         // Define macro
                         case "MAC":
@@ -175,6 +196,7 @@ namespace AssEmbly
                                 throw new OperandException($"The MAC mnemonic requires two operands. {operands.Length} were given.");
                             }
                             macros[operands[0]] = operands[1];
+                            lineIsLabelled = false;
                             continue;
                         default:
                             break;
@@ -187,6 +209,11 @@ namespace AssEmbly
                     }
                     assembledLines.Add(((uint)program.Count, line));
                     program.AddRange(newBytes);
+                    warnings.AddRange(warningGenerator.NextInstruction(
+                        newBytes, mnemonic, operands,
+                        currentImport is null ? baseFileLine : currentImport.CurrentLine,
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled));
+                    lineIsLabelled = false;
                 }
                 catch (AssemblerException e)
                 {
@@ -222,6 +249,7 @@ namespace AssEmbly
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
             }
+            warnings.AddRange(warningGenerator.Finalize());
 
             debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list

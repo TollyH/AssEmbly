@@ -84,7 +84,9 @@
             string debugInfo;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(args[1]), out debugInfo);
+                program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
+                    out debugInfo, out List<Warning> warnings);
             }
             catch (Exception e)
             {
@@ -211,7 +213,12 @@
             byte[] program;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(args[1]), out _);
+                program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                    // Ignore all warnings when using 'run' command
+                    AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
+                    AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
+                    AssemblerWarnings.SuggestionMessages.Keys.ToHashSet(),
+                    out _, out _);
             }
             catch (Exception e)
             {
