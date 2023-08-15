@@ -268,16 +268,15 @@ namespace AssEmbly
                 lastExecutableLine[file] = line;
                 if (jumpCallToLabelOpcodes.Contains(newBytes[0]))
                 {
-                    jumpCallToLabels[(line, file)] = BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[1..]);
+                    jumpCallToLabels[(line, file)] = currentAddress + 1;
                 }
                 else if (writeToMemory.Contains(newBytes[0]))
                 {
-                    writesToLabels[(line, file)] = BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[1..]);
+                    writesToLabels[(line, file)] = currentAddress + 1;
                 }
                 else if (readValueFromMemory.TryGetValue(newBytes[0], out int addressOpcodeIndex))
                 {
-                    _ = Assembler.ParseLiteral(operands[addressOpcodeIndex], false, out ulong number);
-                    writesToLabels[(line, file)] = number;
+                    readsFromLabels[(line, file)] = currentAddress + (uint)addressOpcodeIndex + 1;
                 }
             }
         }
@@ -338,7 +337,8 @@ namespace AssEmbly
             List<Warning> warnings = new();
             foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpCallToLabels)
             {
-                if (dataAddresses.Contains(labelAddress))
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.Skip((int)labelAddress).ToArray());
+                if (dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpFile, jumpLine,
                         lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)]));
@@ -353,7 +353,8 @@ namespace AssEmbly
             List<Warning> warnings = new();
             foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpCallToLabels)
             {
-                if (labelAddress >= currentAddress)
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.Skip((int)labelAddress).ToArray());
+                if (address >= currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpFile, jumpLine,
                         lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)]));
@@ -368,7 +369,8 @@ namespace AssEmbly
             List<Warning> warnings = new();
             foreach (((int writeLine, string writeFile), ulong labelAddress) in writesToLabels)
             {
-                if (!dataAddresses.Contains(labelAddress))
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.Skip((int)labelAddress).ToArray());
+                if (!dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)]));
@@ -381,9 +383,10 @@ namespace AssEmbly
         {
             // Warning 0005: Instruction reads from a label pointing to executable code in a context that likely expects data.
             List<Warning> warnings = new();
-            foreach (((int writeLine, string writeFile), ulong labelAddress) in writesToLabels)
+            foreach (((int writeLine, string writeFile), ulong labelAddress) in readsFromLabels)
             {
-                if (!dataAddresses.Contains(labelAddress))
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.Skip((int)labelAddress).ToArray());
+                if (!dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)]));
