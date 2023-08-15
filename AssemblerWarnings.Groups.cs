@@ -106,6 +106,51 @@
             { 0xF0, new int[] { 0 } },  // RCC reg
             { 0xF1, new int[] { 0 } },  // RFC reg
         };
+        /// <summary>
+        /// Every opcode that writes to a literal memory location.
+        /// Currently, the address of the memory location is always the first operand.
+        /// </summary>
+        internal static readonly HashSet<byte> writeToMemory = new() { 0x84, 0x85, 0x8C, 0x8D, 0x94, 0x95, 0x9C, 0x9D };
+
+        /// <summary>
+        /// Every opcode that reads a value from memory as data, mapped to the index of the operand that is the memory address.
+        /// </summary>
+        internal static readonly Dictionary<byte, int> readValueFromMemory = new()
+        {
+            { 0x12, 1 },  // ADD reg, adr
+            { 0x22, 1 },  // SUB reg, adr
+            { 0x32, 1 },  // MUL reg, adr
+            { 0x42, 1 },  // DIV reg, adr
+            { 0x46, 2 },  // DVR reg, reg, adr
+            { 0x4A, 1 },  // REM reg, adr
+            { 0x52, 1 },  // SHL reg, adr
+            { 0x56, 1 },  // SHR reg, adr
+            { 0x62, 1 },  // AND reg, adr
+            { 0x66, 1 },  // ORR reg, adr
+            { 0x6A, 1 },  // XOR reg, adr
+            { 0x72, 1 },  // TST reg, adr
+            { 0x76, 1 },  // CMP reg, adr
+            { 0x82, 1 },  // MVB reg, adr
+            { 0x8A, 1 },  // MVW reg, adr
+            { 0x92, 1 },  // MVD reg, adr
+            { 0x9A, 1 },  // MVQ reg, adr
+            { 0xA2, 0 },  // PSH adr
+            { 0xB4, 1 },  // CAL adr, adr
+            { 0xB8, 1 },  // CAL ptr, adr
+            { 0xBD, 0 },  // RET adr
+            { 0xC2, 0 },  // WCN adr
+            { 0xC6, 0 },  // WCB adr
+            { 0xCA, 0 },  // WCX adr
+            { 0xCE, 0 },  // WCC adr
+            { 0xD2, 0 },  // WFN adr
+            { 0xD6, 0 },  // WFB adr
+            { 0xDA, 0 },  // WFX adr
+            { 0xDE, 0 },  // WFC adr
+            { 0xE0, 0 },  // OFL adr
+            { 0xE3, 0 },  // DFL adr
+            { 0xE5, 1 },  // FEX reg, adr
+            { 0xE7, 1 },  // FSZ reg, adr
+        };
 
         /// <summary>
         /// Directives that result in data (non-code bytes) being inserted into the assembly.
