@@ -183,6 +183,7 @@ namespace AssEmbly
                 { 0011, Analyzer_Rolling_Warning_0011 },
                 { 0012, Analyzer_Rolling_Warning_0012 },
                 { 0013, Analyzer_Rolling_Warning_0013 },
+                { 0014, Analyzer_Rolling_Warning_0014 },
             };
             suggestionRollingAnalyzers = new()
             {
@@ -489,6 +490,12 @@ namespace AssEmbly
             // Warning 0013: Jump/Call target label points to itself, resulting in an unbreakable infinite loop.
             return !instructionIsData && jumpCallToLabelOpcodes.Contains(newBytes[0])
                 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[1..]) == currentAddress;
+        }
+
+        private bool Analyzer_Rolling_Warning_0014()
+        {
+            // Warning 0014: Unlabelled executable code found after data insertion.
+            return !instructionIsData && lastInstructionWasData && !labelled;
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()
