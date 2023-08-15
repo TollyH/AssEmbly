@@ -87,6 +87,28 @@
                 program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
                     new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
                     out debugInfo, out List<Warning> warnings);
+                foreach (Warning warning in warnings)
+                {
+                    Console.ForegroundColor = warning.Severity switch
+                    {
+                        WarningSeverity.NonFatalError => ConsoleColor.Red,
+                        WarningSeverity.Warning => ConsoleColor.DarkYellow,
+                        WarningSeverity.Suggestion => ConsoleColor.Cyan,
+                        _ => Console.ForegroundColor
+                    };
+                    string messageStart = warning.Severity switch
+                    {
+                        WarningSeverity.NonFatalError => "Error",
+                        WarningSeverity.Warning => "Warning",
+                        WarningSeverity.Suggestion => "Suggestion",
+                        _ => "Unknown"
+                    };
+                    Console.WriteLine(
+                        $"\n{messageStart} {warning.Code:D4} on line {warning.Line} in {(warning.File == "" ? "base file" : warning.File)}" +
+                        $"\n    {warning.InstructionElements[0]} {string.Join(", ", warning.InstructionElements[1..])}" +
+                        $"\n{warning.Message}");
+                    Console.ResetColor();
+                }
             }
             catch (Exception e)
             {
