@@ -636,9 +636,10 @@ namespace AssEmbly
             foreach (string operand in operands)
             {
                 string operandClean = operand.Replace("_", "");
-                if (ulong.TryParse(operandClean, out _) && operandClean[0] == '0')
+                if (ulong.TryParse(operandClean, out ulong number) && operandClean[0] == '0')
                 {
-                    return true;
+                    // If number is 0, don't create suggestion unless there is more than one 0 digit.
+                    return number != 0 || operandClean.Length > 1;
                 }
             }
             return false;
