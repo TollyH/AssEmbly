@@ -38,7 +38,7 @@ namespace AssEmbly
         }
     }
 
-    public delegate bool RollingWarningAnalyzer(byte[] newBytes, string mnemonic, string[] operands);
+    public delegate bool RollingWarningAnalyzer();
     public delegate List<Warning> FinalWarningAnalyzer();
 
     public partial class AssemblerWarnings
@@ -55,6 +55,14 @@ namespace AssEmbly
         public HashSet<int> DisabledWarnings = new();
         public HashSet<int> DisabledSuggestions = new();
 
+        // Variables updated by parameters of the NextInstruction method
+        private byte[] newBytes = Array.Empty<byte>();
+        private string mnemonic = "";
+        private string[] operands = Array.Empty<string>();
+        private int line = 0;
+        private string file = "";
+        private bool labelled = false;
+
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
         /// </summary>
@@ -69,9 +77,17 @@ namespace AssEmbly
         /// <param name="file">
         /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
         /// </param>
+        /// <param name="labelled">Was this instruction preceded by one or more label definitions?</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
-        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file)
+        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled)
         {
+            this.newBytes = newBytes;
+            this.mnemonic = mnemonic;
+            this.operands = operands;
+            this.line = line;
+            this.file = file;
+            this.labelled = labelled;
+
             List<Warning> warnings = new();
 
             foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in nonFatalErrorRollingAnalyzers)
@@ -80,7 +96,7 @@ namespace AssEmbly
                 {
                     continue;
                 }
-                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                if (rollingAnalyzer())
                 {
                     warnings.Add(new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands));
                 }
@@ -91,7 +107,7 @@ namespace AssEmbly
                 {
                     continue;
                 }
-                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                if (rollingAnalyzer())
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands));
                 }
@@ -102,7 +118,7 @@ namespace AssEmbly
                 {
                     continue;
                 }
-                if (rollingAnalyzer(newBytes, mnemonic, operands))
+                if (rollingAnalyzer())
                 {
                     warnings.Add(new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands));
                 }
@@ -195,7 +211,6 @@ namespace AssEmbly
                 { 0003, Analyzer_Final_Warning_0003 },
                 { 0004, Analyzer_Final_Warning_0004 },
                 { 0005, Analyzer_Final_Warning_0005 },
-                { 0008, Analyzer_Final_Warning_0008 },
                 { 0009, Analyzer_Final_Warning_0009 },
             };
             suggestionFinalAnalyzers = new()
@@ -205,7 +220,7 @@ namespace AssEmbly
             };
         }
 
-        private bool Analyzer_Rolling_NonFatalError_0001(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_NonFatalError_0001()
         {
             // Non-Fatal Error 0001: Instruction writes to the rpo register.
             if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
@@ -221,7 +236,7 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_NonFatalError_0002(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_NonFatalError_0002()
         {
             // Non-Fatal Error 0002: Division by constant 0.
             if (divisionByLiteral.TryGetValue(newBytes[0], out int literalOperandIndex))
@@ -232,12 +247,12 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Warning_0001(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0001()
         {
 
         }
 
-        private bool Analyzer_Rolling_Warning_0002(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0002()
         {
 
         }
@@ -247,7 +262,7 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Warning_0003(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0003()
         {
 
         }
@@ -257,7 +272,7 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Warning_0004(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0004()
         {
 
         }
@@ -267,7 +282,7 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Warning_0005(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0005()
         {
 
         }
@@ -277,12 +292,12 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Warning_0006(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0006()
         {
 
         }
 
-        private bool Analyzer_Rolling_Warning_0007(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0007()
         {
             // Warning 0007: Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.
             if (moveLiteral.Contains(newBytes[0]) && moveBitCounts.TryGetValue(newBytes[0], out int maxBits))
@@ -297,17 +312,12 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Warning_0008(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0008()
         {
 
         }
 
-        private List<Warning> Analyzer_Final_Warning_0008()
-        {
-
-        }
-
-        private bool Analyzer_Rolling_Warning_0009(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0009()
         {
 
         }
@@ -317,12 +327,12 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Warning_0010(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0010()
         {
 
         }
 
-        private bool Analyzer_Rolling_Warning_0011(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0011()
         {
             // Warning 0011: Instruction writes to the rsf register.
             if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
@@ -338,7 +348,7 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Warning_0012(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0012()
         {
             // Warning 0012: Instruction writes to the rsb register.
             if (writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
@@ -354,23 +364,23 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Warning_0013(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Warning_0013()
         {
             
         }
 
-        private bool Analyzer_Rolling_Suggestion_0001(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0001()
         {
             // Suggestion 0001: Avoid use of NOP instruction.
             return newBytes[0] == 0x01;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0002(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0002()
         {
 
         }
 
-        private bool Analyzer_Rolling_Suggestion_0003(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0003()
         {
 
         }
@@ -380,7 +390,7 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Suggestion_0004(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0004()
         {
 
         }
@@ -390,36 +400,36 @@ namespace AssEmbly
 
         }
 
-        private bool Analyzer_Rolling_Suggestion_0005(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0005()
         {
             // Suggestion 0005: Use `TST {reg}, {reg}` instead of `CMP {reg}, 0`, as it results in less bytes.
             return newBytes[0] == 0x75 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0006(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0006()
         {
             // Suggestion 0006: Use `XOR {reg}, {reg}` instead of `MV{B|W|D|Q} {reg}, 0`, as it results in less bytes.
             return moveRegLit.Contains(newBytes[0]) && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0007(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0007()
         {
             // Suggestion 0007: Use `INC {reg}` instead of `ADD {reg}, 1`, as it results in less bytes.
             return newBytes[0] == 0x11 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0008(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0008()
         {
             // Suggestion 0008: Use `DEC {reg}` instead of `SUB {reg}, 1`, as it results in less bytes.
             return newBytes[0] == 0x21 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0009(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0009()
         {
 
         }
 
-        private bool Analyzer_Rolling_Suggestion_0010(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0010()
         {
             // Suggestion 0010: Operation has no effect.
             switch (newBytes[0])
@@ -460,13 +470,13 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0011(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0011()
         {
             // Suggestion 0011: Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {reg}, {reg}` instead.
             return shiftByLiteral.Contains(newBytes[0]) && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) >= 64;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0012(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0012()
         {
             // Suggestion 0012: Remove leading 0 digits from denary number.
             foreach (string operand in operands)
@@ -480,7 +490,7 @@ namespace AssEmbly
             return false;
         }
 
-        private bool Analyzer_Rolling_Suggestion_0013(byte[] newBytes, string mnemonic, string[] operands)
+        private bool Analyzer_Rolling_Suggestion_0013()
         {
             // Suggestion 0013: Remove useless `PAD 0` directive.
             if (mnemonic.ToUpper() == "PAD")
