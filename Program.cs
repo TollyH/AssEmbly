@@ -79,13 +79,68 @@
             {
                 Environment.CurrentDirectory = Path.GetFullPath(parent);
             }
+            HashSet<int> disabledErrors = new();
+            HashSet<int> disabledWarnings = new();
+            HashSet<int> disabledSuggestions = new();
+            foreach (string a in args)
+            {
+                string lowerA = a.ToLowerInvariant();
+                if (lowerA.StartsWith("--disable-error-"))
+                {
+                    if (!int.TryParse(a[16..], out int errorCode))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{a[16..]} is not a valid error code to disable.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    _ = disabledErrors.Add(errorCode);
+                }
+                else if (lowerA.StartsWith("--disable-warning-"))
+                {
+                    if (!int.TryParse(a[18..], out int errorCode))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{a[18..]} is not a valid warning code to disable.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    _ = disabledWarnings.Add(errorCode);
+                }
+                else if (lowerA.StartsWith("--disable-suggestion-"))
+                {
+                    if (!int.TryParse(a[21..], out int errorCode))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{a[21..]} is not a valid suggestion code to disable.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    _ = disabledSuggestions.Add(errorCode);
+                }
+                else if (lowerA == "--no-errors")
+                {
+                    disabledErrors = AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet();
+                }
+                else if (lowerA == "--no-warnings")
+                {
+                    disabledWarnings = AssemblerWarnings.WarningMessages.Keys.ToHashSet();
+                }
+                else if (lowerA == "--no-suggestions")
+                {
+                    disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
+                }
+            }
             string filename = string.Join('.', args[1].Split('.')[..^1]);
             byte[] program;
             string debugInfo;
             try
             {
                 program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
-                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
+                    disabledErrors, disabledWarnings, disabledSuggestions,
                     out debugInfo, out List<Warning> warnings);
                 foreach (Warning warning in warnings)
                 {
@@ -393,8 +448,10 @@
             Console.WriteLine();
             Console.WriteLine("Operations:");
             Console.WriteLine("assemble - Take a program written in AssEmbly and assemble it down to executable bytecode");
-            Console.WriteLine("    Usage: 'AssEmbly assemble <file-path> [destination-path] [--no-debug-file]'");
+            Console.WriteLine("    Usage: 'AssEmbly assemble <file-path> [destination-path] [--no-debug-file] [--no-errors|warnings|suggestions] [--disable-error|warning|suggestion-xxxx]'");
             Console.WriteLine("    --no-debug-file - Do not generate a debug information file with the executable.");
+            Console.WriteLine("    --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.");
+            Console.WriteLine("    --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.");
             Console.WriteLine();
             Console.WriteLine("execute - Execute an already assembled bytecode file");
             Console.WriteLine("    Usage: 'AssEmbly execute <file-path> [--mem-size=2046]'");
