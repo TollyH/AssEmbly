@@ -1,4 +1,7 @@
-﻿namespace AssEmbly
+﻿using System.Text.Json;
+using System.Web;
+
+namespace AssEmbly
 {
     internal class Program
     {
@@ -42,6 +45,9 @@
                     break;
                 case "disassemble":
                     PerformDisassembly(args);
+                    break;
+                case "lint":
+                    PerformLintingAssembly(args);
                     break;
                 case "help":
                     DisplayHelp();
@@ -438,6 +444,50 @@
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);
             Console.WriteLine($"Program disassembled successfully. It can be found at: \"{destination}\"");
+        }
+
+        private static void PerformLintingAssembly(string[] args)
+        {
+            // This is an undocumented operation designed for IDE extensions to provide linting on source files.
+            // As such, all output is JSON formatted and does not use console colours.
+            if (args.Length < 2)
+            {
+                Console.WriteLine("{\"error\":\"A path to the program to be disassembled is required.\"}");
+                Environment.Exit(1);
+                return;
+            }
+            if (!File.Exists(args[1]))
+            {
+                Console.WriteLine("{\"error\":\"The specified file does not exist.\"}");
+                Environment.Exit(1);
+                return;
+            }
+            // Change working directory to the location of the specified file.
+            string parent = Path.GetDirectoryName(args[1])!;
+            if (parent.Trim() != "")
+            {
+                Environment.CurrentDirectory = Path.GetFullPath(parent);
+            }
+            try
+            {
+                _ = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                    // Never ignore warnings when using 'lint' command
+                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
+                    out _, out List<Warning> warnings);
+                Console.WriteLine(JsonSerializer.Serialize(warnings, new JsonSerializerOptions { IncludeFields = true }));
+            }
+            catch (Exception e)
+            {
+                if (e is AssemblerException assemblerException)
+                {
+                    Console.WriteLine($"{{\"error\":\"{HttpUtility.JavaScriptStringEncode(assemblerException.ConsoleMessage)}\"}}");
+                }
+                else
+                {
+                    Console.WriteLine($"{{\"error\":\"An unexpected error occurred " +
+                        $"({HttpUtility.JavaScriptStringEncode(e.GetType().Name)}): {HttpUtility.JavaScriptStringEncode(e.Message)}\"}}");
+                }
+            }
         }
 
         private static void DisplayHelp()
