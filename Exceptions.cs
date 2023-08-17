@@ -39,11 +39,13 @@
     /// </summary>
     public class AssemblerException : AssEmblyException
     {
-        public AssemblerException() : base() { }
+        public Warning WarningObject { get; set; }
+
         public AssemblerException(string message) : base(message) { }
-        public AssemblerException(string message, Exception inner) : base(message, inner) { }
-        public AssemblerException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public AssemblerException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public AssemblerException(string message, int line, string file) : base(message)
+        {
+            WarningObject = new Warning(WarningSeverity.FatalError, 0000, file, line, "", Array.Empty<string>(), message);
+        }
     }
 
     /// <summary>
@@ -51,11 +53,8 @@
     /// </summary>
     public class SyntaxError : AssemblerException
     {
-        public SyntaxError() : base() { }
         public SyntaxError(string message) : base(message) { }
-        public SyntaxError(string message, Exception inner) : base(message, inner) { }
-        public SyntaxError(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public SyntaxError(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public SyntaxError(string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -63,11 +62,8 @@
     /// </summary>
     public class OperandException : AssemblerException
     {
-        public OperandException() : base() { }
         public OperandException(string message) : base(message) { }
-        public OperandException(string message, Exception inner) : base(message, inner) { }
-        public OperandException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public OperandException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public OperandException(string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -75,11 +71,8 @@
     /// </summary>
     public class ImportException : AssemblerException
     {
-        public ImportException() : base() { }
         public ImportException(string message) : base(message) { }
-        public ImportException(string message, Exception inner) : base(message, inner) { }
-        public ImportException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public ImportException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public ImportException(string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -87,11 +80,8 @@
     /// </summary>
     public class OpcodeException : AssemblerException
     {
-        public OpcodeException() : base() { }
         public OpcodeException(string message) : base(message) { }
-        public OpcodeException(string message, Exception inner) : base(message, inner) { }
-        public OpcodeException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public OpcodeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public OpcodeException(string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -99,11 +89,8 @@
     /// </summary>
     public class LabelNameException : AssemblerException
     {
-        public LabelNameException() : base() { }
         public LabelNameException(string message) : base(message) { }
-        public LabelNameException(string message, Exception inner) : base(message, inner) { }
-        public LabelNameException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public LabelNameException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public LabelNameException(string message, int line, string file) : base(message, line, file) { }
     }
 
     // DEBUGGER EXCEPTIONS

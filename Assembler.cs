@@ -269,9 +269,12 @@ namespace AssEmbly
                     if (currentImport is null)
                     {
                         e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{line}\"\n{e.Message}";
+                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), e.Message);
                     }
                     else
                     {
+                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
+                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), e.Message);
                         string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{line}\"";
                         _ = importStack.Pop();  // Remove already printed frame from stack
                         while (importStack.TryPop(out ImportStackFrame? nestedImport))
@@ -293,7 +296,7 @@ namespace AssEmbly
                 {
                     throw new LabelNameException($"Error on line {line} in {filePath ?? "base file"}\n\n" +
                         $"A label with the name \"{labelName}\" does not exist, but a reference was made to it. " +
-                        $"Have you missed a definition?");
+                        $"Have you missed a definition?", line, filePath ?? "");
                 }
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);

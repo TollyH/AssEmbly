@@ -480,7 +480,8 @@ namespace AssEmbly
             {
                 if (e is AssemblerException assemblerException)
                 {
-                    Console.WriteLine($"{{\"error\":\"{HttpUtility.JavaScriptStringEncode(assemblerException.ConsoleMessage)}\"}}");
+                    Console.WriteLine(JsonSerializer.Serialize(new Warning[1] { assemblerException.WarningObject },
+                        new JsonSerializerOptions { IncludeFields = true }));
                 }
                 else
                 {

@@ -23,9 +23,9 @@ namespace AssEmbly
         /// </summary>
         public readonly string[] InstructionElements;
 
-        public readonly string Message => string.Format(AssemblerWarnings.GetMessagesForSeverity(Severity)[Code], InstructionElements);
+        public readonly string Message;
 
-        public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands)
+        public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands, string? message = null)
         {
             Severity = severity;
             Code = code;
@@ -35,6 +35,8 @@ namespace AssEmbly
             InstructionElements = new string[operands.Length + 1];
             InstructionElements[0] = mnemonic;
             Array.Copy(operands, 0, InstructionElements, 1, operands.Length);
+
+            Message = message ?? string.Format(AssemblerWarnings.GetMessagesForSeverity(Severity)[Code], InstructionElements);
         }
     }
 
