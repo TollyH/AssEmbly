@@ -624,7 +624,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0009()
         {
             // Suggestion 0009: Operation has no effect.
-            if (instructionIsData || newBytes.Length == 0)
+            if (instructionIsData || newBytes.Length == 0 || (operands.Length > 0 && operands[^1][0] == ':'))
             {
                 return false;
             }
