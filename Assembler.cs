@@ -295,9 +295,11 @@ namespace AssEmbly
             {
                 if (!labels.TryGetValue(labelName, out ulong targetOffset))
                 {
-                    throw new LabelNameException($"Error on line {line} in {filePath ?? "base file"}\n\n" +
+                    LabelNameException exc = new(
                         $"A label with the name \"{labelName}\" does not exist, but a reference was made to it. " +
                         $"Have you missed a definition?", line, filePath ?? "");
+                    exc.ConsoleMessage = $"Error on line {line} in {filePath ?? "base file"}\n\n{exc.Message}";
+                    throw exc;
                 }
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
