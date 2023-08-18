@@ -64,6 +64,7 @@ namespace AssEmbly
         private int line = 0;
         private string file = "";
         private bool labelled = false;
+        private Stack<Assembler.ImportStackFrame> importStack = new();
 
         private byte[] finalProgram = Array.Empty<byte>();
 
@@ -82,8 +83,10 @@ namespace AssEmbly
         /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
         /// </param>
         /// <param name="labelled">Was this instruction preceded by one or more label definitions?</param>
+        /// <param name="importStack">The current state of the program's import stack.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
-        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled)
+        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled,
+            IEnumerable<Assembler.ImportStackFrame> importStack)
         {
             this.newBytes = newBytes;
             this.mnemonic = mnemonic;
@@ -91,6 +94,7 @@ namespace AssEmbly
             this.line = line;
             this.file = file;
             this.labelled = labelled;
+            this.importStack = new Stack<Assembler.ImportStackFrame>(importStack);
 
             List<Warning> warnings = new();
 
@@ -185,11 +189,11 @@ namespace AssEmbly
                 { 0001, Analyzer_Rolling_Warning_0001 },
                 { 0007, Analyzer_Rolling_Warning_0007 },
                 { 0008, Analyzer_Rolling_Warning_0008 },
-                { 0009, Analyzer_Rolling_Warning_0009 },
                 { 0010, Analyzer_Rolling_Warning_0010 },
                 { 0011, Analyzer_Rolling_Warning_0011 },
                 { 0012, Analyzer_Rolling_Warning_0012 },
                 { 0014, Analyzer_Rolling_Warning_0014 },
+                { 0015, Analyzer_Rolling_Warning_0015 },
             };
             suggestionRollingAnalyzers = new()
             {
@@ -243,9 +247,9 @@ namespace AssEmbly
         private ulong currentAddress = 0;
         private bool lastInstructionWasTerminator = false;
         private bool lastInstructionWasData = false;
-        private string lastFilePath = "";
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
+        private Stack<Assembler.ImportStackFrame> lastImportStack = new();
 
         private void PreAnalyzeStateUpdate()
         {
@@ -299,9 +303,9 @@ namespace AssEmbly
                 lastInstructionWasTerminator = terminators.Contains(newBytes[0]);
             }
             lastInstructionWasData = instructionIsData;
-            lastFilePath = file;
             lastMnemonic = mnemonic;
             lastOperands = operands;
+            lastImportStack = importStack;
         }
 
         // Analyzer methods
@@ -458,12 +462,6 @@ namespace AssEmbly
             return !labelled && lastInstructionWasTerminator && !instructionIsData && !instructionIsImport;
         }
 
-        private bool Analyzer_Rolling_Warning_0009()
-        {
-            // Warning 0009: Program runs to end of file without being terminated by unconditional jump, return, or halt.
-            return file != lastFilePath && !lastInstructionWasTerminator && !lastInstructionWasData;
-        }
-
         private List<Warning> Analyzer_Final_Warning_0009()
         {
             // Warning 0009: Program runs to end of file without being terminated by unconditional jump, return, or halt.
@@ -534,6 +532,12 @@ namespace AssEmbly
         {
             // Warning 0014: Unlabelled executable code found after data insertion.
             return newBytes.Length > 0 && !instructionIsData && lastInstructionWasData && !labelled;
+        }
+
+        private bool Analyzer_Rolling_Warning_0015()
+        {
+            // Warning 0015: Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.
+            return importStack.Count < lastImportStack.Count && !lastInstructionWasTerminator && !lastInstructionWasData;
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()

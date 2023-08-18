@@ -24,6 +24,7 @@
             { 0012, "Instruction writes to the rsb register." },
             { 0013, "Jump/Call target label points to itself, resulting in an unbreakable infinite loop." },
             { 0014, "Unlabelled executable code found after data insertion." },
+            { 0015, "Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction." },
         };
 
         public static readonly Dictionary<int, string> SuggestionMessages = new()

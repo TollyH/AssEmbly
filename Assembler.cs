@@ -178,7 +178,6 @@ namespace AssEmbly
                                 throw new ImportException($"Circular import detected: attempted import from \"{filepath}\" when it is already in import stack.");
                             }
                             string[] linesToImport = File.ReadAllLines(filepath);
-                            importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
                             // Insert the contents of the imported file so they are assembled next
                             dynamicLines.InsertRange(l + 1, linesToImport);
                             resolvedImports.Add((filepath, filepath, (uint)program.Count));
@@ -186,8 +185,10 @@ namespace AssEmbly
                             warnings.AddRange(warningGenerator.NextInstruction(
                                 Array.Empty<byte>(), mnemonic, operands,
                                 currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled));
+                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, importStack));
                             lineIsLabelled = false;
+
+                            importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
                             continue;
                         // Define macro
                         case "MAC":
@@ -261,7 +262,7 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
                         currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, importStack));
                     lineIsLabelled = false;
                 }
                 catch (AssemblerException e)
