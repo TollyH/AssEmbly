@@ -25,6 +25,7 @@
             { 0013, "Jump/Call target label points to itself, resulting in an unbreakable infinite loop." },
             { 0014, "Unlabelled executable code found after data insertion." },
             { 0015, "Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction." },
+            { 0016, "Addresses are 64-bit values, however this move instruction moves less than 64 bits." },
         };
 
         public static readonly Dictionary<int, string> SuggestionMessages = new()

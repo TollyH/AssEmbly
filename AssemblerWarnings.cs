@@ -194,6 +194,7 @@ namespace AssEmbly
                 { 0012, Analyzer_Rolling_Warning_0012 },
                 { 0014, Analyzer_Rolling_Warning_0014 },
                 { 0015, Analyzer_Rolling_Warning_0015 },
+                { 0016, Analyzer_Rolling_Warning_0016 },
             };
             suggestionRollingAnalyzers = new()
             {
@@ -544,6 +545,13 @@ namespace AssEmbly
         {
             // Warning 0015: Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.
             return importStack.Count < lastImportStack.Count && !lastInstructionWasTerminator && !lastInstructionWasData;
+        }
+
+        private bool Analyzer_Rolling_Warning_0016()
+        {
+            // Warning 0016: Addresses are 64-bit values, however this move instruction moves less than 64 bits.
+            return newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(newBytes[0])
+                && operands[1][0] == ':' && moveBitCounts.TryGetValue(newBytes[0], out int bits) && bits < 64;
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()
