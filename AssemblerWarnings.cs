@@ -451,7 +451,13 @@ namespace AssEmbly
                 {
                     return false;
                 }
-                return (int)Math.Log(number, 2) + 1 > maxBits;
+                int neededBits = 0;
+                while (number > 0)
+                {
+                    neededBits++;
+                    number >>= 1;
+                }
+                return neededBits > maxBits;
             }
             return false;
         }
