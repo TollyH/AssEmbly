@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-15</p>
+<p>Last revised: 2023-08-18</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -265,7 +265,7 @@ Definition</a></li>
 <li><a href="#imp--file-importing"><code>IMP</code> — File
 Importing</a></li>
 <li><a
-href="#analyzer--toggling-assembler-warnings"><code>#analyzer</code> —
+href="#analyzer--toggling-assembler-warnings"><code>ANALYZER</code> —
 Toggling Assembler Warnings</a></li>
 </ul></li>
 <li><a href="#console-input-and-output">Console Input and
@@ -1622,13 +1622,13 @@ occur.</p>
 <p>Attempting to assemble any of these three files would result in the
 assembler throwing an error, as each file ends up depending on itself as
 it resolves its import.</p>
-<h3 id="analyzer-toggling-assembler-warnings"><code>#analyzer</code> —
+<h3 id="analyzer-toggling-assembler-warnings"><code>ANALYZER</code> —
 Toggling Assembler Warnings</h3>
 <p>The AssEmbly assembler checks for common issues with your source code
 when you assemble it in order to alert you of potential issues and
 improvements that can be made. There may be some situations, however,
 where you want to suppress these issues from being detected. This can be
-done within the source code using the <code>#analyzer</code> directive.
+done within the source code using the <code>ANALYZER</code> directive.
 The directive takes three operands: the severity of the warning (either
 <code>error</code>, <code>warning</code>, or <code>suggestion</code>);
 the numerical code for the warning (this is a 4-digit number printed
@@ -1641,16 +1641,16 @@ in the code.</p>
 <p>For example:</p>
 <pre class="text"><code>CMP rg0, 0  ; generates suggestion 0005
 
-#analyzer suggestion, 0005, 0
+ANALYZER suggestion, 0005, 0
 CMP rg0, 0  ; generates no suggestion
 CMP rg0, 0  ; still generates no suggestion
-#analyzer suggestion, 0005, 1  ; &#39;r&#39; would also work if the suggestion isn&#39;t disabled via a CLI argument
+ANALYZER suggestion, 0005, 1  ; &#39;r&#39; would also work if the suggestion isn&#39;t disabled via a CLI argument
 
 CMP rg0, 0  ; generates suggestion 0005 again</code></pre>
 <p>Be aware that some analyzers do not run until the end of the assembly
 process and so cannot be re-enabled without inadvertently causing the
 warning to re-appear. This can be overcome by placing the disabling
-<code>#analyzer</code> directive at the end of the base file for any
+<code>ANALYZER</code> directive at the end of the base file for any
 analyzers where this behaviour is an issue, or by simply not re-enabling
 the analyzer.</p>
 <h2 id="console-input-and-output">Console Input and Output</h2>

@@ -2,7 +2,7 @@
 
 Applies to versions: `1.1.0`
 
-Last revised: 2023-08-15
+Last revised: 2023-08-18
 
 ## Introduction
 
@@ -59,7 +59,7 @@ For the purposes of this documentation, a "character" is synonymous with a "byte
     - [`NUM` — Number Insertion](#num--number-insertion)
     - [`MAC` — Macro Definition](#mac--macro-definition)
     - [`IMP` — File Importing](#imp--file-importing)
-    - [`#analyzer` — Toggling Assembler Warnings](#analyzer--toggling-assembler-warnings)
+    - [`ANALYZER` — Toggling Assembler Warnings](#analyzer--toggling-assembler-warnings)
   - [Console Input and Output](#console-input-and-output)
   - [File Handling](#file-handling)
     - [Opening and Closing](#opening-and-closing)
@@ -1258,9 +1258,9 @@ IMP "file_one.asm"
 
 Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
 
-### `#analyzer` — Toggling Assembler Warnings
+### `ANALYZER` — Toggling Assembler Warnings
 
-The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `#analyzer` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
+The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
 
 After using the directive, its effect remains active until assembly ends, or the same warning is toggled again with the directive further on in the code.
 
@@ -1269,15 +1269,15 @@ For example:
 ```text
 CMP rg0, 0  ; generates suggestion 0005
 
-#analyzer suggestion, 0005, 0
+ANALYZER suggestion, 0005, 0
 CMP rg0, 0  ; generates no suggestion
 CMP rg0, 0  ; still generates no suggestion
-#analyzer suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
+ANALYZER suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
 
 CMP rg0, 0  ; generates suggestion 0005 again
 ```
 
-Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `#analyzer` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
+Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
 
 ## Console Input and Output
 

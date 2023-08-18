@@ -199,28 +199,28 @@ namespace AssEmbly
                             lineIsLabelled = false;
                             continue;
                         // Toggle warnings
-                        case "#ANALYZER":
+                        case "ANALYZER":
                             if (operands.Length != 3)
                             {
-                                throw new OperandException($"The #analyzer directive requires 3 operands. {operands.Length} were given.");
+                                throw new OperandException($"The ANALYZER directive requires 3 operands. {operands.Length} were given.");
                             }
                             HashSet<int> disabledSet = operands[0].ToUpperInvariant() switch
                             {
                                 "ERROR" => warningGenerator.DisabledNonFatalErrors,
                                 "WARNING" => warningGenerator.DisabledWarnings,
                                 "SUGGESTION" => warningGenerator.DisabledSuggestions,
-                                _ => throw new OperandException("The first operand to the #analyzer directive must be one of 'error', 'warning' or 'suggestion'.")
+                                _ => throw new OperandException("The first operand to the ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.")
                             };
                             IReadOnlySet<int> initialSet = operands[0].ToUpperInvariant() switch
                             {
                                 "ERROR" => disabledNonFatalErrors,
                                 "WARNING" => disabledWarnings,
                                 "SUGGESTION" => disabledSuggestions,
-                                _ => throw new OperandException("The first operand to the #analyzer directive must be one of 'error', 'warning' or 'suggestion'.")
+                                _ => throw new OperandException("The first operand to the ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.")
                             };
                             if (!int.TryParse(operands[1], out int code))
                             {
-                                throw new OperandException("The second operand to the #analyzer directive must be an integer.");
+                                throw new OperandException("The second operand to the ANALYZER directive must be an integer.");
                             }
                             switch (operands[2].ToUpperInvariant())
                             {
@@ -244,7 +244,7 @@ namespace AssEmbly
                                     }
                                     break;
                                 default:
-                                    throw new OperandException("The third operand to the #analyzer directive must be one of '0', '1', or 'r'.");
+                                    throw new OperandException("The third operand to the ANALYZER directive must be one of '0', '1', or 'r'.");
                             }
                             continue;
                         default:
