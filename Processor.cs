@@ -25,6 +25,8 @@ namespace AssEmbly
             Registers[(int)Data.Register.rso] = memorySize;
             Registers[(int)Data.Register.rsb] = memorySize;
             ProgramLoaded = false;
+            // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
+            Console.OutputEncoding = System.Text.Encoding.UTF8;
         }
 
         /// <summary>
@@ -1058,22 +1060,35 @@ namespace AssEmbly
                             Console.Write(string.Format("{0:X}", MemReadRegisterByte(Registers[(int)Data.Register.rpo])));
                             Registers[(int)Data.Register.rpo]++;
                             break;
+                        // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
                         case 0xC:  // WCC reg
-                            Console.Write((char)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
+                            {
+                                using Stream stdout = Console.OpenStandardOutput();
+                                stdout.WriteByte((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            }
                         case 0xD:  // WCC lit
-                            Console.Write((char)Memory[Registers[(int)Data.Register.rpo]]);
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
+                            {
+                                using Stream stdout = Console.OpenStandardOutput();
+                                stdout.WriteByte(Memory[Registers[(int)Data.Register.rpo]]);
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            }
                         case 0xE:  // WCC adr
-                            Console.Write((char)MemReadBytePointer(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
+                            {
+                                using Stream stdout = Console.OpenStandardOutput();
+                                stdout.WriteByte(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            }
                         case 0xF:  // WCC ptr
-                            Console.Write((char)MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
+                            {
+                                using Stream stdout = Console.OpenStandardOutput();
+                                stdout.WriteByte(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            }
                         default:
                             throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised console write low opcode");
                     }
