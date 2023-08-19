@@ -439,8 +439,13 @@ namespace AssEmbly
             foreach ((int stringLine, string stringFile) in stringInsertionLines)
             {
                 string[] stringOperands = lineOperands[(stringFile, stringLine)];
-                int stringLength = Assembler.ParseLiteral(stringOperands[0], true).Length;
-                ulong address = lineAddresses[(stringFile, stringLine)] + (uint)stringLength;
+                byte[] stringBytes = Assembler.ParseLiteral(stringOperands[0], true);
+                if (stringBytes[^1] == 0)
+                {
+                    // String itself is terminated with null (likely '\0')
+                    continue;
+                }
+                ulong address = lineAddresses[(stringFile, stringLine)] + (uint)stringBytes.Length;
                 if (address >= (uint)finalProgram.Length || finalProgram[(int)address] != 0)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0006, stringFile, stringLine,
