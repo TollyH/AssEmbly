@@ -102,27 +102,29 @@ namespace AssEmbly
                 {
                     baseFileLine++;
                 }
-                string line = StripComments(dynamicLines[l]);
+                string rawLine = dynamicLines[l];
                 foreach ((string macro, string replacement) in macros)
                 {
-                    line = line.Replace(macro, replacement);
-                }
-                if (line == "")
-                {
-                    continue;
+                    rawLine = rawLine.Replace(macro, replacement);
                 }
                 try
                 {
+                    string[] line = ParseLine(rawLine);
+                    if (line.Length == 0)
+                    {
+                        continue;
+                    }
+                    string mnemonic = line[0];
                     // Lines starting with ':' are label definitions
-                    if (line.StartsWith(':'))
+                    if (mnemonic.StartsWith(':'))
                     {
                         // Will throw an error if label is not valid
-                        _ = DetermineOperandType(line);
-                        if (line[1] == '&')
+                        _ = DetermineOperandType(mnemonic);
+                        if (mnemonic[1] == '&')
                         {
-                            throw new SyntaxError($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {line}\n     ^");
+                            throw new SyntaxError($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {rawLine}\n     ^");
                         }
-                        string labelName = line[1..];
+                        string labelName = mnemonic[1..];
                         if (labels.ContainsKey(labelName))
                         {
                             throw new LabelNameException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
@@ -138,17 +140,7 @@ namespace AssEmbly
                         lineIsLabelled = true;
                         continue;
                     }
-                    MatchCollection quotes = Regex.Matches(line, @"(?<!\\)""");
-                    // All quotes must be paired up, not including escaped quotes
-                    if (quotes.Count % 2 != 0)
-                    {
-                        throw new SyntaxError($"Statement contains an unclosed quote mark:\n    {line}\n    {new string(' ', quotes.Last().Index)}^");
-                    }
-                    string[] split = line.Split(' ', 2);
-                    string mnemonic = split[0];
-                    // Regex splits on commas surrounded by any amount of whitespace (not including newlines), unless wrapped in unescaped quotes.
-                    string[] operands = split.Length == 2 ? Regex.Split(
-                        split[1].Trim(), @"[^\S\r\n]*,[^\S\r\n]*(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)") : Array.Empty<string>();
+                    string[] operands = line[1..];
                     // Check for line-modifying/state altering assembler directives
                     switch (mnemonic.ToUpperInvariant())
                     {
@@ -257,7 +249,7 @@ namespace AssEmbly
                         labelReferences.Add((label, relativeOffset + (uint)program.Count, currentImport?.ImportPath,
                             currentImport is null ? baseFileLine : currentImport.CurrentLine));
                     }
-                    assembledLines.Add(((uint)program.Count, line));
+                    assembledLines.Add(((uint)program.Count, rawLine));
                     program.AddRange(newBytes);
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
@@ -269,14 +261,14 @@ namespace AssEmbly
                 {
                     if (currentImport is null)
                     {
-                        e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{line}\"\n{e.Message}";
+                        e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{rawLine}\"\n{e.Message}";
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), e.Message);
                     }
                     else
                     {
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
                             currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), e.Message);
-                        string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{line}\"";
+                        string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{rawLine}\"";
                         _ = importStack.Pop();  // Remove already printed frame from stack
                         while (importStack.TryPop(out ImportStackFrame? nestedImport))
                         {
@@ -420,12 +412,148 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Strip comments and surrounding whitespace from a line.
+        /// Split a line of AssEmbly into its individual components.
         /// </summary>
-        public static string StripComments(string statement)
+        /// <param name="line">The raw AssEmbly source line.</param>
+        /// <returns>
+        /// An array of separated line components. May be empty if there is nothing on the line to assemble.
+        /// If not empty, the first item will be the mnemonic.
+        /// </returns>
+        /// <exception cref="SyntaxError">The given line contains invalid formatting.</exception>
+        public static string[] ParseLine(string line)
         {
-            // Regex splits on semicolons, unless wrapped in unescaped quotes.
-            return Regex.Split(statement, @";(?=(?:[^""\\]*(?:\\.|""([^""\\]*\\.)*[^""\\]*""))*[^""]*$)")[0].Trim();
+            List<string> elements = new();
+
+            StringBuilder sb = new();
+            int trailingWhitespace = -1;
+            int stringEnd = -1;
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+                if (c == ';')
+                {
+                    // Comment found, ignore rest of line
+                    break;
+                }
+                if (char.IsWhiteSpace(c))
+                {
+                    if (sb.Length != 0 && elements.Count == 0)
+                    {
+                        // End of mnemonic found, add line so far as first item
+                        elements.Add(sb.ToString());
+                        sb = new StringBuilder();
+                        continue;
+                    }
+                    if (sb.Length != 0 && elements.Count > 0)
+                    {
+                        // We've encountered whitespace whilst inside an operand,
+                        // no more non-whitespace characters may now follow until the next comma
+                        trailingWhitespace = i;
+                    }
+                    continue;
+                }
+                if (c == ',')
+                {
+                    if (elements.Count == 0)
+                    {
+                        throw new SyntaxError(
+                            $"Mnemonics should be separated from operands with spaces, not commas:\n    {line}\n    {new string(' ', i)}^");
+                    }
+                    if (sb.Length == 0)
+                    {
+                        throw new SyntaxError($"Operands cannot be empty:\n    {line}\n    {new string(' ', i)}^");
+                    }
+                    // End of operand found, add stored characters as an element and move on
+                    elements.Add(sb.ToString());
+                    sb = new StringBuilder();
+                    trailingWhitespace = -1;
+                    stringEnd = -1;
+                    continue;
+                }
+                if (trailingWhitespace != -1)
+                {
+                    throw new SyntaxError(
+                        $"Operands cannot contain whitespace. Did you forget a comma?\n    {line}\n    {new string(' ', trailingWhitespace)}^");
+                }
+                if (stringEnd != -1)
+                {
+                    throw new SyntaxError(
+                        $"Non-whitespace characters found after string literal. Did you forget a comma?\n    {line}\n    {new string(' ', i)}^");
+                }
+                if (c == '"')
+                {
+                    if (sb.Length != 0)
+                    {
+                        throw new SyntaxError(
+                            $"String literal defined after non-whitespace characters. Did you forget a comma?:\n    {line}\n    {new string(' ', i)}^");
+                    }
+                    _ = sb.Append(PreParseStringLiteral(line, ref i));
+                    stringEnd = i;
+                    continue;
+                }
+                _ = sb.Append(c);
+            }
+            // Add any remaining characters
+            if (sb.Length > 0)
+            {
+                elements.Add(sb.ToString());
+            }
+            return elements.ToArray();
+        }
+
+        /// <summary>
+        /// Process a string literal as a part of an entire line of AssEmbly source.
+        /// Resolves escape sequences and ensures that the string ends with an unescaped quote mark.
+        /// </summary>
+        /// <param name="line">The entire source line with the string contained.</param>
+        /// <param name="startIndex">
+        /// The index in the line to the opening quote.
+        /// It will be incremented automatically by this method to the index of the closing quote.
+        /// </param>
+        /// <returns>The processed string literal, including opening and closing quotes.</returns>
+        /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
+        /// <exception cref="ArgumentException">The given line is invalid.</exception>
+        /// <exception cref="SyntaxError">The string in the line is invalid.</exception>
+        public static string PreParseStringLiteral(string line, ref int startIndex)
+        {
+            if (startIndex < 0 || startIndex >= line.Length)
+            {
+                throw new IndexOutOfRangeException("String start index is outside the range of the given line.");
+            }
+            if (line.Length < 2)
+            {
+                throw new ArgumentException("Given line is less than two characters long, which is invalid.");
+            }
+            if (line[startIndex] != '"')
+            {
+                throw new ArgumentException("Given string start index does not point to a quote mark.");
+            }
+            StringBuilder sb = new("\"");
+            int i = startIndex;
+            while (true)
+            {
+                if (++i >= line.Length)
+                {
+                    throw new SyntaxError(
+                        $"End of line found while processing string literal.\n    {line}\n    {new string(' ', i - 1)}^");
+                }
+                char c = line[i];
+                if (c == '\\')
+                {
+                    char escape = line[++i];
+                    _ = sb.Append(c);
+                    _ = sb.Append(escape);
+                    continue;
+                }
+                if (c == '"')
+                {
+                    break;
+                }
+                _ = sb.Append(c);
+            }
+            startIndex = i;
+            _ = sb.Append('"');
+            return sb.ToString();
         }
 
         /// <summary>
