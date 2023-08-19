@@ -541,7 +541,58 @@ namespace AssEmbly
                 if (c == '\\')
                 {
                     char escape = line[++i];
-                    _ = sb.Append(c);
+                    switch (escape)
+                    {
+                        // Escapes that keep the same character
+                        case '\'':
+                        case '"':
+                        case '\\':
+                            break;
+                        // Escapes that map to another character
+                        case '0':
+                            escape = '\0';
+                            break;
+                        case 'a':
+                            escape = '\a';
+                            break;
+                        case 'b':
+                            escape = '\b';
+                            break;
+                        case 'f':
+                            escape = '\f';
+                            break;
+                        case 'n':
+                            escape = '\n';
+                            break;
+                        case 'r':
+                            escape = '\r';
+                            break;
+                        case 't':
+                            escape = '\t';
+                            break;
+                        case 'v':
+                            escape = '\v';
+                            break;
+                        case 'u':
+                            if (i + 4 >= line.Length)
+                            {
+                                throw new SyntaxError($"End of line reached when processing unicode escape\n    {line}\n    {new string(' ', i)}^");
+                            }
+                            string rawCodePoint = line[(i + 1)..(i + 5)];
+                            try
+                            {
+                                escape = (char)Convert.ToUInt16(rawCodePoint, 16);
+                            }
+                            catch (FormatException)
+                            {
+                                throw new SyntaxError(
+                                    $"Unicode escape must be immediately followed a 4 digit unicode codepoint\n    {line}\n    {new string(' ', i)}^");
+                            }
+                            i += 4;
+                            break;
+                        default:
+                            throw new SyntaxError($"Unrecognised escape character '{escape}'\n    {line}\n    {new string(' ', i)}^");
+                    }
                     _ = sb.Append(escape);
                     continue;
                 }
