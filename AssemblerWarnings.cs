@@ -17,6 +17,7 @@ namespace AssEmbly
         public readonly int Code;
         public readonly string File;
         public readonly int Line;
+        public readonly string OriginalLine;
 
         /// <summary>
         /// Index 0 will always be mnemonic. Index 1 and onwards are opcodes, if any.
@@ -25,12 +26,14 @@ namespace AssEmbly
 
         public readonly string Message;
 
-        public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands, string? message = null)
+        public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands,
+            string originalLine, string? message = null)
         {
             Severity = severity;
             Code = code;
             File = file;
             Line = line;
+            OriginalLine = originalLine;
 
             InstructionElements = new string[operands.Length + 1];
             InstructionElements[0] = mnemonic;
@@ -66,6 +69,8 @@ namespace AssEmbly
         private bool labelled = false;
         private Stack<Assembler.ImportStackFrame> importStack = new();
 
+        private Dictionary<(string File, int Line), string> lineText = new();
+
         private byte[] finalProgram = Array.Empty<byte>();
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace AssEmbly
         /// <param name="importStack">The current state of the program's import stack.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
         public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled,
-            IEnumerable<Assembler.ImportStackFrame> importStack)
+            string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack)
         {
             this.newBytes = newBytes;
             this.mnemonic = mnemonic;
@@ -95,6 +100,7 @@ namespace AssEmbly
             this.file = file;
             this.labelled = labelled;
             this.importStack = new Stack<Assembler.ImportStackFrame>(importStack);
+            lineText[(file, line)] = rawLine;
 
             List<Warning> warnings = new();
 
@@ -107,7 +113,8 @@ namespace AssEmbly
                 }
                 if (rollingAnalyzer())
                 {
-                    warnings.Add(new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands));
+                    warnings.Add(
+                        new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands, rawLine));
                 }
             }
             foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in warningRollingAnalyzers)
@@ -118,7 +125,8 @@ namespace AssEmbly
                 }
                 if (rollingAnalyzer())
                 {
-                    warnings.Add(new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands));
+                    warnings.Add(
+                        new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands, rawLine));
                 }
             }
             foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in suggestionRollingAnalyzers)
@@ -129,7 +137,8 @@ namespace AssEmbly
                 }
                 if (rollingAnalyzer())
                 {
-                    warnings.Add(new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands));
+                    warnings.Add(
+                        new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands, rawLine));
                 }
             }
             PostAnalyzeStateUpdate();
@@ -365,7 +374,8 @@ namespace AssEmbly
                 if (dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
+                        lineText[(jumpFile, jumpLine)]));
                 }
             }
             return warnings;
@@ -381,7 +391,8 @@ namespace AssEmbly
                 if (address >= currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0003, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
+                        lineText[(jumpFile, jumpLine)]));
                 }
             }
             return warnings;
@@ -397,7 +408,8 @@ namespace AssEmbly
                 if (!dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0004, writeFile, writeLine,
-                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)]));
+                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
+                        lineText[(writeFile, writeLine)]));
                 }
             }
             return warnings;
@@ -413,7 +425,8 @@ namespace AssEmbly
                 if (!dataAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writeFile, writeLine,
-                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)]));
+                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
+                        lineText[(writeFile, writeLine)]));
                 }
             }
             return warnings;
@@ -431,7 +444,7 @@ namespace AssEmbly
                 if (address >= (uint)finalProgram.Length || finalProgram[(int)address] != 0)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0006, stringFile, stringLine,
-                        lineMnemonics[(stringFile, stringLine)], stringOperands));
+                        lineMnemonics[(stringFile, stringLine)], stringOperands, lineText[(stringFile, stringLine)]));
                 }
             }
             return warnings;
@@ -474,7 +487,10 @@ namespace AssEmbly
             // Warning 0009: Program runs to end of file without being terminated by unconditional jump, return, or halt.
             if (!lastInstructionWasTerminator && !lastInstructionWasData)
             {
-                return new List<Warning> { new Warning(WarningSeverity.Warning, 0009, file, line, mnemonic, operands) };
+                return new List<Warning>
+                {
+                    new Warning(WarningSeverity.Warning, 0009, file, line, mnemonic, operands, lineText[(file, line)])
+                };
             }
             return new List<Warning>();
         }
@@ -529,7 +545,8 @@ namespace AssEmbly
                 if (address == labelAddress - 1)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0013, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
+                        lineText[(jumpFile, jumpLine)]));
                 }
             }
             return warnings;
@@ -586,7 +603,8 @@ namespace AssEmbly
                 if (lastExecutableLine.TryGetValue(impFile, out int execLine) && impLine < execLine)
                 {
                     warnings.Add(new Warning(WarningSeverity.Suggestion, 0003, impFile, impLine,
-                        lineMnemonics[(impFile, impLine)], lineOperands[(impFile, impLine)]));
+                        lineMnemonics[(impFile, impLine)], lineOperands[(impFile, impLine)],
+                        lineText[(impFile, impLine)]));
                 }
             }
             return warnings;
@@ -601,7 +619,8 @@ namespace AssEmbly
                 if (lastExecutableLine.TryGetValue(dataFile, out int execLine) && dataLine < execLine)
                 {
                     warnings.Add(new Warning(WarningSeverity.Suggestion, 0004, dataFile, dataLine,
-                        lineMnemonics[(dataFile, dataLine)], lineOperands[(dataFile, dataLine)]));
+                        lineMnemonics[(dataFile, dataLine)], lineOperands[(dataFile, dataLine)],
+                        lineText[(dataFile, dataLine)]));
                 }
             }
             return warnings;

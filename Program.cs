@@ -166,7 +166,7 @@ namespace AssEmbly
                     };
                     Console.WriteLine(
                         $"\n{messageStart} {warning.Code:D4} on line {warning.Line} in {(warning.File == "" ? "base file" : warning.File)}" +
-                        $"\n    {warning.InstructionElements[0]} {string.Join(", ", warning.InstructionElements[1..])}" +
+                        $"\n    {warning.OriginalLine}" +
                         $"\n{warning.Message}");
                     Console.ResetColor();
                 }

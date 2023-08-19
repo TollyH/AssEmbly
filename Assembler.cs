@@ -177,7 +177,7 @@ namespace AssEmbly
                             warnings.AddRange(warningGenerator.NextInstruction(
                                 Array.Empty<byte>(), mnemonic, operands,
                                 currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, importStack));
+                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, rawLine, importStack));
                             lineIsLabelled = false;
 
                             importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
@@ -254,7 +254,7 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
                         currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, importStack));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, rawLine, importStack));
                     lineIsLabelled = false;
                 }
                 catch (AssemblerException e)
