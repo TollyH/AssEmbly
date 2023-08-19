@@ -511,6 +511,10 @@ namespace AssEmbly
         /// It will be incremented automatically by this method to the index of the closing quote.
         /// </param>
         /// <returns>The processed string literal, including opening and closing quotes.</returns>
+        /// <remarks>
+        /// The string returned by this method is not fully ready to be inserted into a binary stream.
+        /// Use <see cref="ParseLiteral"/> with the returned string to get an array of bytes for the final executable.
+        /// </remarks>
         /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
         /// <exception cref="ArgumentException">The given line is invalid.</exception>
         /// <exception cref="SyntaxError">The string in the line is invalid.</exception>
