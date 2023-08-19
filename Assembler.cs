@@ -262,12 +262,12 @@ namespace AssEmbly
                     if (currentImport is null)
                     {
                         e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{rawLine}\"\n{e.Message}";
-                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), e.Message);
+                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), rawLine, e.Message);
                     }
                     else
                     {
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
-                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), e.Message);
+                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), rawLine, e.Message);
                         string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{rawLine}\"";
                         _ = importStack.Pop();  // Remove already printed frame from stack
                         while (importStack.TryPop(out ImportStackFrame? nestedImport))
