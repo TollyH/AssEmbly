@@ -590,6 +590,24 @@ namespace AssEmbly
                             }
                             i += 4;
                             break;
+                        case 'U':
+                            if (i + 8 >= line.Length)
+                            {
+                                throw new SyntaxError($"End of line reached when processing unicode escape\n    {line}\n    {new string(' ', i)}^");
+                            }
+                            rawCodePoint = line[(i + 1)..(i + 9)];
+                            try
+                            {
+                                _ = sb.Append(char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16)));
+                            }
+                            catch
+                            {
+                                throw new SyntaxError(
+                                    $"Unicode escape must be immediately followed a valid 8 digit unicode codepoint " +
+                                    $"(0x00000000 - 0x0010ffff excluding 0x0000d800 - 0x0000dfff)\n    {line}\n    {new string(' ', i)}^");
+                            }
+                            i += 8;
+                            continue;
                         default:
                             throw new SyntaxError($"Unrecognised escape character '{escape}'\n    {line}\n    {new string(' ', i)}^");
                     }
