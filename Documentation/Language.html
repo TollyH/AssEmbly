@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-18</p>
+<p>Last revised: 2023-08-19</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -256,8 +256,10 @@ For Zero</a></li>
 <ul>
 <li><a href="#pad--byte-padding"><code>PAD</code> — Byte
 Padding</a></li>
-<li><a href="#dat--byte-insertion"><code>DAT</code> — Byte
-Insertion</a></li>
+<li><a href="#dat--byte-insertion"><code>DAT</code> — Byte Insertion</a>
+<ul>
+<li><a href="#escape-sequences">Escape Sequences</a></li>
+</ul></li>
 <li><a href="#num--number-insertion"><code>NUM</code> — Number
 Insertion</a></li>
 <li><a href="#mac--macro-definition"><code>MAC</code> — Macro
@@ -346,6 +348,10 @@ addresses/labels)</td>
 <tr class="odd">
 <td>Instruction Count</td>
 <td>165 opcodes (48 unique operations)</td>
+</tr>
+<tr class="even">
+<td>Text Encoding</td>
+<td>UTF-8</td>
 </tr>
 </tbody>
 </table>
@@ -1440,15 +1446,19 @@ JMP :STRING_LOOP  ; Loop back to print next character
 HLT  ; End execution to stop processor running into string data
 
 :STRING
-DAT &quot;Hello!&quot;  ; Store a string of character bytes after program data.
-DAT 0  ; End string with a 0 byte</code></pre>
+DAT &quot;Hello!\0&quot;  ; Store a string of character bytes after program data.
+; Note that the string ends with &#39;\0&#39; (a 0 or &quot;null&quot; byte)</code></pre>
 <p>This program will loop through the string, placing the byte value of
 each character in <code>rg0</code> and writing it to the console as a
 character, until it reaches the 0 byte, when it will then stop to avoid
-looping infinitely. Terminating a string with a 0 byte like this should
-always be done to give an easy way of knowing when the end of a string
-has been reached.</p>
-<p>This program assembles down to the following bytes:</p>
+looping infinitely. While not a strict requirement, terminating a string
+with a 0 byte like this should always be done to give an easy way of
+knowing when the end of a string has been reached. Placing a
+<code>DAT 0</code> directive on the line after the string insertion will
+also achieve this 0 termination, and will result in the exact same bytes
+being assembled, however using the <code>\0</code> escape sequence is
+more compact. Escape sequences are explained after this example.</p>
+<p>The example program assembles down to the following bytes:</p>
 <pre class="text"><code>99 06 2E 00 00 00 00 00 00 00 83 07 06 75 07 00 00 00 00 00 00 00 00 04 2D 00 00 00 00 00 00 00 14 06 CC 07 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 21 00</code></pre>
 <p>Which can be broken down to:</p>
 <pre class="text"><code>Address | Bytes
@@ -1477,11 +1487,105 @@ has been reached.</p>
  0x2D   | 00
         | HLT
 --------+----------------------------------------------------
- 0x2E   | 48 65 6C 6C 6F 21
-        | DAT &quot;Hello!&quot;
---------+----------------------------------------------------
- 0x34   | 00
-        | DAT 0</code></pre>
+ 0x2E   | 48 65 6C 6C 6F 21 00
+        | DAT &quot;Hello!\0&quot;</code></pre>
+<h4 id="escape-sequences">Escape Sequences</h4>
+<p>There are some sequences of characters that have special meanings
+when found inside a string. Each of these begins with a backslash
+(<code>\</code>) character and are used to insert characters into the
+string that couldn’t be inserted normally. Every supported sequence is
+as follows:</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 13%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Escape sequence</th>
+<th>Character name</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>\"</code></td>
+<td>Double quote</td>
+<td>Used to insert a double quote into the string without causing the
+string to end.</td>
+</tr>
+<tr class="even">
+<td><code>\\</code></td>
+<td>Backslash</td>
+<td>In order for a string to contain a backslash, you must escape it so
+it isn’t treated as the start of an escape sequence.</td>
+</tr>
+<tr class="odd">
+<td><code>\0</code></td>
+<td>Null</td>
+<td>ASCII 0x00. Should be used to terminate every string.</td>
+</tr>
+<tr class="even">
+<td><code>\a</code></td>
+<td>Alert</td>
+<td>ASCII 0x07.</td>
+</tr>
+<tr class="odd">
+<td><code>\b</code></td>
+<td>Backspace</td>
+<td>ASCII 0x08.</td>
+</tr>
+<tr class="even">
+<td><code>\f</code></td>
+<td>Form feed</td>
+<td>ASCII 0x0C.</td>
+</tr>
+<tr class="odd">
+<td><code>\n</code></td>
+<td>Newline</td>
+<td>ASCII 0x0A. Will cause the string to move onto a new console/file
+line when printed. Should be preceded by <code>\r</code> on
+Windows.</td>
+</tr>
+<tr class="even">
+<td><code>\r</code></td>
+<td>Carriage return</td>
+<td>ASCII 0x0D.</td>
+</tr>
+<tr class="odd">
+<td><code>\t</code></td>
+<td>Horizontal tab</td>
+<td>ASCII 0x09.</td>
+</tr>
+<tr class="even">
+<td><code>\v</code></td>
+<td>Vertical tab</td>
+<td>ASCII 0x0B.</td>
+</tr>
+<tr class="odd">
+<td><code>\u....</code></td>
+<td>Unicode codepoint (16-bit)</td>
+<td>Inserts the unicode character with a codepoint represented by 4
+hexadecimal digits in the range <code>0x0000</code> to
+<code>0xFFFF</code>.</td>
+</tr>
+<tr class="even">
+<td><code>\U........</code></td>
+<td>Unicode codepoint (32-bit)</td>
+<td>Inserts the unicode character with a codepoint represented by 8
+hexadecimal digits in the range <code>0x00000000</code> to
+<code>0x0010FFFF</code>, excluding <code>0x0000d800</code> to
+<code>0x0000dfff</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>\'</code></td>
+<td>Single quote</td>
+<td>Included for future expansion. Not currently required - simply type
+a <code>'</code> character instead.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="num-number-insertion"><code>NUM</code> — Number Insertion</h3>
 <p>The <code>NUM</code> directive is similar to <code>DAT</code>, except
 it always inserts 8 bytes exactly, so can be used to represent 64-bit
@@ -1718,8 +1822,7 @@ instruction when you have finished operating on it.</p>
 character bytes in memory, ending with at least one <code>0</code> byte.
 An example static filepath definition is as follows:</p>
 <pre class="text"><code>:FILE_PATH
-DAT &quot;file.txt&quot;
-DAT 0  ; Could also be &quot;PAD 1&quot;</code></pre>
+DAT &quot;file.txt\0&quot;</code></pre>
 <p>This would normally be placed after all program code and a
 <code>HLT</code> instruction to prevent it accidentally being executed
 as if it were part of the program. The file can be opened with the
@@ -1774,8 +1877,7 @@ CFL  ; Close the file, saving newly written contents
 HLT  ; Prevent executing into string data
 
 :FILE_PATH
-DAT &quot;file.txt&quot;
-DAT 0  ; Could also be &quot;PAD 1&quot;</code></pre>
+DAT &quot;file.txt\0&quot;</code></pre>
 <p>Executing this program will create a file called
 <code>file.txt</code> with the following contents:</p>
 <pre class="text"><code>16711778

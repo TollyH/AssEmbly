@@ -2,7 +2,7 @@
 
 Applies to versions: `1.1.0`
 
-Last revised: 2023-08-18
+Last revised: 2023-08-19
 
 ## Introduction
 
@@ -56,6 +56,7 @@ For the purposes of this documentation, a "character" is synonymous with a "byte
   - [Assembler Directives](#assembler-directives)
     - [`PAD` — Byte Padding](#pad--byte-padding)
     - [`DAT` — Byte Insertion](#dat--byte-insertion)
+      - [Escape Sequences](#escape-sequences)
     - [`NUM` — Number Insertion](#num--number-insertion)
     - [`MAC` — Macro Definition](#mac--macro-definition)
     - [`IMP` — File Importing](#imp--file-importing)
@@ -90,6 +91,7 @@ For the purposes of this documentation, a "character" is synonymous with a "byte
 | Operand Size             | 1 byte (registers, pointers) / 8 bytes (literals, addresses/labels) |
 | Instruction Size         | 1 byte – 17 bytes (practical) / unlimited (theoretical)             |
 | Instruction Count        | 165 opcodes (48 unique operations)                                  |
+| Text Encoding            | UTF-8                                                               |
 
 ## Basic Syntax
 
@@ -1071,13 +1073,13 @@ JMP :STRING_LOOP  ; Loop back to print next character
 HLT  ; End execution to stop processor running into string data
 
 :STRING
-DAT "Hello!"  ; Store a string of character bytes after program data.
-DAT 0  ; End string with a 0 byte
+DAT "Hello!\0"  ; Store a string of character bytes after program data.
+; Note that the string ends with '\0' (a 0 or "null" byte)
 ```
 
-This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console as a character, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. Terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached.
+This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console as a character, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained after this example.
 
-This program assembles down to the following bytes:
+The example program assembles down to the following bytes:
 
 ```text
 99 06 2E 00 00 00 00 00 00 00 83 07 06 75 07 00 00 00 00 00 00 00 00 04 2D 00 00 00 00 00 00 00 14 06 CC 07 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 21 00
@@ -1112,12 +1114,29 @@ Address | Bytes
  0x2D   | 00
         | HLT
 --------+----------------------------------------------------
- 0x2E   | 48 65 6C 6C 6F 21
-        | DAT "Hello!"
---------+----------------------------------------------------
- 0x34   | 00
-        | DAT 0
+ 0x2E   | 48 65 6C 6C 6F 21 00
+        | DAT "Hello!\0"
 ```
+
+#### Escape Sequences
+
+There are some sequences of characters that have special meanings when found inside a string. Each of these begins with a backslash (`\`) character and are used to insert characters into the string that couldn't be inserted normally. Every supported sequence is as follows:
+
+| Escape sequence | Character name             | Notes                                                                                                                                                                 |
+|-----------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `\"`            | Double quote               | Used to insert a double quote into the string without causing the string to end.                                                                                      |
+| `\\`            | Backslash                  | In order for a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                              |
+| `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
+| `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
+| `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
+| `\f`            | Form feed                  | ASCII 0x0C.                                                                                                                                                           |
+| `\n`            | Newline                    | ASCII 0x0A. Will cause the string to move onto a new console/file line when printed. Should be preceded by `\r` on Windows.                                           |
+| `\r`            | Carriage return            | ASCII 0x0D.                                                                                                                                                           |
+| `\t`            | Horizontal tab             | ASCII 0x09.                                                                                                                                                           |
+| `\v`            | Vertical tab               | ASCII 0x0B.                                                                                                                                                           |
+| `\u....`        | Unicode codepoint (16-bit) | Inserts the unicode character with a codepoint represented by 4 hexadecimal digits in the range `0x0000` to `0xFFFF`.                                                 |
+| `\U........`    | Unicode codepoint (32-bit) | Inserts the unicode character with a codepoint represented by 8 hexadecimal digits in the range `0x00000000` to `0x0010FFFF`, excluding `0x0000d800` to `0x0000dfff`. |
+| `\'`            | Single quote               | Included for future expansion. Not currently required - simply type a `'` character instead.                                                                          |
 
 ### `NUM` — Number Insertion
 
@@ -1335,8 +1354,7 @@ Filepaths given to `OFL` to be opened should be strings of character bytes in me
 
 ```text
 :FILE_PATH
-DAT "file.txt"
-DAT 0  ; Could also be "PAD 1"
+DAT "file.txt\0"
 ```
 
 This would normally be placed after all program code and a `HLT` instruction to prevent it accidentally being executed as if it were part of the program. The file can be opened with the following line anywhere in the program:
@@ -1392,8 +1410,7 @@ CFL  ; Close the file, saving newly written contents
 HLT  ; Prevent executing into string data
 
 :FILE_PATH
-DAT "file.txt"
-DAT 0  ; Could also be "PAD 1"
+DAT "file.txt\0"
 ```
 
 Executing this program will create a file called `file.txt` with the following contents:
