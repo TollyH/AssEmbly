@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Text;
 
 namespace AssEmbly
 {
@@ -19,6 +20,11 @@ namespace AssEmbly
 
         private readonly Random rng = new();
 
+        // Because C#'s console methods work with potentially multi-byte characters at a time,
+        // but AssEmbly works with single bytes, we need a queue to store bytes that have been read
+        // from stdin but are yet to be processed by an AssEmbly read instruction.
+        private readonly Queue<byte> stdinByteQueue = new();
+
         public Processor(ulong memorySize)
         {
             Memory = new byte[memorySize];
@@ -27,7 +33,7 @@ namespace AssEmbly
             Registers[(int)Data.Register.rsb] = memorySize;
             ProgramLoaded = false;
             // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
+            Console.OutputEncoding = Encoding.UTF8;
         }
 
         /// <summary>
@@ -1184,11 +1190,13 @@ namespace AssEmbly
                                 {
                                     throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                                 }
-                                string filepath = "";
-                                for (ulong i = ReadMemoryQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                ulong startIndex = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
+                                ulong count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                string filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 Registers[(int)Data.Register.rpo] += 8;
                                 openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                 openFileSize = openFile.Length;
@@ -1208,11 +1216,13 @@ namespace AssEmbly
                                 {
                                     throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                                 }
-                                filepath = "";
-                                for (ulong i = ReadMemoryRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 Registers[(int)Data.Register.rpo]++;
                                 openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                 openFileSize = openFile.Length;
@@ -1241,56 +1251,68 @@ namespace AssEmbly
                                 openFileSize = 0;
                                 break;
                             case 0x3:  // DFL adr
-                                filepath = "";
-                                for (ulong i = ReadMemoryQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 Registers[(int)Data.Register.rpo] += 8;
                                 File.Delete(filepath);
                                 break;
                             case 0x4:  // DFL ptr
-                                filepath = "";
-                                for (ulong i = ReadMemoryRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 Registers[(int)Data.Register.rpo]++;
                                 File.Delete(filepath);
                                 break;
                             case 0x5:  // FEX reg, adr
-                                filepath = "";
-                                for (ulong i = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 1);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 WriteMemoryRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
                                 Registers[(int)Data.Register.rpo] += 9;
                                 break;
                             case 0x6:  // FEX reg, ptr
-                                filepath = "";
-                                for (ulong i = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 1);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 WriteMemoryRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
                                 Registers[(int)Data.Register.rpo] += 2;
                                 break;
                             case 0x7:  // FSZ reg, adr
-                                filepath = "";
-                                for (ulong i = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 1);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 WriteMemoryRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
                                 Registers[(int)Data.Register.rpo] += 9;
                                 break;
                             case 0x8:  // FSZ reg, ptr
-                                filepath = "";
-                                for (ulong i = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                startIndex = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 1);
+                                count = 0;
+                                while (Memory[startIndex + count] != 0x0)
                                 {
-                                    filepath += (char)Memory[i];
+                                    count++;
                                 }
+                                filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
                                 WriteMemoryRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
                                 Registers[(int)Data.Register.rpo] += 2;
                                 break;
@@ -1302,16 +1324,42 @@ namespace AssEmbly
                         switch (opcodeLow)
                         {
                             case 0x0:  // RCC reg
-                                ConsoleKeyInfo pressedKey = new();
-                                while (char.IsControl(pressedKey.KeyChar) && pressedKey.KeyChar != '\r')
                                 {
-                                    pressedKey = Console.ReadKey(true);
+                                    if (!stdinByteQueue.TryDequeue(out byte currentByte))
+                                    {
+                                        // There are no remaining queued UTF-8 bytes, so get the next character from the console.
+                                        string inputCharacter = "";
+                                        ConsoleKeyInfo pressedKey;
+                                        // C# gives us a single part of a UTF-16 surrogate pair if something outside the BMP is typed (i.e. an emoji).
+                                        // If we detect the start of a surrogate pair, get another character as well to have the full character
+                                        // to be converted to UTF-8.
+                                        do
+                                        {
+                                            pressedKey = Console.ReadKey(true);
+                                            // By default pressing enter will get \r, we want \n
+                                            inputCharacter += pressedKey.Key == ConsoleKey.Enter
+                                                ? '\n' : pressedKey.KeyChar;
+                                        } while (char.IsHighSurrogate(pressedKey.KeyChar));
+                                        byte[] utf8Bytes = Encoding.UTF8.GetBytes(inputCharacter);
+                                        currentByte = utf8Bytes[0];
+
+                                        // Add remaining UTF-8 bytes to a queue to be retrieved by future RCC instructions
+                                        if (utf8Bytes.Length > 1)
+                                        {
+                                            for (int i = 1; i < utf8Bytes.Length; i++)
+                                            {
+                                                stdinByteQueue.Enqueue(utf8Bytes[i]);
+                                            }
+                                        }
+                                    }
+                                    // Echo byte to console
+                                    using Stream stdout = Console.OpenStandardOutput();
+                                    stdout.WriteByte(currentByte);
+
+                                    WriteMemoryRegister(Registers[(int)Data.Register.rpo], currentByte);
+                                    Registers[(int)Data.Register.rpo]++;
+                                    break;
                                 }
-                                char pressedChar = pressedKey.KeyChar == '\r' ? '\n' : pressedKey.KeyChar;
-                                WriteMemoryRegister(Registers[(int)Data.Register.rpo], pressedChar);
-                                Console.Write(pressedChar);
-                                Registers[(int)Data.Register.rpo]++;
-                                break;
                             case 0x1:  // RFC reg
                                 WriteMemoryRegister(Registers[(int)Data.Register.rpo], fileRead!.ReadByte());
                                 if (fileRead.BaseStream.Position >= openFileSize)
