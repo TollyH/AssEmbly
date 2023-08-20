@@ -226,7 +226,15 @@ namespace AssEmbly
             {
                 if (a.ToLowerInvariant().StartsWith("--mem-size="))
                 {
-                    memSize = ulong.Parse(a.Split("=")[1]);
+                    string memSizeString = a.Split("=")[1];
+                    if (!ulong.TryParse(memSizeString, out memSize))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
                 }
             }
             Processor processor = new(memSize);
@@ -289,7 +297,15 @@ namespace AssEmbly
             {
                 if (a.ToLowerInvariant().StartsWith("--mem-size="))
                 {
-                    memSize = ulong.Parse(a.Split("=")[1]);
+                    string memSizeString = a.Split("=")[1];
+                    if (!ulong.TryParse(memSizeString, out memSize))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
                 }
             }
             Processor processor = new(memSize);
@@ -377,7 +393,15 @@ namespace AssEmbly
             {
                 if (a.ToLowerInvariant().StartsWith("--mem-size="))
                 {
-                    memSize = ulong.Parse(a.Split("=")[1]);
+                    string memSizeString = a.Split("=")[1];
+                    if (!ulong.TryParse(memSizeString, out memSize))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
                 }
             }
             Processor processor = new(memSize);
