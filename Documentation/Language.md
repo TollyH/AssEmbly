@@ -2,15 +2,13 @@
 
 Applies to versions: `1.1.0`
 
-Last revised: 2023-08-19
+Last revised: 2023-08-20
 
 ## Introduction
 
 AssEmbly is a mock processor architecture and assembly language written in C# and running on .NET. It is designed to simplify the process of learning and writing in assembly language, while still following the same basic concepts and constraints seen in mainstream architectures such as x86.
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
-
-For the purposes of this documentation, a "character" is synonymous with a "byte".
 
 ## Table of Contents
 
@@ -73,6 +71,7 @@ For the purposes of this documentation, a "character" is synonymous with a "byte
     - [Return Values](#return-values)
     - [Subroutines and the Stack](#subroutines-and-the-stack)
     - [Passing Multiple Parameters](#passing-multiple-parameters)
+  - [Text Encoding](#text-encoding)
   - [Full Instruction Reference](#full-instruction-reference)
   - [ASCII Table](#ascii-table)
 
@@ -1615,6 +1614,14 @@ ADD rfp, *rg0
 POP rg0  ; Restore rg0 to its original value
 RET rfp
 ```
+
+## Text Encoding
+
+All text in AssEmbly (input from/output to the console; strings inserted by `DAT`; strings given to `OFL`, `DFL`, `FEX`, etc) is encoded in UTF-8. This means that all characters that are a part of the ASCII character set only take up a single byte, though some characters may take as many as 4 bytes to store fully.
+
+Be aware that when working with characters that require multiple bytes, instructions like `RCC`, `RFC`, `WCC`, and `WFC` still only work on single bytes at a time. As long as you read/write all of the UTF-8 bytes in the correct order, they should be stored and displayed correctly.
+
+Text bytes read from files **will not** be automatically converted to UTF-8 if the file was saved with another encoding.
 
 ## Full Instruction Reference
 

@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-19</p>
+<p>Last revised: 2023-08-20</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -183,8 +183,6 @@ following the same basic concepts and constraints seen in mainstream
 architectures such as x86.</p>
 <p>AssEmbly was designed and implemented in its entirety by <a
 href="https://github.com/TollyH">Tolly Hill</a>.</p>
-<p>For the purposes of this documentation, a “character” is synonymous
-with a “byte”.</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
 <li><a href="#assembly-language-reference">AssEmbly Language
@@ -292,6 +290,7 @@ Stack</a></li>
 <li><a href="#passing-multiple-parameters">Passing Multiple
 Parameters</a></li>
 </ul></li>
+<li><a href="#text-encoding">Text Encoding</a></li>
 <li><a href="#full-instruction-reference">Full Instruction
 Reference</a></li>
 <li><a href="#ascii-table">ASCII Table</a></li>
@@ -2131,6 +2130,20 @@ ADD rfp, *rg0
 
 POP rg0  ; Restore rg0 to its original value
 RET rfp</code></pre>
+<h2 id="text-encoding">Text Encoding</h2>
+<p>All text in AssEmbly (input from/output to the console; strings
+inserted by <code>DAT</code>; strings given to <code>OFL</code>,
+<code>DFL</code>, <code>FEX</code>, etc) is encoded in UTF-8. This means
+that all characters that are a part of the ASCII character set only take
+up a single byte, though some characters may take as many as 4 bytes to
+store fully.</p>
+<p>Be aware that when working with characters that require multiple
+bytes, instructions like <code>RCC</code>, <code>RFC</code>,
+<code>WCC</code>, and <code>WFC</code> still only work on single bytes
+at a time. As long as you read/write all of the UTF-8 bytes in the
+correct order, they should be stored and displayed correctly.</p>
+<p>Text bytes read from files <strong>will not</strong> be automatically
+converted to UTF-8 if the file was saved with another encoding.</p>
 <h2 id="full-instruction-reference">Full Instruction Reference</h2>
 <table style="width:100%;">
 <colgroup>
