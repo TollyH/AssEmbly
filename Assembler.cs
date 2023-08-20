@@ -294,7 +294,7 @@ namespace AssEmbly
                     throw exc;
                 }
                 // Write the now known address of the label to where it is required within the program
-                BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..((int)insertOffset + 8)], targetOffset);
+                BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..], targetOffset);
             }
             warnings.AddRange(warningGenerator.Finalize(programBytes));
 

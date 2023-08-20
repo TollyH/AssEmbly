@@ -166,7 +166,7 @@
                                 break;
                         }
                     }
-                    if (DebuggingProcessor.Step())
+                    if (DebuggingProcessor.Execute(false))
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine("\n\nHalt instruction reached. You should not continue unless this instruction was placed as a breakpoint.");

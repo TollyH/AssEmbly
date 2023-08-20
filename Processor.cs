@@ -7,8 +7,9 @@ namespace AssEmbly
     /// </summary>
     public class Processor
     {
-        public byte[] Memory { get; private set; }
-        public ulong[] Registers { get; private set; }
+        public readonly byte[] Memory;
+        public readonly ulong[] Registers;
+
         public bool ProgramLoaded { get; private set; }
 
         private FileStream? openFile;
@@ -52,27 +53,8 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Execute the program until a halt instruction is reached. If a halt instruction has already been reached, continue from after it.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if a program hasn't been loaded into this processor, or the processor has reached the end of allocated memory.
-        /// </exception>
-        /// <exception cref="InvalidOpcodeException">
-        /// Thrown if the processor encounters an opcode to execute that didn't match any known opcodes.
-        /// </exception>
-        /// <exception cref="ReadOnlyRegisterException">Thrown if an instruction attempts to write to a read-only register.</exception>
-        /// <exception cref="FileOperationException">
-        /// Thrown when a file operation is attempted but is not valid given the current state of the processor.
-        /// </exception>
-        /// <exception cref="IndexOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
-        public void Execute()
-        {
-            while (!Step()) { }
-        }
-
-        /// <summary>
-        /// Execute a single instruction.
+        /// Execute either a single instruction or execute until a halt instruction is reached,
+        /// depending on the value of <paramref name="runUntilHalt"/>.
         /// </summary>
         /// <returns><see langword="true"/> if execution should stop (HLT reached) - otherwise <see langword="false"/></returns>
         /// <exception cref="InvalidOperationException">
@@ -88,7 +70,7 @@ namespace AssEmbly
         /// <exception cref="IndexOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if an instruction tried to access an invalid memory address.</exception>
         /// <exception cref="DivideByZeroException">Thrown if a division instruction is executed with a value of zero as the divisor.</exception>
-        public bool Step()
+        public bool Execute(bool runUntilHalt)
         {
             if (!ProgramLoaded)
             {
@@ -99,1250 +81,1253 @@ namespace AssEmbly
                 throw new InvalidOperationException("The processor has reached the end of accessible memory.");
             }
             bool halt = false;
-            byte opcode = Memory[Registers[(int)Data.Register.rpo]];
-            // Upper 4-bytes (general category of instruction)
-            byte opcodeHigh = (byte)((0xF0 & opcode) >> 4);
-            // Lower 4-bytes (specific operation and operand types)
-            byte opcodeLow = (byte)(0x0F & opcode);
-            Registers[(int)Data.Register.rpo]++;
-            switch (opcodeHigh)
+            do
             {
-                case 0x0:  // Control / Jump
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // HLT (Halt)
-                            halt = true;
-                            break;
-                        case 0x1:  // NOP
-                            break;
-                        case 0x2:  // JMP adr (Unconditional Jump)
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x3:  // JMP ptr (Unconditional Jump)
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x4:  // JEQ adr (Jump If Equal To - Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
-                            {
+                byte opcode = Memory[Registers[(int)Data.Register.rpo]];
+                // Upper 4-bytes (general category of instruction)
+                byte opcodeHigh = (byte)((0xF0 & opcode) >> 4);
+                // Lower 4-bytes (specific operation and operand types)
+                byte opcodeLow = (byte)(0x0F & opcode);
+                Registers[(int)Data.Register.rpo]++;
+                switch (opcodeHigh)
+                {
+                    case 0x0:  // Control / Jump
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // HLT (Halt)
+                                halt = true;
+                                break;
+                            case 0x1:  // NOP
+                                break;
+                            case 0x2:  // JMP adr (Unconditional Jump)
                                 Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0x5:  // JEQ ptr (Jump If Equal To - Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
-                            {
+                                break;
+                            case 0x3:  // JMP ptr (Unconditional Jump)
                                 Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        case 0x6:  // JNE adr (Jump If Not Equal To - Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0x7:  // JNE ptr (Jump If Not Equal To - Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        case 0x8:  // JLT adr (Jump If Less Than - Carry Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0x9:  // JLT ptr (Jump If Less Than - Carry Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        case 0xA:  // JLE adr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0xB:  // JLE ptr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        case 0xC:  // JGT adr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0xD:  // JGT ptr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        case 0xE:  // JGE adr (Jump If Greater Than or Equal To - Carry Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 8;
-                            }
-                            break;
-                        case 0xF:  // JGE ptr (Jump If Greater Than or Equal To - Carry Flag Unset)
-                            if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
-                            {
-                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rpo] += 1;
-                            }
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised control low opcode");
-                    }
-                    break;
-                case 0x1:  // Addition
-                    Data.Register targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    ulong initial = Registers[(int)targetRegister];
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // ADD reg, reg
-                            Registers[(int)targetRegister] += MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // ADD reg, lit
-                            Registers[(int)targetRegister] += MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // ADD reg, adr
-                            Registers[(int)targetRegister] += MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // ADD reg, ptr
-                            Registers[(int)targetRegister] += MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // ICR reg
-                            Registers[(int)targetRegister]++;
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised addition low opcode");
-                    }
-                    if (Registers[(int)targetRegister] < initial)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    }
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x2:  // Subtraction
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    initial = Registers[(int)targetRegister];
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // SUB reg, reg
-                            Registers[(int)targetRegister] -= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // SUB reg, lit
-                            Registers[(int)targetRegister] -= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // SUB reg, adr
-                            Registers[(int)targetRegister] -= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // SUB reg, ptr
-                            Registers[(int)targetRegister] -= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // DCR reg
-                            Registers[(int)targetRegister]--;
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subtraction low opcode");
-                    }
-                    if (Registers[(int)targetRegister] > initial)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    }
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x3:  // Multiplication
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    initial = Registers[(int)targetRegister];
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // MUL reg, reg
-                            Registers[(int)targetRegister] *= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // MUL reg, lit
-                            Registers[(int)targetRegister] *= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // MUL reg, adr
-                            Registers[(int)targetRegister] *= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // MUL reg, ptr
-                            Registers[(int)targetRegister] *= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised multiplication low opcode");
-                    }
-                    if (Registers[(int)targetRegister] < initial)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    }
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x4:  // Division
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    // Only used to store remainder in DVR, set to an unused default otherwise
-                    Data.Register secondTarget = Data.Register.rpo;
-                    if (opcodeLow is >= 0x4 and <= 0x7 &&  // DVR
-                        (secondTarget = MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)) == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {secondTarget}");
-                    }
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // DIV reg, reg
-                            Registers[(int)targetRegister] /= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // DIV reg, lit
-                            Registers[(int)targetRegister] /= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // DIV reg, adr
-                            Registers[(int)targetRegister] /= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // DIV reg, ptr
-                            Registers[(int)targetRegister] /= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // DVR reg, reg, reg
-                            ulong dividend = Registers[(int)targetRegister];
-                            ulong divisor = MemReadRegister(Registers[(int)Data.Register.rpo] + 2);
-                            ulong div = dividend / divisor;
-                            ulong rem = dividend % divisor;
-                            Registers[(int)targetRegister] = div;
-                            Registers[(int)secondTarget] = rem;
-                            Registers[(int)Data.Register.rpo] += 3;
-                            break;
-                        case 0x5:  // DVR reg, reg, lit
-                            dividend = Registers[(int)targetRegister];
-                            divisor = MemReadQWord(Registers[(int)Data.Register.rpo] + 2);
-                            div = dividend / divisor;
-                            rem = dividend % divisor;
-                            Registers[(int)targetRegister] = div;
-                            Registers[(int)secondTarget] = rem;
-                            Registers[(int)Data.Register.rpo] += 10;
-                            break;
-                        case 0x6:  // DVR reg, reg, adr
-                            dividend = Registers[(int)targetRegister];
-                            divisor = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 2);
-                            div = dividend / divisor;
-                            rem = dividend % divisor;
-                            Registers[(int)targetRegister] = div;
-                            Registers[(int)secondTarget] = rem;
-                            Registers[(int)Data.Register.rpo] += 10;
-                            break;
-                        case 0x7:  // DVR reg, reg, ptr
-                            dividend = Registers[(int)targetRegister];
-                            divisor = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 2);
-                            div = dividend / divisor;
-                            rem = dividend % divisor;
-                            Registers[(int)targetRegister] = div;
-                            Registers[(int)secondTarget] = rem;
-                            Registers[(int)Data.Register.rpo] += 3;
-                            break;
-                        case 0x8:  // REM reg, reg
-                            Registers[(int)targetRegister] %= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x9:  // REM reg, lit
-                            Registers[(int)targetRegister] %= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xA:  // REM reg, adr
-                            Registers[(int)targetRegister] %= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xB:  // REM reg, ptr
-                            Registers[(int)targetRegister] %= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised division low opcode");
-                    }
-                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x5:  // Shifting
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    initial = Registers[(int)targetRegister];
-                    int amount;
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // SHL reg, reg
-                            amount = (int)MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] <<= amount;
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // SHL reg, lit
-                            amount = (int)MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] <<= amount;
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // SHL reg, adr
-                            amount = (int)MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] <<= amount;
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // SHL reg, ptr
-                            amount = (int)MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] <<= amount;
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // SHR reg, reg
-                            amount = (int)MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] >>= amount;
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x5:  // SHR reg, lit
-                            amount = (int)MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] >>= amount;
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x6:  // SHR reg, adr
-                            amount = (int)MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] >>= amount;
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x7:  // SHR reg, ptr
-                            amount = (int)MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)targetRegister] >>= amount;
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised shifting low opcode");
-                    }
-                    // As registers are only 64 bits, shifting by 64 bits or more will always result in 0
-                    if (amount >= 64)
-                    {
-                        Registers[(int)targetRegister] = 0;
-                    }
-                    // We will never overflow when shifting by 0 bits or if the initial value is 0.
-                    // We will always overflow if shifting by 64 bits or more as long as the above isn't the case.
-                    //
-                    // Otherwise, if shifting left (opcodeLow <= 0x3), "(initial >> (64 - amount)) != 0" checks if there are any 1 bits
-                    // in the portion of the number that will be cutoff during the left shift by cutting off the bits that will remain.
-                    // 8-bit e.g: 0b11001001 << 3 |> (0b11001001 >> (8 - 3)), (0b11001001 >> 5) = 0b00000110, result != 0, therefore set carry.
-                    //
-                    // If shifting right, "(initial << (64 - amount)) != 0" checks if there are any 1 bits
-                    // in the portion of the number that will be cutoff during the right shift by cutting off the bits that will remain.
-                    // 8-bit e.g: 0b11001001 >> 3 |> (0b11001001 << (8 - 3)), (0b11001001 << 5) = 0b00100000, result != 0, therefore set carry.
-                    if (amount != 0 && initial != 0 && (amount >= 64 || opcodeLow <= 0x3
-                        ? (initial >> (64 - amount)) != 0
-                        : (initial << (64 - amount)) != 0))
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    }
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x6:  // Bitwise
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // AND reg, reg
-                            Registers[(int)targetRegister] &= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // AND reg, lit
-                            Registers[(int)targetRegister] &= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // AND reg, adr
-                            Registers[(int)targetRegister] &= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // AND reg, ptr
-                            Registers[(int)targetRegister] &= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // ORR reg, reg
-                            Registers[(int)targetRegister] |= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x5:  // ORR reg, lit
-                            Registers[(int)targetRegister] |= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x6:  // ORR reg, adr
-                            Registers[(int)targetRegister] |= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x7:  // ORR reg, ptr
-                            Registers[(int)targetRegister] |= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x8:  // XOR reg, reg
-                            Registers[(int)targetRegister] ^= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x9:  // XOR reg, lit
-                            Registers[(int)targetRegister] ^= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xA:  // XOR reg, adr
-                            Registers[(int)targetRegister] ^= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xB:  // XOR reg, ptr
-                            Registers[(int)targetRegister] ^= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0xC:  // NOT reg
-                            Registers[(int)targetRegister] = ~Registers[(int)targetRegister];
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0xD:  // RNG reg
-                            byte[] randomBuffer = new byte[8];
-                            rng.NextBytes(randomBuffer);
-                            Registers[(int)targetRegister] = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised bitwise low opcode");
-                    }
-                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    if (Registers[(int)targetRegister] == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x7:  // Test
-                    targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
-                    if (targetRegister == Data.Register.rpo)
-                    {
-                        throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
-                    }
-                    ulong newValue;
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // TST reg, reg
-                            newValue = Registers[(int)targetRegister] & MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // TST reg, lit
-                            newValue = Registers[(int)targetRegister] & MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // TST reg, adr
-                            newValue = Registers[(int)targetRegister] & MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // TST reg, ptr
-                            newValue = Registers[(int)targetRegister] & MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // CMP reg, reg
-                            newValue = Registers[(int)targetRegister] - MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x5:  // CMP reg, lit
-                            newValue = Registers[(int)targetRegister] - MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x6:  // CMP reg, adr
-                            newValue = Registers[(int)targetRegister] - MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x7:  // CMP reg, ptr
-                            newValue = Registers[(int)targetRegister] - MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised comparison low opcode");
-                    }
-                    if (opcodeLow >= 0x4 && newValue > Registers[(int)targetRegister])
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
-                    }
-                    if (newValue == 0)
-                    {
-                        Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
-                    }
-                    else
-                    {
-                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
-                    }
-                    break;
-                case 0x8:  // Small Move
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // MVB reg, reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // MVB reg, lit
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // MVB reg, adr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadBytePointer(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // MVB reg, ptr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterByte(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // MVB adr, reg
-                            MemWriteBytePointer(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x5:  // MVB adr, lit
-                            MemWriteBytePointer(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 16;
-                            break;
-                        case 0x6:  // MVB ptr, reg
-                            MemWriteRegisterByte(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x7:  // MVB ptr, lit
-                            MemWriteRegisterByte(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x8:  // MVW reg, reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x9:  // MVW reg, lit
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xA:  // MVW reg, adr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadWordPointer(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xB:  // MVW reg, ptr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0xC:  // MVW adr, reg
-                            MemWriteWordPointer(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xD:  // MVW adr, lit
-                            MemWriteWordPointer(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 16;
-                            break;
-                        case 0xE:  // MVW ptr, reg
-                            MemWriteRegisterWord(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0xF:  // MVW ptr, lit
-                            MemWriteRegisterWord(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised small move low opcode");
-                    }
-                    break;
-                case 0x9:  // Large Move
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // MVD reg, reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x1:  // MVD reg, lit
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x2:  // MVD reg, adr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadDWordPointer(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x3:  // MVD reg, ptr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterDWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x4:  // MVD adr, reg
-                            MemWriteDWordPointer(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x5:  // MVD adr, lit
-                            MemWriteDWordPointer(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
-                            Registers[(int)Data.Register.rpo] += 16;
-                            break;
-                        case 0x6:  // MVD ptr, reg
-                            MemWriteRegisterDWord(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x7:  // MVD ptr, lit
-                            MemWriteRegisterDWord(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x8:  // MVQ reg, reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x9:  // MVQ reg, lit
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xA:  // MVQ reg, adr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xB:  // MVQ reg, ptr
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0xC:  // MVQ adr, reg
-                            MemWriteQWordPointer(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 8));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0xD:  // MVQ adr, lit
-                            MemWriteQWordPointer(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 8));
-                            Registers[(int)Data.Register.rpo] += 16;
-                            break;
-                        case 0xE:  // MVQ ptr, reg
-                            MemWriteRegisterQWord(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0xF:  // MVQ ptr, lit
-                            MemWriteRegisterQWord(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised large move low opcode");
-                    }
-                    break;
-                case 0xA:  // Stack
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // PSH reg
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegister(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rso] -= 8;
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x1:  // PSH lit
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWord(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rso] -= 8;
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x2:  // PSH adr
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rso] -= 8;
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x3:  // PSH ptr
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rso] -= 8;
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x4:  // POP reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rso]));
-                            Registers[(int)Data.Register.rso] += 8;
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised stack low opcode");
-                    }
-                    break;
-                case 0xB:  // Subroutines
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // CAL adr
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 8);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x1:  // CAL ptr
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 1);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x2:  // CAL adr, reg
-                            Registers[(int)Data.Register.rfp] = MemReadRegister(Registers[(int)Data.Register.rpo] + 8);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x3:  // CAL adr, lit
-                            Registers[(int)Data.Register.rfp] = MemReadQWord(Registers[(int)Data.Register.rpo] + 8);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x4:  // CAL adr, adr
-                            Registers[(int)Data.Register.rfp] = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 8);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x5:  // CAL adr, ptr
-                            Registers[(int)Data.Register.rfp] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 8);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x6:  // CAL ptr, reg
-                            Registers[(int)Data.Register.rfp] = MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x7:  // CAL ptr, lit
-                            Registers[(int)Data.Register.rfp] = MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x8:  // CAL ptr, adr
-                            Registers[(int)Data.Register.rfp] = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0x9:  // CAL ptr, ptr
-                            Registers[(int)Data.Register.rfp] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                            MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                            Registers[(int)Data.Register.rso] -= 24;
-                            Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
-                            Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            break;
-                        case 0xA:  // RET
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
-                            Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
-                            Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
-                            break;
-                        case 0xB:  // RET reg
-                            Registers[(int)Data.Register.rrv] = MemReadRegister(Registers[(int)Data.Register.rpo]);
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
-                            Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
-                            Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
-                            break;
-                        case 0xC:  // RET lit
-                            Registers[(int)Data.Register.rrv] = MemReadQWord(Registers[(int)Data.Register.rpo]);
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
-                            Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
-                            Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
-                            break;
-                        case 0xD:  // RET adr
-                            Registers[(int)Data.Register.rrv] = MemReadQWordPointer(Registers[(int)Data.Register.rpo]);
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
-                            Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
-                            Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
-                            break;
-                        case 0xE:  // RET ptr
-                            Registers[(int)Data.Register.rrv] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo]);
-                            Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
-                            Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
-                            Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subroutine low opcode");
-                    }
-                    break;
-                case 0xC:  // Console Write
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // WCN reg
-                            Console.Write(MemReadRegister(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x1:  // WCN lit
-                            Console.Write(MemReadQWord(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x2:  // WCN adr
-                            Console.Write(MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x3:  // WCN ptr
-                            Console.Write(MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x4:  // WCB reg
-                            Console.Write(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x5:  // WCB lit
-                            Console.Write(Memory[Registers[(int)Data.Register.rpo]]);
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x6:  // WCB adr
-                            Console.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x7:  // WCB ptr
-                            Console.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x8:  // WCX reg
-                            Console.Write(string.Format("{0:X}", 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x9:  // WCX lit
-                            Console.Write(string.Format("{0:X}", Memory[Registers[(int)Data.Register.rpo]]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xA:  // WCX adr
-                            Console.Write(string.Format("{0:X}", MemReadBytePointer(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xB:  // WCX ptr
-                            Console.Write(string.Format("{0:X}", MemReadRegisterByte(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
-                        case 0xC:  // WCC reg
-                            {
-                                using Stream stdout = Console.OpenStandardOutput();
-                                stdout.WriteByte((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                break;
+                            case 0x4:  // JEQ adr (Jump If Equal To - Zero Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0x5:  // JEQ ptr (Jump If Equal To - Zero Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            case 0x6:  // JNE adr (Jump If Not Equal To - Zero Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0x7:  // JNE ptr (Jump If Not Equal To - Zero Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Zero) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            case 0x8:  // JLT adr (Jump If Less Than - Carry Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0x9:  // JLT ptr (Jump If Less Than - Carry Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            case 0xA:  // JLE adr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0xB:  // JLE ptr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) != 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            case 0xC:  // JGT adr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0xD:  // JGT ptr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.ZeroAndCarry) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            case 0xE:  // JGE adr (Jump If Greater Than or Equal To - Carry Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                }
+                                break;
+                            case 0xF:  // JGE ptr (Jump If Greater Than or Equal To - Carry Flag Unset)
+                                if ((Registers[(int)Data.Register.rsf] & (ulong)Data.StatusFlags.Carry) == 0)
+                                {
+                                    Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rpo] += 1;
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised control low opcode");
+                        }
+                        break;
+                    case 0x1:  // Addition
+                        Data.Register targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        ulong initial = Registers[(int)targetRegister];
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // ADD reg, reg
+                                Registers[(int)targetRegister] += MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // ADD reg, lit
+                                Registers[(int)targetRegister] += MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // ADD reg, adr
+                                Registers[(int)targetRegister] += MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // ADD reg, ptr
+                                Registers[(int)targetRegister] += MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // ICR reg
+                                Registers[(int)targetRegister]++;
                                 Registers[(int)Data.Register.rpo]++;
                                 break;
-                            }
-                        case 0xD:  // WCC lit
-                            {
-                                using Stream stdout = Console.OpenStandardOutput();
-                                stdout.WriteByte(Memory[Registers[(int)Data.Register.rpo]]);
-                                Registers[(int)Data.Register.rpo] += 8;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised addition low opcode");
+                        }
+                        if (Registers[(int)targetRegister] < initial)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        }
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x2:  // Subtraction
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        initial = Registers[(int)targetRegister];
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // SUB reg, reg
+                                Registers[(int)targetRegister] -= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
                                 break;
-                            }
-                        case 0xE:  // WCC adr
-                            {
-                                using Stream stdout = Console.OpenStandardOutput();
-                                stdout.WriteByte(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
-                                Registers[(int)Data.Register.rpo] += 8;
+                            case 0x1:  // SUB reg, lit
+                                Registers[(int)targetRegister] -= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
                                 break;
-                            }
-                        case 0xF:  // WCC ptr
-                            {
-                                using Stream stdout = Console.OpenStandardOutput();
-                                stdout.WriteByte(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                            case 0x2:  // SUB reg, adr
+                                Registers[(int)targetRegister] -= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // SUB reg, ptr
+                                Registers[(int)targetRegister] -= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // DCR reg
+                                Registers[(int)targetRegister]--;
                                 Registers[(int)Data.Register.rpo]++;
                                 break;
-                            }
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised console write low opcode");
-                    }
-                    break;
-                case 0xD:  // File Write
-                    if (openFile is null)
-                    {
-                        throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
-                    }
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // WFN reg
-                            foreach (char digit in MemReadRegister(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x1:  // WFN lit
-                            foreach (char digit in MemReadQWord(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x2:  // WFN adr
-                            foreach (char digit in MemReadQWordPointer(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x3:  // WFN ptr
-                            foreach (char digit in MemReadRegisterQWord(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x4:  // WFB reg
-                            foreach (char digit in (0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x5:  // WFB lit
-                            foreach (char digit in Memory[Registers[(int)Data.Register.rpo]].ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x6:  // WFB adr
-                            foreach (char digit in MemReadBytePointer(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0x7:  // WFB ptr
-                            foreach (char digit in MemReadRegisterByte(Registers[(int)Data.Register.rpo]).ToString())
-                            {
-                                fileWrite!.Write(digit);
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x8:  // WFX reg
-                            fileWrite!.Write(string.Format("{0:X}", 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x9:  // WFX lit
-                            fileWrite!.Write(string.Format("{0:X}", Memory[Registers[(int)Data.Register.rpo]]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xA:  // WFX adr
-                            fileWrite!.Write(string.Format("{0:X}", MemReadBytePointer(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xB:  // WFX ptr
-                            fileWrite!.Write(string.Format("{0:X}", MemReadRegisterByte(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0xC:  // WFC reg
-                            fileWrite!.Write((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0xD:  // WFC lit
-                            fileWrite!.Write(Memory[Registers[(int)Data.Register.rpo]]);
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xE:  // WFC adr
-                            fileWrite!.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo] += 8;
-                            break;
-                        case 0xF:  // WFC ptr
-                            fileWrite!.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file write low opcode");
-                    }
-                    break;
-                case 0xE:  // File Operations
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // OFL adr
-                            if (openFile is not null)
-                            {
-                                throw new FileOperationException("Cannot execute open file instruction if a file is already open");
-                            }
-                            string filepath = "";
-                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                            openFileSize = openFile.Length;
-                            fileWrite = new BinaryWriter(openFile);
-                            fileRead = new BinaryReader(openFile);
-                            if (fileRead.BaseStream.Position >= openFileSize)
-                            {
-                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
-                            }
-                            break;
-                        case 0x1:  // OFL ptr
-                            if (openFile is not null)
-                            {
-                                throw new FileOperationException("Cannot execute open file instruction if a file is already open");
-                            }
-                            filepath = "";
-                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-                            openFileSize = openFile.Length;
-                            fileWrite = new BinaryWriter(openFile);
-                            fileRead = new BinaryReader(openFile);
-                            if (fileRead.BaseStream.Position >= openFileSize)
-                            {
-                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
-                            }
-                            else
-                            {
-                                Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
-                            }
-                            break;
-                        case 0x2:  // CFL
-                            if (openFile is null)
-                            {
-                                throw new FileOperationException("Cannot execute close file instruction if a file is not open");
-                            }
-                            fileWrite!.Close();
-                            fileWrite = null;
-                            fileRead!.Close();
-                            fileRead = null;
-                            openFile!.Close();
-                            openFile = null;
-                            openFileSize = 0;
-                            break;
-                        case 0x3:  // DFL adr
-                            filepath = "";
-                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            Registers[(int)Data.Register.rpo] += 8;
-                            File.Delete(filepath);
-                            break;
-                        case 0x4:  // DFL ptr
-                            filepath = "";
-                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            File.Delete(filepath);
-                            break;
-                        case 0x5:  // FEX reg, adr
-                            filepath = "";
-                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x6:  // FEX reg, ptr
-                            filepath = "";
-                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        case 0x7:  // FSZ reg, adr
-                            filepath = "";
-                            for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
-                            Registers[(int)Data.Register.rpo] += 9;
-                            break;
-                        case 0x8:  // FSZ reg, ptr
-                            filepath = "";
-                            for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
-                            {
-                                filepath += (char)Memory[i];
-                            }
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
-                            Registers[(int)Data.Register.rpo] += 2;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file operation low opcode");
-                    }
-                    break;
-                case 0xF:  // Reading
-                    switch (opcodeLow)
-                    {
-                        case 0x0:  // RCC reg
-                            ConsoleKeyInfo pressedKey = new();
-                            while (char.IsControl(pressedKey.KeyChar) && pressedKey.KeyChar != '\r')
-                            {
-                                pressedKey = Console.ReadKey(true);
-                            }
-                            char pressedChar = pressedKey.KeyChar == '\r' ? '\n' : pressedKey.KeyChar;
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], pressedChar);
-                            Console.Write(pressedChar);
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        case 0x1:  // RFC reg
-                            MemWriteRegister(Registers[(int)Data.Register.rpo], fileRead!.ReadByte());
-                            if (fileRead.BaseStream.Position >= openFileSize)
-                            {
-                                Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
-                            }
-                            Registers[(int)Data.Register.rpo]++;
-                            break;
-                        default:
-                            throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised reading low opcode");
-                    }
-                    break;
-                default:
-                    throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode");
-            }
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subtraction low opcode");
+                        }
+                        if (Registers[(int)targetRegister] > initial)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        }
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x3:  // Multiplication
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        initial = Registers[(int)targetRegister];
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // MUL reg, reg
+                                Registers[(int)targetRegister] *= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // MUL reg, lit
+                                Registers[(int)targetRegister] *= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // MUL reg, adr
+                                Registers[(int)targetRegister] *= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // MUL reg, ptr
+                                Registers[(int)targetRegister] *= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised multiplication low opcode");
+                        }
+                        if (Registers[(int)targetRegister] < initial)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        }
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x4:  // Division
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        // Only used to store remainder in DVR, set to an unused default otherwise
+                        Data.Register secondTarget = Data.Register.rpo;
+                        if (opcodeLow is >= 0x4 and <= 0x7 &&  // DVR
+                            (secondTarget = MemReadRegisterType(Registers[(int)Data.Register.rpo] + 1)) == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {secondTarget}");
+                        }
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // DIV reg, reg
+                                Registers[(int)targetRegister] /= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // DIV reg, lit
+                                Registers[(int)targetRegister] /= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // DIV reg, adr
+                                Registers[(int)targetRegister] /= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // DIV reg, ptr
+                                Registers[(int)targetRegister] /= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // DVR reg, reg, reg
+                                ulong dividend = Registers[(int)targetRegister];
+                                ulong divisor = MemReadRegister(Registers[(int)Data.Register.rpo] + 2);
+                                ulong div = dividend / divisor;
+                                ulong rem = dividend % divisor;
+                                Registers[(int)targetRegister] = div;
+                                Registers[(int)secondTarget] = rem;
+                                Registers[(int)Data.Register.rpo] += 3;
+                                break;
+                            case 0x5:  // DVR reg, reg, lit
+                                dividend = Registers[(int)targetRegister];
+                                divisor = MemReadQWord(Registers[(int)Data.Register.rpo] + 2);
+                                div = dividend / divisor;
+                                rem = dividend % divisor;
+                                Registers[(int)targetRegister] = div;
+                                Registers[(int)secondTarget] = rem;
+                                Registers[(int)Data.Register.rpo] += 10;
+                                break;
+                            case 0x6:  // DVR reg, reg, adr
+                                dividend = Registers[(int)targetRegister];
+                                divisor = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 2);
+                                div = dividend / divisor;
+                                rem = dividend % divisor;
+                                Registers[(int)targetRegister] = div;
+                                Registers[(int)secondTarget] = rem;
+                                Registers[(int)Data.Register.rpo] += 10;
+                                break;
+                            case 0x7:  // DVR reg, reg, ptr
+                                dividend = Registers[(int)targetRegister];
+                                divisor = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 2);
+                                div = dividend / divisor;
+                                rem = dividend % divisor;
+                                Registers[(int)targetRegister] = div;
+                                Registers[(int)secondTarget] = rem;
+                                Registers[(int)Data.Register.rpo] += 3;
+                                break;
+                            case 0x8:  // REM reg, reg
+                                Registers[(int)targetRegister] %= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x9:  // REM reg, lit
+                                Registers[(int)targetRegister] %= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xA:  // REM reg, adr
+                                Registers[(int)targetRegister] %= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xB:  // REM reg, ptr
+                                Registers[(int)targetRegister] %= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised division low opcode");
+                        }
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x5:  // Shifting
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        initial = Registers[(int)targetRegister];
+                        int amount;
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // SHL reg, reg
+                                amount = (int)MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] <<= amount;
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // SHL reg, lit
+                                amount = (int)MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] <<= amount;
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // SHL reg, adr
+                                amount = (int)MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] <<= amount;
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // SHL reg, ptr
+                                amount = (int)MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] <<= amount;
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // SHR reg, reg
+                                amount = (int)MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] >>= amount;
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x5:  // SHR reg, lit
+                                amount = (int)MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] >>= amount;
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x6:  // SHR reg, adr
+                                amount = (int)MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] >>= amount;
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x7:  // SHR reg, ptr
+                                amount = (int)MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)targetRegister] >>= amount;
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised shifting low opcode");
+                        }
+                        // As registers are only 64 bits, shifting by 64 bits or more will always result in 0
+                        if (amount >= 64)
+                        {
+                            Registers[(int)targetRegister] = 0;
+                        }
+                        // We will never overflow when shifting by 0 bits or if the initial value is 0.
+                        // We will always overflow if shifting by 64 bits or more as long as the above isn't the case.
+                        //
+                        // Otherwise, if shifting left (opcodeLow <= 0x3), "(initial >> (64 - amount)) != 0" checks if there are any 1 bits
+                        // in the portion of the number that will be cutoff during the left shift by cutting off the bits that will remain.
+                        // 8-bit e.g: 0b11001001 << 3 |> (0b11001001 >> (8 - 3)), (0b11001001 >> 5) = 0b00000110, result != 0, therefore set carry.
+                        //
+                        // If shifting right, "(initial << (64 - amount)) != 0" checks if there are any 1 bits
+                        // in the portion of the number that will be cutoff during the right shift by cutting off the bits that will remain.
+                        // 8-bit e.g: 0b11001001 >> 3 |> (0b11001001 << (8 - 3)), (0b11001001 << 5) = 0b00100000, result != 0, therefore set carry.
+                        if (amount != 0 && initial != 0 && (amount >= 64 || opcodeLow <= 0x3
+                            ? (initial >> (64 - amount)) != 0
+                            : (initial << (64 - amount)) != 0))
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        }
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x6:  // Bitwise
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // AND reg, reg
+                                Registers[(int)targetRegister] &= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // AND reg, lit
+                                Registers[(int)targetRegister] &= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // AND reg, adr
+                                Registers[(int)targetRegister] &= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // AND reg, ptr
+                                Registers[(int)targetRegister] &= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // ORR reg, reg
+                                Registers[(int)targetRegister] |= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x5:  // ORR reg, lit
+                                Registers[(int)targetRegister] |= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x6:  // ORR reg, adr
+                                Registers[(int)targetRegister] |= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x7:  // ORR reg, ptr
+                                Registers[(int)targetRegister] |= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x8:  // XOR reg, reg
+                                Registers[(int)targetRegister] ^= MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x9:  // XOR reg, lit
+                                Registers[(int)targetRegister] ^= MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xA:  // XOR reg, adr
+                                Registers[(int)targetRegister] ^= MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xB:  // XOR reg, ptr
+                                Registers[(int)targetRegister] ^= MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0xC:  // NOT reg
+                                Registers[(int)targetRegister] = ~Registers[(int)targetRegister];
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0xD:  // RNG reg
+                                byte[] randomBuffer = new byte[8];
+                                rng.NextBytes(randomBuffer);
+                                Registers[(int)targetRegister] = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised bitwise low opcode");
+                        }
+                        Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        if (Registers[(int)targetRegister] == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x7:  // Test
+                        targetRegister = MemReadRegisterType(Registers[(int)Data.Register.rpo]);
+                        if (targetRegister == Data.Register.rpo)
+                        {
+                            throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                        }
+                        ulong newValue;
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // TST reg, reg
+                                newValue = Registers[(int)targetRegister] & MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // TST reg, lit
+                                newValue = Registers[(int)targetRegister] & MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // TST reg, adr
+                                newValue = Registers[(int)targetRegister] & MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // TST reg, ptr
+                                newValue = Registers[(int)targetRegister] & MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // CMP reg, reg
+                                newValue = Registers[(int)targetRegister] - MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x5:  // CMP reg, lit
+                                newValue = Registers[(int)targetRegister] - MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x6:  // CMP reg, adr
+                                newValue = Registers[(int)targetRegister] - MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x7:  // CMP reg, ptr
+                                newValue = Registers[(int)targetRegister] - MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised comparison low opcode");
+                        }
+                        if (opcodeLow >= 0x4 && newValue > Registers[(int)targetRegister])
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Carry;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Carry;
+                        }
+                        if (newValue == 0)
+                        {
+                            Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.Zero;
+                        }
+                        else
+                        {
+                            Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.Zero;
+                        }
+                        break;
+                    case 0x8:  // Small Move
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // MVB reg, reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // MVB reg, lit
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // MVB reg, adr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadBytePointer(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // MVB reg, ptr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterByte(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // MVB adr, reg
+                                MemWriteBytePointer(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x5:  // MVB adr, lit
+                                MemWriteBytePointer(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 16;
+                                break;
+                            case 0x6:  // MVB ptr, reg
+                                MemWriteRegisterByte(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x7:  // MVB ptr, lit
+                                MemWriteRegisterByte(Registers[(int)Data.Register.rpo], (byte)(0xFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x8:  // MVW reg, reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x9:  // MVW reg, lit
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xA:  // MVW reg, adr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadWordPointer(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xB:  // MVW reg, ptr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0xC:  // MVW adr, reg
+                                MemWriteWordPointer(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xD:  // MVW adr, lit
+                                MemWriteWordPointer(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 16;
+                                break;
+                            case 0xE:  // MVW ptr, reg
+                                MemWriteRegisterWord(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0xF:  // MVW ptr, lit
+                                MemWriteRegisterWord(Registers[(int)Data.Register.rpo], (ushort)(0xFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised small move low opcode");
+                        }
+                        break;
+                    case 0x9:  // Large Move
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // MVD reg, reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x1:  // MVD reg, lit
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], 0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x2:  // MVD reg, adr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadDWordPointer(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x3:  // MVD reg, ptr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterDWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x4:  // MVD adr, reg
+                                MemWriteDWordPointer(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x5:  // MVD adr, lit
+                                MemWriteDWordPointer(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 8)));
+                                Registers[(int)Data.Register.rpo] += 16;
+                                break;
+                            case 0x6:  // MVD ptr, reg
+                                MemWriteRegisterDWord(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadRegister(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x7:  // MVD ptr, lit
+                                MemWriteRegisterDWord(Registers[(int)Data.Register.rpo], (uint)(0xFFFFFFFF & MemReadQWord(Registers[(int)Data.Register.rpo] + 1)));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x8:  // MVQ reg, reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x9:  // MVQ reg, lit
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xA:  // MVQ reg, adr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xB:  // MVQ reg, ptr
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0xC:  // MVQ adr, reg
+                                MemWriteQWordPointer(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 8));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0xD:  // MVQ adr, lit
+                                MemWriteQWordPointer(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 8));
+                                Registers[(int)Data.Register.rpo] += 16;
+                                break;
+                            case 0xE:  // MVQ ptr, reg
+                                MemWriteRegisterQWord(Registers[(int)Data.Register.rpo], MemReadRegister(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0xF:  // MVQ ptr, lit
+                                MemWriteRegisterQWord(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rpo] + 1));
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised large move low opcode");
+                        }
+                        break;
+                    case 0xA:  // Stack
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // PSH reg
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegister(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rso] -= 8;
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x1:  // PSH lit
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWord(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rso] -= 8;
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x2:  // PSH adr
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rso] -= 8;
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x3:  // PSH ptr
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rso] -= 8;
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x4:  // POP reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], MemReadQWord(Registers[(int)Data.Register.rso]));
+                                Registers[(int)Data.Register.rso] += 8;
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised stack low opcode");
+                        }
+                        break;
+                    case 0xB:  // Subroutines
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // CAL adr
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 8);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x1:  // CAL ptr
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 1);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x2:  // CAL adr, reg
+                                Registers[(int)Data.Register.rfp] = MemReadRegister(Registers[(int)Data.Register.rpo] + 8);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x3:  // CAL adr, lit
+                                Registers[(int)Data.Register.rfp] = MemReadQWord(Registers[(int)Data.Register.rpo] + 8);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x4:  // CAL adr, adr
+                                Registers[(int)Data.Register.rfp] = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 8);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x5:  // CAL adr, ptr
+                                Registers[(int)Data.Register.rfp] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 8);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x6:  // CAL ptr, reg
+                                Registers[(int)Data.Register.rfp] = MemReadRegister(Registers[(int)Data.Register.rpo] + 1);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x7:  // CAL ptr, lit
+                                Registers[(int)Data.Register.rfp] = MemReadQWord(Registers[(int)Data.Register.rpo] + 1);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x8:  // CAL ptr, adr
+                                Registers[(int)Data.Register.rfp] = MemReadQWordPointer(Registers[(int)Data.Register.rpo] + 1);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0x9:  // CAL ptr, ptr
+                                Registers[(int)Data.Register.rfp] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo] + 1);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
+                                MemWriteQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                Registers[(int)Data.Register.rso] -= 24;
+                                Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
+                                Registers[(int)Data.Register.rpo] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                break;
+                            case 0xA:  // RET
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
+                                Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
+                                Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
+                                break;
+                            case 0xB:  // RET reg
+                                Registers[(int)Data.Register.rrv] = MemReadRegister(Registers[(int)Data.Register.rpo]);
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
+                                Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
+                                Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
+                                break;
+                            case 0xC:  // RET lit
+                                Registers[(int)Data.Register.rrv] = MemReadQWord(Registers[(int)Data.Register.rpo]);
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
+                                Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
+                                Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
+                                break;
+                            case 0xD:  // RET adr
+                                Registers[(int)Data.Register.rrv] = MemReadQWordPointer(Registers[(int)Data.Register.rpo]);
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
+                                Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
+                                Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
+                                break;
+                            case 0xE:  // RET ptr
+                                Registers[(int)Data.Register.rrv] = MemReadRegisterQWord(Registers[(int)Data.Register.rpo]);
+                                Registers[(int)Data.Register.rpo] = MemReadQWord(Registers[(int)Data.Register.rsb] + 16);
+                                Registers[(int)Data.Register.rso] = MemReadQWord(Registers[(int)Data.Register.rsb]);
+                                Registers[(int)Data.Register.rsb] = MemReadQWord(Registers[(int)Data.Register.rsb] + 8);
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subroutine low opcode");
+                        }
+                        break;
+                    case 0xC:  // Console Write
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // WCN reg
+                                Console.Write(MemReadRegister(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x1:  // WCN lit
+                                Console.Write(MemReadQWord(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x2:  // WCN adr
+                                Console.Write(MemReadQWordPointer(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x3:  // WCN ptr
+                                Console.Write(MemReadRegisterQWord(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x4:  // WCB reg
+                                Console.Write(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x5:  // WCB lit
+                                Console.Write(Memory[Registers[(int)Data.Register.rpo]]);
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x6:  // WCB adr
+                                Console.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x7:  // WCB ptr
+                                Console.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x8:  // WCX reg
+                                Console.Write(string.Format("{0:X}", 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x9:  // WCX lit
+                                Console.Write(string.Format("{0:X}", Memory[Registers[(int)Data.Register.rpo]]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xA:  // WCX adr
+                                Console.Write(string.Format("{0:X}", MemReadBytePointer(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xB:  // WCX ptr
+                                Console.Write(string.Format("{0:X}", MemReadRegisterByte(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
+                            case 0xC:  // WCC reg
+                                {
+                                    using Stream stdout = Console.OpenStandardOutput();
+                                    stdout.WriteByte((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                    Registers[(int)Data.Register.rpo]++;
+                                    break;
+                                }
+                            case 0xD:  // WCC lit
+                                {
+                                    using Stream stdout = Console.OpenStandardOutput();
+                                    stdout.WriteByte(Memory[Registers[(int)Data.Register.rpo]]);
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                    break;
+                                }
+                            case 0xE:  // WCC adr
+                                {
+                                    using Stream stdout = Console.OpenStandardOutput();
+                                    stdout.WriteByte(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                                    Registers[(int)Data.Register.rpo] += 8;
+                                    break;
+                                }
+                            case 0xF:  // WCC ptr
+                                {
+                                    using Stream stdout = Console.OpenStandardOutput();
+                                    stdout.WriteByte(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                                    Registers[(int)Data.Register.rpo]++;
+                                    break;
+                                }
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised console write low opcode");
+                        }
+                        break;
+                    case 0xD:  // File Write
+                        if (openFile is null)
+                        {
+                            throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                        }
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // WFN reg
+                                foreach (char digit in MemReadRegister(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x1:  // WFN lit
+                                foreach (char digit in MemReadQWord(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x2:  // WFN adr
+                                foreach (char digit in MemReadQWordPointer(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x3:  // WFN ptr
+                                foreach (char digit in MemReadRegisterQWord(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x4:  // WFB reg
+                                foreach (char digit in (0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x5:  // WFB lit
+                                foreach (char digit in Memory[Registers[(int)Data.Register.rpo]].ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x6:  // WFB adr
+                                foreach (char digit in MemReadBytePointer(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0x7:  // WFB ptr
+                                foreach (char digit in MemReadRegisterByte(Registers[(int)Data.Register.rpo]).ToString())
+                                {
+                                    fileWrite!.Write(digit);
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x8:  // WFX reg
+                                fileWrite!.Write(string.Format("{0:X}", 0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x9:  // WFX lit
+                                fileWrite!.Write(string.Format("{0:X}", Memory[Registers[(int)Data.Register.rpo]]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xA:  // WFX adr
+                                fileWrite!.Write(string.Format("{0:X}", MemReadBytePointer(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xB:  // WFX ptr
+                                fileWrite!.Write(string.Format("{0:X}", MemReadRegisterByte(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0xC:  // WFC reg
+                                fileWrite!.Write((byte)(0xFF & MemReadRegister(Registers[(int)Data.Register.rpo])));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0xD:  // WFC lit
+                                fileWrite!.Write(Memory[Registers[(int)Data.Register.rpo]]);
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xE:  // WFC adr
+                                fileWrite!.Write(MemReadBytePointer(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo] += 8;
+                                break;
+                            case 0xF:  // WFC ptr
+                                fileWrite!.Write(MemReadRegisterByte(Registers[(int)Data.Register.rpo]));
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file write low opcode");
+                        }
+                        break;
+                    case 0xE:  // File Operations
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // OFL adr
+                                if (openFile is not null)
+                                {
+                                    throw new FileOperationException("Cannot execute open file instruction if a file is already open");
+                                }
+                                string filepath = "";
+                                for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                                openFileSize = openFile.Length;
+                                fileWrite = new BinaryWriter(openFile);
+                                fileRead = new BinaryReader(openFile);
+                                if (fileRead.BaseStream.Position >= openFileSize)
+                                {
+                                    Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
+                                }
+                                break;
+                            case 0x1:  // OFL ptr
+                                if (openFile is not null)
+                                {
+                                    throw new FileOperationException("Cannot execute open file instruction if a file is already open");
+                                }
+                                filepath = "";
+                                for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                                openFileSize = openFile.Length;
+                                fileWrite = new BinaryWriter(openFile);
+                                fileRead = new BinaryReader(openFile);
+                                if (fileRead.BaseStream.Position >= openFileSize)
+                                {
+                                    Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
+                                }
+                                else
+                                {
+                                    Registers[(int)Data.Register.rsf] &= ~(ulong)Data.StatusFlags.FileEnd;
+                                }
+                                break;
+                            case 0x2:  // CFL
+                                if (openFile is null)
+                                {
+                                    throw new FileOperationException("Cannot execute close file instruction if a file is not open");
+                                }
+                                fileWrite!.Close();
+                                fileWrite = null;
+                                fileRead!.Close();
+                                fileRead = null;
+                                openFile!.Close();
+                                openFile = null;
+                                openFileSize = 0;
+                                break;
+                            case 0x3:  // DFL adr
+                                filepath = "";
+                                for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                Registers[(int)Data.Register.rpo] += 8;
+                                File.Delete(filepath);
+                                break;
+                            case 0x4:  // DFL ptr
+                                filepath = "";
+                                for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo]); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                File.Delete(filepath);
+                                break;
+                            case 0x5:  // FEX reg, adr
+                                filepath = "";
+                                for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x6:  // FEX reg, ptr
+                                filepath = "";
+                                for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], File.Exists(filepath) ? 1UL : 0UL);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            case 0x7:  // FSZ reg, adr
+                                filepath = "";
+                                for (ulong i = MemReadQWord(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
+                                Registers[(int)Data.Register.rpo] += 9;
+                                break;
+                            case 0x8:  // FSZ reg, ptr
+                                filepath = "";
+                                for (ulong i = MemReadRegister(Registers[(int)Data.Register.rpo] + 1); Memory[i] != 0x0; i++)
+                                {
+                                    filepath += (char)Memory[i];
+                                }
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], (ulong)new FileInfo(filepath).Length);
+                                Registers[(int)Data.Register.rpo] += 2;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised file operation low opcode");
+                        }
+                        break;
+                    case 0xF:  // Reading
+                        switch (opcodeLow)
+                        {
+                            case 0x0:  // RCC reg
+                                ConsoleKeyInfo pressedKey = new();
+                                while (char.IsControl(pressedKey.KeyChar) && pressedKey.KeyChar != '\r')
+                                {
+                                    pressedKey = Console.ReadKey(true);
+                                }
+                                char pressedChar = pressedKey.KeyChar == '\r' ? '\n' : pressedKey.KeyChar;
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], pressedChar);
+                                Console.Write(pressedChar);
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            case 0x1:  // RFC reg
+                                MemWriteRegister(Registers[(int)Data.Register.rpo], fileRead!.ReadByte());
+                                if (fileRead.BaseStream.Position >= openFileSize)
+                                {
+                                    Registers[(int)Data.Register.rsf] |= (ulong)Data.StatusFlags.FileEnd;
+                                }
+                                Registers[(int)Data.Register.rpo]++;
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised reading low opcode");
+                        }
+                        break;
+                    default:
+                        throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode");
+                }
+            } while (runUntilHalt && !halt);
             return halt;
         }
 
@@ -1351,7 +1336,7 @@ namespace AssEmbly
         /// </summary>
         public ushort MemReadWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt16LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 2)]);
+            return BinaryPrimitives.ReadUInt16LittleEndian(Memory.AsSpan()[(int)offset..]);
         }
 
         /// <summary>
@@ -1359,7 +1344,7 @@ namespace AssEmbly
         /// </summary>
         public uint MemReadDWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt32LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 4)]);
+            return BinaryPrimitives.ReadUInt32LittleEndian(Memory.AsSpan()[(int)offset..]);
         }
 
         /// <summary>
@@ -1367,7 +1352,7 @@ namespace AssEmbly
         /// </summary>
         public ulong MemReadQWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt64LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 8)]);
+            return BinaryPrimitives.ReadUInt64LittleEndian(Memory.AsSpan()[(int)offset..]);
         }
 
         /// <summary>
@@ -1455,7 +1440,7 @@ namespace AssEmbly
         /// </summary>
         public void MemWriteWord(ulong offset, ushort value)
         {
-            BinaryPrimitives.WriteUInt16LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 2)], value);
+            BinaryPrimitives.WriteUInt16LittleEndian(Memory.AsSpan()[(int)offset..], value);
         }
 
         /// <summary>
@@ -1463,7 +1448,7 @@ namespace AssEmbly
         /// </summary>
         public void MemWriteDWord(ulong offset, uint value)
         {
-            BinaryPrimitives.WriteUInt32LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 4)], value);
+            BinaryPrimitives.WriteUInt32LittleEndian(Memory.AsSpan()[(int)offset..], value);
         }
 
         /// <summary>
@@ -1471,7 +1456,7 @@ namespace AssEmbly
         /// </summary>
         public void MemWriteQWord(ulong offset, ulong value)
         {
-            BinaryPrimitives.WriteUInt64LittleEndian(Memory.AsSpan()[(int)offset..(int)(offset + 8)], value);
+            BinaryPrimitives.WriteUInt64LittleEndian(Memory.AsSpan()[(int)offset..], value);
         }
 
         /// <summary>

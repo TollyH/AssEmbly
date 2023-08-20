@@ -233,7 +233,7 @@ namespace AssEmbly
             try
             {
                 processor.LoadProgram(File.ReadAllBytes(args[1]));
-                processor.Execute();
+                _ = processor.Execute(true);
             }
             catch (Exception e)
             {
@@ -321,7 +321,7 @@ namespace AssEmbly
             try
             {
                 processor.LoadProgram(program);
-                processor.Execute();
+                _ = processor.Execute(true);
             }
             catch (Exception e)
             {

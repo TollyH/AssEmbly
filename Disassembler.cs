@@ -140,7 +140,7 @@ namespace AssEmbly
                                 fallbackToDat = true;
                                 break;
                             }
-                            operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..((int)totalBytes + 8)]).ToString());
+                            operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]).ToString());
                             totalBytes += 8;
                             break;
                         case Data.OperandType.Address:
@@ -149,7 +149,7 @@ namespace AssEmbly
                                 fallbackToDat = true;
                                 break;
                             }
-                            referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..((int)totalBytes + 8)]));
+                            referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]));
                             operandStrings.Add($":ADDR_{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
