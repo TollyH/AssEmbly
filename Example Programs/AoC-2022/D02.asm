@@ -19,7 +19,7 @@ SUB rg1, 88
 MVQ rg4, rg0
 MVQ rg5, rg1
 ; totalScoreP1 += (Mod(ourIndex - (theirIndex - 1), 3) * 3) + ourIndex + 1
-SUB rg4, 1
+DCR rg4
 SUB rg5, rg4
 ; Add 3 to prevent negatives while keeping MOD result the same
 ADD rg4, 3
@@ -27,13 +27,13 @@ ADD rg5, 3
 REM rg5, 3
 MUL rg5, 3
 ADD rg5, rg1
-ADD rg5, 1
+ICR rg5
 ADD rg2, rg5
 ; Reset temp storage for part 2
 MVQ rg4, rg0
 MVQ rg5, rg1
 ; totalScoreP2 += Mod(ourIndex + (theirIndex - 1), 3) + (ourIndex * 3) + 1
-SUB rg4, 1
+DCR rg4
 ADD rg5, rg4
 ; Add 3 to prevent negatives while keeping MOD result the same
 ADD rg4, 3
@@ -42,7 +42,7 @@ REM rg5, 3
 MVQ rg6, rg1
 MUL rg6, 3
 ADD rg5, rg6
-ADD rg5, 1
+ICR rg5
 ADD rg3, rg5
 ; End of file?
 TST rsf, _ffe
@@ -55,5 +55,4 @@ WCC 10  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input02.txt"
-PAD 1
+DAT "input02.txt\0"

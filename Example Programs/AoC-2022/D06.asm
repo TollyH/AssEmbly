@@ -26,16 +26,16 @@ MVQ rg2, :&MESSAGE
 DCR rg2
 PSH rg2
 :CHARACTER_LOOP
-CMP rg6, 0
-JEQ :SKIP_COMPLETE_CHECK
-CMP rg7, 0
-JNE :END
+TST rg6, rg6
+JZO :SKIP_COMPLETE_CHECK
+TST rg7, rg7
+JNZ :END
 :SKIP_COMPLETE_CHECK
 POP rg2
 ICR rg2
 PSH rg2
 MVQ rg5, rg2
-MVQ rg4, 0
+XOR rg4, rg4
 :INNER_LOOP
 MVQ rg2, *rso
 ICR rg5
@@ -52,16 +52,16 @@ CMP rg2, rg5
 JLT :INNER_LOOP_2
 CMP rg4, 3
 JNE :PART_TWO_CHECK
-CMP rg6, 0
-JNE :PART_TWO_CHECK
+TST rg6, rg6
+JNZ :PART_TWO_CHECK
 MVQ rg6, rg5
 SUB rg6, :&MESSAGE
 ICR rg6
 :PART_TWO_CHECK
 CMP rg4, 13
 JNE :INNER_LOOP
-CMP rg7, 0
-JNE :INNER_LOOP
+TST rg7, rg7
+JNZ :INNER_LOOP
 MVQ rg7, rg5
 SUB rg7, :&MESSAGE
 ICR rg7
@@ -75,7 +75,6 @@ WCC 10  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input06.txt"
-DAT 0
+DAT "input06.txt\0"
 
 :MESSAGE  ; Store message in remaining memory

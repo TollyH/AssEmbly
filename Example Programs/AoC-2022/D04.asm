@@ -63,10 +63,10 @@ ICR rg5
 :TEST_END
 TST rsf, _ffe
 JNZ :END
-MVQ rg0, 0
-MVQ rg1, 0
-MVQ rg2, 0
-MVQ rg3, 0
+XOR rg0, rg0
+XOR rg1, rg1
+XOR rg2, rg2
+XOR rg3, rg3
 JMP :RANGE_1_1ST
 
 :END
@@ -78,5 +78,4 @@ WCC 10  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input04.txt"
-DAT 0
+DAT "input04.txt\0"

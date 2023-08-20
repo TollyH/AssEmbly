@@ -11,8 +11,8 @@ MVQ rg2, :&INPUT_BUFFER_1
 :NUM_1_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
-CMP rg3, 0  ; Check for 0-byte terminator
-JEQ :NUM_1_READ_LOOP_END
+TST rg3, rg3  ; Check for 0-byte terminator
+JZO :NUM_1_READ_LOOP_END
 SUB rg3, 48  ; Convert ASCII digit to number
 MUL rg0, 10
 ADD rg0, rg3
@@ -27,8 +27,8 @@ MVQ rg2, :&INPUT_BUFFER_2
 :NUM_2_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
-CMP rg3, 0  ; Check for 0-byte terminator
-JEQ :NUM_2_READ_LOOP_END
+TST rg3, rg3  ; Check for 0-byte terminator
+JZO :NUM_2_READ_LOOP_END
 SUB rg3, 48  ; Convert ASCII digit to number
 MUL rg1, 10
 ADD rg1, rg3
@@ -78,8 +78,8 @@ NOT rg0
 ICR rg0
 :NOT_NEGATIVE
 WCN rg0
-CMP rg5, 0
-JEQ :END
+TST rg5, rg5
+JZO :END
 ; If remainder in not 0, print it (will only happen when dividing)
 CAL :FUNC_PRINT, :&STR_REMAINDER
 WCN rg5
@@ -92,25 +92,19 @@ PAD 64
 PAD 64
 
 :STR_NUM_1_PROMPT
-DAT "Enter first number > "
-DAT 0  ; Terminate string with 0 byte
+DAT "Enter first number > \0"
 
 :STR_NUM_2_PROMPT
-DAT "Enter second number > "
-DAT 0  ; Terminate string with 0 byte
+DAT "Enter second number > \0"
 
 :STR_OPERATOR_PROMPT
-DAT "Enter operator (+, -, *, /) > "
-DAT 0  ; Terminate string with 0 byte
+DAT "Enter operator (+, -, *, /) > \0"
 
 :STR_INVALID_OPERATOR
-DAT "The entered operator was invalid"
-DAT 10  ; Newline
-DAT 0  ; Terminate string with 0 byte
+DAT "The entered operator was invalid\n\0"
 
 :STR_REMAINDER
-DAT " remainder "
-DAT 0  ; Terminate string with 0 byte
+DAT " remainder \0"
 
 IMP "input.ext.asm"  ; Import input function
 IMP "print.ext.asm"  ; Import print function

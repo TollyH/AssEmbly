@@ -24,8 +24,7 @@ HLT  ; Stop execution
 PAD 256  ; Create a continuous string of 0s, 256 bytes long - will be used to store file path
 
 :PROMPT_STRING
-DAT "Enter file path > "  ; Store string after program data.
-DAT 0  ; End string with a 0 byte so program knows to stop.
+DAT "Enter file path > \0"  ; Store string after program data.
 
 IMP "input.ext.asm"  ; Import input function
 IMP "print.ext.asm"  ; Import print function

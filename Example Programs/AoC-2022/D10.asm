@@ -19,8 +19,8 @@ RFC rg9
 CMP rg0, 110  ; 'n' (noop)
 JEQ :NOOP
 CAL :FUNC_INCREMENT_CYCLE, 2
-MVQ rg5, 0
-MVQ rg6, 0
+XOR rg5, rg5
+XOR rg6, rg6
 RFC rg9  ; Discard space
 :INT_PARSE_LOOP
 RFC rg0
@@ -36,8 +36,8 @@ JMP :INT_PARSE_LOOP
 MVQ rg6, 1
 JMP :INT_PARSE_LOOP
 :INT_PARSE_END
-CMP rg6, 0
-JGT :SUBTRACT
+TST rg6, rg6
+JNZ :SUBTRACT
 ADD rg1, rg5
 JMP :READ_LOOP_CONDITION
 :SUBTRACT
@@ -73,7 +73,7 @@ PSH rg0
 PSH rg7
 PSH rg8
 PSH rg9
-MVQ rg0, 0
+XOR rg0, rg0
 :FUNC_INCREMENT_CYCLE_LOOP
 CMP rg0, rfp
 JGE :FUNC_INCREMENT_CYCLE_END
@@ -119,7 +119,6 @@ POP rg0
 RET
 
 :FILE_PATH
-DAT "input10.txt"
-DAT 0
+DAT "input10.txt\0"
 
 :PART_TWO_RESULT  ; Use remaining memory for storing part two result

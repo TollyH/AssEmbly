@@ -15,22 +15,22 @@ TST rsf, 0b100  ; End of file?
 JNZ :RESET_INTERS
 CMP rg0, 10  ; Newline?
 JNE :CHAR_PROCESS
-CMP rg1, 0  ; Did we already have newline?
+TST rg1, rg1  ; Did we already have newline?
 JNE :RESET_INTERS
 :NEW_ELF
 ; Start new elf - store current total
 MVQ *rg4, rg3
 ICR rg5
 ADD rg4, 8
-MVQ rg1, 0
-MVQ rg3, 0
+XOR rg1, rg1
+XOR rg3, rg3
 TST rsf, _ffe  ; End of file?
 JNZ :MAX
 JMP :CHAR_READ_LOOP
 :RESET_INTERS
 ; Next number for same elf
 ADD rg3, rg1
-MVQ rg1, 0
+XOR rg1, rg1
 TST rsf, _ffe  ; End of file?
 JNZ :NEW_ELF
 JMP :CHAR_READ_LOOP
@@ -48,8 +48,8 @@ CFL
 ; rg4 - elf memory offset
 ; rg5 - number of elves
 MVQ rg4, :&TOTALS
-MVQ rg2, 0
-MVQ rg1, 0
+XOR rg2, rg2
+XOR rg1, rg1
 ; Lower values as they'll be raised again
 SUB rg4, 8
 DCR rg2
@@ -71,7 +71,7 @@ WCC 10  ; Newline
 
 ; rg6 - Second highest
 MVQ rg4, :&TOTALS
-MVQ rg2, 0
+XOR rg2, rg2
 ; Lower values as they'll be raised again
 SUB rg4, 8
 DCR rg2
@@ -93,7 +93,7 @@ JMP :MAX_LOOP_2
 :THIRD_HIGHEST
 ; rg7 - Third highest
 MVQ rg4, :&TOTALS
-MVQ rg2, 0
+XOR rg2, rg2
 ; Lower values as they'll be raised again
 SUB rg4, 8
 DCR rg2
@@ -122,7 +122,7 @@ WCC 10  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input01.txt"
-PAD 1
+DAT "input01.txt\0"
+
 
 :TOTALS  ; Use all of remaining memory for elf storage

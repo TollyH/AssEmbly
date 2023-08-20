@@ -78,7 +78,7 @@ OFL :FILE_PATH
 ; rg6 - store for character line last occurred
 MVQ rg2, :&LINE_STORE
 DCR rg2
-MVQ rg3, 0
+XOR rg3, rg3
 MVQ rg4, 1
 :READ_LOOP_TWO
 MVQ rg1, :&LINE_STORE
@@ -154,7 +154,6 @@ WCC 10  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input03.txt"
-DAT 0
+DAT "input03.txt\0"
 
 :LINE_STORE  ; Use all of remaining memory for storing each line

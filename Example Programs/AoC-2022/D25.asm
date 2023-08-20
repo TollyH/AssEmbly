@@ -5,7 +5,7 @@ OFL :FILE_PATH
 ; rg1 - current line length / loop counter
 ; rg2 - line store offset
 ; rg3 - current character
-MVQ rg1, 0
+XOR rg1, rg1
 MVQ rg2, :&LINE_STORE
 :READ_LOOP
 RFC rg3
@@ -29,8 +29,8 @@ MVQ rg5, 1
 :POWER_LOOP
 DCR rg4
 MUL rg5, 5
-CMP rg4, 0
-JGT :POWER_LOOP
+TST rg4, rg4
+JNZ :POWER_LOOP
 
 ; Determine digit value and add to total
 CMP rg3, 50  ; '2'
@@ -45,7 +45,7 @@ JMP :BASE_CHECK_END
 :DIGIT_ZERO_CHECK
 CMP rg3, 48  ; '0'
 JNE :DIGIT_DASH_CHECK
-MVQ rg6, 0
+XOR rg6, rg6
 JMP :BASE_CHECK_END
 :DIGIT_DASH_CHECK
 CMP rg3, 45  ; '-'
@@ -59,18 +59,18 @@ MUL rg5, rg6
 ADD rg0, rg5
 ICR rg2
 DCR rg1
-CMP rg1, 0
-JGT :FROM_SNAFU_LOOP
+TST rg1, rg1
+JNZ :FROM_SNAFU_LOOP
 TST rsf, _ffe  ; End of file?
 JNZ :TO_SNAFU
 ; Reset counters
-MVQ rg1, 0
+XOR rg1, rg1
 MVQ rg2, :&LINE_STORE
 JMP :READ_LOOP
 
 :TO_SNAFU
 CFL
-MVQ rg1, 0
+XOR rg1, rg1
 ; rg7 - remaining mod
 :TO_SNAFU_LOOP
 MVQ rg7, rg0
@@ -122,7 +122,6 @@ WCC rg8
 JMP :PRINT_RESULT
 
 :FILE_PATH
-DAT "input25.txt"
-PAD 1
+DAT "input25.txt\0"
 
 :LINE_STORE  ; Use all of remaining memory for storing each line
