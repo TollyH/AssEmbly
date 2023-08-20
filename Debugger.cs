@@ -414,7 +414,7 @@
                     Console.ResetColor();
                     Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
                 }
-                Console.Write($"│ {i:X16} │ {DebuggingProcessor.MemReadQWord(i):X16}              │ rsb - {currentStackBase - i,-4} │");
+                Console.Write($"│ {i:X16} │ {DebuggingProcessor.ReadMemoryQWord(i):X16}              │ rsb - {currentStackBase - i,-4} │");
                 if (i == currentStackOffset)
                 {
                     Console.WriteLine(" <- rsp");
@@ -434,12 +434,12 @@
                 Console.WriteLine("Return information");
                 Console.ResetColor();
                 Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
-                Console.WriteLine($"│ {currentStackBase:X16} │ Reset rso to {DebuggingProcessor.MemReadQWord(currentStackBase):X16} | rsb + 0    | <- rsb");
-                Console.WriteLine($"│ {currentStackBase + 8:X16} │ Reset rsb to {DebuggingProcessor.MemReadQWord(currentStackBase + 8):X16} | rsb + 8    |");
-                Console.WriteLine($"│ {currentStackBase + 16:X16} │ Reset rpo to {DebuggingProcessor.MemReadQWord(currentStackBase + 16):X16} | rsb + 16   |");
+                Console.WriteLine($"│ {currentStackBase:X16} │ Reset rso to {DebuggingProcessor.ReadMemoryQWord(currentStackBase):X16} | rsb + 0    | <- rsb");
+                Console.WriteLine($"│ {currentStackBase + 8:X16} │ Reset rsb to {DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8):X16} | rsb + 8    |");
+                Console.WriteLine($"│ {currentStackBase + 16:X16} │ Reset rpo to {DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16):X16} | rsb + 16   |");
                 Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
 
-                ulong parentStackBase = DebuggingProcessor.MemReadQWord(currentStackBase + 8);
+                ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8);
                 for (ulong i = currentStackBase + 24; i < parentStackBase; i += 8)
                 {
                     if (i == currentStackBase + 24)
@@ -449,7 +449,7 @@
                         Console.ResetColor();
                         Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
                     }
-                    Console.WriteLine($"│ {i:X16} │ {DebuggingProcessor.MemReadQWord(i):X16}              │ rsb + {i - currentStackBase,-4} │");
+                    Console.WriteLine($"│ {i:X16} │ {DebuggingProcessor.ReadMemoryQWord(i):X16}              │ rsb + {i - currentStackBase,-4} │");
                     if (i + 8 >= parentStackBase)
                     {
                         Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
