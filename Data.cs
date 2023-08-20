@@ -272,7 +272,7 @@
             { ("WCX", new OperandType[1] { OperandType.Address }), 0xCA },
             { ("WCX", new OperandType[1] { OperandType.Pointer }), 0xCB },
 
-            // WCC (Write Byte to Console as Character)
+            // WCC (Write Raw Byte to Console)
             { ("WCC", new OperandType[1] { OperandType.Register }), 0xCC },
             { ("WCC", new OperandType[1] { OperandType.Literal }), 0xCD },
             { ("WCC", new OperandType[1] { OperandType.Address }), 0xCE },
@@ -297,7 +297,7 @@
             { ("WFX", new OperandType[1] { OperandType.Address }), 0xDA },
             { ("WFX", new OperandType[1] { OperandType.Pointer }), 0xDB },
 
-            // WFC (Write Byte to Open File as Character)
+            // WFC (Write Raw Byte to Open File)
             { ("WFC", new OperandType[1] { OperandType.Register }), 0xDC },
             { ("WFC", new OperandType[1] { OperandType.Literal }), 0xDD },
             { ("WFC", new OperandType[1] { OperandType.Address }), 0xDE },

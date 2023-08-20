@@ -445,9 +445,9 @@ The 3 bits currently in use are:
 Each bit of this number can be considered as a true (1) or false (0)
 value as to whether the flag is “set” or not.
 
-The file end flag is set to 1 by the RFC operation if the character that
-has just been read from the currently open file was the last character
-in that file. It is reset to 0 only upon opening a file again.
+The file end flag is set to 1 by the RFC operation if the byte that has
+just been read from the currently open file was the last byte in that
+file. It is reset to 0 only upon opening a file again.
 
 The carry flag is set to 1 after a mathematical or bitwise operation if
 the result of that operation caused the destination register to go below
@@ -1140,7 +1140,7 @@ checks this flag.
 This would be done like so:
 
     :READ
-    RFC rg0  ; Read the next character from the open file to rg0
+    RFC rg0  ; Read the next byte from the open file to rg0
     TST rsf, 0b100  ; Check if the third bit is set
     JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
@@ -1244,14 +1244,14 @@ program here for demonstration purposes.
 
 DAT — Byte Insertion
 
-The DAT directive inserts either a single byte, or a string of character
-bytes, into a program wherever the directive is located. As with PAD, it
-can be directly preceded by a label definition to point to the byte or
-string of bytes. If not being used with a string, DAT can only insert
-single bytes at once, meaning the maximum value is 255. It is also not
-suitable for inserting numbers to be used in 64-bit expecting operations
-(such as maths and bitwise), see the following section on the NUM
-directive for inserting 64-bit numbers.
+The DAT directive inserts either a single byte, or a string of UTF-8
+character bytes, into a program wherever the directive is located. As
+with PAD, it can be directly preceded by a label definition to point to
+the byte or string of bytes. If not being used with a string, DAT can
+only insert single bytes at once, meaning the maximum value is 255. It
+is also not suitable for inserting numbers to be used in 64-bit
+expecting operations (such as maths and bitwise), see the following
+section on the NUM directive for inserting 64-bit numbers.
 
 An example of single byte insertion:
 
@@ -1298,15 +1298,15 @@ Or an example of using a string:
     ; Note that the string ends with '\0' (a 0 or "null" byte)
 
 This program will loop through the string, placing the byte value of
-each character in rg0 and writing it to the console as a character,
-until it reaches the 0 byte, when it will then stop to avoid looping
-infinitely. While not a strict requirement, terminating a string with a
-0 byte like this should always be done to give an easy way of knowing
-when the end of a string has been reached. Placing a DAT 0 directive on
-the line after the string insertion will also achieve this 0
-termination, and will result in the exact same bytes being assembled,
-however using the \0 escape sequence is more compact. Escape sequences
-are explained after this example.
+each character in rg0 and writing it to the console, until it reaches
+the 0 byte, when it will then stop to avoid looping infinitely. While
+not a strict requirement, terminating a string with a 0 byte like this
+should always be done to give an easy way of knowing when the end of a
+string has been reached. Placing a DAT 0 directive on the line after the
+string insertion will also achieve this 0 termination, and will result
+in the exact same bytes being assembled, however using the \0 escape
+sequence is more compact. Escape sequences are explained after this
+example.
 
 The example program assembles down to the following bytes:
 
@@ -1599,10 +1599,10 @@ Console Input and Output
 
 AssEmbly has native support for reading and writing from the console.
 There are four types of write that can be performed: 64-bit number in
-decimal; byte in decimal; byte in hexadecimal; and byte as a character.
-There is only a single type of read: a character as a byte. There is no
-native support for reading numbers in any base, nor is there support for
-reading or writing multiple numbers/characters at once.
+decimal; byte in decimal; byte in hexadecimal; and a raw byte
+(character). There is only a single type of read: a single raw byte.
+There is no native support for reading numbers in any base, nor is there
+support for reading or writing multiple numbers/bytes at once.
 
 Writing can be done from registers, literals, labels, and pointers;
 reading must be done to a register. As with the move instructions, if a
@@ -1636,13 +1636,13 @@ An example of each type of write:
     WCC 10  ; Write a newline character
 
 Keep in mind that newlines are not automatically written after each
-write instruction, you will need to manually write the character with a
-value of 10 to start writing on a new line. See the ASCII table at the
-end of the document for other character codes.
+write instruction, you will need to manually write the raw byte 10 (a
+newline character) to start writing on a new line. See the ASCII table
+at the end of the document for other common character codes.
 
-An example of reading a character:
+An example of reading a byte:
 
-    RCC rg0  ; Read a character from the console and save the byte code to rg0
+    RCC rg0  ; Read a byte from the console and save the byte code to rg0
 
 When an RCC instruction is reached, the program will pause execution and
 wait for the user to input a character to the console. Once a character
@@ -1650,12 +1650,21 @@ has been inputted, the corresponding byte value of the character will be
 copied to the given register. In this example, if the user types a
 lowercase “b”, 0x62 would be copied to rg0.
 
+Be aware that if the user types a character that requires multiple bytes
+to represent in UTF-8, RCC will still only retrieve a single byte. You
+will have to use RCC multiple times to get all of the bytes needed to
+represent the character. WCC will also only write a single byte at a
+time, though as long as the console has UTF-8 support, simply writing
+each UTF-8 byte one after the other will result in the correct character
+being displayed.
+
 Note that the user does not need to press enter after inputting a
 character, execution will resume immediately after a single character is
 typed. If you wish to wait for the user to press enter, compare the
-inputted character to 10 (the code for a newline character inserted when
-enter is pressed). The example program input.ext.asm contains a
-subroutine which does this.
+inputted character to 10 (the code for a newline character). The example
+program input.ext.asm contains a subroutine which does this. The user
+pressing the enter key will always give a single 10 byte, regardless of
+platform.
 
 File Handling
 
@@ -1669,9 +1678,9 @@ read or written to, and only one file can be open at a time. You should
 close the currently open file with the CFL instruction when you have
 finished operating on it.
 
-Filepaths given to OFL to be opened should be strings of character bytes
-in memory, ending with at least one 0 byte. An example static filepath
-definition is as follows:
+Filepaths given to OFL to be opened should be strings of UTF-8 character
+bytes in memory, ending with at least one 0 byte. An example static
+filepath definition is as follows:
 
     :FILE_PATH
     DAT "file.txt\0"
@@ -1700,35 +1709,36 @@ Reading and Writing
 
 Reading and writing from files is almost identical to how it is done
 from the console. Registers, literals, labels, and pointers can all be
-written, and reading must be done to a register. Only the lower byte of
-registers and literals is considered, and only a single byte of memory
-is read for labels and pointers. An open file can be both read from and
-written to while it is open, though changes written to the file will not
-be reflected in either the current AssEmbly program or other
-applications until the file is closed. If a file already has data in it
-when it is written to, the new data will be appended to the end.
+written, and reading must be done to a register. When using byte writing
+instructions, only the lower byte of registers and literals is
+considered, and only a single byte of memory is read for labels and
+pointers. An open file can be both read from and written to while it is
+open, though changes written to the file will not be reflected in either
+the current AssEmbly program or other applications until the file is
+closed. If a file already has data in it when it is written to, the new
+data will be appended to the end.
 
 An example of writing to a file:
 
     MVQ rg0, 0xFF0062
     OFL :FILE_PATH  ; Open file with the 0-terminated string at :FILE_PATH
 
-    WFN rg0  ; Write a 64-bit number to the console in decimal
+    WFN rg0  ; Write a 64-bit number to the file in decimal
     ; "16711778" (0xFF0062) is appended to the file
 
     WFC 10  ; Write a newline character
 
-    WFB rg0  ; Write a single byte to the console in decimal
+    WFB rg0  ; Write a single byte to the file in decimal
     ; "98" (0x62) is appended to the file
 
     WFC 10  ; Write a newline character
 
-    WFX rg0  ; Write a single byte to the console in hexadecimal
+    WFX rg0  ; Write a single byte to the file in hexadecimal
     ; "62" is appended to the file
 
     WFC 10  ; Write a newline character
 
-    WFC rg0  ; Write a single byte to the console as a character
+    WFC rg0  ; Write a single byte to the file as a character
     ; "b" (0x62) is appended to the file
 
     WFC 10  ; Write a newline character
@@ -1748,21 +1758,21 @@ following contents:
     b
 
 File contents can be read with the RFC instruction, taking a single
-register as an operand. The next unread character from the file will be
-stored in the specified register as its byte representation, and if the
-end of the file has been reached the file end flag will be set to 1. The
-only way to reset the current reading position in a file, and by
-extension to only way to unset the file end flag, is to close and reopen
-the file.
+register as an operand. The next unread byte from the file will be
+stored in the specified register. Text files are not treated specially,
+RFC will simply retrieve the characters 1 byte at a time as they are
+encoded in the file. If the end of the file has been reached after
+reading, the file end flag will be set to 1. The only way to reset the
+current reading position in a file is to close and reopen the file.
 
-To read all characters until the end of a file, you will need to
-continually read single characters from the file, testing the file end
-flag after every read, stopping as soon as it becomes set. The example
-program read_file.asm has an example of this, as well as this example
-from the bit testing section:
+To read all bytes until the end of a file, you will need to continually
+read single bytes from the file, testing the file end flag after every
+read, stopping as soon as it becomes set. The example program
+read_file.asm has an example of this, as well as this example from the
+bit testing section:
 
     :READ
-    RFC rg0  ; Read the next character from the open file to rg0
+    RFC rg0  ; Read the next byte from the open file to rg0
     TST rsf, 0b100  ; Check if the third bit is set
     JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
@@ -2521,20 +2531,20 @@ Full Instruction Reference
                 Console                      starting at the address in a register 
                                              as a decimal number to the console    
 
-  WCB           Write Byte to    Register    Write the lower 8-bits of a register  0xC4
-                Console                      value as a decimal number to the      
+  WCB           Write Numeric    Register    Write the lower 8-bits of a register  0xC4
+                Byte to Console              value as a decimal number to the      
                                              console                               
 
-  WCB           Write Byte to    Literal     Write the lower 8-bits of a literal   0xC5
-                Console                      value as a decimal number to the      
+  WCB           Write Numeric    Literal     Write the lower 8-bits of a literal   0xC5
+                Byte to Console              value as a decimal number to the      
                                              console                               
 
-  WCB           Write Byte to    Address     Write contents of memory at the       0xC6
-                Console                      address in a label as a decimal       
+  WCB           Write Numeric    Address     Write contents of memory at the       0xC6
+                Byte to Console              address in a label as a decimal       
                                              number to the console                 
 
-  WCB           Write Byte to    Pointer     Write contents of memory at the       0xC7
-                Console                      address in a register as a decimal    
+  WCB           Write Numeric    Pointer     Write contents of memory at the       0xC7
+                Byte to Console              address in a register as a decimal    
                                              number to the console                 
 
   WCX           Write            Register    Write the lower 8-bits of a register  0xC8
@@ -2553,18 +2563,18 @@ Full Instruction Reference
                 Hexadecimal to               address in a register as a            
                 Console                      hexadecimal number to the console     
 
-  WCC           Write Character  Register    Write the lower 8-bits of a register  0xCC
-                to Console                   value as a character to the console   
+  WCC           Write Raw Byte   Register    Write the lower 8-bits of a register  0xCC
+                to Console                   value as a raw byte to the console    
 
-  WCC           Write Character  Literal     Write the lower 8-bits of a literal   0xCD
-                to Console                   value as a character to the console   
+  WCC           Write Raw Byte   Literal     Write the lower 8-bits of a literal   0xCD
+                to Console                   value as a raw byte to the console    
 
-  WCC           Write Character  Address     Write contents of memory at the       0xCE
-                to Console                   address in a label as a character to  
+  WCC           Write Raw Byte   Address     Write contents of memory at the       0xCE
+                to Console                   address in a label as a raw byte to   
                                              the console                           
 
-  WCC           Write Character  Pointer     Write contents of memory at the       0xCF
-                to Console                   address in a register as a character  
+  WCC           Write Raw Byte   Pointer     Write contents of memory at the       0xCF
+                to Console                   address in a register as a raw byte   
                                              to the console                        
 
   File Writing                                                                     
@@ -2584,20 +2594,20 @@ Full Instruction Reference
                                              as a decimal number to the opened     
                                              file                                  
 
-  WFB           Write Byte to    Register    Write the lower 8-bits of a register  0xD4
-                File                         value as a decimal number to the      
+  WFB           Write Numeric    Register    Write the lower 8-bits of a register  0xD4
+                Byte to File                 value as a decimal number to the      
                                              opened file                           
 
-  WFB           Write Byte to    Literal     Write the lower 8-bits of a literal   0xD5
-                File                         value as a decimal number to the      
+  WFB           Write Numeric    Literal     Write the lower 8-bits of a literal   0xD5
+                Byte to File                 value as a decimal number to the      
                                              opened file                           
 
-  WFB           Write Byte to    Address     Write contents of memory at the       0xD6
-                File                         address in a label as a decimal       
+  WFB           Write Numeric    Address     Write contents of memory at the       0xD6
+                Byte to File                 address in a label as a decimal       
                                              number to the opened file             
 
-  WFB           Write Byte to    Pointer     Write contents of memory at the       0xD7
-                File                         address in a register as a decimal    
+  WFB           Write Numeric    Pointer     Write contents of memory at the       0xD7
+                Byte to File                 address in a register as a decimal    
                                              number to the opened file             
 
   WFX           Write            Register    Write the lower 8-bits of a register  0xD8
@@ -2616,20 +2626,20 @@ Full Instruction Reference
                 Hexadecimal to               address in a register as a            
                 File                         hexadecimal number to the opened file 
 
-  WFC           Write Character  Register    Write the lower 8-bits of a register  0xDC
-                to File                      value as a character to the opened    
+  WFC           Write Raw Byte   Register    Write the lower 8-bits of a register  0xDC
+                to File                      value as a raw byte to the opened     
                                              file                                  
 
-  WFC           Write Character  Literal     Write the lower 8-bits of a literal   0xDD
-                to File                      value as a character to the opened    
+  WFC           Write Raw Byte   Literal     Write the lower 8-bits of a literal   0xDD
+                to File                      value as a raw byte to the opened     
                                              file                                  
 
-  WFC           Write Character  Address     Write contents of memory at the       0xDE
-                to File                      address in a label as a character to  
+  WFC           Write Raw Byte   Address     Write contents of memory at the       0xDE
+                to File                      address in a label as a raw byte to   
                                              the opened file                       
 
-  WFC           Write Character  Pointer     Write contents of memory at the       0xDF
-                to File                      address in a register as a character  
+  WFC           Write Raw Byte   Pointer     Write contents of memory at the       0xDF
+                to File                      address in a register as a raw byte   
                                              to the opened file                    
 
   File                                                                             
@@ -2673,12 +2683,11 @@ Full Instruction Reference
 
   Reading                                                                          
 
-  RCC           Read Character   Register    Read a character from the console as  0xF0
-                from Console                 a byte, storing it in a register      
+  RCC           Read Raw Byte    Register    Read a raw byte from the console,     0xF0
+                from Console                 storing it in a register              
 
-  RFC           Read Character   Register    Read the next character from the      0xF1
-                from File                    currently open file as a byte,        
-                                             storing it in a register              
+  RFC           Read Raw Byte    Register    Read the next byte from the currently 0xF1
+                from File                    open file, storing it in a register   
   -----------------------------------------------------------------------------------------
 
 ASCII Table

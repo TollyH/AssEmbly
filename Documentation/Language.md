@@ -332,7 +332,7 @@ Z = Zero flag
 
 Each bit of this number can be considered as a `true` (`1`) or `false` (`0`) value as to whether the flag is "set" or not.
 
-The file end flag is set to `1` by the `RFC` operation if the character that has just been read from the currently open file was the last character in that file. It is reset to `0` only upon opening a file again.
+The file end flag is set to `1` by the `RFC` operation if the byte that has just been read from the currently open file was the last byte in that file. It is reset to `0` only upon opening a file again.
 
 The carry flag is set to `1` after a mathematical or bitwise operation if the result of that operation caused the destination register to go below `0` and wrap around to the upper limit, go above the limit of a 64-bit integer and wrap around to `0` (more info in the section on maths), otherwise it is proactively set to `0`.
 
@@ -931,7 +931,7 @@ This would be done like so:
 
 ```text
 :READ
-RFC rg0  ; Read the next character from the open file to rg0
+RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
 JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
@@ -1022,7 +1022,7 @@ Note that usually, to reduce the number of jumps required, `PAD`s would be place
 
 ### `DAT` — Byte Insertion
 
-The `DAT` directive inserts either a single byte, or a string of character bytes, into a program wherever the directive is located. As with `PAD`, it can be directly preceded by a label definition to point to the byte or string of bytes. If not being used with a string, `DAT` can only insert single bytes at once, meaning the maximum value is 255. It is also not suitable for inserting numbers to be used in 64-bit expecting operations (such as maths and bitwise), see the following section on the `NUM` directive for inserting 64-bit numbers.
+The `DAT` directive inserts either a single byte, or a string of UTF-8 character bytes, into a program wherever the directive is located. As with `PAD`, it can be directly preceded by a label definition to point to the byte or string of bytes. If not being used with a string, `DAT` can only insert single bytes at once, meaning the maximum value is 255. It is also not suitable for inserting numbers to be used in 64-bit expecting operations (such as maths and bitwise), see the following section on the `NUM` directive for inserting 64-bit numbers.
 
 An example of single byte insertion:
 
@@ -1076,7 +1076,7 @@ DAT "Hello!\0"  ; Store a string of character bytes after program data.
 ; Note that the string ends with '\0' (a 0 or "null" byte)
 ```
 
-This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console as a character, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained after this example.
+This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained after this example.
 
 The example program assembles down to the following bytes:
 
@@ -1299,7 +1299,7 @@ Be aware that some analyzers do not run until the end of the assembly process an
 
 ## Console Input and Output
 
-AssEmbly has native support for reading and writing from the console. There are four types of write that can be performed: 64-bit number in decimal; byte in decimal; byte in hexadecimal; and byte as a character. There is only a single type of read: a character as a byte. There is no native support for reading numbers in any base, nor is there support for reading or writing multiple numbers/characters at once.
+AssEmbly has native support for reading and writing from the console. There are four types of write that can be performed: 64-bit number in decimal; byte in decimal; byte in hexadecimal; and a raw byte (character). There is only a single type of read: a single raw byte. There is no native support for reading numbers in any base, nor is there support for reading or writing multiple numbers/bytes at once.
 
 Writing can be done from registers, literals, labels, and pointers; reading must be done to a register. As with the move instructions, if a byte write instruction is used on a register or literal, only the lowest byte will be considered. If one is used on a label or a pointer, only a single byte of memory will be read, as an opposed to the 8 bytes that are read when writing a 64-bit number.
 
@@ -1329,17 +1329,19 @@ WCC rg0  ; Write a single byte to the console as a character
 WCC 10  ; Write a newline character
 ```
 
-Keep in mind that newlines are not automatically written after each write instruction, you will need to manually write the character with a value of `10` to start writing on a new line. See the ASCII table at the end of the document for other character codes.
+Keep in mind that newlines are not automatically written after each write instruction, you will need to manually write the raw byte `10` (a newline character) to start writing on a new line. See the ASCII table at the end of the document for other common character codes.
 
-An example of reading a character:
+An example of reading a byte:
 
 ```text
-RCC rg0  ; Read a character from the console and save the byte code to rg0
+RCC rg0  ; Read a byte from the console and save the byte code to rg0
 ```
 
 When an `RCC` instruction is reached, the program will pause execution and wait for the user to input a character to the console. Once a character has been inputted, the corresponding byte value of the character will be copied to the given register. In this example, if the user types a lowercase "b", `0x62` would be copied to `rg0`.
 
-Note that the user does not need to press enter after inputting a character, execution will resume immediately after a single character is typed. If you wish to wait for the user to press enter, compare the inputted character to `10` (the code for a newline character inserted when enter is pressed). The example program `input.ext.asm` contains a subroutine which does this.
+Be aware that if the user types a character that requires multiple bytes to represent in UTF-8, `RCC` will still only retrieve a single byte. You will have to use `RCC` multiple times to get all of the bytes needed to represent the character. `WCC` will also only write a single byte at a time, though as long as the console has UTF-8 support, simply writing each UTF-8 byte one after the other will result in the correct character being displayed.
+
+Note that the user does not need to press enter after inputting a character, execution will resume immediately after a single character is typed. If you wish to wait for the user to press enter, compare the inputted character to `10` (the code for a newline character). The example program `input.ext.asm` contains a subroutine which does this. The user pressing the enter key will always give a single `10` byte, regardless of platform.
 
 ## File Handling
 
@@ -1349,7 +1351,7 @@ As well as interfacing with the console, AssEmbly also has native support for ha
 
 Files must be explicitly opened with the `OFL` instruction before they can read or written to, and only one file can be open at a time. You should close the currently open file with the `CFL` instruction when you have finished operating on it.
 
-Filepaths given to `OFL` to be opened should be strings of character bytes in memory, ending with at least one `0` byte. An example static filepath definition is as follows:
+Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes in memory, ending with at least one `0` byte. An example static filepath definition is as follows:
 
 ```text
 :FILE_PATH
@@ -1377,7 +1379,7 @@ CFL
 
 ### Reading and Writing
 
-Reading and writing from files is almost identical to how it is done from the console. Registers, literals, labels, and pointers can all be written, and reading must be done to a register. Only the lower byte of registers and literals is considered, and only a single byte of memory is read for labels and pointers. An open file can be both read from and written to while it is open, though changes written to the file will not be reflected in either the current AssEmbly program or other applications until the file is closed. If a file already has data in it when it is written to, the new data will be **appended to the end**.
+Reading and writing from files is almost identical to how it is done from the console. Registers, literals, labels, and pointers can all be written, and reading must be done to a register. When using byte writing instructions, only the lower byte of registers and literals is considered, and only a single byte of memory is read for labels and pointers. An open file can be both read from and written to while it is open, though changes written to the file will not be reflected in either the current AssEmbly program or other applications until the file is closed. If a file already has data in it when it is written to, the new data will be **appended to the end**.
 
 An example of writing to a file:
 
@@ -1385,22 +1387,22 @@ An example of writing to a file:
 MVQ rg0, 0xFF0062
 OFL :FILE_PATH  ; Open file with the 0-terminated string at :FILE_PATH
 
-WFN rg0  ; Write a 64-bit number to the console in decimal
+WFN rg0  ; Write a 64-bit number to the file in decimal
 ; "16711778" (0xFF0062) is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFB rg0  ; Write a single byte to the console in decimal
+WFB rg0  ; Write a single byte to the file in decimal
 ; "98" (0x62) is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFX rg0  ; Write a single byte to the console in hexadecimal
+WFX rg0  ; Write a single byte to the file in hexadecimal
 ; "62" is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFC rg0  ; Write a single byte to the console as a character
+WFC rg0  ; Write a single byte to the file as a character
 ; "b" (0x62) is appended to the file
 
 WFC 10  ; Write a newline character
@@ -1422,13 +1424,13 @@ b
 
 ```
 
-File contents can be read with the `RFC` instruction, taking a single register as an operand. The next unread character from the file will be stored in the specified register as its byte representation, and if the end of the file has been reached the file end flag will be set to `1`. The only way to reset the current reading position in a file, and by extension to only way to unset the file end flag, is to close and reopen the file.
+File contents can be read with the `RFC` instruction, taking a single register as an operand. The next unread byte from the file will be stored in the specified register. Text files are not treated specially, `RFC` will simply retrieve the characters 1 byte at a time as they are encoded in the file. If the end of the file has been reached after reading, the file end flag will be set to `1`. The only way to reset the current reading position in a file is to close and reopen the file.
 
-To read all characters until the end of a file, you will need to continually read single characters from the file, testing the file end flag after every read, stopping as soon as it becomes set. The example program `read_file.asm` has an example of this, as well as this example from the bit testing section:
+To read all bytes until the end of a file, you will need to continually read single bytes from the file, testing the file end flag after every read, stopping as soon as it becomes set. The example program `read_file.asm` has an example of this, as well as this example from the bit testing section:
 
 ```text
 :READ
-RFC rg0  ; Read the next character from the open file to rg0
+RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
 JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
@@ -1764,35 +1766,35 @@ Text bytes read from files **will not** be automatically converted to UTF-8 if t
 | `WCN`         | Write Number to Console                             | Literal                      | Write a literal value as a decimal number to the console                                                            | `0xC1` |
 | `WCN`         | Write Number to Console                             | Address                      | Write 64-bits (4 bytes) of memory starting at the address in a label as a decimal number to the console             | `0xC2` |
 | `WCN`         | Write Number to Console                             | Pointer                      | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the console          | `0xC3` |
-| `WCB`         | Write Byte to Console                               | Register                     | Write the lower 8-bits of a register value as a decimal number to the console                                       | `0xC4` |
-| `WCB`         | Write Byte to Console                               | Literal                      | Write the lower 8-bits of a literal value as a decimal number to the console                                        | `0xC5` |
-| `WCB`         | Write Byte to Console                               | Address                      | Write contents of memory at the address in a label as a decimal number to the console                               | `0xC6` |
-| `WCB`         | Write Byte to Console                               | Pointer                      | Write contents of memory at the address in a register as a decimal number to the console                            | `0xC7` |
+| `WCB`         | Write Numeric Byte to Console                       | Register                     | Write the lower 8-bits of a register value as a decimal number to the console                                       | `0xC4` |
+| `WCB`         | Write Numeric Byte to Console                       | Literal                      | Write the lower 8-bits of a literal value as a decimal number to the console                                        | `0xC5` |
+| `WCB`         | Write Numeric Byte to Console                       | Address                      | Write contents of memory at the address in a label as a decimal number to the console                               | `0xC6` |
+| `WCB`         | Write Numeric Byte to Console                       | Pointer                      | Write contents of memory at the address in a register as a decimal number to the console                            | `0xC7` |
 | `WCX`         | Write Hexadecimal to Console                        | Register                     | Write the lower 8-bits of a register value as a hexadecimal number to the console                                   | `0xC8` |
 | `WCX`         | Write Hexadecimal to Console                        | Literal                      | Write the lower 8-bits of a literal value as a hexadecimal number to the console                                    | `0xC9` |
 | `WCX`         | Write Hexadecimal to Console                        | Address                      | Write contents of memory at the address in a label as a hexadecimal number to the console                           | `0xCA` |
 | `WCX`         | Write Hexadecimal to Console                        | Pointer                      | Write contents of memory at the address in a register as a hexadecimal number to the console                        | `0xCB` |
-| `WCC`         | Write Character to Console                          | Register                     | Write the lower 8-bits of a register value as a character to the console                                            | `0xCC` |
-| `WCC`         | Write Character to Console                          | Literal                      | Write the lower 8-bits of a literal value as a character to the console                                             | `0xCD` |
-| `WCC`         | Write Character to Console                          | Address                      | Write contents of memory at the address in a label as a character to the console                                    | `0xCE` |
-| `WCC`         | Write Character to Console                          | Pointer                      | Write contents of memory at the address in a register as a character to the console                                 | `0xCF` |
+| `WCC`         | Write Raw Byte to Console                           | Register                     | Write the lower 8-bits of a register value as a raw byte to the console                                             | `0xCC` |
+| `WCC`         | Write Raw Byte to Console                           | Literal                      | Write the lower 8-bits of a literal value as a raw byte to the console                                              | `0xCD` |
+| `WCC`         | Write Raw Byte to Console                           | Address                      | Write contents of memory at the address in a label as a raw byte to the console                                     | `0xCE` |
+| `WCC`         | Write Raw Byte to Console                           | Pointer                      | Write contents of memory at the address in a register as a raw byte to the console                                  | `0xCF` |
 | **File Writing**                                                                                                                                                                                                              |||||
 | `WFN`         | Write Number to File                                | Register                     | Write a register value as a decimal number to the opened file                                                       | `0xD0` |
 | `WFN`         | Write Number to File                                | Literal                      | Write a literal value as a decimal number to the opened file                                                        | `0xD1` |
 | `WFN`         | Write Number to File                                | Address                      | Write 64-bits (4 bytes) of memory starting at the address in a label as a decimal number to the opened file         | `0xD2` |
 | `WFN`         | Write Number to File                                | Pointer                      | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the opened file      | `0xD3` |
-| `WFB`         | Write Byte to File                                  | Register                     | Write the lower 8-bits of a register value as a decimal number to the opened file                                   | `0xD4` |
-| `WFB`         | Write Byte to File                                  | Literal                      | Write the lower 8-bits of a literal value as a decimal number to the opened file                                    | `0xD5` |
-| `WFB`         | Write Byte to File                                  | Address                      | Write contents of memory at the address in a label as a decimal number to the opened file                           | `0xD6` |
-| `WFB`         | Write Byte to File                                  | Pointer                      | Write contents of memory at the address in a register as a decimal number to the opened file                        | `0xD7` |
+| `WFB`         | Write Numeric Byte to File                          | Register                     | Write the lower 8-bits of a register value as a decimal number to the opened file                                   | `0xD4` |
+| `WFB`         | Write Numeric Byte to File                          | Literal                      | Write the lower 8-bits of a literal value as a decimal number to the opened file                                    | `0xD5` |
+| `WFB`         | Write Numeric Byte to File                          | Address                      | Write contents of memory at the address in a label as a decimal number to the opened file                           | `0xD6` |
+| `WFB`         | Write Numeric Byte to File                          | Pointer                      | Write contents of memory at the address in a register as a decimal number to the opened file                        | `0xD7` |
 | `WFX`         | Write Hexadecimal to File                           | Register                     | Write the lower 8-bits of a register value as a hexadecimal number to the opened file                               | `0xD8` |
 | `WFX`         | Write Hexadecimal to File                           | Literal                      | Write the lower 8-bits of a literal value as a hexadecimal number to the opened file                                | `0xD9` |
 | `WFX`         | Write Hexadecimal to File                           | Address                      | Write contents of memory at the address in a label as a hexadecimal number to the opened file                       | `0xDA` |
 | `WFX`         | Write Hexadecimal to File                           | Pointer                      | Write contents of memory at the address in a register as a hexadecimal number to the opened file                    | `0xDB` |
-| `WFC`         | Write Character to File                             | Register                     | Write the lower 8-bits of a register value as a character to the opened file                                        | `0xDC` |
-| `WFC`         | Write Character to File                             | Literal                      | Write the lower 8-bits of a literal value as a character to the opened file                                         | `0xDD` |
-| `WFC`         | Write Character to File                             | Address                      | Write contents of memory at the address in a label as a character to the opened file                                | `0xDE` |
-| `WFC`         | Write Character to File                             | Pointer                      | Write contents of memory at the address in a register as a character to the opened file                             | `0xDF` |
+| `WFC`         | Write Raw Byte to File                              | Register                     | Write the lower 8-bits of a register value as a raw byte to the opened file                                         | `0xDC` |
+| `WFC`         | Write Raw Byte to File                              | Literal                      | Write the lower 8-bits of a literal value as a raw byte to the opened file                                          | `0xDD` |
+| `WFC`         | Write Raw Byte to File                              | Address                      | Write contents of memory at the address in a label as a raw byte to the opened file                                 | `0xDE` |
+| `WFC`         | Write Raw Byte to File                              | Pointer                      | Write contents of memory at the address in a register as a raw byte to the opened file                              | `0xDF` |
 | **File Operations**                                                                                                                                                                                                           |||||
 | `OFL`         | Open File                                           | Address                      | Open the file at the path specified by a `0x00` terminated string in memory starting at an address in a label       | `0xE0` |
 | `OFL`         | Open File                                           | Pointer                      | Open the file at the path specified by a `0x00` terminated string in memory starting at an address in a register    | `0xE1` |
@@ -1804,8 +1806,8 @@ Text bytes read from files **will not** be automatically converted to UTF-8 if t
 | `FSZ`         | Get File Size                                       | Register, Address            | In a register, store the byte size of the file at the path specified in memory starting at an address in a label    | `0xE7` |
 | `FSZ`         | Get File Size                                       | Register, Pointer            | In a register, store the byte size of the file at the path specified in memory starting at an address in a register | `0xE8` |
 | **Reading**                                                                                                                                                                                                                   |||||
-| `RCC`         | Read Character from Console                         | Register                     | Read a character from the console as a byte, storing it in a register                                               | `0xF0` |
-| `RFC`         | Read Character from File                            | Register                     | Read the next character from the currently open file as a byte, storing it in a register                            | `0xF1` |
+| `RCC`         | Read Raw Byte from Console                          | Register                     | Read a raw byte from the console, storing it in a register                                                          | `0xF0` |
+| `RFC`         | Read Raw Byte from File                             | Register                     | Read the next byte from the currently open file, storing it in a register                                           | `0xF1` |
 
 ## ASCII Table
 

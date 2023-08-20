@@ -734,9 +734,9 @@ Z = Zero flag</code></pre>
 (<code>1</code>) or <code>false</code> (<code>0</code>) value as to
 whether the flag is “set” or not.</p>
 <p>The file end flag is set to <code>1</code> by the <code>RFC</code>
-operation if the character that has just been read from the currently
-open file was the last character in that file. It is reset to
-<code>0</code> only upon opening a file again.</p>
+operation if the byte that has just been read from the currently open
+file was the last byte in that file. It is reset to <code>0</code> only
+upon opening a file again.</p>
 <p>The carry flag is set to <code>1</code> after a mathematical or
 bitwise operation if the result of that operation caused the destination
 register to go below <code>0</code> and wrap around to the upper limit,
@@ -1316,7 +1316,7 @@ is set (the file end flag), as there isn’t a built-in conditional jump
 that checks this flag.</p>
 <p>This would be done like so:</p>
 <pre class="text"><code>:READ
-RFC rg0  ; Read the next character from the open file to rg0
+RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
 JZO :READ  ; If it isn&#39;t set (i.e. it is equal to 0), jump back to READ</code></pre>
 <p>This program will keep looping until the third bit of
@@ -1403,8 +1403,8 @@ ADD rg0, 8  ; Add 8 to rg0, it now points to the next number</code></pre>
 put in the middle of the program here for demonstration purposes.</p>
 <h3 id="dat-byte-insertion"><code>DAT</code> — Byte Insertion</h3>
 <p>The <code>DAT</code> directive inserts either a single byte, or a
-string of character bytes, into a program wherever the directive is
-located. As with <code>PAD</code>, it can be directly preceded by a
+string of UTF-8 character bytes, into a program wherever the directive
+is located. As with <code>PAD</code>, it can be directly preceded by a
 label definition to point to the byte or string of bytes. If not being
 used with a string, <code>DAT</code> can only insert single bytes at
 once, meaning the maximum value is 255. It is also not suitable for
@@ -1448,15 +1448,15 @@ HLT  ; End execution to stop processor running into string data
 DAT &quot;Hello!\0&quot;  ; Store a string of character bytes after program data.
 ; Note that the string ends with &#39;\0&#39; (a 0 or &quot;null&quot; byte)</code></pre>
 <p>This program will loop through the string, placing the byte value of
-each character in <code>rg0</code> and writing it to the console as a
-character, until it reaches the 0 byte, when it will then stop to avoid
-looping infinitely. While not a strict requirement, terminating a string
-with a 0 byte like this should always be done to give an easy way of
-knowing when the end of a string has been reached. Placing a
-<code>DAT 0</code> directive on the line after the string insertion will
-also achieve this 0 termination, and will result in the exact same bytes
-being assembled, however using the <code>\0</code> escape sequence is
-more compact. Escape sequences are explained after this example.</p>
+each character in <code>rg0</code> and writing it to the console, until
+it reaches the 0 byte, when it will then stop to avoid looping
+infinitely. While not a strict requirement, terminating a string with a
+0 byte like this should always be done to give an easy way of knowing
+when the end of a string has been reached. Placing a <code>DAT 0</code>
+directive on the line after the string insertion will also achieve this
+0 termination, and will result in the exact same bytes being assembled,
+however using the <code>\0</code> escape sequence is more compact.
+Escape sequences are explained after this example.</p>
 <p>The example program assembles down to the following bytes:</p>
 <pre class="text"><code>99 06 2E 00 00 00 00 00 00 00 83 07 06 75 07 00 00 00 00 00 00 00 00 04 2D 00 00 00 00 00 00 00 14 06 CC 07 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 21 00</code></pre>
 <p>Which can be broken down to:</p>
@@ -1759,10 +1759,10 @@ the analyzer.</p>
 <h2 id="console-input-and-output">Console Input and Output</h2>
 <p>AssEmbly has native support for reading and writing from the console.
 There are four types of write that can be performed: 64-bit number in
-decimal; byte in decimal; byte in hexadecimal; and byte as a character.
-There is only a single type of read: a character as a byte. There is no
-native support for reading numbers in any base, nor is there support for
-reading or writing multiple numbers/characters at once.</p>
+decimal; byte in decimal; byte in hexadecimal; and a raw byte
+(character). There is only a single type of read: a single raw byte.
+There is no native support for reading numbers in any base, nor is there
+support for reading or writing multiple numbers/bytes at once.</p>
 <p>Writing can be done from registers, literals, labels, and pointers;
 reading must be done to a register. As with the move instructions, if a
 byte write instruction is used on a register or literal, only the lowest
@@ -1792,23 +1792,32 @@ WCC rg0  ; Write a single byte to the console as a character
 
 WCC 10  ; Write a newline character</code></pre>
 <p>Keep in mind that newlines are not automatically written after each
-write instruction, you will need to manually write the character with a
-value of <code>10</code> to start writing on a new line. See the ASCII
-table at the end of the document for other character codes.</p>
-<p>An example of reading a character:</p>
-<pre class="text"><code>RCC rg0  ; Read a character from the console and save the byte code to rg0</code></pre>
+write instruction, you will need to manually write the raw byte
+<code>10</code> (a newline character) to start writing on a new line.
+See the ASCII table at the end of the document for other common
+character codes.</p>
+<p>An example of reading a byte:</p>
+<pre class="text"><code>RCC rg0  ; Read a byte from the console and save the byte code to rg0</code></pre>
 <p>When an <code>RCC</code> instruction is reached, the program will
 pause execution and wait for the user to input a character to the
 console. Once a character has been inputted, the corresponding byte
 value of the character will be copied to the given register. In this
 example, if the user types a lowercase “b”, <code>0x62</code> would be
 copied to <code>rg0</code>.</p>
+<p>Be aware that if the user types a character that requires multiple
+bytes to represent in UTF-8, <code>RCC</code> will still only retrieve a
+single byte. You will have to use <code>RCC</code> multiple times to get
+all of the bytes needed to represent the character. <code>WCC</code>
+will also only write a single byte at a time, though as long as the
+console has UTF-8 support, simply writing each UTF-8 byte one after the
+other will result in the correct character being displayed.</p>
 <p>Note that the user does not need to press enter after inputting a
 character, execution will resume immediately after a single character is
 typed. If you wish to wait for the user to press enter, compare the
-inputted character to <code>10</code> (the code for a newline character
-inserted when enter is pressed). The example program
-<code>input.ext.asm</code> contains a subroutine which does this.</p>
+inputted character to <code>10</code> (the code for a newline
+character). The example program <code>input.ext.asm</code> contains a
+subroutine which does this. The user pressing the enter key will always
+give a single <code>10</code> byte, regardless of platform.</p>
 <h2 id="file-handling">File Handling</h2>
 <p>As well as interfacing with the console, AssEmbly also has native
 support for handling files.</p>
@@ -1818,8 +1827,8 @@ before they can read or written to, and only one file can be open at a
 time. You should close the currently open file with the <code>CFL</code>
 instruction when you have finished operating on it.</p>
 <p>Filepaths given to <code>OFL</code> to be opened should be strings of
-character bytes in memory, ending with at least one <code>0</code> byte.
-An example static filepath definition is as follows:</p>
+UTF-8 character bytes in memory, ending with at least one <code>0</code>
+byte. An example static filepath definition is as follows:</p>
 <pre class="text"><code>:FILE_PATH
 DAT &quot;file.txt\0&quot;</code></pre>
 <p>This would normally be placed after all program code and a
@@ -1840,34 +1849,34 @@ when it is opened, an empty one will be created.</p>
 <h3 id="reading-and-writing">Reading and Writing</h3>
 <p>Reading and writing from files is almost identical to how it is done
 from the console. Registers, literals, labels, and pointers can all be
-written, and reading must be done to a register. Only the lower byte of
-registers and literals is considered, and only a single byte of memory
-is read for labels and pointers. An open file can be both read from and
-written to while it is open, though changes written to the file will not
-be reflected in either the current AssEmbly program or other
-applications until the file is closed. If a file already has data in it
-when it is written to, the new data will be <strong>appended to the
-end</strong>.</p>
+written, and reading must be done to a register. When using byte writing
+instructions, only the lower byte of registers and literals is
+considered, and only a single byte of memory is read for labels and
+pointers. An open file can be both read from and written to while it is
+open, though changes written to the file will not be reflected in either
+the current AssEmbly program or other applications until the file is
+closed. If a file already has data in it when it is written to, the new
+data will be <strong>appended to the end</strong>.</p>
 <p>An example of writing to a file:</p>
 <pre class="text"><code>MVQ rg0, 0xFF0062
 OFL :FILE_PATH  ; Open file with the 0-terminated string at :FILE_PATH
 
-WFN rg0  ; Write a 64-bit number to the console in decimal
+WFN rg0  ; Write a 64-bit number to the file in decimal
 ; &quot;16711778&quot; (0xFF0062) is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFB rg0  ; Write a single byte to the console in decimal
+WFB rg0  ; Write a single byte to the file in decimal
 ; &quot;98&quot; (0x62) is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFX rg0  ; Write a single byte to the console in hexadecimal
+WFX rg0  ; Write a single byte to the file in hexadecimal
 ; &quot;62&quot; is appended to the file
 
 WFC 10  ; Write a newline character
 
-WFC rg0  ; Write a single byte to the console as a character
+WFC rg0  ; Write a single byte to the file as a character
 ; &quot;b&quot; (0x62) is appended to the file
 
 WFC 10  ; Write a newline character
@@ -1885,19 +1894,20 @@ DAT &quot;file.txt\0&quot;</code></pre>
 b
 </code></pre>
 <p>File contents can be read with the <code>RFC</code> instruction,
-taking a single register as an operand. The next unread character from
-the file will be stored in the specified register as its byte
-representation, and if the end of the file has been reached the file end
-flag will be set to <code>1</code>. The only way to reset the current
-reading position in a file, and by extension to only way to unset the
-file end flag, is to close and reopen the file.</p>
-<p>To read all characters until the end of a file, you will need to
-continually read single characters from the file, testing the file end
-flag after every read, stopping as soon as it becomes set. The example
+taking a single register as an operand. The next unread byte from the
+file will be stored in the specified register. Text files are not
+treated specially, <code>RFC</code> will simply retrieve the characters
+1 byte at a time as they are encoded in the file. If the end of the file
+has been reached after reading, the file end flag will be set to
+<code>1</code>. The only way to reset the current reading position in a
+file is to close and reopen the file.</p>
+<p>To read all bytes until the end of a file, you will need to
+continually read single bytes from the file, testing the file end flag
+after every read, stopping as soon as it becomes set. The example
 program <code>read_file.asm</code> has an example of this, as well as
 this example from the bit testing section:</p>
 <pre class="text"><code>:READ
-RFC rg0  ; Read the next character from the open file to rg0
+RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
 JZO :READ  ; If it isn&#39;t set (i.e. it is equal to 0), jump back to READ</code></pre>
 <h3 id="other-operations">Other Operations</h3>
@@ -3222,7 +3232,7 @@ register as a decimal number to the console</td>
 </tr>
 <tr class="even">
 <td><code>WCB</code></td>
-<td>Write Byte to Console</td>
+<td>Write Numeric Byte to Console</td>
 <td>Register</td>
 <td>Write the lower 8-bits of a register value as a decimal number to
 the console</td>
@@ -3230,7 +3240,7 @@ the console</td>
 </tr>
 <tr class="odd">
 <td><code>WCB</code></td>
-<td>Write Byte to Console</td>
+<td>Write Numeric Byte to Console</td>
 <td>Literal</td>
 <td>Write the lower 8-bits of a literal value as a decimal number to the
 console</td>
@@ -3238,7 +3248,7 @@ console</td>
 </tr>
 <tr class="even">
 <td><code>WCB</code></td>
-<td>Write Byte to Console</td>
+<td>Write Numeric Byte to Console</td>
 <td>Address</td>
 <td>Write contents of memory at the address in a label as a decimal
 number to the console</td>
@@ -3246,7 +3256,7 @@ number to the console</td>
 </tr>
 <tr class="odd">
 <td><code>WCB</code></td>
-<td>Write Byte to Console</td>
+<td>Write Numeric Byte to Console</td>
 <td>Pointer</td>
 <td>Write contents of memory at the address in a register as a decimal
 number to the console</td>
@@ -3286,33 +3296,33 @@ hexadecimal number to the console</td>
 </tr>
 <tr class="even">
 <td><code>WCC</code></td>
-<td>Write Character to Console</td>
+<td>Write Raw Byte to Console</td>
 <td>Register</td>
-<td>Write the lower 8-bits of a register value as a character to the
+<td>Write the lower 8-bits of a register value as a raw byte to the
 console</td>
 <td><code>0xCC</code></td>
 </tr>
 <tr class="odd">
 <td><code>WCC</code></td>
-<td>Write Character to Console</td>
+<td>Write Raw Byte to Console</td>
 <td>Literal</td>
-<td>Write the lower 8-bits of a literal value as a character to the
+<td>Write the lower 8-bits of a literal value as a raw byte to the
 console</td>
 <td><code>0xCD</code></td>
 </tr>
 <tr class="even">
 <td><code>WCC</code></td>
-<td>Write Character to Console</td>
+<td>Write Raw Byte to Console</td>
 <td>Address</td>
-<td>Write contents of memory at the address in a label as a character to
+<td>Write contents of memory at the address in a label as a raw byte to
 the console</td>
 <td><code>0xCE</code></td>
 </tr>
 <tr class="odd">
 <td><code>WCC</code></td>
-<td>Write Character to Console</td>
+<td>Write Raw Byte to Console</td>
 <td>Pointer</td>
-<td>Write contents of memory at the address in a register as a character
+<td>Write contents of memory at the address in a register as a raw byte
 to the console</td>
 <td><code>0xCF</code></td>
 </tr>
@@ -3355,7 +3365,7 @@ register as a decimal number to the opened file</td>
 </tr>
 <tr class="odd">
 <td><code>WFB</code></td>
-<td>Write Byte to File</td>
+<td>Write Numeric Byte to File</td>
 <td>Register</td>
 <td>Write the lower 8-bits of a register value as a decimal number to
 the opened file</td>
@@ -3363,7 +3373,7 @@ the opened file</td>
 </tr>
 <tr class="even">
 <td><code>WFB</code></td>
-<td>Write Byte to File</td>
+<td>Write Numeric Byte to File</td>
 <td>Literal</td>
 <td>Write the lower 8-bits of a literal value as a decimal number to the
 opened file</td>
@@ -3371,7 +3381,7 @@ opened file</td>
 </tr>
 <tr class="odd">
 <td><code>WFB</code></td>
-<td>Write Byte to File</td>
+<td>Write Numeric Byte to File</td>
 <td>Address</td>
 <td>Write contents of memory at the address in a label as a decimal
 number to the opened file</td>
@@ -3379,7 +3389,7 @@ number to the opened file</td>
 </tr>
 <tr class="even">
 <td><code>WFB</code></td>
-<td>Write Byte to File</td>
+<td>Write Numeric Byte to File</td>
 <td>Pointer</td>
 <td>Write contents of memory at the address in a register as a decimal
 number to the opened file</td>
@@ -3419,33 +3429,33 @@ hexadecimal number to the opened file</td>
 </tr>
 <tr class="odd">
 <td><code>WFC</code></td>
-<td>Write Character to File</td>
+<td>Write Raw Byte to File</td>
 <td>Register</td>
-<td>Write the lower 8-bits of a register value as a character to the
+<td>Write the lower 8-bits of a register value as a raw byte to the
 opened file</td>
 <td><code>0xDC</code></td>
 </tr>
 <tr class="even">
 <td><code>WFC</code></td>
-<td>Write Character to File</td>
+<td>Write Raw Byte to File</td>
 <td>Literal</td>
-<td>Write the lower 8-bits of a literal value as a character to the
+<td>Write the lower 8-bits of a literal value as a raw byte to the
 opened file</td>
 <td><code>0xDD</code></td>
 </tr>
 <tr class="odd">
 <td><code>WFC</code></td>
-<td>Write Character to File</td>
+<td>Write Raw Byte to File</td>
 <td>Address</td>
-<td>Write contents of memory at the address in a label as a character to
+<td>Write contents of memory at the address in a label as a raw byte to
 the opened file</td>
 <td><code>0xDE</code></td>
 </tr>
 <tr class="even">
 <td><code>WFC</code></td>
-<td>Write Character to File</td>
+<td>Write Raw Byte to File</td>
 <td>Pointer</td>
-<td>Write contents of memory at the address in a register as a character
+<td>Write contents of memory at the address in a register as a raw byte
 to the opened file</td>
 <td><code>0xDF</code></td>
 </tr>
@@ -3538,18 +3548,17 @@ in memory starting at an address in a register</td>
 </tr>
 <tr class="even">
 <td><code>RCC</code></td>
-<td>Read Character from Console</td>
+<td>Read Raw Byte from Console</td>
 <td>Register</td>
-<td>Read a character from the console as a byte, storing it in a
-register</td>
+<td>Read a raw byte from the console, storing it in a register</td>
 <td><code>0xF0</code></td>
 </tr>
 <tr class="odd">
 <td><code>RFC</code></td>
-<td>Read Character from File</td>
+<td>Read Raw Byte from File</td>
 <td>Register</td>
-<td>Read the next character from the currently open file as a byte,
-storing it in a register</td>
+<td>Read the next byte from the currently open file, storing it in a
+register</td>
 <td><code>0xF1</code></td>
 </tr>
 </tbody>
