@@ -244,9 +244,10 @@ namespace AssEmbly
         private Dictionary<(string File, int Line), string[]> lineOperands = new();
         private bool instructionIsData = false;
         private bool instructionIsImport = false;
+        private bool instructionIsString = false;
         private List<(int Line, string File)> dataInsertionLines = new();
         private HashSet<ulong> dataAddresses = new();
-        private List<(int Line, string File)> stringInsertionLines = new();
+        private List<(int Line, string File)> endingStringInsertionLines = new();
         private List<(int Line, string File)> importLines = new();
         private Dictionary<string, int> lastExecutableLine = new();
         private Dictionary<(int Line, string File), ulong> jumpCallToLabels = new();
@@ -257,6 +258,7 @@ namespace AssEmbly
         private ulong currentAddress = 0;
         private bool lastInstructionWasTerminator = false;
         private bool lastInstructionWasData = false;
+        private bool lastInstructionWasString = false;
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
@@ -269,6 +271,7 @@ namespace AssEmbly
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
             instructionIsImport = mnemonic.ToUpper() == "IMP";
+            instructionIsString = false;
 
             if (instructionIsData)
             {
@@ -276,7 +279,13 @@ namespace AssEmbly
                 _ = dataAddresses.Add(currentAddress);
                 if (operands[0][0] == '"')
                 {
-                    stringInsertionLines.Add((line, file));
+                    instructionIsString = true;
+                    if (lastInstructionWasString)
+                    {
+                        // Only store the last in a chain of string insertions
+                        endingStringInsertionLines.RemoveAt(endingStringInsertionLines.Count - 1);
+                    }
+                    endingStringInsertionLines.Add((line, file));
                 }
             }
             else if (instructionIsImport)
@@ -313,6 +322,7 @@ namespace AssEmbly
                 lastInstructionWasTerminator = terminators.Contains(newBytes[0]);
             }
             lastInstructionWasData = instructionIsData;
+            lastInstructionWasString = instructionIsString;
             lastMnemonic = mnemonic;
             lastOperands = operands;
             lastImportStack = importStack;
@@ -436,7 +446,7 @@ namespace AssEmbly
         {
             // Warning 0006: String insertion is not immediately followed by a 0 (null) byte.
             List<Warning> warnings = new();
-            foreach ((int stringLine, string stringFile) in stringInsertionLines)
+            foreach ((int stringLine, string stringFile) in endingStringInsertionLines)
             {
                 string[] stringOperands = lineOperands[(stringFile, stringLine)];
                 byte[] stringBytes = Assembler.ParseLiteral(stringOperands[0], true);
