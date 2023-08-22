@@ -80,12 +80,12 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
+
+            string sourcePath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(sourcePath)!;
+            string filename = Path.GetFileNameWithoutExtension(sourcePath);
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             HashSet<int> disabledErrors = new();
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
@@ -141,12 +141,11 @@ namespace AssEmbly
                     disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
                 }
             }
-            string filename = string.Join('.', args[1].Split('.')[..^1]);
             byte[] program;
             string debugInfo;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
                     disabledErrors, disabledWarnings, disabledSuggestions,
                     out debugInfo, out List<Warning> warnings);
                 foreach (Warning warning in warnings)
@@ -195,7 +194,7 @@ namespace AssEmbly
                 File.WriteAllText(destination + ".adi", debugInfo);
             }
 
-            Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: \"{destination}\"");
+            Console.WriteLine($"Program assembled into {program.LongLength} bytes successfully. It can be found at: \"{Path.GetFullPath(destination)}\"");
         }
 
         private static void ExecuteProgram(string[] args)
@@ -216,12 +215,11 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
+
+            string appPath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(appPath)!;
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             ulong memSize = 2046;
             foreach (string a in args)
             {
@@ -241,7 +239,7 @@ namespace AssEmbly
             Processor processor = new(memSize, args.Contains("--v1-call-stack"));
             try
             {
-                processor.LoadProgram(File.ReadAllBytes(args[1]));
+                processor.LoadProgram(File.ReadAllBytes(appPath));
                 _ = processor.Execute(true);
             }
             catch (Exception e)
@@ -287,12 +285,11 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
+
+            string sourcePath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(sourcePath)!;
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             ulong memSize = 2046;
             foreach (string a in args)
             {
@@ -313,7 +310,7 @@ namespace AssEmbly
             byte[] program;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
                     // Ignore all warnings when using 'run' command
                     AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
                     AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
@@ -383,12 +380,11 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
+
+            string sourcePath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(sourcePath)!;
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             ulong memSize = 2046;
             foreach (string a in args)
             {
@@ -408,7 +404,7 @@ namespace AssEmbly
             Processor processor = new(memSize, args.Contains("--v1-call-stack"));
             try
             {
-                processor.LoadProgram(File.ReadAllBytes(args[1]));
+                processor.LoadProgram(File.ReadAllBytes(sourcePath));
             }
             catch (Exception e)
             {
@@ -446,17 +442,16 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
-            string filename = string.Join('.', args[1].Split('.')[..^1]);
+
+            string sourcePath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(sourcePath)!;
+            string filename = Path.GetFileNameWithoutExtension(sourcePath);
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             string disassembledProgram;
             try
             {
-                disassembledProgram = Disassembler.DisassembleProgram(File.ReadAllBytes(args[1]), !args.Contains("--no-strings"), !args.Contains("--no-pads"));
+                disassembledProgram = Disassembler.DisassembleProgram(File.ReadAllBytes(sourcePath), !args.Contains("--no-strings"), !args.Contains("--no-pads"));
             }
             catch (Exception e)
             {
@@ -468,7 +463,7 @@ namespace AssEmbly
             }
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);
-            Console.WriteLine($"Program disassembled successfully. It can be found at: \"{destination}\"");
+            Console.WriteLine($"Program disassembled successfully. It can be found at: \"{Path.GetFullPath(destination)}\"");
         }
 
         private static void PerformLintingAssembly(string[] args)
@@ -487,15 +482,14 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            // Change working directory to the location of the specified file.
-            string parent = Path.GetDirectoryName(args[1])!;
-            if (parent.Trim() != "")
-            {
-                Environment.CurrentDirectory = Path.GetFullPath(parent);
-            }
+
+            string sourcePath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(sourcePath)!;
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+
             try
             {
-                _ = Assembler.AssembleLines(File.ReadAllLines(args[1]),
+                _ = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
                     // Never ignore warnings when using 'lint' command
                     new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
                     out _, out List<Warning> warnings);
