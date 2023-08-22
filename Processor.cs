@@ -10,6 +10,9 @@ namespace AssEmbly
     {
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
+        public readonly bool UseV1CallStack;
+
+        private readonly ulong stackCallSize;
 
         public bool ProgramLoaded { get; private set; }
 
@@ -25,7 +28,7 @@ namespace AssEmbly
         // from stdin but are yet to be processed by an AssEmbly read instruction.
         private readonly Queue<byte> stdinByteQueue = new();
 
-        public Processor(ulong memorySize)
+        public Processor(ulong memorySize, bool useV1CallStack = false)
         {
             Memory = new byte[memorySize];
             Registers = new ulong[Enum.GetNames(typeof(Data.Register)).Length];
@@ -34,6 +37,8 @@ namespace AssEmbly
             ProgramLoaded = false;
             // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
             Console.OutputEncoding = Encoding.UTF8;
+            UseV1CallStack = useV1CallStack;
+            stackCallSize = useV1CallStack ? 24UL : 16UL;
         }
 
         /// <summary>
@@ -881,16 +886,22 @@ namespace AssEmbly
                             case 0x0:  // CAL adr
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 8);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
                                 break;
                             case 0x1:  // CAL ptr
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 1);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -898,8 +909,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 8);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -907,8 +921,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 8);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -916,8 +933,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryPointedQWord(Registers[(int)Data.Register.rpo] + 8);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 16);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -925,8 +945,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryRegisterPointedQWord(Registers[(int)Data.Register.rpo] + 8);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -934,8 +957,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryRegister(Registers[(int)Data.Register.rpo] + 1);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -943,8 +969,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryQWord(Registers[(int)Data.Register.rpo] + 1);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -952,8 +981,11 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryPointedQWord(Registers[(int)Data.Register.rpo] + 1);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 9);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
                                 break;
@@ -961,39 +993,42 @@ namespace AssEmbly
                                 Registers[(int)Data.Register.rfp] = ReadMemoryRegisterPointedQWord(Registers[(int)Data.Register.rpo] + 1);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 8, Registers[(int)Data.Register.rpo] + 2);
                                 WriteMemoryQWord(Registers[(int)Data.Register.rso] - 16, Registers[(int)Data.Register.rsb]);
-                                WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
-                                Registers[(int)Data.Register.rso] -= 24;
+                                if (UseV1CallStack)
+                                {
+                                    WriteMemoryQWord(Registers[(int)Data.Register.rso] - 24, Registers[(int)Data.Register.rso]);
+                                }
+                                Registers[(int)Data.Register.rso] -= stackCallSize;
                                 Registers[(int)Data.Register.rsb] = Registers[(int)Data.Register.rso];
                                 Registers[(int)Data.Register.rpo] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
                                 break;
                             case 0xA:  // RET
-                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 16);
-                                Registers[(int)Data.Register.rso] = ReadMemoryQWord(Registers[(int)Data.Register.rsb]);
-                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 8);
+                                Registers[(int)Data.Register.rso] += stackCallSize;
+                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 8);
+                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 16);
                                 break;
                             case 0xB:  // RET reg
                                 Registers[(int)Data.Register.rrv] = ReadMemoryRegister(Registers[(int)Data.Register.rpo]);
-                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 16);
-                                Registers[(int)Data.Register.rso] = ReadMemoryQWord(Registers[(int)Data.Register.rsb]);
-                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 8);
+                                Registers[(int)Data.Register.rso] += stackCallSize;
+                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 8);
+                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 16);
                                 break;
                             case 0xC:  // RET lit
                                 Registers[(int)Data.Register.rrv] = ReadMemoryQWord(Registers[(int)Data.Register.rpo]);
-                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 16);
-                                Registers[(int)Data.Register.rso] = ReadMemoryQWord(Registers[(int)Data.Register.rsb]);
-                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 8);
+                                Registers[(int)Data.Register.rso] += stackCallSize;
+                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 8);
+                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 16);
                                 break;
                             case 0xD:  // RET adr
                                 Registers[(int)Data.Register.rrv] = ReadMemoryPointedQWord(Registers[(int)Data.Register.rpo]);
-                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 16);
-                                Registers[(int)Data.Register.rso] = ReadMemoryQWord(Registers[(int)Data.Register.rsb]);
-                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 8);
+                                Registers[(int)Data.Register.rso] += stackCallSize;
+                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 8);
+                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 16);
                                 break;
                             case 0xE:  // RET ptr
                                 Registers[(int)Data.Register.rrv] = ReadMemoryRegisterPointedQWord(Registers[(int)Data.Register.rpo]);
-                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 16);
-                                Registers[(int)Data.Register.rso] = ReadMemoryQWord(Registers[(int)Data.Register.rsb]);
-                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rsb] + 8);
+                                Registers[(int)Data.Register.rso] += stackCallSize;
+                                Registers[(int)Data.Register.rpo] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 8);
+                                Registers[(int)Data.Register.rsb] = ReadMemoryQWord(Registers[(int)Data.Register.rso] - 16);
                                 break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised subroutine low opcode");

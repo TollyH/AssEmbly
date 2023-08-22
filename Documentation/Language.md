@@ -1580,15 +1580,15 @@ CAL :SUBROUTINE_TWO, 6
 
 ### Subroutines and the Stack
 
-In order to store the address to return to when using subroutines, the stack is utilised. Every time the `CAL` instruction is used, the address of the next opcode, the current value of `rsb`, and the current value of `rso` are pushed to the stack in that order. `rsb` and `rso` will then be updated to the new address of the top of the stack (the address where `rso` was pushed to). `rsb` will continue to point here (the **base**) until another subroutine is called or the subroutine is returned from. `rso` will continue to update as normal as items are popped to and pushed from the stack, always pointing to the top of it. The area from the current **base** (`rsb`) to the top of the stack (`rso`) is called the current **stack frame**. Multiple stack frames can be stacked on top of each other if a subroutine is called from another subroutine.
+In order to store the address to return to when using subroutines, the stack is utilised. Every time the `CAL` instruction is used, the address of the next opcode, and the current value of `rsb`, are pushed to the stack in that order. `rsb` and `rso` will then be updated to the new address of the top of the stack (the address where `rsb` was pushed to). `rsb` will continue to point here (the **base**) until another subroutine is called or the subroutine is returned from. `rso` will continue to update as normal as items are popped to and pushed from the stack, always pointing to the top of it. The area from the current **base** (`rsb`) to the top of the stack (`rso`) is called the current **stack frame**. Multiple stack frames can be stacked on top of each other if a subroutine is called from another subroutine.
 
-When returning from a subroutine, the opposite is performed. `rso`, `rsb`, and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. It is important that all values apart from these three are popped off the stack prior to using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`).
+When returning from a subroutine, the opposite is performed. `rsb`, and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. It is important that all values apart from these two are popped off the stack prior to using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`). After returning `rso` will point to the same address as when the function was called.
 
 If you utilise registers in a subroutine, you should use the stack to ensure that the value of each modified register is returned to its initial value before returning from the subroutine. See the above section on using the stack to preserve registers for info on how to do this.
 
 ### Passing Multiple Parameters
 
-The `CAL` instruction can only take a single parameter, however there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the three automatically pushed values first. These, along with every other value in the stack, are all 8 bytes long, so adding `24` (`8 * 3`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
+The `CAL` instruction can only take a single parameter, however there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are all 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
 
 For example:
 
@@ -1603,7 +1603,7 @@ CAL :SUBROUTINE, 1  ; Parameter A (rfp)
 PSH rg0  ; Preserve the value of rg0
 
 MVQ rg0, rsb
-ADD rg0, 24  ; Parameter B
+ADD rg0, 16  ; Parameter B
 ADD rfp, *rg0
 ; rfp is now 3
 ADD rg0, 8  ; Parameter C
@@ -1746,8 +1746,8 @@ Text bytes read from files **will not** be automatically converted to UTF-8 if t
 | `PSH`         | Push to Stack                                       | Pointer                      | Insert the contents of memory at an address in a register to the top of the stack                                   | `0xA3` |
 | `POP`         | Pop from Stack                                      | Register                     | Remove the value from the top of the stack and store it in a register                                               | `0xA4` |
 | **Subroutines**                                                                                                                                                                                                               |||||
-| `CAL`         | Call Subroutine                                     | Address                      | Call the subroutine at an address in a label, pushing `rpo`, `rsb`, and `rso` to the stack                          | `0xB0` |
-| `CAL`         | Call Subroutine                                     | Pointer                      | Call the subroutine at an address in a register, pushing `rpo`, `rsb`, and `rso` to the stack                       | `0xB1` |
+| `CAL`         | Call Subroutine                                     | Address                      | Call the subroutine at an address in a label, pushing `rpo` and `rsb` to the stack                                  | `0xB0` |
+| `CAL`         | Call Subroutine                                     | Pointer                      | Call the subroutine at an address in a register, pushing `rpo` and `rsb` to the stack                               | `0xB1` |
 | `CAL`         | Call Subroutine                                     | Address, Register            | Call the subroutine at an address in a label, moving the value in a register to `rfp`                               | `0xB2` |
 | `CAL`         | Call Subroutine                                     | Address, Literal             | Call the subroutine at an address in a label, moving a literal value to `rfp`                                       | `0xB3` |
 | `CAL`         | Call Subroutine                                     | Address, Address             | Call the subroutine at an address in a label, moving the contents of memory at an address in a label to `rfp`       | `0xB4` |
@@ -1756,9 +1756,9 @@ Text bytes read from files **will not** be automatically converted to UTF-8 if t
 | `CAL`         | Call Subroutine                                     | Pointer, Literal             | Call the subroutine at an address in a register, moving a literal value to `rfp`                                    | `0xB7` |
 | `CAL`         | Call Subroutine                                     | Pointer, Address             | Call the subroutine at an address in a register, moving the contents of memory at an address in a label to `rfp`    | `0xB8` |
 | `CAL`         | Call Subroutine                                     | Pointer, Pointer             | Call the subroutine at an address in a register, moving the contents of memory at an address in a register to `rfp` | `0xB9` |
-| `RET`         | Return from Subroutine                              | -                            | Pop the previous states of `rso`, `rsb`. and `rpo` off the stack                                                    | `0xBA` |
-| `RET`         | Return from Subroutine                              | Register                     | Pop the previous states of `rso`, `rsb`. and `rpo` off the stack, moving the value in a register to `rrv`           | `0xBB` |
-| `RET`         | Return from Subroutine                              | Literal                      | Pop the previous states of `rso`, `rsb`. and `rpo` off the stack, moving a literal value to `rrv`                   | `0xBC` |
+| `RET`         | Return from Subroutine                              | -                            | Pop the previous states of `rsb` and `rpo` off the stack                                                            | `0xBA` |
+| `RET`         | Return from Subroutine                              | Register                     | Pop the previous states of `rsb` and `rpo` off the stack, moving the value in a register to `rrv`                   | `0xBB` |
+| `RET`         | Return from Subroutine                              | Literal                      | Pop the previous states of `rsb` and `rpo` off the stack, moving a literal value to `rrv`                           | `0xBC` |
 | `RET`         | Return from Subroutine                              | Address                      | Pop the previous states off the stack, moving the contents of memory at an address in a label to `rrv`              | `0xBD` |
 | `RET`         | Return from Subroutine                              | Pointer                      | Pop the previous states off the stack, moving the contents of memory at an address in a register to `rrv`           | `0xBE` |
 | **Console Writing**                                                                                                                                                                                                           |||||

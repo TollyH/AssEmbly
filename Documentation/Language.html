@@ -2077,26 +2077,27 @@ CAL :SUBROUTINE_TWO, 6
 <h3 id="subroutines-and-the-stack">Subroutines and the Stack</h3>
 <p>In order to store the address to return to when using subroutines,
 the stack is utilised. Every time the <code>CAL</code> instruction is
-used, the address of the next opcode, the current value of
-<code>rsb</code>, and the current value of <code>rso</code> are pushed
-to the stack in that order. <code>rsb</code> and <code>rso</code> will
-then be updated to the new address of the top of the stack (the address
-where <code>rso</code> was pushed to). <code>rsb</code> will continue to
-point here (the <strong>base</strong>) until another subroutine is
-called or the subroutine is returned from. <code>rso</code> will
-continue to update as normal as items are popped to and pushed from the
-stack, always pointing to the top of it. The area from the current
-<strong>base</strong> (<code>rsb</code>) to the top of the stack
-(<code>rso</code>) is called the current <strong>stack frame</strong>.
-Multiple stack frames can be stacked on top of each other if a
-subroutine is called from another subroutine.</p>
+used, the address of the next opcode, and the current value of
+<code>rsb</code>, are pushed to the stack in that order.
+<code>rsb</code> and <code>rso</code> will then be updated to the new
+address of the top of the stack (the address where <code>rsb</code> was
+pushed to). <code>rsb</code> will continue to point here (the
+<strong>base</strong>) until another subroutine is called or the
+subroutine is returned from. <code>rso</code> will continue to update as
+normal as items are popped to and pushed from the stack, always pointing
+to the top of it. The area from the current <strong>base</strong>
+(<code>rsb</code>) to the top of the stack (<code>rso</code>) is called
+the current <strong>stack frame</strong>. Multiple stack frames can be
+stacked on top of each other if a subroutine is called from another
+subroutine.</p>
 <p>When returning from a subroutine, the opposite is performed.
-<code>rso</code>, <code>rsb</code>, and <code>rpo</code> are popped off
-the top of the stack, thereby continuing execution as it was before the
-subroutine was called. It is important that all values apart from these
-three are popped off the stack prior to using the <code>RET</code>
-instruction (you can ensure this by moving the value of <code>rsb</code>
-into <code>rso</code>).</p>
+<code>rsb</code>, and <code>rpo</code> are popped off the top of the
+stack, thereby continuing execution as it was before the subroutine was
+called. It is important that all values apart from these two are popped
+off the stack prior to using the <code>RET</code> instruction (you can
+ensure this by moving the value of <code>rsb</code> into
+<code>rso</code>). After returning <code>rso</code> will point to the
+same address as when the function was called.</p>
 <p>If you utilise registers in a subroutine, you should use the stack to
 ensure that the value of each modified register is returned to its
 initial value before returning from the subroutine. See the above
@@ -2110,9 +2111,9 @@ these. Before calling the subroutine, push any values you want to act as
 parameters to the subroutine, to the stack. Once the subroutine has been
 called, you can use <code>rsb</code> to calculate the address that each
 parameter will be stored at. To access the first parameter (the last one
-pushed before calling), you need to account for the three automatically
+pushed before calling), you need to account for the two automatically
 pushed values first. These, along with every other value in the stack,
-are all 8 bytes long, so adding <code>24</code> (<code>8 * 3</code>) to
+are all 8 bytes long, so adding <code>16</code> (<code>8 * 2</code>) to
 <code>rsb</code> will get you the address of this parameter (you should
 do this in another register, <code>rsb</code> should be left
 unmodified). To access any subsequent parameters, simply add another
@@ -2128,7 +2129,7 @@ CAL :SUBROUTINE, 1  ; Parameter A (rfp)
 PSH rg0  ; Preserve the value of rg0
 
 MVQ rg0, rsb
-ADD rg0, 24  ; Parameter B
+ADD rg0, 16  ; Parameter B
 ADD rfp, *rg0
 ; rfp is now 3
 ADD rg0, 8  ; Parameter C
@@ -3074,8 +3075,7 @@ register</td>
 <td>Call Subroutine</td>
 <td>Address</td>
 <td>Call the subroutine at an address in a label, pushing
-<code>rpo</code>, <code>rsb</code>, and <code>rso</code> to the
-stack</td>
+<code>rpo</code> and <code>rsb</code> to the stack</td>
 <td><code>0xB0</code></td>
 </tr>
 <tr class="odd">
@@ -3083,8 +3083,7 @@ stack</td>
 <td>Call Subroutine</td>
 <td>Pointer</td>
 <td>Call the subroutine at an address in a register, pushing
-<code>rpo</code>, <code>rsb</code>, and <code>rso</code> to the
-stack</td>
+<code>rpo</code> and <code>rsb</code> to the stack</td>
 <td><code>0xB1</code></td>
 </tr>
 <tr class="even">
@@ -3155,26 +3154,24 @@ of memory at an address in a register to <code>rfp</code></td>
 <td><code>RET</code></td>
 <td>Return from Subroutine</td>
 <td>-</td>
-<td>Pop the previous states of <code>rso</code>, <code>rsb</code>. and
-<code>rpo</code> off the stack</td>
+<td>Pop the previous states of <code>rsb</code> and <code>rpo</code> off
+the stack</td>
 <td><code>0xBA</code></td>
 </tr>
 <tr class="odd">
 <td><code>RET</code></td>
 <td>Return from Subroutine</td>
 <td>Register</td>
-<td>Pop the previous states of <code>rso</code>, <code>rsb</code>. and
-<code>rpo</code> off the stack, moving the value in a register to
-<code>rrv</code></td>
+<td>Pop the previous states of <code>rsb</code> and <code>rpo</code> off
+the stack, moving the value in a register to <code>rrv</code></td>
 <td><code>0xBB</code></td>
 </tr>
 <tr class="even">
 <td><code>RET</code></td>
 <td>Return from Subroutine</td>
 <td>Literal</td>
-<td>Pop the previous states of <code>rso</code>, <code>rsb</code>. and
-<code>rpo</code> off the stack, moving a literal value to
-<code>rrv</code></td>
+<td>Pop the previous states of <code>rsb</code> and <code>rpo</code> off
+the stack, moving a literal value to <code>rrv</code></td>
 <td><code>0xBC</code></td>
 </tr>
 <tr class="odd">

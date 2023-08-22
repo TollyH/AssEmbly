@@ -230,11 +230,11 @@
             // POP (Pop Value from Stack)
             { ("POP", new OperandType[1] { OperandType.Register }), 0xA4 },  // reg <-
 
-            // CAL (Call Subroutine at Address/Pointer, Pushing rpo, rsb, and rso to the stack)
+            // CAL (Call Subroutine at Address/Pointer, Pushing rpo and rsb to the stack)
             { ("CAL", new OperandType[1] { OperandType.Address }), 0xB0 },
             { ("CAL", new OperandType[1] { OperandType.Pointer }), 0xB1 },
 
-            // CAL (Call Subroutine at Address/Pointer, Pushing rpo, rsb, and rso to the stack, storing second operand in rfp)
+            // CAL (Call Subroutine at Address/Pointer, Pushing rpo and rsb to the stack, storing second operand in rfp)
             { ("CAL", new OperandType[2] { OperandType.Address, OperandType.Register }), 0xB2 },
             { ("CAL", new OperandType[2] { OperandType.Address, OperandType.Literal }), 0xB3 },
             { ("CAL", new OperandType[2] { OperandType.Address, OperandType.Address }), 0xB4 },
@@ -244,10 +244,10 @@
             { ("CAL", new OperandType[2] { OperandType.Pointer, OperandType.Address }), 0xB8 },
             { ("CAL", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), 0xB9 },
 
-            // RET (Return from Subroutine, Restoring rso, rsb, and rpo from the stack)
+            // RET (Return from Subroutine, Restoring rsb and rpo from the stack)
             { ("RET", Array.Empty<OperandType>()), 0xBA },
 
-            // RET (Return from Subroutine, Restoring rso, rsb, and rpo from the stack, storing operand in rrv)
+            // RET (Return from Subroutine, Restoring rsb and rpo from the stack, storing operand in rrv)
             { ("RET", new OperandType[1] { OperandType.Register }), 0xBB },
             { ("RET", new OperandType[1] { OperandType.Literal }), 0xBC },
             { ("RET", new OperandType[1] { OperandType.Address }), 0xBD },

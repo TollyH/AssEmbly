@@ -11,14 +11,20 @@
 
         public List<(Data.Register Register, ulong Value)> Breakpoints { get; set; } = new();
 
-        public Debugger()
+        public bool UseV1CallStack => DebuggingProcessor.UseV1CallStack;
+        private ulong stackCallSize => UseV1CallStack ? 24UL : 16UL;
+        private Data.Register[] registerPushOrder => UseV1CallStack
+            ? new Data.Register[3] { Data.Register.rso, Data.Register.rsb, Data.Register.rpo }
+            : new Data.Register[2] { Data.Register.rsb, Data.Register.rpo };
+
+        public Debugger(bool useV1CallStack = false)
         {
-            DebuggingProcessor = new(2046);
+            DebuggingProcessor = new(2046, useV1CallStack);
         }
 
-        public Debugger(ulong memorySize)
+        public Debugger(ulong memorySize, bool useV1CallStack = false)
         {
-            DebuggingProcessor = new(memorySize);
+            DebuggingProcessor = new(memorySize, useV1CallStack);
         }
 
         public Debugger(Processor processorToDebug)
@@ -428,21 +434,27 @@
                     Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
                 }
             }
-            if (currentStackBase + 16 < (ulong)DebuggingProcessor.Memory.LongLength)
+            if (currentStackBase + stackCallSize <= (ulong)DebuggingProcessor.Memory.LongLength)
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
                 Console.WriteLine("Return information");
                 Console.ResetColor();
                 Console.WriteLine("┌──────────────────┬───────────────────────────────┬────────────┐");
-                Console.WriteLine($"│ {currentStackBase:X16} │ Reset rso to {DebuggingProcessor.ReadMemoryQWord(currentStackBase):X16} | rsb + 0    | <- rsb");
-                Console.WriteLine($"│ {currentStackBase + 8:X16} │ Reset rsb to {DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8):X16} | rsb + 8    |");
-                Console.WriteLine($"│ {currentStackBase + 16:X16} │ Reset rpo to {DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16):X16} | rsb + 16   |");
+                Console.WriteLine($"│ {currentStackBase:X16} │ Reset {registerPushOrder[0]} to " +
+                    $"{DebuggingProcessor.ReadMemoryQWord(currentStackBase):X16} | rsb + 0    | <- rsb");
+                Console.WriteLine($"│ {currentStackBase + 8:X16} │ Reset {registerPushOrder[1]} to " +
+                    $"{DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8):X16} | rsb + 8    |");
+                if (UseV1CallStack)
+                {
+                    Console.WriteLine($"│ {currentStackBase + 16:X16} │ Reset {registerPushOrder[2]} to " +
+                        $"{DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16):X16} | rsb + 16   |");
+                }
                 Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
 
                 ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8);
-                for (ulong i = currentStackBase + 24; i < parentStackBase; i += 8)
+                for (ulong i = currentStackBase + stackCallSize; i < parentStackBase; i += 8)
                 {
-                    if (i == currentStackBase + 24)
+                    if (i == currentStackBase + stackCallSize)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Parent stack frame (possibly parameters to this subroutine)");

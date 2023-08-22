@@ -44,7 +44,7 @@ XOR rg3, rg3
 
 ; Get stack parameters
 MVQ rg1, rsb
-ADD rg1, 24
+ADD rg1, 16
 MVQ rg2, *rg1
 ADD rg1, 8
 MVQ rg1, *rg1
@@ -175,7 +175,7 @@ MVD rg3, 0xFF000000
 
 ; Get stack parameters
 MVQ rg4, rsb
-ADD rg4, 24
+ADD rg4, 16
 MVQ rg2, *rg4
 ADD rg2, rfp  ; Convert length to the end index + 1
 ADD rg4, 8
@@ -415,7 +415,7 @@ PSH rg4
 
 ; Get stack parameters
 MVQ rg1, rsb
-ADD rg1, 24
+ADD rg1, 16
 MVQ rg1, *rg1
 
 ; Allocate space in stack for file to be read to
