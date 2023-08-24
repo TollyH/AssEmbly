@@ -5,9 +5,13 @@ namespace AssEmbly
     [Flags]
     public enum AAPFeatures : ulong
     {
+        None = 0,
         V1CallStack = 0b1,
         ExtensionSigned = 0b10,
         ExtensionFloat = 0b100,
+
+        All = 0b111,
+        Incompatible = ~All
     }
 
     public class AAPFile

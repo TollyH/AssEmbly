@@ -17,14 +17,14 @@
             ? new Register[3] { Register.rso, Register.rsb, Register.rpo }
             : new Register[2] { Register.rsb, Register.rpo };
 
-        public Debugger(bool useV1CallStack = false)
+        public Debugger(ulong entryPoint = 0, bool useV1CallStack = false)
         {
-            DebuggingProcessor = new(2046, useV1CallStack);
+            DebuggingProcessor = new(2046, entryPoint, useV1CallStack);
         }
 
-        public Debugger(ulong memorySize, bool useV1CallStack = false)
+        public Debugger(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
         {
-            DebuggingProcessor = new(memorySize, useV1CallStack);
+            DebuggingProcessor = new(memorySize, entryPoint, useV1CallStack);
         }
 
         public Debugger(Processor processorToDebug)

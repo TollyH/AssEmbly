@@ -28,10 +28,11 @@ namespace AssEmbly
         // from stdin but are yet to be processed by an AssEmbly read instruction.
         private readonly Queue<byte> stdinByteQueue = new();
 
-        public Processor(ulong memorySize, bool useV1CallStack = false)
+        public Processor(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
         {
             Memory = new byte[memorySize];
             Registers = new ulong[Enum.GetNames(typeof(Register)).Length];
+            Registers[(int)Register.rpo] = entryPoint;
             Registers[(int)Register.rso] = memorySize;
             Registers[(int)Register.rsb] = memorySize;
             ProgramLoaded = false;

@@ -5,10 +5,10 @@ namespace AssEmbly
 {
     internal static class Program
     {
+        internal static Version? version = typeof(Program).Assembly.GetName().Version;
+
         private static void Main(string[] args)
         {
-            Version? version = typeof(Program).Assembly.GetName().Version;
-
             if (args.Contains("--version"))
             {
                 Console.WriteLine(version?.ToString());
@@ -187,7 +187,20 @@ namespace AssEmbly
                 return;
             }
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
-            File.WriteAllBytes(destination, program);
+            if (args.Contains("--v1-format"))
+            {
+                File.WriteAllBytes(destination, program);
+            }
+            else
+            {
+                AAPFeatures features = AAPFeatures.None;
+                if (args.Contains("--v1-call-stack"))
+                {
+                    features |= AAPFeatures.V1CallStack;
+                }
+                AAPFile executable = new(version ?? new Version(), features, 0, program);
+                File.WriteAllBytes(destination, executable.GetBytes());
+            }
 
             if (!args.Contains("--no-debug-file"))
             {
@@ -236,10 +249,53 @@ namespace AssEmbly
                     }
                 }
             }
-            Processor processor = new(memSize, args.Contains("--v1-call-stack"));
+            Processor? processor = null;
             try
             {
-                processor.LoadProgram(File.ReadAllBytes(appPath));
+                byte[] program;
+                if (args.Contains("--v1-format"))
+                {
+                    program = File.ReadAllBytes(appPath);
+                    processor = new(memSize, entryPoint: 0, useV1CallStack: true);
+                }
+                else
+                {
+                    AAPFile file;
+                    try
+                    {
+                        file = new(File.ReadAllBytes(appPath));
+                    }
+                    catch
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("The given executable file is invalid. " +
+                            "Make sure you're not attempting to execute the source file instead of the executable. " +
+                            "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    program = file.Program;
+                    if ((file.Features & AAPFeatures.Incompatible) != 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    if (file.LanguageVersion > (version ?? new Version()))
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
+                            $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
+                            $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
+                        Console.ResetColor();
+                    }
+                    processor = new(memSize, entryPoint: file.EntryPoint,
+                        useV1CallStack: args.Contains("--v1-call-stack") || file.Features.HasFlag(AAPFeatures.V1CallStack));
+                }
+                processor.LoadProgram(program);
                 _ = processor.Execute(true);
             }
             catch (Exception e)
@@ -253,10 +309,13 @@ namespace AssEmbly
                             ? "An instruction attempted to divide by zero."
                             : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Register)))
+                    if (processor is not null)
                     {
-                        ulong value = processor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                        foreach (int register in Enum.GetValues(typeof(Register)))
+                        {
+                            ulong value = processor.Registers[register];
+                            Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                        }
                     }
                 }
                 else
@@ -306,7 +365,8 @@ namespace AssEmbly
                     }
                 }
             }
-            Processor processor = new(memSize, args.Contains("--v1-call-stack"));
+            // TODO: get entry point
+            Processor processor = new(memSize, entryPoint: 0, useV1CallStack: args.Contains("--v1-call-stack"));
             byte[] program;
             try
             {
@@ -381,8 +441,8 @@ namespace AssEmbly
                 return;
             }
 
-            string sourcePath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(sourcePath)!;
+            string appPath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(appPath)!;
             Environment.CurrentDirectory = Path.GetFullPath(parent);
 
             ulong memSize = 2046;
@@ -401,10 +461,53 @@ namespace AssEmbly
                     }
                 }
             }
-            Processor processor = new(memSize, args.Contains("--v1-call-stack"));
+            Processor? processor;
             try
             {
-                processor.LoadProgram(File.ReadAllBytes(sourcePath));
+                byte[] program;
+                if (args.Contains("--v1-format"))
+                {
+                    program = File.ReadAllBytes(appPath);
+                    processor = new(memSize, entryPoint: 0, useV1CallStack: true);
+                }
+                else
+                {
+                    AAPFile file;
+                    try
+                    {
+                        file = new(File.ReadAllBytes(appPath));
+                    }
+                    catch
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("The given executable file is invalid. " +
+                            "Make sure you're not attempting to execute the source file instead of the executable. " +
+                            "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    program = file.Program;
+                    if ((file.Features & AAPFeatures.Incompatible) != 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return;
+                    }
+                    if (file.LanguageVersion > (version ?? new Version()))
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
+                            $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
+                            $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
+                        Console.ResetColor();
+                    }
+                    processor = new(memSize, entryPoint: file.EntryPoint,
+                        useV1CallStack: args.Contains("--v1-call-stack") || file.Features.HasFlag(AAPFeatures.V1CallStack));
+                }
+                processor.LoadProgram(program);
             }
             catch (Exception e)
             {
@@ -522,11 +625,14 @@ namespace AssEmbly
             Console.WriteLine("    --no-debug-file - Do not generate a debug information file with the executable.");
             Console.WriteLine("    --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.");
             Console.WriteLine("    --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.");
+            Console.WriteLine("    --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.");
+            Console.WriteLine("    --v1-format - Force the generated executable to be in the header-less format from v1.x.x.");
             Console.WriteLine();
             Console.WriteLine("execute - Execute an already assembled executable file");
             Console.WriteLine("    Usage: 'AssEmbly execute <file-path> [options]'");
             Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
+            Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack");
             Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine();
             Console.WriteLine("run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.");
@@ -539,6 +645,7 @@ namespace AssEmbly
             Console.WriteLine("    Usage: 'AssEmbly debug <file-path> [debug-info-file-path] [options]'");
             Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
+            Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack");
             Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine("    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.");
             Console.WriteLine();
@@ -546,6 +653,7 @@ namespace AssEmbly
             Console.WriteLine("    Usage: 'AssEmbly disassemble <file-path> [destination-path] [options]'");
             Console.WriteLine("    --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes");
             Console.WriteLine("    --no-pads - Don't attempt to locate uses of the PAD directive; keep them as chains of HLT");
+            Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format.");
             Console.WriteLine();
         }
     }
