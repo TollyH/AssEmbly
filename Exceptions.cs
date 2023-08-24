@@ -170,4 +170,17 @@
         public FileOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public FileOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
+
+    // AAP FORMAT EXCEPTIONS
+    /// <summary>
+    /// Represents errors that occur during loading or saving an AAP file.
+    /// </summary>
+    public class AAPFormatException : AssEmblyException
+    {
+        public AAPFormatException() : base() { }
+        public AAPFormatException(string message) : base(message) { }
+        public AAPFormatException(string message, Exception inner) : base(message, inner) { }
+        public AAPFormatException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public AAPFormatException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
 }
