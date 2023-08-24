@@ -253,10 +253,10 @@ namespace AssEmbly
                             ? "An instruction attempted to divide by zero."
                             : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    foreach (int register in Enum.GetValues(typeof(Register)))
                     {
                         ulong value = processor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                     }
                 }
                 else
@@ -348,10 +348,10 @@ namespace AssEmbly
                             ? "An instruction attempted to divide by zero."
                             : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    foreach (int register in Enum.GetValues(typeof(Register)))
                     {
                         ulong value = processor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                     }
                 }
                 else

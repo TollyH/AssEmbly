@@ -150,8 +150,8 @@ namespace AssEmbly
                             {
                                 throw new OperandException($"The IMP mnemonic requires a single operand. {operands.Length} were given.");
                             }
-                            Data.OperandType operandType = DetermineOperandType(operands[0]);
-                            if (operandType != Data.OperandType.Literal)
+                            OperandType operandType = DetermineOperandType(operands[0]);
+                            if (operandType != OperandType.Literal)
                             {
                                 throw new OperandException($"The operand to the IMP mnemonic must be a literal. An operand of type {operandType} was provided.");
                             }
@@ -314,7 +314,7 @@ namespace AssEmbly
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
         {
-            Data.OperandType[] operandTypes = new Data.OperandType[operands.Length];
+            OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string LabelName, ulong AddressOffset)> labels = new();
             // Check for byte-inserting assembler directives
@@ -326,8 +326,8 @@ namespace AssEmbly
                     {
                         throw new OperandException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
                     }
-                    Data.OperandType operandType = DetermineOperandType(operands[0]);
-                    if (operandType != Data.OperandType.Literal)
+                    OperandType operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
                     {
                         throw new OperandException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
@@ -342,7 +342,7 @@ namespace AssEmbly
                         throw new OperandException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     operandType = DetermineOperandType(operands[0]);
-                    return operandType == Data.OperandType.Literal
+                    return operandType == OperandType.Literal
                         // Generate an array of 0-bytes with the specified length
                         ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
                             ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
@@ -355,7 +355,7 @@ namespace AssEmbly
                         throw new OperandException($"The NUM mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     operandType = DetermineOperandType(operands[0]);
-                    if (operandType != Data.OperandType.Literal)
+                    if (operandType != OperandType.Literal)
                     {
                         throw new OperandException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
@@ -369,10 +369,10 @@ namespace AssEmbly
                 operandTypes[i] = DetermineOperandType(operands[i]);
                 switch (operandTypes[i])
                 {
-                    case Data.OperandType.Register:
-                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i].ToLowerInvariant()));
+                    case OperandType.Register:
+                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i].ToLowerInvariant()));
                         break;
-                    case Data.OperandType.Literal:
+                    case OperandType.Literal:
                         if (operands[i].StartsWith(":&"))
                         {
                             labels.Add((operands[i][2..], (uint)operandBytes.Count + 1));
@@ -387,7 +387,7 @@ namespace AssEmbly
                             operandBytes.AddRange(ParseLiteral(operands[i], false));
                         }
                         break;
-                    case Data.OperandType.Address:
+                    case OperandType.Address:
                         labels.Add((operands[i][1..], (uint)operandBytes.Count + 1));
                         for (int j = 0; j < 8; j++)
                         {
@@ -395,9 +395,9 @@ namespace AssEmbly
                             operandBytes.Add(0);
                         }
                         break;
-                    case Data.OperandType.Pointer:
+                    case OperandType.Pointer:
                         // Convert register name to associated byte value
-                        operandBytes.Add((byte)Enum.Parse<Data.Register>(operands[i][1..].ToLowerInvariant()));
+                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i][1..].ToLowerInvariant()));
                         break;
                     default: break;
                 }
@@ -635,7 +635,7 @@ namespace AssEmbly
         /// <param name="operand">A single operand with no comments or whitespace.</param>
         /// <remarks>Operands will also be validated here.</remarks>
         /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
-        public static Data.OperandType DetermineOperandType(string operand)
+        public static OperandType DetermineOperandType(string operand)
         {
             if (operand[0] == ':')
             {
@@ -645,7 +645,7 @@ namespace AssEmbly
                 return invalidMatch.Success
                     ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
                         $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
-                    : operand[1] == '&' ? Data.OperandType.Literal : Data.OperandType.Address;
+                    : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
             }
             else if (int.TryParse(operand[0..1], out _))
             {
@@ -657,17 +657,17 @@ namespace AssEmbly
                 return invalidMatch.Success
                     ? throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
                         $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?")
-                    : Data.OperandType.Literal;
+                    : OperandType.Literal;
             }
             else if (operand[0] == '"')
             {
-                return Data.OperandType.Literal;
+                return OperandType.Literal;
             }
             else
             {
                 int offset = operand[0] == '*' ? 1 : 0;
-                return Enum.TryParse<Data.Register>(operand[offset..].ToLowerInvariant(), out _)
-                    ? operand[0] == '*' ? Data.OperandType.Pointer : Data.OperandType.Register
+                return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
+                    ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
                     : throw new SyntaxError($"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
             }
         }

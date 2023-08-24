@@ -103,18 +103,18 @@ namespace AssEmbly
             bool fallbackToDat = false;
 
             byte opcode = instruction[0];
-            IEnumerable<KeyValuePair<(string, Data.OperandType[]), byte>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
+            IEnumerable<KeyValuePair<(string, OperandType[]), byte>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
             if (!matching.Any())
             {
                 fallbackToDat = true;
             }
             else
             {
-                (string mnemonic, Data.OperandType[] operandTypes) = matching.First().Key;
+                (string mnemonic, OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
                 ulong totalBytes = 1;
                 List<ulong> referencedAddresses = new();
-                foreach (Data.OperandType type in operandTypes)
+                foreach (OperandType type in operandTypes)
                 {
                     if (totalBytes >= (uint)instruction.Length)
                     {
@@ -123,10 +123,10 @@ namespace AssEmbly
                     }
                     switch (type)
                     {
-                        case Data.OperandType.Register:
-                            if (Enum.IsDefined((Data.Register)instruction[(int)totalBytes]))
+                        case OperandType.Register:
+                            if (Enum.IsDefined((Register)instruction[(int)totalBytes]))
                             {
-                                operandStrings.Add(((Data.Register)instruction[(int)totalBytes]).ToString());
+                                operandStrings.Add(((Register)instruction[(int)totalBytes]).ToString());
                                 totalBytes++;
                             }
                             else
@@ -134,7 +134,7 @@ namespace AssEmbly
                                 fallbackToDat = true;
                             }
                             break;
-                        case Data.OperandType.Literal:
+                        case OperandType.Literal:
                             if (totalBytes + 8 > (uint)instruction.Length)
                             {
                                 fallbackToDat = true;
@@ -143,7 +143,7 @@ namespace AssEmbly
                             operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]).ToString());
                             totalBytes += 8;
                             break;
-                        case Data.OperandType.Address:
+                        case OperandType.Address:
                             if (totalBytes + 8 > (uint)instruction.Length)
                             {
                                 fallbackToDat = true;
@@ -153,10 +153,10 @@ namespace AssEmbly
                             operandStrings.Add($":ADDR_{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
-                        case Data.OperandType.Pointer:
-                            if (Enum.IsDefined((Data.Register)instruction[(int)totalBytes]))
+                        case OperandType.Pointer:
+                            if (Enum.IsDefined((Register)instruction[(int)totalBytes]))
                             {
-                                operandStrings.Add("*" + ((Data.Register)instruction[(int)totalBytes]).ToString());
+                                operandStrings.Add("*" + ((Register)instruction[(int)totalBytes]).ToString());
                                 totalBytes++;
                             }
                             else

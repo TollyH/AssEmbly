@@ -9,13 +9,13 @@
         public bool RunToReturn { get; set; } = false;
         public ulong? StepOverStackBase { get; set; } = null;
 
-        public List<(Data.Register Register, ulong Value)> Breakpoints { get; set; } = new();
+        public List<(Register Register, ulong Value)> Breakpoints { get; set; } = new();
 
         public bool UseV1CallStack => DebuggingProcessor.UseV1CallStack;
         private ulong stackCallSize => UseV1CallStack ? 24UL : 16UL;
-        private Data.Register[] registerPushOrder => UseV1CallStack
-            ? new Data.Register[3] { Data.Register.rso, Data.Register.rsb, Data.Register.rpo }
-            : new Data.Register[2] { Data.Register.rsb, Data.Register.rpo };
+        private Register[] registerPushOrder => UseV1CallStack
+            ? new Register[3] { Register.rso, Register.rsb, Register.rpo }
+            : new Register[2] { Register.rsb, Register.rpo };
 
         public Debugger(bool useV1CallStack = false)
         {
@@ -50,7 +50,7 @@
 
         public void DisplayDebugInfo()
         {
-            ulong currentAddress = DebuggingProcessor.Registers[(int)Data.Register.rpo];
+            ulong currentAddress = DebuggingProcessor.Registers[(int)Register.rpo];
             // Disassemble line on-the-fly, unless a provided debugging file provides the original text for the line
             string lineDisassembly = LoadedDebugInfoFile is null
                 || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
@@ -76,10 +76,10 @@
                 }
             }
             Console.WriteLine("Register states:");
-            foreach (int register in Enum.GetValues(typeof(Data.Register)))
+            foreach (int register in Enum.GetValues(typeof(Register)))
             {
                 ulong value = DebuggingProcessor.Registers[register];
-                Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
             }
         }
 
@@ -91,11 +91,11 @@
                 {
                     // Only pause for debugging instruction if not running to break, not in a deeper subroutine than we were if stepping over,
                     // and aren't waiting for a return instruction
-                    bool breakForDebug = StepInstructions && (StepOverStackBase is null || DebuggingProcessor.Registers[(int)Data.Register.rsb] >= StepOverStackBase)
+                    bool breakForDebug = StepInstructions && (StepOverStackBase is null || DebuggingProcessor.Registers[(int)Register.rsb] >= StepOverStackBase)
                     // Is the next instruction a return instruction?
-                        && (!RunToReturn || DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Data.Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
+                        && (!RunToReturn || DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
 
-                    foreach ((Data.Register register, ulong value) in Breakpoints)
+                    foreach ((Register register, ulong value) in Breakpoints)
                     {
                         if (DebuggingProcessor.Registers[(int)register] == value)
                         {
@@ -134,11 +134,11 @@
                                 break;
                             case "over":
                                 endCommandEntryLoop = true;
-                                StepOverStackBase = DebuggingProcessor.Registers[(int)Data.Register.rsb];
+                                StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
                                 break;
                             case "return":
                                 endCommandEntryLoop = true;
-                                StepOverStackBase = DebuggingProcessor.Registers[(int)Data.Register.rsb];
+                                StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
                                 RunToReturn = true;
                                 break;
                             case "read":
@@ -195,10 +195,10 @@
                             ? "An instruction attempted to divide by zero."
                             : "An instruction tried to access an invalid memory address.";
                     Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Data.Register)))
+                    foreach (int register in Enum.GetValues(typeof(Register)))
                     {
                         ulong value = DebuggingProcessor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Data.Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
+                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
                     }
                 }
                 else
@@ -283,7 +283,7 @@
                 }
                 else if (command[1] == "reg")
                 {
-                    if (!Enum.TryParse(command[2], out Data.Register register))
+                    if (!Enum.TryParse(command[2], out Register register))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"\"{command[2]}\" is not a valid register. Run 'help' for more info.");
@@ -356,15 +356,15 @@
                 {
                     Console.Write($"\n{i:X16} │");
                 }
-                if (i == DebuggingProcessor.Registers[(int)Data.Register.rso])
+                if (i == DebuggingProcessor.Registers[(int)Register.rso])
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                 }
-                if (i == DebuggingProcessor.Registers[(int)Data.Register.rsb])
+                if (i == DebuggingProcessor.Registers[(int)Register.rsb])
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                 }
-                if (i == DebuggingProcessor.Registers[(int)Data.Register.rpo])
+                if (i == DebuggingProcessor.Registers[(int)Register.rpo])
                 {
                     Console.ForegroundColor = ConsoleColor.Blue;
                 }
@@ -395,22 +395,22 @@
                 Console.ResetColor();
                 return;
             }
-            if (DebuggingProcessor.Registers[(int)Data.Register.rso] >= (ulong)DebuggingProcessor.Memory.LongLength)
+            if (DebuggingProcessor.Registers[(int)Register.rso] >= (ulong)DebuggingProcessor.Memory.LongLength)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("The stack is currently empty.");
                 Console.ResetColor();
                 return;
             }
-            if (DebuggingProcessor.Registers[(int)Data.Register.rso] > DebuggingProcessor.Registers[(int)Data.Register.rsb])
+            if (DebuggingProcessor.Registers[(int)Register.rso] > DebuggingProcessor.Registers[(int)Register.rsb])
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("The stack pointer is currently greater than the stack base - stack visualisation not available in this state.");
                 Console.ResetColor();
                 return;
             }
-            ulong currentStackOffset = DebuggingProcessor.Registers[(int)Data.Register.rso];
-            ulong currentStackBase = DebuggingProcessor.Registers[(int)Data.Register.rsb];
+            ulong currentStackOffset = DebuggingProcessor.Registers[(int)Register.rso];
+            ulong currentStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
             for (ulong i = currentStackOffset; i < currentStackBase; i += 8)
             {
                 if (i == currentStackOffset)
@@ -523,7 +523,7 @@
             if (command.Length == 1)
             {
                 Console.WriteLine("Current breakpoints:");
-                foreach ((Data.Register register, ulong value) in Breakpoints)
+                foreach ((Register register, ulong value) in Breakpoints)
                 {
                     Console.WriteLine($"{register}: {value}");
                 }
@@ -531,7 +531,7 @@
             else if (command.Length == 4)
             {
                 string action = command[1].ToLower();
-                if (!Enum.TryParse(command[2], out Data.Register register))
+                if (!Enum.TryParse(command[2], out Register register))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"\"{command[2]}\" is not a valid register. Run 'help' for more info.");

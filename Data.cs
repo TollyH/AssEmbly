@@ -1,48 +1,48 @@
 ﻿namespace AssEmbly
 {
+    public enum OperandType
+    {
+        Register,
+        Literal,
+        Address,
+        Pointer
+    }
+
+    public enum Register
+    {
+        rpo,  // Program Offset
+        rso,  // Stack Offset
+        rsb,  // Stack Base
+        rsf,  // Status Flags (Zero Flag, Carry Flag, File End Flag, 61 remaining high bits undefined)
+        rrv,  // Return Value
+        rfp,  // Fast Pass Parameter
+        rg0,  // General 0
+        rg1,  // General 1
+        rg2,  // General 2
+        rg3,  // General 3
+        rg4,  // General 4
+        rg5,  // General 5
+        rg6,  // General 6
+        rg7,  // General 7
+        rg8,  // General 8
+        rg9,  // General 9
+    }
+
+    [Flags]
+    public enum StatusFlags
+    {
+        Zero = 0b1,
+        Carry = 0b10,
+        FileEnd = 0b100,
+
+        ZeroAndCarry = Zero | Carry,
+    }
+
     /// <summary>
     /// Stores <see langword="static"/> data about AssEmbly, such as register and operand types, and mnemonic mappings.
     /// </summary>
     public static class Data
     {
-        public enum OperandType
-        {
-            Register,
-            Literal,
-            Address,
-            Pointer
-        }
-
-        public enum Register
-        {
-            rpo,  // Program Offset
-            rso,  // Stack Offset
-            rsb,  // Stack Base
-            rsf,  // Status Flags (Zero Flag, Carry Flag, File End Flag, 61 remaining high bits undefined)
-            rrv,  // Return Value
-            rfp,  // Fast Pass Parameter
-            rg0,  // General 0
-            rg1,  // General 1
-            rg2,  // General 2
-            rg3,  // General 3
-            rg4,  // General 4
-            rg5,  // General 5
-            rg6,  // General 6
-            rg7,  // General 7
-            rg8,  // General 8
-            rg9,  // General 9
-        }
-
-        [Flags]
-        public enum StatusFlags
-        {
-            Zero = 0b1,
-            Carry = 0b10,
-            FileEnd = 0b100,
-
-            ZeroAndCarry = Zero | Carry,
-        }
-
         /// <summary>
         /// A mapping of what byte a mnemonic with a particular set of operands should compile to.
         /// </summary>
