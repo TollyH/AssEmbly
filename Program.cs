@@ -74,6 +74,7 @@ namespace AssEmbly
             HashSet<int> disabledErrors = new();
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
+            bool useV1Format = false;
             foreach (string a in args)
             {
                 string lowerA = a.ToLowerInvariant();
@@ -125,15 +126,21 @@ namespace AssEmbly
                 {
                     disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
                 }
+                else if (lowerA == "--v1-format")
+                {
+                    useV1Format = true;
+                }
             }
 
             byte[] program;
             string debugInfo;
+            ulong entryPoint;
             try
             {
                 program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
+                    useV1Format,
                     disabledErrors, disabledWarnings, disabledSuggestions,
-                    out debugInfo, out List<Warning> warnings);
+                    out debugInfo, out List<Warning> warnings, out entryPoint);
                 foreach (Warning warning in warnings)
                 {
                     Console.ForegroundColor = warning.Severity switch
@@ -164,7 +171,7 @@ namespace AssEmbly
             }
 
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
-            if (args.Contains("--v1-format"))
+            if (useV1Format)
             {
                 File.WriteAllBytes(destination, program);
             }
@@ -175,7 +182,7 @@ namespace AssEmbly
                 {
                     features |= AAPFeatures.V1CallStack;
                 }
-                AAPFile executable = new(version ?? new Version(), features, 0, program);
+                AAPFile executable = new(version ?? new Version(), features, entryPoint, program);
                 File.WriteAllBytes(destination, executable.GetBytes());
             }
 
@@ -218,17 +225,16 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            // TODO: get entry point
-            Processor processor = new(memSize, entryPoint: 0, useV1CallStack: args.Contains("--v1-call-stack"));
             byte[] program;
+            ulong entryPoint;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
+                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
                     // Ignore all warnings when using 'run' command
                     AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
                     AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
                     AssemblerWarnings.SuggestionMessages.Keys.ToHashSet(),
-                    out _, out _);
+                    out _, out _, out entryPoint);
             }
             catch (Exception e)
             {
@@ -236,6 +242,7 @@ namespace AssEmbly
                 return;
             }
 
+            Processor processor = new(memSize, entryPoint, useV1CallStack: args.Contains("--v1-call-stack"));
             LoadProgramIntoProcessor(processor, program);
             ExecuteProcessor(processor);
         }
@@ -329,10 +336,10 @@ namespace AssEmbly
 
             try
             {
-                _ = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
+                _ = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
                     // Never ignore warnings when using 'lint' command
                     new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
-                    out _, out List<Warning> warnings);
+                    out _, out List<Warning> warnings, out _);
                 Console.WriteLine(JsonSerializer.Serialize(warnings, new JsonSerializerOptions { IncludeFields = true }));
             }
             catch (Exception e)

@@ -2,7 +2,7 @@
 
 Applies to versions: `1.1.0`
 
-Last revised: 2023-08-24
+Last revised: 2023-08-25
 
 ## Introduction
 
@@ -117,7 +117,7 @@ Some instructions, like `CFL`, don't need any operands. In these cases, simply h
 
 Mnemonics correspond to and are assembled down to **opcodes**, numbers (in the case of AssEmbly, single bytes), that the processor reads to know what instruction to perform and what types of operands it needs to read.
 
-The processor will begin executing from the **first line** in the file downwards. Programs should *always* end in a `HLT` instruction (with no operands) to stop the processor.
+The processor will begin executing from the **first line** in the file downwards, unless a label with the name `ENTRY` is defined, in which case the processor will start there (more in the following section on labels). Programs should *always* end in a `HLT` instruction (with no operands) to stop the processor.
 
 For the most part, if an instruction modifies or stores a value somewhere, the **first** operand will be used as the **destination**.
 
@@ -173,6 +173,19 @@ MVQ rg1, 10
 ```
 
 `:END` here will have a value of `34` when referenced, as each instruction prior will take up `17` bytes (more on this later).
+
+The label name `:ENTRY` (case insensitive) has a special meaning. If it is present in a file, execution will start from wherever the entry label points to. If it is not present, execution will start from the first line.
+
+For example, in this small file:
+
+```text
+MVQ rg0, 5
+:ENTRY
+MVQ rg1, 10
+HLT
+```
+
+When this program is executed, only the `MVQ rg1, 10` line will run. `MVQ rg0, 5` will never be executed.
 
 ## Operand Types
 
@@ -265,7 +278,7 @@ MVQ rg1, *rg0  ; Move the item in memory (0xCD) at the address (0) in rg0 to rg1
 
 ## Registers
 
-As with most modern architectures, operations in AssEmbly are almost always performed on **registers**. Each register contains a 64-bit number and has a unique, pre-assigned name. They are stored separately from the processor's memory, therefore cannot be referenced by an address, only by name. There are 16 of them in AssEmbly, 10 of which are *general purpose*, meaning they are free to be used for whatever you wish. The remaining six have special purposes within the architecture, so should be used with care.
+As with most modern architectures, operations in AssEmbly are almost always performed on **registers**. Each register contains a 64-bit number and has a unique, pre-assigned name. They are stored separately from the processor's memory, therefore cannot be referenced by an address, only by name. There are 16 of them in AssEmbly, 10 of which are *general purpose*, meaning they are free to be used for whatever you wish. All general purpose registers start with a value of `0`. The remaining six have special purposes within the architecture, so should be used with care.
 
 Please be aware that to understand the full operation and purpose for some registers, knowledge explained later on in the manual may be required.
 

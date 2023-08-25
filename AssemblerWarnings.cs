@@ -65,8 +65,11 @@ namespace AssEmbly
         private string mnemonic = "";
         private string[] operands = Array.Empty<string>();
         private int line = 0;
+        private int firstLine = 0;
         private string file = "";
         private bool labelled = false;
+        private bool isEntry = false;
+        private bool usingV1Format = false;
         private Stack<Assembler.ImportStackFrame> importStack = new();
 
         private Dictionary<(string File, int Line), string> lineText = new();
@@ -88,10 +91,11 @@ namespace AssEmbly
         /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
         /// </param>
         /// <param name="labelled">Was this instruction preceded by one or more label definitions?</param>
+        /// <param name="isEntry">Is this instruction the entry point?</param>
         /// <param name="importStack">The current state of the program's import stack.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
         public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled,
-            string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack)
+            bool isEntry, string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack)
         {
             this.newBytes = newBytes;
             this.mnemonic = mnemonic;
@@ -99,8 +103,14 @@ namespace AssEmbly
             this.line = line;
             this.file = file;
             this.labelled = labelled;
+            this.isEntry = isEntry;
             this.importStack = new Stack<Assembler.ImportStackFrame>(importStack);
             lineText[(file, line)] = rawLine;
+
+            if (firstLine == 0)
+            {
+                firstLine = line;
+            }
 
             List<Warning> warnings = new();
 
@@ -186,12 +196,15 @@ namespace AssEmbly
             return warnings.ToArray();
         }
 
-        public AssemblerWarnings()
+        public AssemblerWarnings(bool usingV1Format)
         {
+            this.usingV1Format = usingV1Format;
+
             nonFatalErrorRollingAnalyzers = new()
             {
                 { 0001, Analyzer_Rolling_NonFatalError_0001 },
                 { 0002, Analyzer_Rolling_NonFatalError_0002 },
+                { 0003, Analyzer_Rolling_NonFatalError_0003 },
             };
             warningRollingAnalyzers = new()
             {
@@ -204,6 +217,8 @@ namespace AssEmbly
                 { 0014, Analyzer_Rolling_Warning_0014 },
                 { 0015, Analyzer_Rolling_Warning_0015 },
                 { 0016, Analyzer_Rolling_Warning_0016 },
+                { 0017, Analyzer_Rolling_Warning_0017 },
+                { 0018, Analyzer_Rolling_Warning_0018 },
             };
             suggestionRollingAnalyzers = new()
             {
@@ -362,6 +377,13 @@ namespace AssEmbly
                 return number == 0;
             }
             return false;
+        }
+
+        private bool Analyzer_Rolling_NonFatalError_0003()
+        {
+            // Non-Fatal Error 0003: File has an entry point explicitly defined,
+            // but the program is being assembled into v1 format which doesn't support them.
+            return isEntry && usingV1Format;
         }
 
         private bool Analyzer_Rolling_Warning_0001()
@@ -584,6 +606,18 @@ namespace AssEmbly
             // Warning 0016: Addresses are 64-bit values, however this move instruction moves less than 64 bits.
             return newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(newBytes[0])
                 && operands[1][0] == ':' && moveBitCounts.TryGetValue(newBytes[0], out int bits) && bits < 64;
+        }
+
+        private bool Analyzer_Rolling_Warning_0017()
+        {
+            // Warning 0017: Entry point points to data, not executable code.
+            return isEntry && instructionIsData;
+        }
+
+        private bool Analyzer_Rolling_Warning_0018()
+        {
+            // Warning 0018: Entry point points to an import.
+            return isEntry && instructionIsImport;
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()

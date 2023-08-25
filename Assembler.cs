@@ -27,11 +27,16 @@ namespace AssEmbly
         /// Assemble multiple AssEmbly lines at once into executable bytecode.
         /// </summary>
         /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
+        /// <param name="usingV1Format">
+        /// Whether or not a v1 executable will be generated from this assembly.
+        /// Used only for warning generation. Does not affect the resulting bytes.
+        /// </param>
         /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
         /// <param name="disabledWarnings">A set of warning codes to disable.</param>
         /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
         /// <param name="debugInfo">A string to store generated debug information file text in.</param>
         /// <param name="warnings">A list to store any generated warnings in.</param>
+        /// <param name="entryPoint">A ulong to store the entry point of the program in.</param>
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
         /// <exception cref="LabelNameException">
@@ -42,9 +47,9 @@ namespace AssEmbly
         /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
         /// </exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static byte[] AssembleLines(string[] lines,
+        public static byte[] AssembleLines(string[] lines, bool usingV1Format,
             IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions,
-            out string debugInfo, out List<Warning> warnings)
+            out string debugInfo, out List<Warning> warnings, out ulong entryPoint)
         {
             // The lines to assemble may change during assembly, for example importing a file
             // will extend the list of lines to assemble as and when the import is reached.
@@ -69,11 +74,14 @@ namespace AssEmbly
             int baseFileLine = 0;
 
             bool lineIsLabelled = false;
-            AssemblerWarnings warningGenerator = new();
+            bool lineIsEntry = false;
+            AssemblerWarnings warningGenerator = new(usingV1Format);
             warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
             warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
             warningGenerator.DisabledSuggestions.UnionWith(disabledSuggestions);
             warnings = new List<Warning>();
+
+            entryPoint = 0;
 
             for (int l = 0; l < dynamicLines.Count; l++)
             {
@@ -129,6 +137,11 @@ namespace AssEmbly
                         {
                             throw new LabelNameException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
                         }
+                        if (labelName.ToUpperInvariant() == "ENTRY")
+                        {
+                            entryPoint = (uint)program.Count;
+                            lineIsEntry = true;
+                        }
                         labels[labelName] = (uint)program.Count;
 
                         if (!addressLabelNames.ContainsKey((uint)program.Count))
@@ -177,8 +190,9 @@ namespace AssEmbly
                             warnings.AddRange(warningGenerator.NextInstruction(
                                 Array.Empty<byte>(), mnemonic, operands,
                                 currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, rawLine, importStack));
+                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
                             lineIsLabelled = false;
+                            lineIsEntry = false;
 
                             importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
                             continue;
@@ -190,6 +204,7 @@ namespace AssEmbly
                             }
                             macros[operands[0]] = operands[1];
                             lineIsLabelled = false;
+                            lineIsEntry = false;
                             continue;
                         // Toggle warnings
                         case "ANALYZER":
@@ -254,8 +269,9 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
                         currentImport is null ? baseFileLine : currentImport.CurrentLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, rawLine, importStack));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
                     lineIsLabelled = false;
+                    lineIsEntry = false;
                 }
                 catch (AssemblerException e)
                 {

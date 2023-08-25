@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>1.1.0</code></p>
-<p>Last revised: 2023-08-24</p>
+<p>Last revised: 2023-08-25</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -384,9 +384,11 @@ these cases, simply have the mnemonic alone on the line.</p>
 bytes), that the processor reads to know what instruction to perform and
 what types of operands it needs to read.</p>
 <p>The processor will begin executing from the <strong>first
-line</strong> in the file downwards. Programs should <em>always</em> end
-in a <code>HLT</code> instruction (with no operands) to stop the
-processor.</p>
+line</strong> in the file downwards, unless a label with the name
+<code>ENTRY</code> is defined, in which case the processor will start
+there (more in the following section on labels). Programs should
+<em>always</em> end in a <code>HLT</code> instruction (with no operands)
+to stop the processor.</p>
 <p>For the most part, if an instruction modifies or stores a value
 somewhere, the <strong>first</strong> operand will be used as the
 <strong>destination</strong>.</p>
@@ -437,6 +439,17 @@ MVQ rg1, 10
 <p><code>:END</code> here will have a value of <code>34</code> when
 referenced, as each instruction prior will take up <code>17</code> bytes
 (more on this later).</p>
+<p>The label name <code>:ENTRY</code> (case insensitive) has a special
+meaning. If it is present in a file, execution will start from wherever
+the entry label points to. If it is not present, execution will start
+from the first line.</p>
+<p>For example, in this small file:</p>
+<pre class="text"><code>MVQ rg0, 5
+:ENTRY
+MVQ rg1, 10
+HLT</code></pre>
+<p>When this program is executed, only the <code>MVQ rg1, 10</code> line
+will run. <code>MVQ rg0, 5</code> will never be executed.</p>
 <h2 id="operand-types">Operand Types</h2>
 <p>There are four different types of operand that an instruction may be
 able to take. If an instruction supports multiple different possible
@@ -539,7 +552,8 @@ always performed on <strong>registers</strong>. Each register contains a
 separately from the processor’s memory, therefore cannot be referenced
 by an address, only by name. There are 16 of them in AssEmbly, 10 of
 which are <em>general purpose</em>, meaning they are free to be used for
-whatever you wish. The remaining six have special purposes within the
+whatever you wish. All general purpose registers start with a value of
+<code>0</code>. The remaining six have special purposes within the
 architecture, so should be used with care.</p>
 <p>Please be aware that to understand the full operation and purpose for
 some registers, knowledge explained later on in the manual may be

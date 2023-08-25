@@ -6,6 +6,7 @@
         {
             { 0001, "Instruction writes to the rpo register." },
             { 0002, "Division by constant 0." },
+            { 0003, "File has an entry point explicitly defined, but the program is being assembled into v1 format which doesn't support them." },
         };
 
         public static readonly Dictionary<int, string> WarningMessages = new()
@@ -26,6 +27,8 @@
             { 0014, "Unlabelled executable code found after data insertion." },
             { 0015, "Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction." },
             { 0016, "Addresses are 64-bit values, however this move instruction moves less than 64 bits." },
+            { 0017, "Entry point points to data, not executable code." },
+            { 0018, "Entry point points to an import." },
         };
 
         public static readonly Dictionary<int, string> SuggestionMessages = new()
