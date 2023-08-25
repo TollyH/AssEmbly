@@ -1,12 +1,46 @@
-﻿using System.Diagnostics;
-
-namespace AssEmbly
+﻿namespace AssEmbly
 {
     internal static partial class Program
     {
         public static readonly ulong DefaultMemorySize = 2046;
 
         // Shared methods that are used by multiple commands
+        public static AAPFile? LoadAAPFile(string appPath)
+        {
+            AAPFile file;
+            try
+            {
+                file = new(File.ReadAllBytes(appPath));
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("The given executable file is invalid. " +
+                    "Make sure you're not attempting to load the source file instead of the executable. " +
+                    "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
+                Console.ResetColor();
+                Environment.Exit(1);
+                return null;
+            }
+            if ((file.Features & AAPFeatures.Incompatible) != 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
+                Console.ResetColor();
+                Environment.Exit(1);
+                return null;
+            }
+            if (file.LanguageVersion > (version ?? new Version()))
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
+                    $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
+                    $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
+                Console.ResetColor();
+            }
+            return file;
+        }
+
         public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize, bool useV1Format, bool useV1CallStack)
         {
             byte[] program;
@@ -18,40 +52,14 @@ namespace AssEmbly
             }
             else
             {
-                AAPFile file;
-                try
+                AAPFile? file = LoadAAPFile(appPath);
+                if (file is null)
                 {
-                    file = new(File.ReadAllBytes(appPath));
-                }
-                catch
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("The given executable file is invalid. " +
-                        "Make sure you're not attempting to execute the source file instead of the executable. " +
-                        "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
-                    Console.ResetColor();
-                    Environment.Exit(1);
                     return null;
-                }
-                program = file.Program;
-                if ((file.Features & AAPFeatures.Incompatible) != 0)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
-                    Console.ResetColor();
-                    Environment.Exit(1);
-                    return null;
-                }
-                if (file.LanguageVersion > (version ?? new Version()))
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkYellow;
-                    Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
-                        $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
-                        $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
-                    Console.ResetColor();
                 }
                 processor = new(memSize, entryPoint: file.EntryPoint,
                     useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack));
+                program = file.Program;
             }
             LoadProgramIntoProcessor(processor, program);
             return processor;

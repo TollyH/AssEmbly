@@ -276,9 +276,24 @@ namespace AssEmbly
             (string sourcePath, string filename) = ResolveInputFilePath(args);
 
             string disassembledProgram;
+            byte[] program;
+            if (args.Contains("--v1-format"))
+            {
+                program = File.ReadAllBytes(sourcePath);
+            }
+            else
+            {
+                AAPFile? file = LoadAAPFile(sourcePath);
+                if (file is null)
+                {
+                    return;
+                }
+                program = file.Program;
+            }
+
             try
             {
-                disassembledProgram = Disassembler.DisassembleProgram(File.ReadAllBytes(sourcePath), !args.Contains("--no-strings"), !args.Contains("--no-pads"));
+                disassembledProgram = Disassembler.DisassembleProgram(program, !args.Contains("--no-strings"), !args.Contains("--no-pads"));
             }
             catch (Exception e)
             {
