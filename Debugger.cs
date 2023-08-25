@@ -186,26 +186,7 @@
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
-                {
-                    string message = e is RuntimeException runtimeException
-                        ? runtimeException.ConsoleMessage
-                        : e is DivideByZeroException
-                            ? "An instruction attempted to divide by zero."
-                            : "An instruction tried to access an invalid memory address.";
-                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Register)))
-                    {
-                        ulong value = DebuggingProcessor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
-                }
-                Console.ResetColor();
+                Program.OnExecutionException(e, DebuggingProcessor);
             }
         }
 

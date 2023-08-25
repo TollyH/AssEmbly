@@ -3,7 +3,7 @@ using System.Web;
 
 namespace AssEmbly
 {
-    internal static class Program
+    internal static partial class Program
     {
         internal static Version? version = typeof(Program).Assembly.GetName().Version;
 
@@ -64,27 +64,12 @@ namespace AssEmbly
 
         private static void AssembleSourceFile(string[] args)
         {
-            if (args.Length < 2)
+            if (!CheckInputFileArg(args, "A path to the program listing to be assembled is required."))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("A path to the program listing to be assembled is required.");
-                Console.ResetColor();
-                Environment.Exit(1);
-                return;
-            }
-            if (!File.Exists(args[1]))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
-            string sourcePath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(sourcePath)!;
-            string filename = Path.GetFileNameWithoutExtension(sourcePath);
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string sourcePath, string filename) = ResolveInputFilePath(args);
 
             HashSet<int> disabledErrors = new();
             HashSet<int> disabledWarnings = new();
@@ -141,6 +126,7 @@ namespace AssEmbly
                     disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
                 }
             }
+
             byte[] program;
             string debugInfo;
             try
@@ -173,19 +159,10 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (e is AssemblerException assemblerException)
-                {
-                    Console.WriteLine(assemblerException.ConsoleMessage);
-                }
-                else
-                {
-                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
-                }
-                Console.ResetColor();
-                Environment.Exit(1);
+                OnAssemblerException(e);
                 return;
             }
+
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
             if (args.Contains("--v1-format"))
             {
@@ -212,159 +189,35 @@ namespace AssEmbly
 
         private static void ExecuteProgram(string[] args)
         {
-            if (args.Length < 2)
+            if (!CheckInputFileArg(args, "A path to the assembled program to be executed is required."))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("A path to the assembled program to be executed is required.");
-                Console.ResetColor();
-                Environment.Exit(1);
-                return;
-            }
-            if (!File.Exists(args[1]))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
-            string appPath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(appPath)!;
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string appPath, _) = ResolveInputFilePath(args);
 
-            ulong memSize = 2046;
-            foreach (string a in args)
+            ulong memSize = GetMemorySize(args);
+
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize, args.Contains("--v1-format"), args.Contains("--v1-call-stack"));
+            if (processor is null)
             {
-                if (a.ToLowerInvariant().StartsWith("--mem-size="))
-                {
-                    string memSizeString = a.Split("=")[1];
-                    if (!ulong.TryParse(memSizeString, out memSize))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                }
+                return;
             }
-            Processor? processor = null;
-            try
-            {
-                byte[] program;
-                if (args.Contains("--v1-format"))
-                {
-                    program = File.ReadAllBytes(appPath);
-                    processor = new(memSize, entryPoint: 0, useV1CallStack: true);
-                }
-                else
-                {
-                    AAPFile file;
-                    try
-                    {
-                        file = new(File.ReadAllBytes(appPath));
-                    }
-                    catch
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("The given executable file is invalid. " +
-                            "Make sure you're not attempting to execute the source file instead of the executable. " +
-                            "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                    program = file.Program;
-                    if ((file.Features & AAPFeatures.Incompatible) != 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                    if (file.LanguageVersion > (version ?? new Version()))
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
-                            $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
-                            $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
-                        Console.ResetColor();
-                    }
-                    processor = new(memSize, entryPoint: file.EntryPoint,
-                        useV1CallStack: args.Contains("--v1-call-stack") || file.Features.HasFlag(AAPFeatures.V1CallStack));
-                }
-                processor.LoadProgram(program);
-                _ = processor.Execute(true);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
-                {
-                    string message = e is RuntimeException runtimeException
-                        ? runtimeException.ConsoleMessage
-                        : e is DivideByZeroException
-                            ? "An instruction attempted to divide by zero."
-                            : "An instruction tried to access an invalid memory address.";
-                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    if (processor is not null)
-                    {
-                        foreach (int register in Enum.GetValues(typeof(Register)))
-                        {
-                            ulong value = processor.Registers[register];
-                            Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
-                }
-                Console.ResetColor();
-            }
+
+            ExecuteProcessor(processor);
         }
 
         private static void AssembleAndExecute(string[] args)
         {
-            if (args.Length < 2)
+            if (!CheckInputFileArg(args, "A path to the program listing to be executed is required."))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("A path to the program listing to be executed is required.");
-                Console.ResetColor();
-                Environment.Exit(1);
-                return;
-            }
-            if (!File.Exists(args[1]))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
-            string sourcePath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(sourcePath)!;
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string sourcePath, _) = ResolveInputFilePath(args);
 
-            ulong memSize = 2046;
-            foreach (string a in args)
-            {
-                if (a.ToLowerInvariant().StartsWith("--mem-size="))
-                {
-                    string memSizeString = a.Split("=")[1];
-                    if (!ulong.TryParse(memSizeString, out memSize))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                }
-            }
+            ulong memSize = GetMemorySize(args);
+
             // TODO: get entry point
             Processor processor = new(memSize, entryPoint: 0, useV1CallStack: args.Contains("--v1-call-stack"));
             byte[] program;
@@ -379,142 +232,28 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (e is AssemblerException assemblerException)
-                {
-                    Console.WriteLine(assemblerException.ConsoleMessage);
-                }
-                else
-                {
-                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
-                }
-                Console.ResetColor();
-                Environment.Exit(1);
+                OnAssemblerException(e);
                 return;
             }
-            try
-            {
-                processor.LoadProgram(program);
-                _ = processor.Execute(true);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
-                {
-                    string message = e is RuntimeException runtimeException
-                        ? runtimeException.ConsoleMessage
-                        : e is DivideByZeroException
-                            ? "An instruction attempted to divide by zero."
-                            : "An instruction tried to access an invalid memory address.";
-                    Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                    foreach (int register in Enum.GetValues(typeof(Register)))
-                    {
-                        ulong value = processor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
-                    }
-                }
-                else
-                {
-                    Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
-                }
-                Console.ResetColor();
-            }
+
+            LoadProgramIntoProcessor(processor, program);
+            ExecuteProcessor(processor);
         }
 
         private static void RunDebugger(string[] args)
         {
-            if (args.Length < 2)
+            if (!CheckInputFileArg(args, "A path to the assembled program to be debugged is required."))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("A path to the assembled program to be debugged is required.");
-                Console.ResetColor();
-                Environment.Exit(1);
-                return;
-            }
-            if (!File.Exists(args[1]))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
-            string appPath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(appPath)!;
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string appPath, _) = ResolveInputFilePath(args);
 
-            ulong memSize = 2046;
-            foreach (string a in args)
+            ulong memSize = GetMemorySize(args);
+
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize, args.Contains("--v1-format"), args.Contains("--v1-call-stack"));
+            if (processor is null)
             {
-                if (a.ToLowerInvariant().StartsWith("--mem-size="))
-                {
-                    string memSizeString = a.Split("=")[1];
-                    if (!ulong.TryParse(memSizeString, out memSize))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                }
-            }
-            Processor? processor;
-            try
-            {
-                byte[] program;
-                if (args.Contains("--v1-format"))
-                {
-                    program = File.ReadAllBytes(appPath);
-                    processor = new(memSize, entryPoint: 0, useV1CallStack: true);
-                }
-                else
-                {
-                    AAPFile file;
-                    try
-                    {
-                        file = new(File.ReadAllBytes(appPath));
-                    }
-                    catch
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("The given executable file is invalid. " +
-                            "Make sure you're not attempting to execute the source file instead of the executable. " +
-                            "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                    program = file.Program;
-                    if ((file.Features & AAPFeatures.Incompatible) != 0)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return;
-                    }
-                    if (file.LanguageVersion > (version ?? new Version()))
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
-                            $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
-                            $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
-                        Console.ResetColor();
-                    }
-                    processor = new(memSize, entryPoint: file.EntryPoint,
-                        useV1CallStack: args.Contains("--v1-call-stack") || file.Features.HasFlag(AAPFeatures.V1CallStack));
-                }
-                processor.LoadProgram(program);
-            }
-            catch (Exception e)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n\nAn unexpected error occurred loading your program:\n    {e.GetType().Name}: {e.Message}");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
@@ -529,27 +268,12 @@ namespace AssEmbly
 
         private static void PerformDisassembly(string[] args)
         {
-            if (args.Length < 2)
+            if (!CheckInputFileArg(args, "A path to the program to be disassembled is required."))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("A path to the program to be disassembled is required.");
-                Console.ResetColor();
-                Environment.Exit(1);
-                return;
-            }
-            if (!File.Exists(args[1]))
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
-                Console.ResetColor();
-                Environment.Exit(1);
                 return;
             }
 
-            string sourcePath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(sourcePath)!;
-            string filename = Path.GetFileNameWithoutExtension(sourcePath);
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string sourcePath, string filename) = ResolveInputFilePath(args);
 
             string disassembledProgram;
             try
@@ -586,9 +310,7 @@ namespace AssEmbly
                 return;
             }
 
-            string sourcePath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(sourcePath)!;
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            (string sourcePath, _) = ResolveInputFilePath(args);
 
             try
             {
