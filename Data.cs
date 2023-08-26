@@ -49,6 +49,22 @@
             InstructionCode = instructionCode;
         }
 
+        /// <summary>
+        /// Parse an opcode from an array of bytes at a given offset.
+        /// </summary>
+        /// <param name="bytes">The array of bytes to parse the opcode from.</param>
+        /// <param name="offset">The index in <paramref name="bytes"/> to start parsing from.</param>
+        /// <returns>An opcode based on the parsed value from <paramref name="bytes"/> at <paramref name="offset"/>.</returns>
+        /// <remarks><paramref name="offset"/> will be incremented to the index of the end of the opcode by this method.</remarks>
+        public static Opcode ParseBytes(byte[] bytes, ref ulong offset)
+        {
+            if (bytes[offset] == 0xFF)
+            {
+                return new Opcode(bytes[++offset], bytes[++offset]);
+            }
+            return new Opcode(0x00, bytes[offset]);
+        }
+
         public override readonly bool Equals(object? obj)
         {
             return obj is Opcode opcode && Equals(opcode);
