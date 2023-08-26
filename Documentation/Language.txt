@@ -1,8 +1,8 @@
 AssEmbly Language Reference
 
-Applies to versions: 1.1.0
+Applies to versions: 1.1.0 - 1.1.1
 
-Last revised: 2023-08-20
+Last revised: 2023-08-26
 
 Introduction
 
