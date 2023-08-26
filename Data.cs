@@ -86,6 +86,8 @@
         /// </summary>
         public static readonly Dictionary<(string Mnemonic, OperandType[] OperandTypes), Opcode> Mnemonics = new(new MnemonicComparer())
         {
+            // BASE INSTRUCTION SET
+
             // Control
             // HLT (Halt)
             { ("HLT", Array.Empty<OperandType>()), new Opcode(0x00, 0x00) },

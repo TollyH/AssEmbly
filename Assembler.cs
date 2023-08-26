@@ -418,12 +418,20 @@ namespace AssEmbly
                     default: break;
                 }
             }
-            if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out byte opcode))
+            if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out Opcode opcode))
             {
                 throw new OpcodeException($"Unrecognised mnemonic and operand combination:\n    {mnemonic} {string.Join(", ", operandTypes)}" +
                     $"\nConsult the language reference for a list of all valid mnemonic/operand combinations.");
             }
-            operandBytes.Insert(0, opcode);
+
+            operandBytes.Insert(0, opcode.InstructionCode);
+            // Base instruction set only needs to be referenced by instruction code,
+            // all others need to be in full form (0xFF, {ExtensionSet}, {InstructionCode})
+            if (opcode.ExtensionSet != 0x00)
+            {
+                operandBytes.Insert(0, opcode.ExtensionSet);
+                operandBytes.Insert(0, 0xFF);
+            }
             return (operandBytes.ToArray(), labels);
         }
 
