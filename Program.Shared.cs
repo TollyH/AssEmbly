@@ -120,8 +120,9 @@
                         Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
                         Console.ResetColor();
                         Environment.Exit(1);
-                        return memSize;
+                        return 0;
                     }
+                    return memSize;
                 }
             }
             return DefaultMemorySize;
