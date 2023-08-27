@@ -30,3 +30,4 @@ jobs:
       with:
         name: AssEmbly
         path: Publish/AssEmbly.exe
+        if-no-files-found: error
