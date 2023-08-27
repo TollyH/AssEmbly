@@ -102,8 +102,10 @@ namespace AssEmbly
         {
             bool fallbackToDat = false;
 
-            byte opcode = instruction[0];
-            IEnumerable<KeyValuePair<(string, OperandType[]), byte>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
+            ulong totalBytes = 0;
+            Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
+            totalBytes++;
+            IEnumerable<KeyValuePair<(string, OperandType[]), Opcode>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
             if (!matching.Any())
             {
                 fallbackToDat = true;
@@ -112,7 +114,6 @@ namespace AssEmbly
             {
                 (string mnemonic, OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
-                ulong totalBytes = 1;
                 List<ulong> referencedAddresses = new();
                 foreach (OperandType type in operandTypes)
                 {

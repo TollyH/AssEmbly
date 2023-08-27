@@ -56,13 +56,13 @@
         /// <param name="offset">The index in <paramref name="bytes"/> to start parsing from.</param>
         /// <returns>An opcode based on the parsed value from <paramref name="bytes"/> at <paramref name="offset"/>.</returns>
         /// <remarks><paramref name="offset"/> will be incremented to the index of the end of the opcode by this method.</remarks>
-        public static Opcode ParseBytes(byte[] bytes, ref ulong offset)
+        public static Opcode ParseBytes(Span<byte> bytes, ref ulong offset)
         {
-            if (bytes[offset] == 0xFF)
+            if (bytes[(int)offset] == 0xFF)
             {
-                return new Opcode(bytes[++offset], bytes[++offset]);
+                return new Opcode(bytes[(int)++offset], bytes[(int)++offset]);
             }
-            return new Opcode(0x00, bytes[offset]);
+            return new Opcode(0x00, bytes[(int)offset]);
         }
 
         public override readonly bool Equals(object? obj)
