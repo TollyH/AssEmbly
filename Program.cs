@@ -315,6 +315,9 @@ namespace AssEmbly
             Console.WriteLine($"Program disassembled successfully. It can be found at: \"{Path.GetFullPath(destination)}\"");
         }
 
+        // Suppress warning when unused code trimming is used with JSON serialization
+        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("", "IL2026",
+            Justification = "Only the Warning struct is serialized, which contains only primitive types.")]
         private static void PerformLintingAssembly(string[] args)
         {
             // This is an undocumented operation designed for IDE extensions to provide linting on source files.
