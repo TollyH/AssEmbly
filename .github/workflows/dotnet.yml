@@ -19,12 +19,8 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Publish
-      run: dotnet publish -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" --no-restore
+    - name: Publish Project
+      run: dotnet publish -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml"
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
