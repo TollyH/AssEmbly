@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>2.0.0</code></p>
-<p>Last revised: 2023-08-26</p>
+<p>Last revised: 2023-08-27</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a mock processor architecture and assembly language
 written in C# and running on .NET. It is designed to simplify the
@@ -291,8 +291,10 @@ Stack</a></li>
 Parameters</a></li>
 </ul></li>
 <li><a href="#text-encoding">Text Encoding</a></li>
-<li><a href="#full-instruction-reference">Full Instruction
-Reference</a></li>
+<li><a href="#full-instruction-reference">Full Instruction Reference</a>
+<ul>
+<li><a href="#base-instruction-set">Base Instruction Set</a></li>
+</ul></li>
 <li><a href="#ascii-table">ASCII Table</a></li>
 </ul></li>
 </ul>
@@ -333,7 +335,7 @@ Reference</a></li>
 </tr>
 <tr class="even">
 <td>Opcode Size</td>
-<td>1 byte (fixed)</td>
+<td>1 byte (base instruction set) / 3 bytes (extension sets)</td>
 </tr>
 <tr class="odd">
 <td>Operand Size</td>
@@ -346,7 +348,7 @@ addresses/labels)</td>
 </tr>
 <tr class="odd">
 <td>Instruction Count</td>
-<td>165 opcodes (48 unique operations)</td>
+<td>167 opcodes (49 unique operations)</td>
 </tr>
 <tr class="even">
 <td>Text Encoding</td>
@@ -357,7 +359,7 @@ addresses/labels)</td>
 <h2 id="basic-syntax">Basic Syntax</h2>
 <h3 id="mnemonics-and-operands">Mnemonics and Operands</h3>
 <p>All AssEmbly instructions are written on a separate line, starting
-with a <strong>mnemonic</strong> — a 3-letter code that tells the
+with a <strong>mnemonic</strong> — a human readable code that tells the
 <strong>assembler</strong> exactly what operation needs to be performed
 — followed by any and all <strong>operands</strong> for the instruction.
 The assembler is the program that takes human readable assembly programs
@@ -380,9 +382,20 @@ operands <strong>cannot</strong> be separated with commas.</p>
 <p>Some instructions, like <code>CFL</code>, don’t need any operands. In
 these cases, simply have the mnemonic alone on the line.</p>
 <p>Mnemonics correspond to and are assembled down to
-<strong>opcodes</strong>, numbers (in the case of AssEmbly, single
-bytes), that the processor reads to know what instruction to perform and
-what types of operands it needs to read.</p>
+<strong>opcodes</strong>, numbers (in the case of AssEmbly either 1 or 3
+bytes) that the processor reads to know what instruction to perform and
+what types of operands it needs to read. If an opcode starts with a
+<code>0xFF</code> byte, the opcode will be 3 bytes long, with the second
+byte corresponding to an <em>extension set</em> number, and the third
+byte corresponding to an <em>instruction code</em>. If an opcode starts
+with any other byte, that single byte will be the entire opcode, with
+the byte corresponding to an <em>instruction code</em> in the base
+instruction set (extension set number <code>0x00</code>). This means
+that opcodes in the form <code>0xFF, 0x00, 0x??</code> and opcodes in
+the form <code>0x??</code> refer to the same instruction, though this
+<strong>only</strong> works when the extension set is <code>0x00</code>.
+A full list of extension sets and instruction codes can be found toward
+the end of the document.</p>
 <p>The processor will begin executing from the <strong>first
 line</strong> in the file downwards, unless a label with the name
 <code>ENTRY</code> is defined, in which case the processor will start
@@ -502,14 +515,15 @@ be in the place of an operand. Like literals, they always occupy 8 bytes
 WCC 10
 MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0</code></pre>
 <p>Here <code>:AREA_1</code> will point to the <strong>first
-byte</strong> (i.e. the <strong>opcode</strong>) of the <strong>directly
-subsequent assemble-able line</strong> — in this case <code>WCC</code>.
-The second operand to <code>MVQ</code> will become the address that
-<code>WCC</code> is stored at in memory, <code>0</code> if it is the
-first instruction in the file. As <code>MVQ</code> is the instruction to
-move to a destination from a source, <code>rg0</code> will contain
-<code>0xCD</code> after the instruction executes (<code>0xCD</code>
-being the opcode for <code>WCC &lt;Literal&gt;</code>).</p>
+byte</strong> (i.e. the start of the <strong>opcode</strong>) of the
+<strong>directly subsequent assemble-able line</strong> — in this case
+<code>WCC</code>. The second operand to <code>MVQ</code> will become the
+address that <code>WCC</code> is stored at in memory, <code>0</code> if
+it is the first instruction in the file. As <code>MVQ</code> is the
+instruction to move to a destination from a source, <code>rg0</code>
+will contain <code>0xCD</code> after the instruction executes
+(<code>0xCD</code> being the opcode for
+<code>WCC &lt;Literal&gt;</code>).</p>
 <p>Another example, assuming these are the very first lines in a
 file:</p>
 <pre class="text"><code>WCC 10
@@ -978,7 +992,7 @@ value to be stored to. Destinations, and thus the first operand, must
 always be a <strong>register</strong>.</p>
 <p>Mathematical and bitwise operations are always done with 64-bits,
 therefore if an address (i.e. a label or pointer) is used as the second
-operand, 4-bytes will be read starting at that address for the operation
+operand, 8 bytes will be read starting at that address for the operation
 in little endian encoding (see the “moving with memory” section above
 for more info on little endian).</p>
 <h3 id="addition-and-multiplication">Addition and Multiplication</h3>
@@ -2174,13 +2188,21 @@ correct order, they should be stored and displayed correctly.</p>
 <p>Text bytes read from files <strong>will not</strong> be automatically
 converted to UTF-8 if the file was saved with another encoding.</p>
 <h2 id="full-instruction-reference">Full Instruction Reference</h2>
-<table style="width:100%;">
+<h3 id="base-instruction-set">Base Instruction Set</h3>
+<p>Extension set number <code>0x00</code>, opcodes start with
+<code>0xFF, 0x00</code>.</p>
+<p>Note that for the base instruction set (number <code>0x00</code>)
+<em>only</em>, the leading <code>0xFF, 0x00</code> to specify the
+extension set can be omitted, as the processor will automatically treat
+opcodes not starting with <code>0xFF</code> as base instruction set
+opcodes.</p>
+<table>
 <colgroup>
-<col style="width: 6%" />
-<col style="width: 23%" />
-<col style="width: 13%" />
-<col style="width: 52%" />
-<col style="width: 3%" />
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -2188,7 +2210,7 @@ converted to UTF-8 if the file was saved with another encoding.</p>
 <th>Full Name</th>
 <th>Operands</th>
 <th>Function</th>
-<th>Opcode</th>
+<th>Instruction Code</th>
 </tr>
 </thead>
 <tbody>

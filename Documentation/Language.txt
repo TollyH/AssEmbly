@@ -2,7 +2,7 @@ AssEmbly Language Reference
 
 Applies to versions: 2.0.0
 
-Last revised: 2023-08-26
+Last revised: 2023-08-27
 
 Introduction
 
@@ -77,6 +77,7 @@ Table of Contents
         -   Passing Multiple Parameters
     -   Text Encoding
     -   Full Instruction Reference
+        -   Base Instruction Set
     -   ASCII Table
 
 Technical Information
@@ -98,7 +99,8 @@ Technical Information
 
   Branching           Condition code (status register)
 
-  Opcode Size         1 byte (fixed)
+  Opcode Size         1 byte (base instruction set) / 3 bytes (extension
+                      sets)
 
   Operand Size        1 byte (registers, pointers) / 8 bytes (literals,
                       addresses/labels)
@@ -106,7 +108,7 @@ Technical Information
   Instruction Size    1 byte – 17 bytes (practical) / unlimited
                       (theoretical)
 
-  Instruction Count   165 opcodes (48 unique operations)
+  Instruction Count   167 opcodes (49 unique operations)
 
   Text Encoding       UTF-8
   ------------------- ---------------------------------------------------
@@ -116,7 +118,7 @@ Basic Syntax
 Mnemonics and Operands
 
 All AssEmbly instructions are written on a separate line, starting with
-a mnemonic — a 3-letter code that tells the assembler exactly what
+a mnemonic — a human readable code that tells the assembler exactly what
 operation needs to be performed — followed by any and all operands for
 the instruction. The assembler is the program that takes human readable
 assembly programs and turns them into raw numbers — bytes — that can be
@@ -144,8 +146,18 @@ Some instructions, like CFL, don’t need any operands. In these cases,
 simply have the mnemonic alone on the line.
 
 Mnemonics correspond to and are assembled down to opcodes, numbers (in
-the case of AssEmbly, single bytes), that the processor reads to know
-what instruction to perform and what types of operands it needs to read.
+the case of AssEmbly either 1 or 3 bytes) that the processor reads to
+know what instruction to perform and what types of operands it needs to
+read. If an opcode starts with a 0xFF byte, the opcode will be 3 bytes
+long, with the second byte corresponding to an extension set number, and
+the third byte corresponding to an instruction code. If an opcode starts
+with any other byte, that single byte will be the entire opcode, with
+the byte corresponding to an instruction code in the base instruction
+set (extension set number 0x00). This means that opcodes in the form
+0xFF, 0x00, 0x?? and opcodes in the form 0x?? refer to the same
+instruction, though this only works when the extension set is 0x00. A
+full list of extension sets and instruction codes can be found toward
+the end of the document.
 
 The processor will begin executing from the first line in the file
 downwards, unless a label with the name ENTRY is defined, in which case
@@ -295,12 +307,13 @@ Consider the following example:
     WCC 10
     MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0
 
-Here :AREA_1 will point to the first byte (i.e. the opcode) of the
-directly subsequent assemble-able line — in this case WCC. The second
-operand to MVQ will become the address that WCC is stored at in memory,
-0 if it is the first instruction in the file. As MVQ is the instruction
-to move to a destination from a source, rg0 will contain 0xCD after the
-instruction executes (0xCD being the opcode for WCC <Literal>).
+Here :AREA_1 will point to the first byte (i.e. the start of the opcode)
+of the directly subsequent assemble-able line — in this case WCC. The
+second operand to MVQ will become the address that WCC is stored at in
+memory, 0 if it is the first instruction in the file. As MVQ is the
+instruction to move to a destination from a source, rg0 will contain
+0xCD after the instruction executes (0xCD being the opcode for
+WCC <Literal>).
 
 Another example, assuming these are the very first lines in a file:
 
@@ -732,7 +745,7 @@ Destinations, and thus the first operand, must always be a register.
 
 Mathematical and bitwise operations are always done with 64-bits,
 therefore if an address (i.e. a label or pointer) is used as the second
-operand, 4-bytes will be read starting at that address for the operation
+operand, 8 bytes will be read starting at that address for the operation
 in little endian encoding (see the “moving with memory” section above
 for more info on little endian).
 
@@ -2065,653 +2078,1164 @@ if the file was saved with another encoding.
 
 Full Instruction Reference
 
-  -----------------------------------------------------------------------------------------
-  Mnemonic      Full Name        Operands    Function                              Opcode
-  ------------- ---------------- ----------- ------------------------------------- --------
-  Control                                                                          
-
-  HLT           Halt             -           Stops the processor from executing    0x00
-                                             the program                           
-
-  NOP           No Operation     -           Do nothing                            0x01
-
-  Jumping                                                                          
-
-  JMP           Jump             Address     Jump unconditionally to an address in 0x02
-                                             a label                               
-
-  JMP           Jump             Pointer     Jump unconditionally to an address in 0x03
-                                             a register                            
-
-  JEQ / JZO     Jump if Equal /  Address     Jump to an address in a label only if 0x04
-                Jump if Zero                 the zero status flag is set           
-
-  JEQ / JZO     Jump if Equal /  Pointer     Jump to an address in a register only 0x05
-                Jump if Zero                 if the zero status flag is set        
-
-  JNE / JNZ     Jump if not      Address     Jump to an address in a label only if 0x06
-                Equal / Jump if              the zero status flag is unset         
-                not Zero                                                           
-
-  JNE / JNZ     Jump if not      Pointer     Jump to an address in a register only 0x07
-                Equal / Jump if              if the zero status flag is unset      
-                not Zero                                                           
-
-  JLT / JCA     Jump if Less     Address     Jump to an address in a label only if 0x08
-                Than / Jump if               the carry status flag is set          
-                Carry                                                              
-
-  JLT / JCA     Jump if Less     Pointer     Jump to an address in a register only 0x09
-                Than / Jump if               if the carry status flag is set       
-                Carry                                                              
-
-  JLE           Jump if Less     Address     Jump to an address in a label only if 0x0A
-                Than or Equal To             either the carry or zero flags are    
-                                             set                                   
-
-  JLE           Jump if Less     Pointer     Jump to an address in a register only 0x0B
-                Than or Equal To             if either the carry or zero flags are 
-                                             set                                   
-
-  JGT           Jump if Greater  Address     Jump to an address in a label only if 0x0C
-                Than                         both the carry and zero flags are     
-                                             unset                                 
-
-  JGT           Jump if Greater  Pointer     Jump to an address in a register only 0x0D
-                Than                         if both the carry and zero flags are  
-                                             unset                                 
-
-  JGE / JNC     Jump if Greater  Address     Jump to an address in a label only if 0x0E
-                Than or Equal To             the carry status flag is unset        
-                / Jump if no                                                       
-                Carry                                                              
-
-  JGE / JNC     Jump if Greater  Pointer     Jump to an address in a register only 0x0F
-                Than or Equal To             if the carry status flag is unset     
-                / Jump if no                                                       
-                Carry                                                              
-
-  Math                                                                             
-
-  ADD           Add              Register,   Add the contents of one register to   0x10
-                                 Register    another                               
-
-  ADD           Add              Register,   Add a literal value to the contents   0x11
-                                 Literal     of a register                         
-
-  ADD           Add              Register,   Add the contents of memory at an      0x12
-                                 Address     address in a label to a register      
-
-  ADD           Add              Register,   Add the contents of memory at an      0x13
-                                 Pointer     address in a register to a register   
-
-  ICR           Increment        Register    Increment the contents of a register  0x14
-                                             by 1                                  
-
-  SUB           Subtract         Register,   Subtract the contents of one register 0x20
-                                 Register    from another                          
-
-  SUB           Subtract         Register,   Subtract a literal value from the     0x21
-                                 Literal     contents of a register                
-
-  SUB           Subtract         Register,   Subtract the contents of memory at an 0x22
-                                 Address     address in a label from a register    
-
-  SUB           Subtract         Register,   Subtract the contents of memory at an 0x23
-                                 Pointer     address in a register from a register 
-
-  DCR           Decrement        Register    Decrement the contents of a register  0x24
-                                             by 1                                  
-
-  MUL           Multiply         Register,   Multiply the contents of one register 0x30
-                                 Register    by another                            
-
-  MUL           Multiply         Register,   Multiply the contents of a register   0x31
-                                 Literal     by a literal value                    
-
-  MUL           Multiply         Register,   Multiply a register by the contents   0x32
-                                 Address     of memory at an address in a label    
-
-  MUL           Multiply         Register,   Multiply a register by the contents   0x33
-                                 Pointer     of memory at an address in a register 
-
-  DIV           Integer Divide   Register,   Divide the contents of one register   0x40
-                                 Register    by another, discarding the remainder  
-
-  DIV           Integer Divide   Register,   Divide the contents of a register by  0x41
-                                 Literal     a literal value, discarding the       
-                                             remainder                             
-
-  DIV           Integer Divide   Register,   Divide a register by the contents of  0x42
-                                 Address     memory at an address in a label,      
-                                             discarding the remainder              
-
-  DIV           Integer Divide   Register,   Divide a register by the contents of  0x43
-                                 Pointer     memory at an address in a register,   
-                                             discarding the remainder              
-
-  DVR           Divide With      Register,   Divide the contents of one register   0x44
-                Remainder        Register,   by another, storing the remainder     
-                                 Register                                          
-
-  DVR           Divide With      Register,   Divide the contents of a register by  0x45
-                Remainder        Register,   a literal value, storing the          
-                                 Literal     remainder                             
-
-  DVR           Divide With      Register,   Divide a register by the contents of  0x46
-                Remainder        Register,   memory at an address in a label,      
-                                 Address     storing the remainder                 
-
-  DVR           Divide With      Register,   Divide a register by the contents of  0x47
-                Remainder        Register,   memory at an address in a register,   
-                                 Pointer     storing the remainder                 
-
-  REM           Remainder Only   Register,   Divide the contents of one register   0x48
-                                 Register    by another, storing only the          
-                                             remainder                             
-
-  REM           Remainder Only   Register,   Divide the contents of a register by  0x49
-                                 Literal     a literal value, storing only the     
-                                             remainder                             
-
-  REM           Remainder Only   Register,   Divide a register by the contents of  0x4A
-                                 Address     memory at an address in a label,      
-                                             storing only the remainder            
-
-  REM           Remainder Only   Register,   Divide a register by the contents of  0x4B
-                                 Pointer     memory at an address in a register,   
-                                             storing only the remainder            
-
-  SHL           Shift Left       Register,   Shift the bits of one register left   0x50
-                                 Register    by another register                   
-
-  SHL           Shift Left       Register,   Shift the bits of a register left by  0x51
-                                 Literal     a literal value                       
-
-  SHL           Shift Left       Register,   Shift the bits of a register left by  0x52
-                                 Address     the contents of memory at an address  
-                                             in a label                            
-
-  SHL           Shift Left       Register,   Shift the bits of a register left by  0x53
-                                 Pointer     the contents of memory at an address  
-                                             in a register                         
-
-  SHR           Shift Right      Register,   Shift the bits of one register right  0x54
-                                 Register    by another register                   
-
-  SHR           Shift Right      Register,   Shift the bits of a register right by 0x55
-                                 Literal     a literal value                       
-
-  SHR           Shift Right      Register,   Shift the bits of a register right by 0x56
-                                 Address     the contents of memory at an address  
-                                             in a label                            
-
-  SHR           Shift Right      Register,   Shift the bits of a register right by 0x57
-                                 Pointer     the contents of memory at an address  
-                                             in a register                         
-
-  Bitwise                                                                          
-
-  AND           Bitwise And      Register,   Bitwise and one register by another   0x60
-                                 Register                                          
-
-  AND           Bitwise And      Register,   Bitwise and a register by a literal   0x61
-                                 Literal     value                                 
-
-  AND           Bitwise And      Register,   Bitwise and a register by the         0x62
-                                 Address     contents of memory at an address in a 
-                                             label                                 
-
-  AND           Bitwise And      Register,   Bitwise and a register by the         0x63
-                                 Pointer     contents of memory at an address in a 
-                                             register                              
-
-  ORR           Bitwise Or       Register,   Bitwise or one register by another    0x64
-                                 Register                                          
-
-  ORR           Bitwise Or       Register,   Bitwise or a register by a literal    0x65
-                                 Literal     value                                 
-
-  ORR           Bitwise Or       Register,   Bitwise or a register by the contents 0x66
-                                 Address     of memory at an address in a label    
-
-  ORR           Bitwise Or       Register,   Bitwise or a register by the contents 0x67
-                                 Pointer     of memory at an address in a register 
-
-  XOR           Bitwise          Register,   Bitwise exclusive or one register by  0x68
-                Exclusive Or     Register    another                               
-
-  XOR           Bitwise          Register,   Bitwise exclusive or a register by a  0x69
-                Exclusive Or     Literal     literal value                         
-
-  XOR           Bitwise          Register,   Bitwise exclusive or a register by    0x6A
-                Exclusive Or     Address     the contents of memory at an address  
-                                             in a label                            
-
-  XOR           Bitwise          Register,   Bitwise exclusive or a register by    0x6B
-                Exclusive Or     Pointer     the contents of memory at an address  
-                                             in a register                         
-
-  NOT           Bitwise Not      Register    Invert each bit of a register         0x6C
-
-  RNG           Random Number    Register    Randomise each bit of a register      0x6D
-                Generator                                                          
-
-  Comparison                                                                       
-
-  TST           Test             Register,   Bitwise and two registers, discarding 0x70
-                                 Register    the result whilst still updating      
-                                             status flags                          
-
-  TST           Test             Register,   Bitwise and a register and a literal  0x71
-                                 Literal     value, discarding the result whilst   
-                                             still updating status flags           
-
-  TST           Test             Register,   Bitwise and a register and the        0x72
-                                 Address     contents of memory at an address in a 
-                                             label, discarding the result          
-
-  TST           Test             Register,   Bitwise and a register and the        0x73
-                                 Pointer     contents of memory at an address in a 
-                                             register, discarding the result       
-
-  CMP           Compare          Register,   Subtract a register from another,     0x74
-                                 Register    discarding the result whilst still    
-                                             updating status flags                 
-
-  CMP           Compare          Register,   Subtract a literal value from a       0x75
-                                 Literal     register, discarding the result       
-                                             whilst still updating status flags    
-
-  CMP           Compare          Register,   Subtract the contents of memory at an 0x76
-                                 Address     address in a label from a register,   
-                                             discarding the result                 
-
-  CMP           Compare          Register,   Subtract the contents of memory at an 0x77
-                                 Pointer     address in a register from a          
-                                             register, discarding the result       
-
-  Data Moving                                                                      
-
-  MVB           Move Byte        Register,   Move the lower 8-bits of one register 0x80
-                                 Register    to another                            
-
-  MVB           Move Byte        Register,   Move the lower 8-bits of a literal    0x81
-                                 Literal     value to a register                   
-
-  MVB           Move Byte        Register,   Move 8-bits of the contents of memory 0x82
-                                 Address     starting at an address in a label to  
-                                             a register                            
-
-  MVB           Move Byte        Register,   Move 8-bits of the contents of memory 0x83
-                                 Pointer     starting at an address in a register  
-                                             to a register                         
-
-  MVB           Move Byte        Address,    Move the lower 8-bits of a register   0x84
-                                 Register    to the contents of memory at an       
-                                             address in a label                    
-
-  MVB           Move Byte        Address,    Move the lower 8-bits of a literal to 0x85
-                                 Literal     the contents of memory at an address  
-                                             in a label                            
-
-  MVB           Move Byte        Pointer,    Move the lower 8-bits of a register   0x86
-                                 Register    to the contents of memory at an       
-                                             address in a register                 
-
-  MVB           Move Byte        Pointer,    Move the lower 8-bits of a literal to 0x87
-                                 Literal     the contents of memory at an address  
-                                             in a register                         
-
-  MVW           Move Word        Register,   Move the lower 16-bits (2 bytes) of   0x88
-                                 Register    one register to another               
-
-  MVW           Move Word        Register,   Move the lower 16-bits (2 bytes) of a 0x89
-                                 Literal     literal value to a register           
-
-  MVW           Move Word        Register,   Move 16-bits (2 bytes) of the         0x8A
-                                 Address     contents of memory starting at an     
-                                             address in a label to a register      
-
-  MVW           Move Word        Register,   Move 16-bits (2 bytes) of the         0x8B
-                                 Pointer     contents of memory starting at an     
-                                             address in a register to a register   
-
-  MVW           Move Word        Address,    Move the lower 16-bits (2 bytes) of a 0x8C
-                                 Register    register to the contents of memory at 
-                                             an address in a label                 
-
-  MVW           Move Word        Address,    Move the lower 16-bits (2 bytes) of a 0x8D
-                                 Literal     literal to the contents of memory at  
-                                             an address in a label                 
-
-  MVW           Move Word        Pointer,    Move the lower 16-bits (2 bytes) of a 0x8E
-                                 Register    register to the contents of memory at 
-                                             an address in a register              
-
-  MVW           Move Word        Pointer,    Move the lower 16-bits (2 bytes) of a 0x8F
-                                 Literal     literal to the contents of memory at  
-                                             an address in a register              
-
-  MVD           Move Double Word Register,   Move the lower 32-bits (4 bytes) of   0x90
-                                 Register    one register to another               
-
-  MVD           Move Double Word Register,   Move the lower 32-bits (4 bytes) of a 0x91
-                                 Literal     literal value to a register           
-
-  MVD           Move Double Word Register,   Move 32-bits (4 bytes) of the         0x92
-                                 Address     contents of memory starting at an     
-                                             address in a label to a register      
-
-  MVD           Move Double Word Register,   Move 32-bits (4 bytes) of the         0x93
-                                 Pointer     contents of memory starting at an     
-                                             address in a register to a register   
-
-  MVD           Move Double Word Address,    Move the lower 32-bits (4 bytes) of a 0x94
-                                 Register    register to the contents of memory at 
-                                             an address in a label                 
-
-  MVD           Move Double Word Address,    Move the lower 32-bits (4 bytes) of a 0x95
-                                 Literal     literal to the contents of memory at  
-                                             an address in a label                 
-
-  MVD           Move Double Word Pointer,    Move the lower 32-bits (4 bytes) of a 0x96
-                                 Register    register to the contents of memory at 
-                                             an address in a register              
-
-  MVD           Move Double Word Pointer,    Move the lower 32-bits (4 bytes) of a 0x97
-                                 Literal     literal to the contents of memory at  
-                                             an address in a register              
-
-  MVQ           Move Quad Word   Register,   Move all 64-bits (8 bytes) of one     0x98
-                                 Register    register to another                   
-
-  MVQ           Move Quad Word   Register,   Move all 64-bits (8 bytes) of a       0x99
-                                 Literal     literal value to a register           
-
-  MVQ           Move Quad Word   Register,   Move 64-bits (8 bytes) of the         0x9A
-                                 Address     contents of memory starting at an     
-                                             address in a label to a register      
-
-  MVQ           Move Quad Word   Register,   Move 64-bits (8 bytes) of the         0x9B
-                                 Pointer     contents of memory starting at an     
-                                             address in a register to a register   
-
-  MVQ           Move Quad Word   Address,    Move all 64-bits (8 bytes) of a       0x9C
-                                 Register    register to the contents of memory at 
-                                             an address in a label                 
-
-  MVQ           Move Quad Word   Address,    Move all 64-bits (8 bytes) of a       0x9D
-                                 Literal     literal to the contents of memory at  
-                                             an address in a label                 
-
-  MVQ           Move Quad Word   Pointer,    Move all 64-bits (8 bytes) of a       0x9E
-                                 Register    register to the contents of memory at 
-                                             an address in a register              
-
-  MVQ           Move Quad Word   Pointer,    Move all 64-bits (8 bytes) of a       0x9F
-                                 Literal     literal to the contents of memory at  
-                                             an address in a register              
-
-  Stack                                                                            
-
-  PSH           Push to Stack    Register    Insert the value in a register to the 0xA0
-                                             top of the stack                      
-
-  PSH           Push to Stack    Literal     Insert a literal value to the top of  0xA1
-                                             the stack                             
-
-  PSH           Push to Stack    Address     Insert the contents of memory at an   0xA2
-                                             address in a label to the top of the  
-                                             stack                                 
-
-  PSH           Push to Stack    Pointer     Insert the contents of memory at an   0xA3
-                                             address in a register to the top of   
-                                             the stack                             
-
-  POP           Pop from Stack   Register    Remove the value from the top of the  0xA4
-                                             stack and store it in a register      
-
-  Subroutines                                                                      
-
-  CAL           Call Subroutine  Address     Call the subroutine at an address in  0xB0
-                                             a label, pushing rpo and rsb to the   
-                                             stack                                 
-
-  CAL           Call Subroutine  Pointer     Call the subroutine at an address in  0xB1
-                                             a register, pushing rpo and rsb to    
-                                             the stack                             
-
-  CAL           Call Subroutine  Address,    Call the subroutine at an address in  0xB2
-                                 Register    a label, moving the value in a        
-                                             register to rfp                       
-
-  CAL           Call Subroutine  Address,    Call the subroutine at an address in  0xB3
-                                 Literal     a label, moving a literal value to    
-                                             rfp                                   
-
-  CAL           Call Subroutine  Address,    Call the subroutine at an address in  0xB4
-                                 Address     a label, moving the contents of       
-                                             memory at an address in a label to    
-                                             rfp                                   
-
-  CAL           Call Subroutine  Address,    Call the subroutine at an address in  0xB5
-                                 Pointer     a label, moving the contents of       
-                                             memory at an address in a register to 
-                                             rfp                                   
-
-  CAL           Call Subroutine  Pointer,    Call the subroutine at an address in  0xB6
-                                 Register    a register, moving the value in a     
-                                             register to rfp                       
-
-  CAL           Call Subroutine  Pointer,    Call the subroutine at an address in  0xB7
-                                 Literal     a register, moving a literal value to 
-                                             rfp                                   
-
-  CAL           Call Subroutine  Pointer,    Call the subroutine at an address in  0xB8
-                                 Address     a register, moving the contents of    
-                                             memory at an address in a label to    
-                                             rfp                                   
-
-  CAL           Call Subroutine  Pointer,    Call the subroutine at an address in  0xB9
-                                 Pointer     a register, moving the contents of    
-                                             memory at an address in a register to 
-                                             rfp                                   
-
-  RET           Return from      -           Pop the previous states of rsb and    0xBA
-                Subroutine                   rpo off the stack                     
-
-  RET           Return from      Register    Pop the previous states of rsb and    0xBB
-                Subroutine                   rpo off the stack, moving the value   
-                                             in a register to rrv                  
-
-  RET           Return from      Literal     Pop the previous states of rsb and    0xBC
-                Subroutine                   rpo off the stack, moving a literal   
-                                             value to rrv                          
-
-  RET           Return from      Address     Pop the previous states off the       0xBD
-                Subroutine                   stack, moving the contents of memory  
-                                             at an address in a label to rrv       
-
-  RET           Return from      Pointer     Pop the previous states off the       0xBE
-                Subroutine                   stack, moving the contents of memory  
-                                             at an address in a register to rrv    
-
-  Console                                                                          
-  Writing                                                                          
-
-  WCN           Write Number to  Register    Write a register value as a decimal   0xC0
-                Console                      number to the console                 
-
-  WCN           Write Number to  Literal     Write a literal value as a decimal    0xC1
-                Console                      number to the console                 
-
-  WCN           Write Number to  Address     Write 64-bits (4 bytes) of memory     0xC2
-                Console                      starting at the address in a label as 
-                                             a decimal number to the console       
-
-  WCN           Write Number to  Pointer     Write 64-bits (4 bytes) of memory     0xC3
-                Console                      starting at the address in a register 
-                                             as a decimal number to the console    
-
-  WCB           Write Numeric    Register    Write the lower 8-bits of a register  0xC4
-                Byte to Console              value as a decimal number to the      
-                                             console                               
-
-  WCB           Write Numeric    Literal     Write the lower 8-bits of a literal   0xC5
-                Byte to Console              value as a decimal number to the      
-                                             console                               
-
-  WCB           Write Numeric    Address     Write contents of memory at the       0xC6
-                Byte to Console              address in a label as a decimal       
-                                             number to the console                 
-
-  WCB           Write Numeric    Pointer     Write contents of memory at the       0xC7
-                Byte to Console              address in a register as a decimal    
-                                             number to the console                 
-
-  WCX           Write            Register    Write the lower 8-bits of a register  0xC8
-                Hexadecimal to               value as a hexadecimal number to the  
-                Console                      console                               
-
-  WCX           Write            Literal     Write the lower 8-bits of a literal   0xC9
-                Hexadecimal to               value as a hexadecimal number to the  
-                Console                      console                               
-
-  WCX           Write            Address     Write contents of memory at the       0xCA
-                Hexadecimal to               address in a label as a hexadecimal   
-                Console                      number to the console                 
-
-  WCX           Write            Pointer     Write contents of memory at the       0xCB
-                Hexadecimal to               address in a register as a            
-                Console                      hexadecimal number to the console     
-
-  WCC           Write Raw Byte   Register    Write the lower 8-bits of a register  0xCC
-                to Console                   value as a raw byte to the console    
-
-  WCC           Write Raw Byte   Literal     Write the lower 8-bits of a literal   0xCD
-                to Console                   value as a raw byte to the console    
-
-  WCC           Write Raw Byte   Address     Write contents of memory at the       0xCE
-                to Console                   address in a label as a raw byte to   
-                                             the console                           
-
-  WCC           Write Raw Byte   Pointer     Write contents of memory at the       0xCF
-                to Console                   address in a register as a raw byte   
-                                             to the console                        
-
-  File Writing                                                                     
-
-  WFN           Write Number to  Register    Write a register value as a decimal   0xD0
-                File                         number to the opened file             
-
-  WFN           Write Number to  Literal     Write a literal value as a decimal    0xD1
-                File                         number to the opened file             
-
-  WFN           Write Number to  Address     Write 64-bits (4 bytes) of memory     0xD2
-                File                         starting at the address in a label as 
-                                             a decimal number to the opened file   
-
-  WFN           Write Number to  Pointer     Write 64-bits (4 bytes) of memory     0xD3
-                File                         starting at the address in a register 
-                                             as a decimal number to the opened     
-                                             file                                  
-
-  WFB           Write Numeric    Register    Write the lower 8-bits of a register  0xD4
-                Byte to File                 value as a decimal number to the      
-                                             opened file                           
-
-  WFB           Write Numeric    Literal     Write the lower 8-bits of a literal   0xD5
-                Byte to File                 value as a decimal number to the      
-                                             opened file                           
-
-  WFB           Write Numeric    Address     Write contents of memory at the       0xD6
-                Byte to File                 address in a label as a decimal       
-                                             number to the opened file             
-
-  WFB           Write Numeric    Pointer     Write contents of memory at the       0xD7
-                Byte to File                 address in a register as a decimal    
-                                             number to the opened file             
-
-  WFX           Write            Register    Write the lower 8-bits of a register  0xD8
-                Hexadecimal to               value as a hexadecimal number to the  
-                File                         opened file                           
-
-  WFX           Write            Literal     Write the lower 8-bits of a literal   0xD9
-                Hexadecimal to               value as a hexadecimal number to the  
-                File                         opened file                           
-
-  WFX           Write            Address     Write contents of memory at the       0xDA
-                Hexadecimal to               address in a label as a hexadecimal   
-                File                         number to the opened file             
-
-  WFX           Write            Pointer     Write contents of memory at the       0xDB
-                Hexadecimal to               address in a register as a            
-                File                         hexadecimal number to the opened file 
-
-  WFC           Write Raw Byte   Register    Write the lower 8-bits of a register  0xDC
-                to File                      value as a raw byte to the opened     
-                                             file                                  
-
-  WFC           Write Raw Byte   Literal     Write the lower 8-bits of a literal   0xDD
-                to File                      value as a raw byte to the opened     
-                                             file                                  
-
-  WFC           Write Raw Byte   Address     Write contents of memory at the       0xDE
-                to File                      address in a label as a raw byte to   
-                                             the opened file                       
-
-  WFC           Write Raw Byte   Pointer     Write contents of memory at the       0xDF
-                to File                      address in a register as a raw byte   
-                                             to the opened file                    
-
-  File                                                                             
-  Operations                                                                       
-
-  OFL           Open File        Address     Open the file at the path specified   0xE0
-                                             by a 0x00 terminated string in memory 
-                                             starting at an address in a label     
-
-  OFL           Open File        Pointer     Open the file at the path specified   0xE1
-                                             by a 0x00 terminated string in memory 
-                                             starting at an address in a register  
-
-  CFL           Close File       -           Close the currently open file         0xE2
-
-  DFL           Delete File      Address     Delete the file at the path specified 0xE3
-                                             by a 0x00 terminated string in memory 
-                                             starting at an address in a label     
-
-  DFL           Delete File      Pointer     Delete the file at the path specified 0xE4
-                                             by a 0x00 terminated string in memory 
-                                             starting at an address in a register  
-
-  FEX           File Exists      Register,   Store 1 in a register if the filepath 0xE5
-                                 Address     specified in memory starting at an    
-                                             address in a label exists, else 0     
-
-  FEX           File Exists      Register,   Store 1 in a register if the filepath 0xE6
-                                 Pointer     specified in memory starting at an    
-                                             address in a register exists, else 0  
-
-  FSZ           Get File Size    Register,   In a register, store the byte size of 0xE7
-                                 Address     the file at the path specified in     
-                                             memory starting at an address in a    
-                                             label                                 
-
-  FSZ           Get File Size    Register,   In a register, store the byte size of 0xE8
-                                 Pointer     the file at the path specified in     
-                                             memory starting at an address in a    
-                                             register                              
-
-  Reading                                                                          
-
-  RCC           Read Raw Byte    Register    Read a raw byte from the console,     0xF0
-                from Console                 storing it in a register              
-
-  RFC           Read Raw Byte    Register    Read the next byte from the currently 0xF1
-                from File                    open file, storing it in a register   
-  -----------------------------------------------------------------------------------------
+Base Instruction Set
+
+Extension set number 0x00, opcodes start with 0xFF, 0x00.
+
+Note that for the base instruction set (number 0x00) only, the leading
+0xFF, 0x00 to specify the extension set can be omitted, as the processor
+will automatically treat opcodes not starting with 0xFF as base
+instruction set opcodes.
+
+  --------------------------------------------------------------------------------
+  Mnemonic      Full Name     Operands     Function          Instruction Code
+  ------------- ------------- ------------ ----------------- ---------------------
+  Control                                                    
+
+  HLT           Halt          -            Stops the         0x00
+                                           processor from    
+                                           executing the     
+                                           program           
+
+  NOP           No Operation  -            Do nothing        0x01
+
+  Jumping                                                    
+
+  JMP           Jump          Address      Jump              0x02
+                                           unconditionally   
+                                           to an address in  
+                                           a label           
+
+  JMP           Jump          Pointer      Jump              0x03
+                                           unconditionally   
+                                           to an address in  
+                                           a register        
+
+  JEQ / JZO     Jump if Equal Address      Jump to an        0x04
+                / Jump if                  address in a      
+                Zero                       label only if the 
+                                           zero status flag  
+                                           is set            
+
+  JEQ / JZO     Jump if Equal Pointer      Jump to an        0x05
+                / Jump if                  address in a      
+                Zero                       register only if  
+                                           the zero status   
+                                           flag is set       
+
+  JNE / JNZ     Jump if not   Address      Jump to an        0x06
+                Equal / Jump               address in a      
+                if not Zero                label only if the 
+                                           zero status flag  
+                                           is unset          
+
+  JNE / JNZ     Jump if not   Pointer      Jump to an        0x07
+                Equal / Jump               address in a      
+                if not Zero                register only if  
+                                           the zero status   
+                                           flag is unset     
+
+  JLT / JCA     Jump if Less  Address      Jump to an        0x08
+                Than / Jump                address in a      
+                if Carry                   label only if the 
+                                           carry status flag 
+                                           is set            
+
+  JLT / JCA     Jump if Less  Pointer      Jump to an        0x09
+                Than / Jump                address in a      
+                if Carry                   register only if  
+                                           the carry status  
+                                           flag is set       
+
+  JLE           Jump if Less  Address      Jump to an        0x0A
+                Than or Equal              address in a      
+                To                         label only if     
+                                           either the carry  
+                                           or zero flags are 
+                                           set               
+
+  JLE           Jump if Less  Pointer      Jump to an        0x0B
+                Than or Equal              address in a      
+                To                         register only if  
+                                           either the carry  
+                                           or zero flags are 
+                                           set               
+
+  JGT           Jump if       Address      Jump to an        0x0C
+                Greater Than               address in a      
+                                           label only if     
+                                           both the carry    
+                                           and zero flags    
+                                           are unset         
+
+  JGT           Jump if       Pointer      Jump to an        0x0D
+                Greater Than               address in a      
+                                           register only if  
+                                           both the carry    
+                                           and zero flags    
+                                           are unset         
+
+  JGE / JNC     Jump if       Address      Jump to an        0x0E
+                Greater Than               address in a      
+                or Equal To /              label only if the 
+                Jump if no                 carry status flag 
+                Carry                      is unset          
+
+  JGE / JNC     Jump if       Pointer      Jump to an        0x0F
+                Greater Than               address in a      
+                or Equal To /              register only if  
+                Jump if no                 the carry status  
+                Carry                      flag is unset     
+
+  Math                                                       
+
+  ADD           Add           Register,    Add the contents  0x10
+                              Register     of one register   
+                                           to another        
+
+  ADD           Add           Register,    Add a literal     0x11
+                              Literal      value to the      
+                                           contents of a     
+                                           register          
+
+  ADD           Add           Register,    Add the contents  0x12
+                              Address      of memory at an   
+                                           address in a      
+                                           label to a        
+                                           register          
+
+  ADD           Add           Register,    Add the contents  0x13
+                              Pointer      of memory at an   
+                                           address in a      
+                                           register to a     
+                                           register          
+
+  ICR           Increment     Register     Increment the     0x14
+                                           contents of a     
+                                           register by 1     
+
+  SUB           Subtract      Register,    Subtract the      0x20
+                              Register     contents of one   
+                                           register from     
+                                           another           
+
+  SUB           Subtract      Register,    Subtract a        0x21
+                              Literal      literal value     
+                                           from the contents 
+                                           of a register     
+
+  SUB           Subtract      Register,    Subtract the      0x22
+                              Address      contents of       
+                                           memory at an      
+                                           address in a      
+                                           label from a      
+                                           register          
+
+  SUB           Subtract      Register,    Subtract the      0x23
+                              Pointer      contents of       
+                                           memory at an      
+                                           address in a      
+                                           register from a   
+                                           register          
+
+  DCR           Decrement     Register     Decrement the     0x24
+                                           contents of a     
+                                           register by 1     
+
+  MUL           Multiply      Register,    Multiply the      0x30
+                              Register     contents of one   
+                                           register by       
+                                           another           
+
+  MUL           Multiply      Register,    Multiply the      0x31
+                              Literal      contents of a     
+                                           register by a     
+                                           literal value     
+
+  MUL           Multiply      Register,    Multiply a        0x32
+                              Address      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MUL           Multiply      Register,    Multiply a        0x33
+                              Pointer      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  DIV           Integer       Register,    Divide the        0x40
+                Divide        Register     contents of one   
+                                           register by       
+                                           another,          
+                                           discarding the    
+                                           remainder         
+
+  DIV           Integer       Register,    Divide the        0x41
+                Divide        Literal      contents of a     
+                                           register by a     
+                                           literal value,    
+                                           discarding the    
+                                           remainder         
+
+  DIV           Integer       Register,    Divide a register 0x42
+                Divide        Address      by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           label, discarding 
+                                           the remainder     
+
+  DIV           Integer       Register,    Divide a register 0x43
+                Divide        Pointer      by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           register,         
+                                           discarding the    
+                                           remainder         
+
+  DVR           Divide With   Register,    Divide the        0x44
+                Remainder     Register,    contents of one   
+                              Register     register by       
+                                           another, storing  
+                                           the remainder     
+
+  DVR           Divide With   Register,    Divide the        0x45
+                Remainder     Register,    contents of a     
+                              Literal      register by a     
+                                           literal value,    
+                                           storing the       
+                                           remainder         
+
+  DVR           Divide With   Register,    Divide a register 0x46
+                Remainder     Register,    by the contents   
+                              Address      of memory at an   
+                                           address in a      
+                                           label, storing    
+                                           the remainder     
+
+  DVR           Divide With   Register,    Divide a register 0x47
+                Remainder     Register,    by the contents   
+                              Pointer      of memory at an   
+                                           address in a      
+                                           register, storing 
+                                           the remainder     
+
+  REM           Remainder     Register,    Divide the        0x48
+                Only          Register     contents of one   
+                                           register by       
+                                           another, storing  
+                                           only the          
+                                           remainder         
+
+  REM           Remainder     Register,    Divide the        0x49
+                Only          Literal      contents of a     
+                                           register by a     
+                                           literal value,    
+                                           storing only the  
+                                           remainder         
+
+  REM           Remainder     Register,    Divide a register 0x4A
+                Only          Address      by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           label, storing    
+                                           only the          
+                                           remainder         
+
+  REM           Remainder     Register,    Divide a register 0x4B
+                Only          Pointer      by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           register, storing 
+                                           only the          
+                                           remainder         
+
+  SHL           Shift Left    Register,    Shift the bits of 0x50
+                              Register     one register left 
+                                           by another        
+                                           register          
+
+  SHL           Shift Left    Register,    Shift the bits of 0x51
+                              Literal      a register left   
+                                           by a literal      
+                                           value             
+
+  SHL           Shift Left    Register,    Shift the bits of 0x52
+                              Address      a register left   
+                                           by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           label             
+
+  SHL           Shift Left    Register,    Shift the bits of 0x53
+                              Pointer      a register left   
+                                           by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           register          
+
+  SHR           Shift Right   Register,    Shift the bits of 0x54
+                              Register     one register      
+                                           right by another  
+                                           register          
+
+  SHR           Shift Right   Register,    Shift the bits of 0x55
+                              Literal      a register right  
+                                           by a literal      
+                                           value             
+
+  SHR           Shift Right   Register,    Shift the bits of 0x56
+                              Address      a register right  
+                                           by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           label             
+
+  SHR           Shift Right   Register,    Shift the bits of 0x57
+                              Pointer      a register right  
+                                           by the contents   
+                                           of memory at an   
+                                           address in a      
+                                           register          
+
+  Bitwise                                                    
+
+  AND           Bitwise And   Register,    Bitwise and one   0x60
+                              Register     register by       
+                                           another           
+
+  AND           Bitwise And   Register,    Bitwise and a     0x61
+                              Literal      register by a     
+                                           literal value     
+
+  AND           Bitwise And   Register,    Bitwise and a     0x62
+                              Address      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  AND           Bitwise And   Register,    Bitwise and a     0x63
+                              Pointer      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  ORR           Bitwise Or    Register,    Bitwise or one    0x64
+                              Register     register by       
+                                           another           
+
+  ORR           Bitwise Or    Register,    Bitwise or a      0x65
+                              Literal      register by a     
+                                           literal value     
+
+  ORR           Bitwise Or    Register,    Bitwise or a      0x66
+                              Address      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  ORR           Bitwise Or    Register,    Bitwise or a      0x67
+                              Pointer      register by the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  XOR           Bitwise       Register,    Bitwise exclusive 0x68
+                Exclusive Or  Register     or one register   
+                                           by another        
+
+  XOR           Bitwise       Register,    Bitwise exclusive 0x69
+                Exclusive Or  Literal      or a register by  
+                                           a literal value   
+
+  XOR           Bitwise       Register,    Bitwise exclusive 0x6A
+                Exclusive Or  Address      or a register by  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  XOR           Bitwise       Register,    Bitwise exclusive 0x6B
+                Exclusive Or  Pointer      or a register by  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  NOT           Bitwise Not   Register     Invert each bit   0x6C
+                                           of a register     
+
+  RNG           Random Number Register     Randomise each    0x6D
+                Generator                  bit of a register 
+
+  Comparison                                                 
+
+  TST           Test          Register,    Bitwise and two   0x70
+                              Register     registers,        
+                                           discarding the    
+                                           result whilst     
+                                           still updating    
+                                           status flags      
+
+  TST           Test          Register,    Bitwise and a     0x71
+                              Literal      register and a    
+                                           literal value,    
+                                           discarding the    
+                                           result whilst     
+                                           still updating    
+                                           status flags      
+
+  TST           Test          Register,    Bitwise and a     0x72
+                              Address      register and the  
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label, discarding 
+                                           the result        
+
+  TST           Test          Register,    Bitwise and a     0x73
+                              Pointer      register and the  
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register,         
+                                           discarding the    
+                                           result            
+
+  CMP           Compare       Register,    Subtract a        0x74
+                              Register     register from     
+                                           another,          
+                                           discarding the    
+                                           result whilst     
+                                           still updating    
+                                           status flags      
+
+  CMP           Compare       Register,    Subtract a        0x75
+                              Literal      literal value     
+                                           from a register,  
+                                           discarding the    
+                                           result whilst     
+                                           still updating    
+                                           status flags      
+
+  CMP           Compare       Register,    Subtract the      0x76
+                              Address      contents of       
+                                           memory at an      
+                                           address in a      
+                                           label from a      
+                                           register,         
+                                           discarding the    
+                                           result            
+
+  CMP           Compare       Register,    Subtract the      0x77
+                              Pointer      contents of       
+                                           memory at an      
+                                           address in a      
+                                           register from a   
+                                           register,         
+                                           discarding the    
+                                           result            
+
+  Data Moving                                                
+
+  MVB           Move Byte     Register,    Move the lower    0x80
+                              Register     8-bits of one     
+                                           register to       
+                                           another           
+
+  MVB           Move Byte     Register,    Move the lower    0x81
+                              Literal      8-bits of a       
+                                           literal value to  
+                                           a register        
+
+  MVB           Move Byte     Register,    Move 8-bits of    0x82
+                              Address      the contents of   
+                                           memory starting   
+                                           at an address in  
+                                           a label to a      
+                                           register          
+
+  MVB           Move Byte     Register,    Move 8-bits of    0x83
+                              Pointer      the contents of   
+                                           memory starting   
+                                           at an address in  
+                                           a register to a   
+                                           register          
+
+  MVB           Move Byte     Address,     Move the lower    0x84
+                              Register     8-bits of a       
+                                           register to the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVB           Move Byte     Address,     Move the lower    0x85
+                              Literal      8-bits of a       
+                                           literal to the    
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVB           Move Byte     Pointer,     Move the lower    0x86
+                              Register     8-bits of a       
+                                           register to the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVB           Move Byte     Pointer,     Move the lower    0x87
+                              Literal      8-bits of a       
+                                           literal to the    
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVW           Move Word     Register,    Move the lower    0x88
+                              Register     16-bits (2 bytes) 
+                                           of one register   
+                                           to another        
+
+  MVW           Move Word     Register,    Move the lower    0x89
+                              Literal      16-bits (2 bytes) 
+                                           of a literal      
+                                           value to a        
+                                           register          
+
+  MVW           Move Word     Register,    Move 16-bits (2   0x8A
+                              Address      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a label to a      
+                                           register          
+
+  MVW           Move Word     Register,    Move 16-bits (2   0x8B
+                              Pointer      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a register to a   
+                                           register          
+
+  MVW           Move Word     Address,     Move the lower    0x8C
+                              Register     16-bits (2 bytes) 
+                                           of a register to  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVW           Move Word     Address,     Move the lower    0x8D
+                              Literal      16-bits (2 bytes) 
+                                           of a literal to   
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVW           Move Word     Pointer,     Move the lower    0x8E
+                              Register     16-bits (2 bytes) 
+                                           of a register to  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVW           Move Word     Pointer,     Move the lower    0x8F
+                              Literal      16-bits (2 bytes) 
+                                           of a literal to   
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVD           Move Double   Register,    Move the lower    0x90
+                Word          Register     32-bits (4 bytes) 
+                                           of one register   
+                                           to another        
+
+  MVD           Move Double   Register,    Move the lower    0x91
+                Word          Literal      32-bits (4 bytes) 
+                                           of a literal      
+                                           value to a        
+                                           register          
+
+  MVD           Move Double   Register,    Move 32-bits (4   0x92
+                Word          Address      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a label to a      
+                                           register          
+
+  MVD           Move Double   Register,    Move 32-bits (4   0x93
+                Word          Pointer      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a register to a   
+                                           register          
+
+  MVD           Move Double   Address,     Move the lower    0x94
+                Word          Register     32-bits (4 bytes) 
+                                           of a register to  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVD           Move Double   Address,     Move the lower    0x95
+                Word          Literal      32-bits (4 bytes) 
+                                           of a literal to   
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVD           Move Double   Pointer,     Move the lower    0x96
+                Word          Register     32-bits (4 bytes) 
+                                           of a register to  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVD           Move Double   Pointer,     Move the lower    0x97
+                Word          Literal      32-bits (4 bytes) 
+                                           of a literal to   
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVQ           Move Quad     Register,    Move all 64-bits  0x98
+                Word          Register     (8 bytes) of one  
+                                           register to       
+                                           another           
+
+  MVQ           Move Quad     Register,    Move all 64-bits  0x99
+                Word          Literal      (8 bytes) of a    
+                                           literal value to  
+                                           a register        
+
+  MVQ           Move Quad     Register,    Move 64-bits (8   0x9A
+                Word          Address      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a label to a      
+                                           register          
+
+  MVQ           Move Quad     Register,    Move 64-bits (8   0x9B
+                Word          Pointer      bytes) of the     
+                                           contents of       
+                                           memory starting   
+                                           at an address in  
+                                           a register to a   
+                                           register          
+
+  MVQ           Move Quad     Address,     Move all 64-bits  0x9C
+                Word          Register     (8 bytes) of a    
+                                           register to the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVQ           Move Quad     Address,     Move all 64-bits  0x9D
+                Word          Literal      (8 bytes) of a    
+                                           literal to the    
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label             
+
+  MVQ           Move Quad     Pointer,     Move all 64-bits  0x9E
+                Word          Register     (8 bytes) of a    
+                                           register to the   
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  MVQ           Move Quad     Pointer,     Move all 64-bits  0x9F
+                Word          Literal      (8 bytes) of a    
+                                           literal to the    
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register          
+
+  Stack                                                      
+
+  PSH           Push to Stack Register     Insert the value  0xA0
+                                           in a register to  
+                                           the top of the    
+                                           stack             
+
+  PSH           Push to Stack Literal      Insert a literal  0xA1
+                                           value to the top  
+                                           of the stack      
+
+  PSH           Push to Stack Address      Insert the        0xA2
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label to the top  
+                                           of the stack      
+
+  PSH           Push to Stack Pointer      Insert the        0xA3
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register to the   
+                                           top of the stack  
+
+  POP           Pop from      Register     Remove the value  0xA4
+                Stack                      from the top of   
+                                           the stack and     
+                                           store it in a     
+                                           register          
+
+  Subroutines                                                
+
+  CAL           Call          Address      Call the          0xB0
+                Subroutine                 subroutine at an  
+                                           address in a      
+                                           label, pushing    
+                                           rpo and rsb to    
+                                           the stack         
+
+  CAL           Call          Pointer      Call the          0xB1
+                Subroutine                 subroutine at an  
+                                           address in a      
+                                           register, pushing 
+                                           rpo and rsb to    
+                                           the stack         
+
+  CAL           Call          Address,     Call the          0xB2
+                Subroutine    Register     subroutine at an  
+                                           address in a      
+                                           label, moving the 
+                                           value in a        
+                                           register to rfp   
+
+  CAL           Call          Address,     Call the          0xB3
+                Subroutine    Literal      subroutine at an  
+                                           address in a      
+                                           label, moving a   
+                                           literal value to  
+                                           rfp               
+
+  CAL           Call          Address,     Call the          0xB4
+                Subroutine    Address      subroutine at an  
+                                           address in a      
+                                           label, moving the 
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label to rfp      
+
+  CAL           Call          Address,     Call the          0xB5
+                Subroutine    Pointer      subroutine at an  
+                                           address in a      
+                                           label, moving the 
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register to rfp   
+
+  CAL           Call          Pointer,     Call the          0xB6
+                Subroutine    Register     subroutine at an  
+                                           address in a      
+                                           register, moving  
+                                           the value in a    
+                                           register to rfp   
+
+  CAL           Call          Pointer,     Call the          0xB7
+                Subroutine    Literal      subroutine at an  
+                                           address in a      
+                                           register, moving  
+                                           a literal value   
+                                           to rfp            
+
+  CAL           Call          Pointer,     Call the          0xB8
+                Subroutine    Address      subroutine at an  
+                                           address in a      
+                                           register, moving  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           label to rfp      
+
+  CAL           Call          Pointer,     Call the          0xB9
+                Subroutine    Pointer      subroutine at an  
+                                           address in a      
+                                           register, moving  
+                                           the contents of   
+                                           memory at an      
+                                           address in a      
+                                           register to rfp   
+
+  RET           Return from   -            Pop the previous  0xBA
+                Subroutine                 states of rsb and 
+                                           rpo off the stack 
+
+  RET           Return from   Register     Pop the previous  0xBB
+                Subroutine                 states of rsb and 
+                                           rpo off the       
+                                           stack, moving the 
+                                           value in a        
+                                           register to rrv   
+
+  RET           Return from   Literal      Pop the previous  0xBC
+                Subroutine                 states of rsb and 
+                                           rpo off the       
+                                           stack, moving a   
+                                           literal value to  
+                                           rrv               
+
+  RET           Return from   Address      Pop the previous  0xBD
+                Subroutine                 states off the    
+                                           stack, moving the 
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           label to rrv      
+
+  RET           Return from   Pointer      Pop the previous  0xBE
+                Subroutine                 states off the    
+                                           stack, moving the 
+                                           contents of       
+                                           memory at an      
+                                           address in a      
+                                           register to rrv   
+
+  Console                                                    
+  Writing                                                    
+
+  WCN           Write Number  Register     Write a register  0xC0
+                to Console                 value as a        
+                                           decimal number to 
+                                           the console       
+
+  WCN           Write Number  Literal      Write a literal   0xC1
+                to Console                 value as a        
+                                           decimal number to 
+                                           the console       
+
+  WCN           Write Number  Address      Write 64-bits (4  0xC2
+                to Console                 bytes) of memory  
+                                           starting at the   
+                                           address in a      
+                                           label as a        
+                                           decimal number to 
+                                           the console       
+
+  WCN           Write Number  Pointer      Write 64-bits (4  0xC3
+                to Console                 bytes) of memory  
+                                           starting at the   
+                                           address in a      
+                                           register as a     
+                                           decimal number to 
+                                           the console       
+
+  WCB           Write Numeric Register     Write the lower   0xC4
+                Byte to                    8-bits of a       
+                Console                    register value as 
+                                           a decimal number  
+                                           to the console    
+
+  WCB           Write Numeric Literal      Write the lower   0xC5
+                Byte to                    8-bits of a       
+                Console                    literal value as  
+                                           a decimal number  
+                                           to the console    
+
+  WCB           Write Numeric Address      Write contents of 0xC6
+                Byte to                    memory at the     
+                Console                    address in a      
+                                           label as a        
+                                           decimal number to 
+                                           the console       
+
+  WCB           Write Numeric Pointer      Write contents of 0xC7
+                Byte to                    memory at the     
+                Console                    address in a      
+                                           register as a     
+                                           decimal number to 
+                                           the console       
+
+  WCX           Write         Register     Write the lower   0xC8
+                Hexadecimal                8-bits of a       
+                to Console                 register value as 
+                                           a hexadecimal     
+                                           number to the     
+                                           console           
+
+  WCX           Write         Literal      Write the lower   0xC9
+                Hexadecimal                8-bits of a       
+                to Console                 literal value as  
+                                           a hexadecimal     
+                                           number to the     
+                                           console           
+
+  WCX           Write         Address      Write contents of 0xCA
+                Hexadecimal                memory at the     
+                to Console                 address in a      
+                                           label as a        
+                                           hexadecimal       
+                                           number to the     
+                                           console           
+
+  WCX           Write         Pointer      Write contents of 0xCB
+                Hexadecimal                memory at the     
+                to Console                 address in a      
+                                           register as a     
+                                           hexadecimal       
+                                           number to the     
+                                           console           
+
+  WCC           Write Raw     Register     Write the lower   0xCC
+                Byte to                    8-bits of a       
+                Console                    register value as 
+                                           a raw byte to the 
+                                           console           
+
+  WCC           Write Raw     Literal      Write the lower   0xCD
+                Byte to                    8-bits of a       
+                Console                    literal value as  
+                                           a raw byte to the 
+                                           console           
+
+  WCC           Write Raw     Address      Write contents of 0xCE
+                Byte to                    memory at the     
+                Console                    address in a      
+                                           label as a raw    
+                                           byte to the       
+                                           console           
+
+  WCC           Write Raw     Pointer      Write contents of 0xCF
+                Byte to                    memory at the     
+                Console                    address in a      
+                                           register as a raw 
+                                           byte to the       
+                                           console           
+
+  File Writing                                               
+
+  WFN           Write Number  Register     Write a register  0xD0
+                to File                    value as a        
+                                           decimal number to 
+                                           the opened file   
+
+  WFN           Write Number  Literal      Write a literal   0xD1
+                to File                    value as a        
+                                           decimal number to 
+                                           the opened file   
+
+  WFN           Write Number  Address      Write 64-bits (4  0xD2
+                to File                    bytes) of memory  
+                                           starting at the   
+                                           address in a      
+                                           label as a        
+                                           decimal number to 
+                                           the opened file   
+
+  WFN           Write Number  Pointer      Write 64-bits (4  0xD3
+                to File                    bytes) of memory  
+                                           starting at the   
+                                           address in a      
+                                           register as a     
+                                           decimal number to 
+                                           the opened file   
+
+  WFB           Write Numeric Register     Write the lower   0xD4
+                Byte to File               8-bits of a       
+                                           register value as 
+                                           a decimal number  
+                                           to the opened     
+                                           file              
+
+  WFB           Write Numeric Literal      Write the lower   0xD5
+                Byte to File               8-bits of a       
+                                           literal value as  
+                                           a decimal number  
+                                           to the opened     
+                                           file              
+
+  WFB           Write Numeric Address      Write contents of 0xD6
+                Byte to File               memory at the     
+                                           address in a      
+                                           label as a        
+                                           decimal number to 
+                                           the opened file   
+
+  WFB           Write Numeric Pointer      Write contents of 0xD7
+                Byte to File               memory at the     
+                                           address in a      
+                                           register as a     
+                                           decimal number to 
+                                           the opened file   
+
+  WFX           Write         Register     Write the lower   0xD8
+                Hexadecimal                8-bits of a       
+                to File                    register value as 
+                                           a hexadecimal     
+                                           number to the     
+                                           opened file       
+
+  WFX           Write         Literal      Write the lower   0xD9
+                Hexadecimal                8-bits of a       
+                to File                    literal value as  
+                                           a hexadecimal     
+                                           number to the     
+                                           opened file       
+
+  WFX           Write         Address      Write contents of 0xDA
+                Hexadecimal                memory at the     
+                to File                    address in a      
+                                           label as a        
+                                           hexadecimal       
+                                           number to the     
+                                           opened file       
+
+  WFX           Write         Pointer      Write contents of 0xDB
+                Hexadecimal                memory at the     
+                to File                    address in a      
+                                           register as a     
+                                           hexadecimal       
+                                           number to the     
+                                           opened file       
+
+  WFC           Write Raw     Register     Write the lower   0xDC
+                Byte to File               8-bits of a       
+                                           register value as 
+                                           a raw byte to the 
+                                           opened file       
+
+  WFC           Write Raw     Literal      Write the lower   0xDD
+                Byte to File               8-bits of a       
+                                           literal value as  
+                                           a raw byte to the 
+                                           opened file       
+
+  WFC           Write Raw     Address      Write contents of 0xDE
+                Byte to File               memory at the     
+                                           address in a      
+                                           label as a raw    
+                                           byte to the       
+                                           opened file       
+
+  WFC           Write Raw     Pointer      Write contents of 0xDF
+                Byte to File               memory at the     
+                                           address in a      
+                                           register as a raw 
+                                           byte to the       
+                                           opened file       
+
+  File                                                       
+  Operations                                                 
+
+  OFL           Open File     Address      Open the file at  0xE0
+                                           the path          
+                                           specified by a    
+                                           0x00 terminated   
+                                           string in memory  
+                                           starting at an    
+                                           address in a      
+                                           label             
+
+  OFL           Open File     Pointer      Open the file at  0xE1
+                                           the path          
+                                           specified by a    
+                                           0x00 terminated   
+                                           string in memory  
+                                           starting at an    
+                                           address in a      
+                                           register          
+
+  CFL           Close File    -            Close the         0xE2
+                                           currently open    
+                                           file              
+
+  DFL           Delete File   Address      Delete the file   0xE3
+                                           at the path       
+                                           specified by a    
+                                           0x00 terminated   
+                                           string in memory  
+                                           starting at an    
+                                           address in a      
+                                           label             
+
+  DFL           Delete File   Pointer      Delete the file   0xE4
+                                           at the path       
+                                           specified by a    
+                                           0x00 terminated   
+                                           string in memory  
+                                           starting at an    
+                                           address in a      
+                                           register          
+
+  FEX           File Exists   Register,    Store 1 in a      0xE5
+                              Address      register if the   
+                                           filepath          
+                                           specified in      
+                                           memory starting   
+                                           at an address in  
+                                           a label exists,   
+                                           else 0            
+
+  FEX           File Exists   Register,    Store 1 in a      0xE6
+                              Pointer      register if the   
+                                           filepath          
+                                           specified in      
+                                           memory starting   
+                                           at an address in  
+                                           a register        
+                                           exists, else 0    
+
+  FSZ           Get File Size Register,    In a register,    0xE7
+                              Address      store the byte    
+                                           size of the file  
+                                           at the path       
+                                           specified in      
+                                           memory starting   
+                                           at an address in  
+                                           a label           
+
+  FSZ           Get File Size Register,    In a register,    0xE8
+                              Pointer      store the byte    
+                                           size of the file  
+                                           at the path       
+                                           specified in      
+                                           memory starting   
+                                           at an address in  
+                                           a register        
+
+  Reading                                                    
+
+  RCC           Read Raw Byte Register     Read a raw byte   0xF0
+                from Console               from the console, 
+                                           storing it in a   
+                                           register          
+
+  RFC           Read Raw Byte Register     Read the next     0xF1
+                from File                  byte from the     
+                                           currently open    
+                                           file, storing it  
+                                           in a register     
+  --------------------------------------------------------------------------------
 
 ASCII Table
 
