@@ -39,7 +39,10 @@
         Sign = 0b1000,
         Overflow = 0b10000,
 
+        // Base
         ZeroAndCarry = Zero | Carry,
+        // Signed
+        SignAndOverflow = Sign | Overflow,
     }
 
     public struct Opcode : IEquatable<Opcode>
@@ -392,16 +395,16 @@
             // SIGNED INSTRUCTION SET
 
             // Signed Conditional Jumps
-            // SIGN_JLT (Jump If Less Than - Signed Flag != Overflow Flag)
+            // SIGN_JLT (Jump If Less Than - Sign Flag != Overflow Flag)
             { ("SIGN_JLT", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x00) },
             { ("SIGN_JLT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x01) },
-            // SIGN_JLE (Jump If Less Than or Equal To - Signed Flag != Overflow Flag or Zero Flag Set)
+            // SIGN_JLE (Jump If Less Than or Equal To - Sign Flag != Overflow Flag or Zero Flag Set)
             { ("SIGN_JLE", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x02) },
             { ("SIGN_JLE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x03) },
-            // SIGN_JGT (Jump If Greater Than - Signed Flag == Overflow Flag and Zero Flag Unset)
+            // SIGN_JGT (Jump If Greater Than - Sign Flag == Overflow Flag and Zero Flag Unset)
             { ("SIGN_JGT", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x04) },
             { ("SIGN_JGT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x05) },
-            // SIGN_JGE (Jump If Greater Than or Equal To - Signed Flag == Overflow Flag)
+            // SIGN_JGE (Jump If Greater Than or Equal To - Sign Flag == Overflow Flag)
             { ("SIGN_JGE", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x06) },
             { ("SIGN_JGE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x07) },
             // SIGN_JSI (Jump If Sign Flag Set)
