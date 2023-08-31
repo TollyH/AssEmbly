@@ -31,9 +31,13 @@
     [Flags]
     public enum StatusFlags
     {
+        // Base
         Zero = 0b1,
         Carry = 0b10,
         FileEnd = 0b100,
+        // Signed
+        Sign = 0b1000,
+        Overflow = 0b10000,
 
         ZeroAndCarry = Zero | Carry,
     }
@@ -384,6 +388,127 @@
 
             // RFC (Read Character from Open File as a Byte)
             { ("RFC", new OperandType[1] { OperandType.Register }), new Opcode(0x00, 0xF1) },
+
+            // SIGNED INSTRUCTION SET
+
+            // Signed Conditional Jumps
+            // SIGN_JLT (Jump If Less Than - Signed Flag != Overflow Flag)
+            { ("SIGN_JLT", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x00) },
+            { ("SIGN_JLT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x01) },
+            // SIGN_JLE (Jump If Less Than or Equal To - Signed Flag != Overflow Flag or Zero Flag Set)
+            { ("SIGN_JLE", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x02) },
+            { ("SIGN_JLE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x03) },
+            // SIGN_JGT (Jump If Greater Than - Signed Flag == Overflow Flag and Zero Flag Unset)
+            { ("SIGN_JGT", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x04) },
+            { ("SIGN_JGT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x05) },
+            // SIGN_JGE (Jump If Greater Than or Equal To - Signed Flag == Overflow Flag)
+            { ("SIGN_JGE", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x06) },
+            { ("SIGN_JGE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x07) },
+            // SIGN_JSI (Jump If Sign Flag Set)
+            { ("SIGN_JSI", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x08) },
+            { ("SIGN_JSI", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x09) },
+            // SIGN_JNS (Jump If Sign Flag Unset)
+            { ("SIGN_JNS", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x0A) },
+            { ("SIGN_JNS", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x0B) },
+            // SIGN_JOV (Jump If Overflow Flag Set)
+            { ("SIGN_JOV", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x0C) },
+            { ("SIGN_JOV", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x0D) },
+            // SIGN_JNO (Jump If Overflow Flag Unset)
+            { ("SIGN_JNO", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x0E) },
+            { ("SIGN_JNO", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x0F) },
+
+            // Signed Math (All operations store result in the first register operand)
+            // SIGN_DIV (Integer Division)
+            { ("SIGN_DIV", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x10) },  // (reg / reg)
+            { ("SIGN_DIV", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x11) },  // (reg / lit)
+            { ("SIGN_DIV", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x12) },  // (reg / adr)
+            { ("SIGN_DIV", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x13) },  // (reg / ptr)
+
+            // SIGN_DVR (Integer Division With Remainder [Remainder Stored in Second Register])
+            { ("SIGN_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x14) },  // (reg / reg)
+            { ("SIGN_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x15) },  // (reg / lit)
+            { ("SIGN_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x16) },  // (reg / adr)
+            { ("SIGN_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x17) },  // (reg / ptr)
+
+            // SIGN_REM (Remainder)
+            { ("SIGN_REM", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x18) },  // (reg % reg)
+            { ("SIGN_REM", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x19) },  // (reg % lit)
+            { ("SIGN_REM", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x1A) },  // (reg % adr)
+            { ("SIGN_REM", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x1B) },  // (reg % ptr)
+
+            // SIGN_SHR (Shift Right)
+            { ("SIGN_SHR", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x20) },  // (reg >> reg)
+            { ("SIGN_SHR", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x21) },  // (reg >> lit)
+            { ("SIGN_SHR", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x22) },  // (reg >> adr)
+            { ("SIGN_SHR", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x23) },  // (reg >> ptr)
+
+            // Sign-Preserving Data Moves
+            // SIGN_MVB (Move Byte [8 bits])
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x30) },  // (reg <- reg)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x31) },  // (reg <- lit)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x32) },  // (reg <- adr)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x33) },  // (reg <- ptr)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x01, 0x34) },  // (adr <- reg)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x01, 0x35) },  // (adr <- lit)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x01, 0x36) },  // (ptr <- reg)
+            { ("SIGN_MVB", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x01, 0x37) },  // (ptr <- lit)
+
+            // SIGN_MVW (Move Word [16 bits - 2 bytes])
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x38) },  // (reg <- reg)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x39) },  // (reg <- lit)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x3A) },  // (reg <- adr)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x3B) },  // (reg <- ptr)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x01, 0x3C) },  // (adr <- reg)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x01, 0x3D) },  // (adr <- lit)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x01, 0x3E) },  // (ptr <- reg)
+            { ("SIGN_MVW", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x01, 0x3F) },  // (ptr <- lit)
+
+            // SIGN_MVD (Move Double Word [32 bits - 4 bytes])
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x01, 0x40) },  // (reg <- reg)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x01, 0x41) },  // (reg <- lit)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x01, 0x42) },  // (reg <- adr)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x01, 0x43) },  // (reg <- ptr)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x01, 0x44) },  // (adr <- reg)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x01, 0x45) },  // (adr <- lit)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x01, 0x46) },  // (ptr <- reg)
+            { ("SIGN_MVD", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x01, 0x47) },  // (ptr <- lit)
+
+            // Console Write
+            // SIGN_WCN (Write 64-bit Number to Console as Decimal)
+            { ("SIGN_WCN", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x50) },
+            { ("SIGN_WCN", new OperandType[1] { OperandType.Literal }), new Opcode(0x01, 0x51) },
+            { ("SIGN_WCN", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x52) },
+            { ("SIGN_WCN", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x53) },
+
+            // SIGN_WCB (Write Byte to Console as Decimal)
+            { ("SIGN_WCB", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x54) },
+            { ("SIGN_WCB", new OperandType[1] { OperandType.Literal }), new Opcode(0x01, 0x55) },
+            { ("SIGN_WCB", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x56) },
+            { ("SIGN_WCB", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x57) },
+
+            // File Write
+            // SIGN_WFN (Write 64-bit Number to Open File as Decimal)
+            { ("SIGN_WFN", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x60) },
+            { ("SIGN_WFN", new OperandType[1] { OperandType.Literal }), new Opcode(0x01, 0x61) },
+            { ("SIGN_WFN", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x62) },
+            { ("SIGN_WFN", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x63) },
+
+            // SIGN_WFB (Write Byte to Open File as Decimal)
+            { ("SIGN_WFB", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x64) },
+            { ("SIGN_WFB", new OperandType[1] { OperandType.Literal }), new Opcode(0x01, 0x65) },
+            { ("SIGN_WFB", new OperandType[1] { OperandType.Address }), new Opcode(0x01, 0x66) },
+            { ("SIGN_WFB", new OperandType[1] { OperandType.Pointer }), new Opcode(0x01, 0x67) },
+
+            // Signed Specific Operations
+            // SIGN_EXB (Extend Signed Byte to Signed Quad Word)
+            { ("SIGN_EXB", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x70) },
+            // SIGN_EXW (Extend Signed Word to Signed Quad Word)
+            { ("SIGN_EXW", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x71) },
+            // SIGN_EXD (Extend Signed Double Word to Signed Quad Word)
+            { ("SIGN_EXD", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x72) },
+
+            // SIGN_NEG (Two's Compliment Negation)
+            { ("SIGN_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x80) },
         };
     }
 }
