@@ -1415,6 +1415,192 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the base instruction set");
                         }
                         break;
+                    case 0x01:  // Signed extension set
+                        switch (opcodeHigh)
+                        {
+                            case 0x0:  // Jumps
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_JLT adr (Jump If Less Than - Sign Flag != Overflow Flag)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0x1:  // SIGN_JLT ptr (Jump If Less Than - Sign Flag != Overflow Flag)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0x2:  // SIGN_JLE adr (Jump If Less Than or Equal To - Sign Flag != Overflow Flag or Zero Flag Set)
+                                        if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
+                                            || (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0x3:  // SIGN_JLE ptr (Jump If Less Than or Equal To - Sign Flag != Overflow Flag or Zero Flag Set)
+                                        if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
+                                            || (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0x4:  // SIGN_JGT adr (Jump If Greater Than - Sign Flag == Overflow Flag and Zero Flag Unset)
+                                        if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
+                                            && (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0x5:  // SIGN_JGT ptr (Jump If Greater Than - Sign Flag == Overflow Flag and Zero Flag Unset)
+                                        if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
+                                            && (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0x6:  // SIGN_JGE adr (Jump If Greater Than or Equal To - Sign Flag == Overflow Flag)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0x7:  // SIGN_JGE ptr (Jump If Greater Than or Equal To - Sign Flag == Overflow Flag)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
+                                            is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0x8:  // SIGN_JSI adr (Jump If Sign Flag Set)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0x9:  // SIGN_JSI ptr (Jump If Sign Flag Set)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0xA:  // SIGN_JNS adr (Jump If Sign Flag Unset)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0xB:  // SIGN_JNS ptr (Jump If Sign Flag Unset)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0xC:  // SIGN_JOV adr (Jump If Overflow Flag Set)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0xD:  // SIGN_JOV ptr (Jump If Overflow Flag Set)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) != 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    case 0xE:  // SIGN_JNO adr (Jump If Overflow Flag Unset)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 8;
+                                        }
+                                        break;
+                                    case 0xF:  // SIGN_JNO ptr (Jump If Overflow Flag Unset)
+                                        if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) == 0)
+                                        {
+                                            Registers[(int)Register.rpo] = ReadMemoryRegister(Registers[(int)Register.rpo]);
+                                        }
+                                        else
+                                        {
+                                            Registers[(int)Register.rpo] += 1;
+                                        }
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set jump low opcode");
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
+                        }
+                        break;
                     default:
                         throw new InvalidOpcodeException($"{opcode.ExtensionSet:X} is not a recognised extension set");
                 }
