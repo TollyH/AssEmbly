@@ -1597,6 +1597,110 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set jump low opcode");
                                 }
                                 break;
+                            case 0x1:  // Division
+                                Register targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
+                                if (targetRegister == Register.rpo)
+                                {
+                                    throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                                }
+                                // Only used to store remainder in DVR, set to an unused default otherwise
+                                Register secondTarget = Register.rpo;
+                                if (opcodeLow is >= 0x4 and <= 0x7 &&  // DVR
+                                    (secondTarget = ReadMemoryRegisterType(Registers[(int)Register.rpo] + 1)) == Register.rpo)
+                                {
+                                    throw new ReadOnlyRegisterException($"Cannot write to read-only register {secondTarget}");
+                                }
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_DIV reg, reg
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // SIGN_DIV reg, lit
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // SIGN_DIV reg, adr
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // SIGN_DIV reg, ptr
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // SIGN_DVR reg, reg, reg
+                                        long dividend = (long)Registers[(int)targetRegister];
+                                        long divisor = (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 2);
+                                        long div = dividend / divisor;
+                                        long rem = dividend % divisor;
+                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)secondTarget] = (ulong)rem;
+                                        Registers[(int)Register.rpo] += 3;
+                                        break;
+                                    case 0x5:  // SIGN_DVR reg, reg, lit
+                                        dividend = (long)Registers[(int)targetRegister];
+                                        divisor = (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 2);
+                                        div = dividend / divisor;
+                                        rem = dividend % divisor;
+                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)secondTarget] = (ulong)rem;
+                                        Registers[(int)Register.rpo] += 10;
+                                        break;
+                                    case 0x6:  // SIGN_DVR reg, reg, adr
+                                        dividend = (long)Registers[(int)targetRegister];
+                                        divisor = (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 2);
+                                        div = dividend / divisor;
+                                        rem = dividend % divisor;
+                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)secondTarget] = (ulong)rem;
+                                        Registers[(int)Register.rpo] += 10;
+                                        break;
+                                    case 0x7:  // SIGN_DVR reg, reg, ptr
+                                        dividend = (long)Registers[(int)targetRegister];
+                                        divisor = (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 2);
+                                        div = dividend / divisor;
+                                        rem = dividend % divisor;
+                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)secondTarget] = (ulong)rem;
+                                        Registers[(int)Register.rpo] += 3;
+                                        break;
+                                    case 0x8:  // SIGN_REM reg, reg
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x9:  // SIGN_REM reg, lit
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0xA:  // SIGN_REM reg, adr
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0xB:  // SIGN_REM reg, ptr
+                                        Registers[(int)targetRegister] = (ulong)(
+                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set division low opcode");
+                                }
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                if (Registers[(int)targetRegister] == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
                         }
