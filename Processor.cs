@@ -1763,6 +1763,112 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set large move low opcode");
                                 }
                                 break;
+                            case 0x5:  // Console Write
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_WCN reg
+                                        Console.Write((long)ReadMemoryRegister(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // SIGN_WCN lit
+                                        Console.Write((long)ReadMemoryQWord(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // SIGN_WCN adr
+                                        Console.Write((long)ReadMemoryPointedQWord(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // SIGN_WCN ptr
+                                        Console.Write((long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x4:  // SIGN_WCB reg
+                                        Console.Write((sbyte)ReadMemoryRegister(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x5:  // SIGN_WCB lit
+                                        Console.Write((sbyte)Memory[Registers[(int)Register.rpo]]);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x6:  // SIGN_WCB adr
+                                        Console.Write((sbyte)ReadMemoryPointedByte(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x7:  // SIGN_WCB ptr
+                                        Console.Write((sbyte)ReadMemoryRegisterPointedByte(Registers[(int)Register.rpo]));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set console write low opcode");
+                                }
+                                break;
+                            case 0x6:  // File Write
+                                if (openFile is null)
+                                {
+                                    throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                                }
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_WFN reg
+                                        foreach (char digit in ((long)ReadMemoryRegister(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // SIGN_WFN lit
+                                        foreach (char digit in ((long)ReadMemoryQWord(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // SIGN_WFN adr
+                                        foreach (char digit in ((long)ReadMemoryPointedQWord(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // SIGN_WFN ptr
+                                        foreach (char digit in ((long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x4:  // SIGN_WFB reg
+                                        foreach (char digit in ((sbyte)ReadMemoryRegister(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x5:  // SIGN_WFB lit
+                                        foreach (char digit in ((sbyte)Memory[Registers[(int)Register.rpo]]).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x6:  // SIGN_WFB adr
+                                        foreach (char digit in ((sbyte)ReadMemoryPointedByte(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x7:  // SIGN_WFB ptr
+                                        foreach (char digit in ((sbyte)ReadMemoryRegisterPointedByte(Registers[(int)Register.rpo])).ToString())
+                                        {
+                                            fileWrite!.Write(digit);
+                                        }
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set file write low opcode");
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
                         }
