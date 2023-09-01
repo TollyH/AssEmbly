@@ -1869,6 +1869,46 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set file write low opcode");
                                 }
                                 break;
+                            case 0x7:  // Extend
+                                targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
+                                if (targetRegister == Register.rpo)
+                                {
+                                    throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                                }
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_EXB reg
+                                        Registers[(int)targetRegister] = (ulong)(sbyte)Registers[(int)targetRegister];
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // SIGN_EXW reg
+                                        Registers[(int)targetRegister] = (ulong)(short)Registers[(int)targetRegister];
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // SIGN_EXD reg
+                                        Registers[(int)targetRegister] = (ulong)(int)Registers[(int)targetRegister];
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set extend low opcode");
+                                }
+                                break;
+                            case 0x8:  // Negate
+                                targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
+                                if (targetRegister == Register.rpo)
+                                {
+                                    throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
+                                }
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_NEG reg
+                                        Registers[(int)targetRegister] = (ulong)-(long)Registers[(int)targetRegister];
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
                         }
