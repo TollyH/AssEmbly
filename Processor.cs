@@ -1701,6 +1701,68 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
+                            case 0x3:  // Small Sign-Preserving Move
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_MVB reg, reg
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(sbyte)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // SIGN_MVB reg, lit
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(sbyte)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // SIGN_MVB reg, adr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(sbyte)ReadMemoryPointedByte(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // SIGN_MVB reg, ptr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(sbyte)ReadMemoryRegisterPointedByte(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // SIGN_MVW reg, reg
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(short)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x5:  // SIGN_MVW reg, lit
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(short)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x6:  // SIGN_MVW reg, adr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(short)ReadMemoryPointedWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x7:  // SIGN_MVW reg, ptr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(short)ReadMemoryRegisterPointedWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set small move low opcode");
+                                }
+                                break;
+                            case 0x4:  // Large Sign-Preserving Move
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SIGN_MVD reg, reg
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(int)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // SIGN_MVD reg, lit
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(int)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // SIGN_MVD reg, adr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(int)ReadMemoryPointedDWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // SIGN_MVD reg, ptr
+                                        WriteMemoryRegister(Registers[(int)Register.rpo], (ulong)(int)ReadMemoryRegisterPointedDWord(Registers[(int)Register.rpo] + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set large move low opcode");
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
                         }
