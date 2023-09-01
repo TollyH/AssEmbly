@@ -1892,6 +1892,15 @@ namespace AssEmbly
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set extend low opcode");
                                 }
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                if (Registers[(int)targetRegister] == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
                                 break;
                             case 0x8:  // Negate
                                 targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
@@ -1907,6 +1916,15 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                }
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                if (Registers[(int)targetRegister] == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
                             default:
