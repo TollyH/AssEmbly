@@ -966,7 +966,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x4:  // POP reg
-                                        WriteMemoryRegister(operandStart, ReadMemoryQWord(operandStart));
+                                        WriteMemoryRegister(operandStart, ReadMemoryQWord(Registers[(int)Register.rso]));
                                         Registers[(int)Register.rso] += 8;
                                         Registers[(int)Register.rpo]++;
                                         break;
