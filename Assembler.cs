@@ -391,7 +391,7 @@ namespace AssEmbly
                     case OperandType.Literal:
                         if (operands[i].StartsWith(":&"))
                         {
-                            labels.Add((operands[i][2..], (uint)operandBytes.Count + 1));
+                            labels.Add((operands[i][2..], (uint)operandBytes.Count));
                             for (int j = 0; j < 8; j++)
                             {
                                 // Label location will be resolved later, pad with 0s for now
@@ -404,7 +404,7 @@ namespace AssEmbly
                         }
                         break;
                     case OperandType.Address:
-                        labels.Add((operands[i][1..], (uint)operandBytes.Count + 1));
+                        labels.Add((operands[i][1..], (uint)operandBytes.Count));
                         for (int j = 0; j < 8; j++)
                         {
                             // Label location will be resolved later, pad with 0s for now
@@ -424,14 +424,23 @@ namespace AssEmbly
                     $"\nConsult the language reference for a list of all valid mnemonic/operand combinations.");
             }
 
+            uint opcodeSize = 1;
             operandBytes.Insert(0, opcode.InstructionCode);
             // Base instruction set only needs to be referenced by instruction code,
             // all others need to be in full form (0xFF, {ExtensionSet}, {InstructionCode})
             if (opcode.ExtensionSet != 0x00)
             {
+                opcodeSize = 3;
                 operandBytes.Insert(0, opcode.ExtensionSet);
                 operandBytes.Insert(0, 0xFF);
             }
+
+            // Add length of opcode to all label address offsets
+            for (int i = 0; i < labels.Count; i++)
+            {
+                labels[i] = (labels[i].LabelName, labels[i].AddressOffset + opcodeSize);
+            }
+
             return (operandBytes.ToArray(), labels);
         }
 
