@@ -47,6 +47,9 @@ namespace AssEmbly
                 case "disassemble":
                     PerformDisassembly(args);
                     break;
+                case "repl":
+                    RunRepl(args);
+                    break;
                 case "lint":
                     PerformLintingAssembly(args);
                     break;
@@ -167,6 +170,7 @@ namespace AssEmbly
             catch (Exception e)
             {
                 OnAssemblerException(e);
+                Environment.Exit(1);
                 return;
             }
 
@@ -239,6 +243,7 @@ namespace AssEmbly
             catch (Exception e)
             {
                 OnAssemblerException(e);
+                Environment.Exit(1);
                 return;
             }
 
@@ -264,7 +269,7 @@ namespace AssEmbly
                 return;
             }
 
-            Debugger debugger = new(processor);
+            Debugger debugger = new(false, processor);
             if (args.Length >= 3 && !args[2].StartsWith('-'))
             {
                 string debugFilePath = args[2];
@@ -313,6 +318,15 @@ namespace AssEmbly
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);
             Console.WriteLine($"Program disassembled successfully. It can be found at: \"{Path.GetFullPath(destination)}\"");
+        }
+
+        private static void RunRepl(string[] args)
+        {
+            ulong memSize = GetMemorySize(args);
+            Debugger debugger = new(true, memorySize: memSize, useV1CallStack: args.Contains("--v1-call-stack"));
+            // Some program needs to be loaded or the processor won't run
+            debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
+            debugger.StartDebugger();
         }
 
         // Suppress warning when unused code trimming is used with JSON serialization
@@ -401,6 +415,12 @@ namespace AssEmbly
             Console.WriteLine("    --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes");
             Console.WriteLine("    --no-pads - Don't attempt to locate uses of the PAD directive; keep them as chains of HLT");
             Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format.");
+            Console.WriteLine();
+            Console.WriteLine("repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions.");
+            Console.WriteLine("    Usage: 'AssEmbly repl [options]'");
+            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the REPL in bytes.");
+            Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
+            Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine();
         }
     }

@@ -179,7 +179,6 @@
                 Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
             }
             Console.ResetColor();
-            Environment.Exit(1);
         }
     }
 }

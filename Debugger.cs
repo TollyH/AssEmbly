@@ -1,9 +1,13 @@
-﻿namespace AssEmbly
+﻿using System.Buffers.Binary;
+
+namespace AssEmbly
 {
     public class Debugger
     {
         public Processor DebuggingProcessor { get; set; }
         public DebugInfo.DebugInfoFile? LoadedDebugInfoFile { get; set; }
+
+        public bool InReplMode { get; private set; }
 
         public bool StepInstructions { get; set; } = true;
         public bool RunToReturn { get; set; } = false;
@@ -17,19 +21,29 @@
             ? new Register[3] { Register.rso, Register.rsb, Register.rpo }
             : new Register[2] { Register.rsb, Register.rpo };
 
-        public Debugger(ulong entryPoint = 0, bool useV1CallStack = false)
+        private ulong[] replPreviousRegisters = new ulong[Enum.GetNames(typeof(Register)).Length];
+        Dictionary<string, ulong> replLabels = new();
+        private ulong nextFreeRpoAddress = 0;
+
+        public Debugger(bool inReplMode, ulong entryPoint = 0, bool useV1CallStack = false)
         {
+            InReplMode = inReplMode;
             DebuggingProcessor = new(2046, entryPoint, useV1CallStack);
+            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
-        public Debugger(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
+        public Debugger(bool inReplMode, ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
         {
+            InReplMode = inReplMode;
             DebuggingProcessor = new(memorySize, entryPoint, useV1CallStack);
+            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
-        public Debugger(Processor processorToDebug)
+        public Debugger(bool inReplMode, Processor processorToDebug)
         {
+            InReplMode = inReplMode;
             DebuggingProcessor = processorToDebug;
+            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
         public void LoadDebugFile(string debugFilePath)
@@ -50,30 +64,37 @@
 
         public void DisplayDebugInfo()
         {
-            ulong currentAddress = DebuggingProcessor.Registers[(int)Register.rpo];
-            // Disassemble line on-the-fly, unless a provided debugging file provides the original text for the line
-            string lineDisassembly = LoadedDebugInfoFile is null
-                || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
-                    ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..]).Line
-                    : inst;
-
-            Console.Write($"\n\nAbout to execute instruction:\n    ");
-            Console.WriteLine(lineDisassembly);
-            Console.WriteLine();
-            if (LoadedDebugInfoFile is not null)
+            if (!InReplMode)
             {
-                if (LoadedDebugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
+                ulong currentAddress = DebuggingProcessor.Registers[(int)Register.rpo];
+                // Disassemble line on-the-fly, unless a provided debugging file provides the original text for the line
+                string lineDisassembly = LoadedDebugInfoFile is null
+                    || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
+                        ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..]).Line
+                        : inst;
+
+                Console.Write($"\n\nAbout to execute instruction:\n    ");
+                Console.WriteLine(lineDisassembly);
+                Console.WriteLine();
+                if (LoadedDebugInfoFile is not null)
                 {
-                    Console.Write("This address is referenced by the following labels:\n    ");
-                    Console.WriteLine(string.Join("\n    ", labels));
-                    Console.WriteLine();
+                    if (LoadedDebugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
+                    {
+                        Console.Write("This address is referenced by the following labels:\n    ");
+                        Console.WriteLine(string.Join("\n    ", labels));
+                        Console.WriteLine();
+                    }
+                    if (LoadedDebugInfoFile.Value.ImportLocations.TryGetValue(currentAddress, out string? importName))
+                    {
+                        Console.Write("The following file was imported here:\n    ");
+                        Console.WriteLine(importName);
+                        Console.WriteLine();
+                    }
                 }
-                if (LoadedDebugInfoFile.Value.ImportLocations.TryGetValue(currentAddress, out string? importName))
-                {
-                    Console.Write("The following file was imported here:\n    ");
-                    Console.WriteLine(importName);
-                    Console.WriteLine();
-                }
+            }
+            else
+            {
+                Console.Write("\n\n");
             }
             Console.WriteLine("Register states:");
             foreach (int register in Enum.GetValues(typeof(Register)))
@@ -83,17 +104,46 @@
             }
         }
 
+        public void DisplayReplInfo()
+        {
+            bool foundChange = false;
+            foreach (int register in Enum.GetValues(typeof(Register)))
+            {
+                ulong value = DebuggingProcessor.Registers[register];
+                ulong previousValue = replPreviousRegisters[register];
+                if (value != previousValue)
+                {
+                    if (!foundChange)
+                    {
+                        foundChange = true;
+                        Console.WriteLine("\n\nChanged registers:");
+                    }
+                    Console.WriteLine($"    {Enum.GetName((Register)register)}: {previousValue} -> {value} (0x{previousValue:X} -> 0x{value:X})");
+                }
+            }
+            Console.WriteLine($"\n{(uint)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rpo]} bytes of memory remaining");
+        }
+
         public void StartDebugger()
         {
-            try
+            while (true)
             {
-                while (true)
+                try
                 {
-                    // Only pause for debugging instruction if not running to break, not in a deeper subroutine than we were if stepping over,
-                    // and aren't waiting for a return instruction
-                    bool breakForDebug = StepInstructions && (StepOverStackBase is null || DebuggingProcessor.Registers[(int)Register.rsb] >= StepOverStackBase)
-                    // Is the next instruction a return instruction?
-                        && (!RunToReturn || DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
+                    bool breakForDebug;
+                    if (InReplMode)
+                    {
+                        // If we're acting as a REPL, only ask user for an instruction if there isn't one already to execute.
+                        breakForDebug = DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] == 0;
+                    }
+                    else
+                    {
+                        // Only pause for debugging instruction if not running to break, not in a deeper subroutine than we were if stepping over,
+                        // and aren't waiting for a return instruction
+                        breakForDebug = StepInstructions && (StepOverStackBase is null || DebuggingProcessor.Registers[(int)Register.rsb] >= StepOverStackBase)
+                            // Is the next instruction a return instruction?
+                            && (!RunToReturn || DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] is 0xBA or 0xBB or 0xBC or 0xBD or 0xBE);
+                    }
 
                     foreach ((Register register, ulong value) in Breakpoints)
                     {
@@ -113,66 +163,91 @@
                         StepInstructions = true;
                         RunToReturn = false;
                         StepOverStackBase = null;
-                        DisplayDebugInfo();
+                        if (InReplMode)
+                        {
+                            DisplayReplInfo();
+                            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
+                        }
+                        else
+                        {
+                            DisplayDebugInfo();
+                        }
                     }
                     bool endCommandEntryLoop = false;
                     while (!endCommandEntryLoop && breakForDebug)
                     {
-                        Console.Write("\nPress ENTER to continue, or type a command ('help' for command list): ");
-                        string[] command = Console.ReadLine()!.Trim().ToLower().Split(' ');
-                        switch (command[0])
+                        Console.Write(InReplMode
+                            ? "\n>>> "
+                            : "\nPress ENTER to continue, or type a command ('help' for command list): ");
+                        string userInput = Console.ReadLine()!;
+                        if (InReplMode)
                         {
-                            case "":
+                            if (ProcessReplInput(userInput))
+                            {
                                 endCommandEntryLoop = true;
-                                break;
-                            case "refresh":
-                                DisplayDebugInfo();
-                                break;
-                            case "run":
-                                endCommandEntryLoop = true;
-                                StepInstructions = false;
-                                break;
-                            case "over":
-                                endCommandEntryLoop = true;
-                                StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
-                                break;
-                            case "return":
-                                endCommandEntryLoop = true;
-                                StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
-                                RunToReturn = true;
-                                break;
-                            case "read":
-                                CommandReadMemory(command);
-                                break;
-                            case "write":
-                                CommandWriteMemReg(command);
-                                break;
-                            case "map":
-                                CommandMapMemory(command);
-                                break;
-                            case "stack":
-                                CommandFormatStack(command);
-                                break;
-                            case "dec2hex":
-                                CommandDecimalToHexadecimal(command);
-                                break;
-                            case "hex2dec":
-                                CommandHexadecimalToDecimal(command);
-                                break;
-                            case "breakpoint":
-                                CommandBreakpointManage(command);
-                                break;
-                            case "help":
-                                CommandDebugHelp();
-                                break;
-                            default:
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.WriteLine($"\"{command[0]}\" is not a recognised command. Run 'help' for more info.");
-                                Console.ResetColor();
-                                break;
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            string[] command = userInput.Trim().ToLower().Split(' ');
+                            switch (command[0])
+                            {
+                                case "":
+                                    endCommandEntryLoop = true;
+                                    break;
+                                case "refresh":
+                                    DisplayDebugInfo();
+                                    break;
+                                case "run":
+                                    endCommandEntryLoop = true;
+                                    StepInstructions = false;
+                                    break;
+                                case "over":
+                                    endCommandEntryLoop = true;
+                                    StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                                    break;
+                                case "return":
+                                    endCommandEntryLoop = true;
+                                    StepOverStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+                                    RunToReturn = true;
+                                    break;
+                                case "read":
+                                    CommandReadMemory(command);
+                                    break;
+                                case "write":
+                                    CommandWriteMemReg(command);
+                                    break;
+                                case "map":
+                                    CommandMapMemory(command);
+                                    break;
+                                case "stack":
+                                    CommandFormatStack(command);
+                                    break;
+                                case "dec2hex":
+                                    CommandDecimalToHexadecimal(command);
+                                    break;
+                                case "hex2dec":
+                                    CommandHexadecimalToDecimal(command);
+                                    break;
+                                case "breakpoint":
+                                    CommandBreakpointManage(command);
+                                    break;
+                                case "help":
+                                    CommandDebugHelp();
+                                    break;
+                                default:
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.WriteLine($"\"{command[0]}\" is not a recognised command. Run 'help' for more info.");
+                                    Console.ResetColor();
+                                    break;
+                            }
                         }
                     }
-                    if (DebuggingProcessor.Execute(false))
+                    if (DebuggingProcessor.Execute(false) && !InReplMode)
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.WriteLine("\n\nHalt instruction reached. You should not continue unless this instruction was placed as a breakpoint.");
@@ -183,10 +258,19 @@
                         StepInstructions = true;
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                Program.OnExecutionException(e, DebuggingProcessor);
+                catch (Exception e)
+                {
+                    Program.OnExecutionException(e, DebuggingProcessor);
+                    if (InReplMode)
+                    {
+                        // Move past all existing instruction data if an error is encountered
+                        DebuggingProcessor.Registers[(int)Register.rpo] = nextFreeRpoAddress;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
             }
         }
 
@@ -582,6 +666,60 @@
             Console.WriteLine("run - Run the program without debugging until the next HLT instruction");
             Console.WriteLine("over - Continue to the next instruction in the current subroutine");
             Console.WriteLine("return - Continue to the next return instruction in this subroutine or higher");
+        }
+
+        private bool ProcessReplInput(string userInput)
+        {
+            try
+            {
+                string[] instruction = Assembler.ParseLine(userInput);
+                if (instruction.Length == 0)
+                {
+                    DisplayDebugInfo();
+                    return false;
+                }
+                string menmonic = instruction[0];
+
+                if (menmonic[0] == ':')
+                {
+                    // Will throw an error if label is not valid
+                    OperandType operandType = Assembler.DetermineOperandType(menmonic);
+                    if (operandType != OperandType.Address)
+                    {
+                        throw new SyntaxError("The first character of a label cannot be '&'");
+                    }
+                    string labelName = menmonic[1..];
+                    replLabels[labelName] = DebuggingProcessor.Registers[(int)Register.rpo];
+                    return false;
+                }
+
+                (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
+                    Assembler.AssembleStatement(menmonic, instruction[1..]);
+
+                foreach ((string labelName, ulong addressOffset) in newLabels)
+                {
+                    if (!replLabels.TryGetValue(labelName, out ulong address))
+                    {
+                        throw new LabelNameException($"A label with the name \"{labelName}\" doesn't exist. Labels must be defined before usage in REPL.");
+                    }
+                    BinaryPrimitives.WriteUInt64LittleEndian(newBytes.AsSpan()[(int)addressOffset..], address);
+                }
+
+                newBytes.CopyTo(DebuggingProcessor.Memory, (int)DebuggingProcessor.Registers[(int)Register.rpo]);
+                nextFreeRpoAddress = DebuggingProcessor.Registers[(int)Register.rpo] + (uint)newBytes.Length;
+                if (userInput[0] == ' ')
+                {
+                    // Starting with a space signifies that the REPL shouldn't execute the input, only insert it
+                    DebuggingProcessor.Registers[(int)Register.rpo] = nextFreeRpoAddress;
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                Program.OnAssemblerException(e);
+                return false;
+            }
         }
     }
 }
