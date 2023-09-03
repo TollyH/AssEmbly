@@ -28,6 +28,8 @@ namespace AssEmbly
         // from stdin but are yet to be processed by an AssEmbly read instruction.
         private readonly Queue<byte> stdinByteQueue = new();
 
+        public const ulong SignBit = unchecked((ulong)long.MinValue);
+
         public Processor(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
         {
             Memory = new byte[memorySize];
@@ -251,32 +253,35 @@ namespace AssEmbly
                                     throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                                 }
                                 ulong initial = Registers[(int)targetRegister];
+                                ulong mathend;
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // ADD reg, reg
-                                        Registers[(int)targetRegister] += ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // ADD reg, lit
-                                        Registers[(int)targetRegister] += ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // ADD reg, adr
-                                        Registers[(int)targetRegister] += ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // ADD reg, ptr
-                                        Registers[(int)targetRegister] += ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // ICR reg
-                                        Registers[(int)targetRegister]++;
+                                        mathend = Registers[(int)targetRegister];
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set addition low opcode");
                                 }
-                                if (Registers[(int)targetRegister] < initial)
+                                ulong result = Registers[(int)targetRegister] += mathend;
+
+                                if (result < initial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
                                 }
@@ -284,7 +289,28 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
-                                if (Registers[(int)targetRegister] == 0)
+
+                                ulong initialSign = initial & SignBit;
+                                ulong resultSign = result & SignBit;
+                                if (initialSign == (mathend & SignBit) && initialSign != resultSign)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Overflow;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+                                }
+
+                                if (resultSign != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -303,29 +329,31 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SUB reg, reg
-                                        Registers[(int)targetRegister] -= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // SUB reg, lit
-                                        Registers[(int)targetRegister] -= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // SUB reg, adr
-                                        Registers[(int)targetRegister] -= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SUB reg, ptr
-                                        Registers[(int)targetRegister] -= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // DCR reg
-                                        Registers[(int)targetRegister]--;
+                                        mathend = Registers[(int)targetRegister];
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set subtraction low opcode");
                                 }
-                                if (Registers[(int)targetRegister] > initial)
+                                result = Registers[(int)targetRegister] -= mathend;
+
+                                if (result > initial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
                                 }
@@ -333,7 +361,28 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
-                                if (Registers[(int)targetRegister] == 0)
+
+                                initialSign = initial & SignBit;
+                                resultSign = result & SignBit;
+                                if (initialSign != (mathend & SignBit) && initialSign != resultSign)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Overflow;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+                                }
+
+                                if (resultSign != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -352,25 +401,29 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // MUL reg, reg
-                                        Registers[(int)targetRegister] *= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // MUL reg, lit
-                                        Registers[(int)targetRegister] *= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // MUL reg, adr
-                                        Registers[(int)targetRegister] *= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MUL reg, ptr
-                                        Registers[(int)targetRegister] *= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set multiplication low opcode");
                                 }
-                                if (Registers[(int)targetRegister] < initial)
+                                result = Registers[(int)targetRegister] *= mathend;
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (result < initial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
                                 }
@@ -378,7 +431,17 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
-                                if (Registers[(int)targetRegister] == 0)
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -403,78 +466,90 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // DIV reg, reg
-                                        Registers[(int)targetRegister] /= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] /= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // DIV reg, lit
-                                        Registers[(int)targetRegister] /= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] /= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // DIV reg, adr
-                                        Registers[(int)targetRegister] /= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] /= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // DIV reg, ptr
-                                        Registers[(int)targetRegister] /= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] /= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // DVR reg, reg, reg
                                         ulong dividend = Registers[(int)targetRegister];
                                         ulong divisor = ReadMemoryRegister(Registers[(int)Register.rpo] + 2);
-                                        ulong div = dividend / divisor;
+                                        result = dividend / divisor;
                                         ulong rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = div;
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)secondTarget] = rem;
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x5:  // DVR reg, reg, lit
                                         dividend = Registers[(int)targetRegister];
                                         divisor = ReadMemoryQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        result = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = div;
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)secondTarget] = rem;
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x6:  // DVR reg, reg, adr
                                         dividend = Registers[(int)targetRegister];
                                         divisor = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        result = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = div;
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)secondTarget] = rem;
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // DVR reg, reg, ptr
                                         dividend = Registers[(int)targetRegister];
                                         divisor = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        result = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = div;
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)secondTarget] = rem;
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x8:  // REM reg, reg
-                                        Registers[(int)targetRegister] %= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] %= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x9:  // REM reg, lit
-                                        Registers[(int)targetRegister] %= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] %= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xA:  // REM reg, adr
-                                        Registers[(int)targetRegister] %= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] %= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // REM reg, ptr
-                                        Registers[(int)targetRegister] %= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] %= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set division low opcode");
                                 }
+
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                if (Registers[(int)targetRegister] == 0)
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -495,52 +570,55 @@ namespace AssEmbly
                                 {
                                     case 0x0:  // SHL reg, reg
                                         amount = (int)ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] <<= amount;
+                                        result = Registers[(int)targetRegister] <<= amount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // SHL reg, lit
                                         amount = (int)ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] <<= amount;
+                                        result = Registers[(int)targetRegister] <<= amount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // SHL reg, adr
                                         amount = (int)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] <<= amount;
+                                        result = Registers[(int)targetRegister] <<= amount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SHL reg, ptr
                                         amount = (int)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] <<= amount;
+                                        result = Registers[(int)targetRegister] <<= amount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // SHR reg, reg
                                         amount = (int)ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] >>= amount;
+                                        result = Registers[(int)targetRegister] >>= amount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x5:  // SHR reg, lit
                                         amount = (int)ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] >>= amount;
+                                        result = Registers[(int)targetRegister] >>= amount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // SHR reg, adr
                                         amount = (int)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] >>= amount;
+                                        result = Registers[(int)targetRegister] >>= amount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // SHR reg, ptr
                                         amount = (int)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
-                                        Registers[(int)targetRegister] >>= amount;
+                                        result = Registers[(int)targetRegister] >>= amount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set shifting low opcode");
                                 }
-                                // As registers are only 64 bits, shifting by 64 bits or more will always result in 0
+                                // C# only counts the lower 6 bits of the amount to shift by, so values greater than or equal to 64 will not return 0 as
+                                // wanted for AssEmbly.
                                 if (amount >= 64)
                                 {
                                     Registers[(int)targetRegister] = 0;
+                                    result = 0;
                                 }
+
                                 // We will never overflow when shifting by 0 bits or if the initial value is 0.
                                 // We will always overflow if shifting by 64 bits or more as long as the above isn't the case.
                                 //
@@ -561,7 +639,8 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
-                                if (Registers[(int)targetRegister] == 0)
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -569,6 +648,17 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
                                 break;
                             case 0x6:  // Bitwise
                                 targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
@@ -579,74 +669,88 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // AND reg, reg
-                                        Registers[(int)targetRegister] &= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] &= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // AND reg, lit
-                                        Registers[(int)targetRegister] &= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] &= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // AND reg, adr
-                                        Registers[(int)targetRegister] &= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] &= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // AND reg, ptr
-                                        Registers[(int)targetRegister] &= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] &= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // ORR reg, reg
-                                        Registers[(int)targetRegister] |= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] |= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x5:  // ORR reg, lit
-                                        Registers[(int)targetRegister] |= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] |= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // ORR reg, adr
-                                        Registers[(int)targetRegister] |= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] |= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // ORR reg, ptr
-                                        Registers[(int)targetRegister] |= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] |= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x8:  // XOR reg, reg
-                                        Registers[(int)targetRegister] ^= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] ^= ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x9:  // XOR reg, lit
-                                        Registers[(int)targetRegister] ^= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] ^= ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xA:  // XOR reg, adr
-                                        Registers[(int)targetRegister] ^= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] ^= ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // XOR reg, ptr
-                                        Registers[(int)targetRegister] ^= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        result = Registers[(int)targetRegister] ^= ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0xC:  // NOT reg
-                                        Registers[(int)targetRegister] = ~Registers[(int)targetRegister];
+                                        result = ~Registers[(int)targetRegister];
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0xD:  // RNG reg
                                         byte[] randomBuffer = new byte[8];
                                         rng.NextBytes(randomBuffer);
-                                        Registers[(int)targetRegister] = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
+                                        result = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set bitwise low opcode");
                                 }
+
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                if (Registers[(int)targetRegister] == 0)
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
                                 else
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
                                 break;
                             case 0x7:  // Test
@@ -655,53 +759,84 @@ namespace AssEmbly
                                 {
                                     throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                                 }
-                                ulong newValue;
+                                initial = Registers[(int)targetRegister];
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // TST reg, reg
-                                        newValue = Registers[(int)targetRegister] & ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // TST reg, lit
-                                        newValue = Registers[(int)targetRegister] & ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // TST reg, adr
-                                        newValue = Registers[(int)targetRegister] & ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // TST reg, ptr
-                                        newValue = Registers[(int)targetRegister] & ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // CMP reg, reg
-                                        newValue = Registers[(int)targetRegister] - ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x5:  // CMP reg, lit
-                                        newValue = Registers[(int)targetRegister] - ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // CMP reg, adr
-                                        newValue = Registers[(int)targetRegister] - ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // CMP reg, ptr
-                                        newValue = Registers[(int)targetRegister] - ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        mathend = ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set comparison low opcode");
                                 }
-                                if (opcodeLow >= 0x4 && newValue > Registers[(int)targetRegister])
+
+                                if (opcodeLow >= 0x4)
                                 {
-                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                    result = initial - mathend;
+                                    if (result > initial)
+                                    {
+                                        Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                    }
+                                    else
+                                    {
+                                        Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                    }
+
+                                    initialSign = initial & SignBit;
+                                    resultSign = result & SignBit;
+                                    if (initialSign != (mathend & SignBit) && initialSign != resultSign)
+                                    {
+                                        Registers[(int)Register.rsf] |= (ulong)StatusFlags.Overflow;
+                                    }
+                                    else
+                                    {
+                                        Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+                                    }
                                 }
                                 else
                                 {
-                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                    result = initial & mathend;
+                                    resultSign = result & SignBit;
                                 }
-                                if (newValue == 0)
+
+                                if (resultSign != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -1610,89 +1745,102 @@ namespace AssEmbly
                                 {
                                     throw new ReadOnlyRegisterException($"Cannot write to read-only register {secondTarget}");
                                 }
+                                long signedResult;
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_DIV reg, reg
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] / (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // SIGN_DIV reg, lit
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] / (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // SIGN_DIV reg, adr
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] / (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_DIV reg, ptr
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] / (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] / (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // SIGN_DVR reg, reg, reg
                                         long dividend = (long)Registers[(int)targetRegister];
                                         long divisor = (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 2);
-                                        long div = dividend / divisor;
+                                        signedResult = dividend / divisor;
                                         long rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)secondTarget] = (ulong)rem;
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x5:  // SIGN_DVR reg, reg, lit
                                         dividend = (long)Registers[(int)targetRegister];
                                         divisor = (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        signedResult = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)secondTarget] = (ulong)rem;
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x6:  // SIGN_DVR reg, reg, adr
                                         dividend = (long)Registers[(int)targetRegister];
                                         divisor = (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        signedResult = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)secondTarget] = (ulong)rem;
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // SIGN_DVR reg, reg, ptr
                                         dividend = (long)Registers[(int)targetRegister];
                                         divisor = (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 2);
-                                        div = dividend / divisor;
+                                        signedResult = dividend / divisor;
                                         rem = dividend % divisor;
-                                        Registers[(int)targetRegister] = (ulong)div;
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)secondTarget] = (ulong)rem;
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x8:  // SIGN_REM reg, reg
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] % (long)ReadMemoryRegister(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x9:  // SIGN_REM reg, lit
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] % (long)ReadMemoryQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xA:  // SIGN_REM reg, adr
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] % (long)ReadMemoryPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // SIGN_REM reg, ptr
-                                        Registers[(int)targetRegister] = (ulong)(
-                                            (long)Registers[(int)targetRegister] % (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1));
+                                        signedResult = (long)Registers[(int)targetRegister] % (long)ReadMemoryRegisterPointedQWord(Registers[(int)Register.rpo] + 1);
+                                        Registers[(int)targetRegister] = (ulong)signedResult;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set division low opcode");
                                 }
+
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                if (Registers[(int)targetRegister] == 0)
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (((ulong)signedResult & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (signedResult == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -1875,25 +2023,41 @@ namespace AssEmbly
                                 {
                                     throw new ReadOnlyRegisterException($"Cannot write to read-only register {targetRegister}");
                                 }
+                                ulong result;
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_EXB reg
-                                        Registers[(int)targetRegister] = (ulong)(sbyte)Registers[(int)targetRegister];
+                                        result = (ulong)(sbyte)Registers[(int)targetRegister];
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // SIGN_EXW reg
-                                        Registers[(int)targetRegister] = (ulong)(short)Registers[(int)targetRegister];
+                                        result = (ulong)(short)Registers[(int)targetRegister];
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x2:  // SIGN_EXD reg
-                                        Registers[(int)targetRegister] = (ulong)(int)Registers[(int)targetRegister];
+                                        result = (ulong)(int)Registers[(int)targetRegister];
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set extend low opcode");
                                 }
+
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                if (Registers[(int)targetRegister] == 0)
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -1901,6 +2065,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
+
                                 break;
                             case 0x8:  // Negate
                                 targetRegister = ReadMemoryRegisterType(Registers[(int)Register.rpo]);
@@ -1911,14 +2076,27 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_NEG reg
-                                        Registers[(int)targetRegister] = (ulong)-(long)Registers[(int)targetRegister];
+                                        result = (ulong)-(long)Registers[(int)targetRegister];
+                                        Registers[(int)targetRegister] = result;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
                                 }
+
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                if (Registers[(int)targetRegister] == 0)
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }

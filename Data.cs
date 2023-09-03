@@ -13,7 +13,7 @@
         rpo,  // Program Offset
         rso,  // Stack Offset
         rsb,  // Stack Base
-        rsf,  // Status Flags (Zero Flag, Carry Flag, File End Flag, 61 remaining high bits undefined)
+        rsf,  // Status Flags
         rrv,  // Return Value
         rfp,  // Fast Pass Parameter
         rg0,  // General 0
