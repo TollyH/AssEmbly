@@ -95,6 +95,7 @@ namespace AssEmbly
                 throw new InvalidOperationException("The processor has reached the end of accessible memory.");
             }
             bool halt = false;
+            using Stream stdout = Console.OpenStandardOutput();
             do
             {
                 Opcode opcode = Opcode.ParseBytes(Memory, ref Registers[(int)Register.rpo]);
@@ -103,6 +104,19 @@ namespace AssEmbly
                 // Lower 4-bytes (specific operation and operand types)
                 byte opcodeLow = (byte)(0x0F & opcode.InstructionCode);
                 ulong operandStart = ++Registers[(int)Register.rpo];
+
+                // Local variables used to hold additional state information while executing instructions
+                ulong initial;
+                ulong mathend;
+                ulong result;
+                ulong remainder;
+                ulong initialSign;
+                ulong resultSign;
+                int shiftAmount;
+                string filepath;
+                long signedInitial;
+                long signedMathend;
+
                 switch (opcode.ExtensionSet)
                 {
                     case 0x00:  // Base instruction set
@@ -247,8 +261,7 @@ namespace AssEmbly
                                 }
                                 break;
                             case 0x1:  // Addition
-                                ulong initial = ReadMemoryRegister(operandStart);
-                                ulong mathend;
+                                initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // ADD reg, reg
@@ -274,7 +287,7 @@ namespace AssEmbly
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set addition low opcode");
                                 }
-                                ulong result = initial + mathend;
+                                result = initial + mathend;
                                 WriteMemoryRegister(operandStart, result);
 
                                 if (result < initial)
@@ -286,8 +299,8 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
-                                ulong initialSign = initial & SignBit;
-                                ulong resultSign = result & SignBit;
+                                initialSign = initial & SignBit;
+                                resultSign = result & SignBit;
                                 if (initialSign == (mathend & SignBit) && initialSign != resultSign)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Overflow;
@@ -461,29 +474,29 @@ namespace AssEmbly
                                     case 0x4:  // DVR reg, reg, reg
                                         mathend = ReadMemoryRegister(operandStart + 2);
                                         result = initial / mathend;
-                                        ulong rem = initial % mathend;
-                                        WriteMemoryRegister(operandStart + 1, rem);
+                                        remainder = initial % mathend;
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x5:  // DVR reg, reg, lit
                                         mathend = ReadMemoryQWord(operandStart + 2);
                                         result = initial / mathend;
-                                        rem = initial % mathend;
-                                        WriteMemoryRegister(operandStart + 1, rem);
+                                        remainder = initial % mathend;
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x6:  // DVR reg, reg, adr
                                         mathend = ReadMemoryPointedQWord(operandStart + 2);
                                         result = initial / mathend;
-                                        rem = initial % mathend;
-                                        WriteMemoryRegister(operandStart + 1, rem);
+                                        remainder = initial % mathend;
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // DVR reg, reg, ptr
                                         mathend = ReadMemoryRegisterPointedQWord(operandStart + 2);
                                         result = initial / mathend;
-                                        rem = initial % mathend;
-                                        WriteMemoryRegister(operandStart + 1, rem);
+                                        remainder = initial % mathend;
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x8:  // REM reg, reg
@@ -530,47 +543,46 @@ namespace AssEmbly
                                 break;
                             case 0x5:  // Shifting
                                 initial = ReadMemoryRegister(operandStart);
-                                int amount;
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SHL reg, reg
-                                        amount = (int)ReadMemoryRegister(operandStart + 1);
-                                        result = initial << amount;
+                                        shiftAmount = (int)ReadMemoryRegister(operandStart + 1);
+                                        result = initial << shiftAmount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x1:  // SHL reg, lit
-                                        amount = (int)ReadMemoryQWord(operandStart + 1);
-                                        result = initial << amount;
+                                        shiftAmount = (int)ReadMemoryQWord(operandStart + 1);
+                                        result = initial << shiftAmount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x2:  // SHL reg, adr
-                                        amount = (int)ReadMemoryPointedQWord(operandStart + 1);
-                                        result = initial << amount;
+                                        shiftAmount = (int)ReadMemoryPointedQWord(operandStart + 1);
+                                        result = initial << shiftAmount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SHL reg, ptr
-                                        amount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        result = initial << amount;
+                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        result = initial << shiftAmount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // SHR reg, reg
-                                        amount = (int)ReadMemoryRegister(operandStart + 1);
-                                        result = initial >> amount;
+                                        shiftAmount = (int)ReadMemoryRegister(operandStart + 1);
+                                        result = initial >> shiftAmount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x5:  // SHR reg, lit
-                                        amount = (int)ReadMemoryQWord(operandStart + 1);
-                                        result = initial >> amount;
+                                        shiftAmount = (int)ReadMemoryQWord(operandStart + 1);
+                                        result = initial >> shiftAmount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // SHR reg, adr
-                                        amount = (int)ReadMemoryPointedQWord(operandStart + 1);
-                                        result = initial >> amount;
+                                        shiftAmount = (int)ReadMemoryPointedQWord(operandStart + 1);
+                                        result = initial >> shiftAmount;
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // SHR reg, ptr
-                                        amount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        result = initial >> amount;
+                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        result = initial >> shiftAmount;
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
@@ -578,7 +590,7 @@ namespace AssEmbly
                                 }
                                 // C# only counts the lower 6 bits of the amount to shift by, so values greater than or equal to 64 will not return 0 as
                                 // wanted for AssEmbly.
-                                if (amount >= 64)
+                                if (shiftAmount >= 64)
                                 {
                                     result = 0;
                                 }
@@ -594,9 +606,9 @@ namespace AssEmbly
                                 // If shifting right, "(initial << (64 - amount)) != 0" checks if there are any 1 bits
                                 // in the portion of the number that will be cutoff during the right shift by cutting off the bits that will remain.
                                 // 8-bit e.g: 0b11001001 >> 3 |> (0b11001001 << (8 - 3)), (0b11001001 << 5) = 0b00100000, result != 0, therefore set carry.
-                                if (amount != 0 && initial != 0 && (amount >= 64 || opcodeLow <= 0x3
-                                    ? (initial >> (64 - amount)) != 0
-                                    : (initial << (64 - amount)) != 0))
+                                if (shiftAmount != 0 && initial != 0 && (shiftAmount >= 64 || opcodeLow <= 0x3
+                                    ? (initial >> (64 - shiftAmount)) != 0
+                                    : (initial << (64 - shiftAmount)) != 0))
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
                                 }
@@ -1182,28 +1194,24 @@ namespace AssEmbly
                                     // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
                                     case 0xC:  // WCC reg
                                         {
-                                            using Stream stdout = Console.OpenStandardOutput();
                                             stdout.WriteByte((byte)(0xFF & ReadMemoryRegister(operandStart)));
                                             Registers[(int)Register.rpo]++;
                                             break;
                                         }
                                     case 0xD:  // WCC lit
                                         {
-                                            using Stream stdout = Console.OpenStandardOutput();
                                             stdout.WriteByte(Memory[operandStart]);
                                             Registers[(int)Register.rpo] += 8;
                                             break;
                                         }
                                     case 0xE:  // WCC adr
                                         {
-                                            using Stream stdout = Console.OpenStandardOutput();
                                             stdout.WriteByte(ReadMemoryPointedByte(operandStart));
                                             Registers[(int)Register.rpo] += 8;
                                             break;
                                         }
                                     case 0xF:  // WCC ptr
                                         {
-                                            using Stream stdout = Console.OpenStandardOutput();
                                             stdout.WriteByte(ReadMemoryRegisterPointedByte(operandStart));
                                             Registers[(int)Register.rpo]++;
                                             break;
@@ -1220,59 +1228,35 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // WFN reg
-                                        foreach (char digit in ReadMemoryRegister(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryRegister(operandStart).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // WFN lit
-                                        foreach (char digit in ReadMemoryQWord(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryQWord(operandStart).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // WFN adr
-                                        foreach (char digit in ReadMemoryPointedQWord(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryPointedQWord(operandStart).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // WFN ptr
-                                        foreach (char digit in ReadMemoryRegisterPointedQWord(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryRegisterPointedQWord(operandStart).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x4:  // WFB reg
-                                        foreach (char digit in (0xFF & ReadMemoryRegister(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write((0xFF & ReadMemoryRegister(operandStart)).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // WFB lit
-                                        foreach (char digit in Memory[operandStart].ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(Memory[operandStart].ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // WFB adr
-                                        foreach (char digit in ReadMemoryPointedByte(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryPointedByte(operandStart).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // WFB ptr
-                                        foreach (char digit in ReadMemoryRegisterPointedByte(operandStart).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(ReadMemoryRegisterPointedByte(operandStart).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x8:  // WFX reg
@@ -1319,18 +1303,18 @@ namespace AssEmbly
                                         {
                                             throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                                         }
-                                        ulong startIndex = ReadMemoryQWord(operandStart);
-                                        ulong count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryQWord(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        string filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         Registers[(int)Register.rpo] += 8;
                                         openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                         openFileSize = openFile.Length;
-                                        fileWrite = new BinaryWriter(openFile);
-                                        fileRead = new BinaryReader(openFile);
+                                        fileWrite = new BinaryWriter(openFile, Encoding.UTF8);
+                                        fileRead = new BinaryReader(openFile, Encoding.UTF8);
                                         if (fileRead.BaseStream.Position >= openFileSize)
                                         {
                                             Registers[(int)Register.rsf] |= (ulong)StatusFlags.FileEnd;
@@ -1345,18 +1329,18 @@ namespace AssEmbly
                                         {
                                             throw new FileOperationException("Cannot execute open file instruction if a file is already open");
                                         }
-                                        startIndex = ReadMemoryRegister(operandStart);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryRegister(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         Registers[(int)Register.rpo]++;
                                         openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                         openFileSize = openFile.Length;
-                                        fileWrite = new BinaryWriter(openFile);
-                                        fileRead = new BinaryReader(openFile);
+                                        fileWrite = new BinaryWriter(openFile, Encoding.UTF8);
+                                        fileRead = new BinaryReader(openFile, Encoding.UTF8);
                                         if (fileRead.BaseStream.Position >= openFileSize)
                                         {
                                             Registers[(int)Register.rsf] |= (ulong)StatusFlags.FileEnd;
@@ -1380,68 +1364,68 @@ namespace AssEmbly
                                         openFileSize = 0;
                                         break;
                                     case 0x3:  // DFL adr
-                                        startIndex = ReadMemoryQWord(operandStart);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryQWord(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         Registers[(int)Register.rpo] += 8;
                                         File.Delete(filepath);
                                         break;
                                     case 0x4:  // DFL ptr
-                                        startIndex = ReadMemoryRegister(operandStart);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryRegister(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         Registers[(int)Register.rpo]++;
                                         File.Delete(filepath);
                                         break;
                                     case 0x5:  // FEX reg, adr
-                                        startIndex = ReadMemoryQWord(operandStart + 1);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryQWord(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         WriteMemoryRegister(operandStart, File.Exists(filepath) ? 1UL : 0UL);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // FEX reg, ptr
-                                        startIndex = ReadMemoryRegister(operandStart + 1);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryRegister(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         WriteMemoryRegister(operandStart, File.Exists(filepath) ? 1UL : 0UL);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x7:  // FSZ reg, adr
-                                        startIndex = ReadMemoryQWord(operandStart + 1);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryQWord(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         WriteMemoryRegister(operandStart, (ulong)new FileInfo(filepath).Length);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x8:  // FSZ reg, ptr
-                                        startIndex = ReadMemoryRegister(operandStart + 1);
-                                        count = 0;
-                                        while (Memory[startIndex + count] != 0x0)
+                                        initial = ReadMemoryRegister(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
                                         {
-                                            count++;
+                                            mathend++;
                                         }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)startIndex, (int)count);
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
                                         WriteMemoryRegister(operandStart, (ulong)new FileInfo(filepath).Length);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
@@ -1482,7 +1466,6 @@ namespace AssEmbly
                                                 }
                                             }
                                             // Echo byte to console
-                                            using Stream stdout = Console.OpenStandardOutput();
                                             stdout.WriteByte(currentByte);
 
                                             WriteMemoryRegister(operandStart, currentByte);
@@ -1688,8 +1671,7 @@ namespace AssEmbly
                                 }
                                 break;
                             case 0x1:  // Division
-                                long signedInitial = (long)ReadMemoryRegister(operandStart);
-                                ulong result;
+                                signedInitial = (long)ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_DIV reg, reg
@@ -1709,31 +1691,31 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x4:  // SIGN_DVR reg, reg, reg
-                                        long divisor = (long)ReadMemoryRegister(operandStart + 2);
-                                        result = (ulong)(signedInitial / divisor);
-                                        long rem = signedInitial % divisor;
-                                        WriteMemoryRegister(operandStart + 1, (ulong)rem);
+                                        signedMathend = (long)ReadMemoryRegister(operandStart + 2);
+                                        result = (ulong)(signedInitial / signedMathend);
+                                        remainder = (ulong)(signedInitial % signedMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x5:  // SIGN_DVR reg, reg, lit
-                                        divisor = (long)ReadMemoryQWord(operandStart + 2);
-                                        result = (ulong)(signedInitial / divisor);
-                                        rem = signedInitial % divisor;
-                                        WriteMemoryRegister(operandStart + 1, (ulong)rem);
+                                        signedMathend = (long)ReadMemoryQWord(operandStart + 2);
+                                        result = (ulong)(signedInitial / signedMathend);
+                                        remainder = (ulong)(signedInitial % signedMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x6:  // SIGN_DVR reg, reg, adr
-                                        divisor = (long)ReadMemoryPointedQWord(operandStart + 2);
-                                        result = (ulong)(signedInitial / divisor);
-                                        rem = signedInitial % divisor;
-                                        WriteMemoryRegister(operandStart + 1, (ulong)rem);
+                                        signedMathend = (long)ReadMemoryPointedQWord(operandStart + 2);
+                                        result = (ulong)(signedInitial / signedMathend);
+                                        remainder = (ulong)(signedInitial % signedMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // SIGN_DVR reg, reg, ptr
-                                        divisor = (long)ReadMemoryRegisterPointedQWord(operandStart + 2);
-                                        result = (ulong)(signedInitial / divisor);
-                                        rem = signedInitial % divisor;
-                                        WriteMemoryRegister(operandStart + 1, (ulong)rem);
+                                        signedMathend = (long)ReadMemoryRegisterPointedQWord(operandStart + 2);
+                                        result = (ulong)(signedInitial / signedMathend);
+                                        remainder = (ulong)(signedInitial % signedMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
                                         Registers[(int)Register.rpo] += 3;
                                         break;
                                     case 0x8:  // SIGN_REM reg, reg
@@ -1887,59 +1869,35 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_WFN reg
-                                        foreach (char digit in ((long)ReadMemoryRegister(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((long)ReadMemoryRegister(operandStart)).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // SIGN_WFN lit
-                                        foreach (char digit in ((long)ReadMemoryQWord(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((long)ReadMemoryQWord(operandStart)).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // SIGN_WFN adr
-                                        foreach (char digit in ((long)ReadMemoryPointedQWord(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((long)ReadMemoryPointedQWord(operandStart)).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // SIGN_WFN ptr
-                                        foreach (char digit in ((long)ReadMemoryRegisterPointedQWord(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((long)ReadMemoryRegisterPointedQWord(operandStart)).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x4:  // SIGN_WFB reg
-                                        foreach (char digit in ((sbyte)ReadMemoryRegister(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((sbyte)ReadMemoryRegister(operandStart)).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // SIGN_WFB lit
-                                        foreach (char digit in ((sbyte)Memory[operandStart]).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((sbyte)Memory[operandStart]).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // SIGN_WFB adr
-                                        foreach (char digit in ((sbyte)ReadMemoryPointedByte(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((sbyte)ReadMemoryPointedByte(operandStart)).ToString());
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // SIGN_WFB ptr
-                                        foreach (char digit in ((sbyte)ReadMemoryRegisterPointedByte(operandStart)).ToString())
-                                        {
-                                            fileWrite!.Write(digit);
-                                        }
+                                        fileWrite!.Write(((sbyte)ReadMemoryRegisterPointedByte(operandStart)).ToString());
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
@@ -1947,7 +1905,7 @@ namespace AssEmbly
                                 }
                                 break;
                             case 0x7:  // Extend
-                                ulong initial = ReadMemoryRegister(operandStart);
+                                initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_EXB reg
