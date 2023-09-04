@@ -708,13 +708,12 @@ namespace AssEmbly
                         $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
                     : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
             }
-            else if (int.TryParse(operand[0..1], out _))
+            else if (operand[0] is (>= '0' and <= '9') or '-')
             {
                 operand = operand.ToLowerInvariant();
-                Match invalidMatch;
-                invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
+                Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
                     ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
-                    : Regex.Match(operand, "[^0-9_]");
+                    : Regex.Match(operand, "[^0-9_](?<!^-)");
                 return invalidMatch.Success
                     ? throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
                         $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?")
@@ -763,13 +762,17 @@ namespace AssEmbly
                 // Hex (0x), Binary (0b), and Decimal literals are all supported
                 parsedNumber = operand.StartsWith("0x")
                     ? Convert.ToUInt64(operand[2..], 16)
-                    : operand.StartsWith("0b")
-                        ? Convert.ToUInt64(operand[2..], 2)
-                        : Convert.ToUInt64(operand);
+                : operand.StartsWith("0b")
+                    ? Convert.ToUInt64(operand[2..], 2)
+                : operand.StartsWith('-')
+                    ? (ulong)Convert.ToInt64(operand)
+                    : Convert.ToUInt64(operand);
             }
             catch (OverflowException)
             {
-                throw new OperandException($"Numeric literal too large. 18,446,744,073,709,551,615 is the maximum value:\n    {operand}");
+                throw new OperandException(operand.StartsWith('-')
+                    ? $"Numeric literal too small. {long.MinValue:N0} is the minimum value:\n    {operand}"
+                    : $"Numeric literal too large. {ulong.MaxValue:N0} is the maximum value:\n    {operand}");
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);
