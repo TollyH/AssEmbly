@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Numerics;
 
 namespace AssEmbly
 {
@@ -96,12 +97,25 @@ namespace AssEmbly
             {
                 Console.Write("\n\n");
             }
+
             Console.WriteLine("Register states:");
             foreach (int register in Enum.GetValues(typeof(Register)))
             {
                 ulong value = DebuggingProcessor.Registers[register];
                 Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
             }
+
+            StatusFlags statusFlags = (StatusFlags)DebuggingProcessor.Registers[(int)Register.rsf];
+            Console.Write("Flags:");
+            foreach (StatusFlags flag in Enum.GetValues(typeof(StatusFlags)))
+            {
+                // Ignore combined flags (e.g. SignAndOverflow)
+                if (BitOperations.PopCount((uint)flag) == 1 && (statusFlags & flag) != 0)
+                {
+                    Console.Write($" {Enum.GetName(flag)}");
+                }
+            }
+            Console.WriteLine();
         }
 
         public void DisplayReplInfo()
@@ -121,6 +135,25 @@ namespace AssEmbly
                     Console.WriteLine($"    {Enum.GetName((Register)register)}: {previousValue} -> {value} (0x{previousValue:X} -> 0x{value:X})");
                 }
             }
+
+            StatusFlags statusFlags = (StatusFlags)DebuggingProcessor.Registers[(int)Register.rsf];
+            StatusFlags previousFlags = (StatusFlags)replPreviousRegisters[(int)Register.rsf];
+            foundChange = false;
+            foreach (StatusFlags flag in Enum.GetValues(typeof(StatusFlags)))
+            {
+                // Ignore combined flags (e.g. SignAndOverflow)
+                if (BitOperations.PopCount((uint)flag) == 1 && (statusFlags & flag) != (previousFlags & flag))
+                {
+                    if (!foundChange)
+                    {
+                        foundChange = true;
+                        Console.Write("Flag changes:");
+                    }
+                    Console.Write($" {((statusFlags & flag) == 0 ? "UNSET" : "SET")}:{Enum.GetName(flag)}");
+                }
+            }
+            Console.WriteLine();
+
             Console.WriteLine($"\n{(uint)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rpo]} bytes of memory remaining");
         }
 
