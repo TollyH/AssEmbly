@@ -600,7 +600,8 @@ namespace AssEmbly
                 if (++i >= line.Length)
                 {
                     throw new SyntaxError(
-                        $"End of line found while processing string literal.\n    {line}\n    {new string(' ', i - 1)}^");
+                        "End of line found while processing string literal. Did you forget a closing quote?" +
+                        $"\n    {line}\n    {new string(' ', i - 1)}^");
                 }
                 char c = line[i];
                 if (c == '\\')
@@ -674,7 +675,9 @@ namespace AssEmbly
                             i += 8;
                             continue;
                         default:
-                            throw new SyntaxError($"Unrecognised escape character '{escape}'\n    {line}\n    {new string(' ', i)}^");
+                            throw new SyntaxError(
+                                $"Unrecognised escape character '{escape}'. Did you forget to escape the backslash?" +
+                                $"\n    {line}\n    {new string(' ', i)}^");
                     }
                     _ = sb.Append(escape);
                     continue;
@@ -728,7 +731,8 @@ namespace AssEmbly
                 int offset = operand[0] == '*' ? 1 : 0;
                 return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
                     ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
-                    : throw new SyntaxError($"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
+                    : throw new SyntaxError(
+                        $"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
             }
         }
 
