@@ -500,13 +500,25 @@ namespace AssEmbly
 
         private void CommandFormatStack(string[] command)
         {
-            if (command.Length != 1)
+            ulong limit = uint.MaxValue;
+            if (command.Length == 2)
+            {
+                if (!ulong.TryParse(command[1], out limit))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\"{command[1]}\" is not a valid limit. Run 'help' for more info.");
+                    Console.ResetColor();
+                    return;
+                }
+            }
+            else if (command.Length != 1)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("This command does not take any arguments. Run 'help' for more info.");
+                Console.WriteLine("This command requires either 1 or no arguments. Run 'help' for more info.");
                 Console.ResetColor();
                 return;
             }
+
             if (DebuggingProcessor.Registers[(int)Register.rso] >= (ulong)DebuggingProcessor.Memory.LongLength)
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -521,8 +533,13 @@ namespace AssEmbly
                 Console.ResetColor();
                 return;
             }
+
             ulong currentStackOffset = DebuggingProcessor.Registers[(int)Register.rso];
             ulong currentStackBase = DebuggingProcessor.Registers[(int)Register.rsb];
+            if (currentStackBase - currentStackOffset > limit)
+            {
+                currentStackOffset = currentStackBase - (limit / 8 * 8);  // Ensure limit is a multiple of 8
+            }
             for (ulong i = currentStackOffset; i < currentStackBase; i += 8)
             {
                 if (i == currentStackOffset)
@@ -564,6 +581,10 @@ namespace AssEmbly
                 Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
 
                 ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8);
+                if (parentStackBase - (currentStackBase + stackCallSize + 7) > limit)
+                {
+                    parentStackBase = currentStackBase + stackCallSize + limit - 7;
+                }
                 for (ulong i = currentStackBase + stackCallSize; i < parentStackBase; i += 8)
                 {
                     if (i == currentStackBase + stackCallSize)
@@ -705,7 +726,7 @@ namespace AssEmbly
             Console.WriteLine("\nread <byte|word|dword|qword> <address> - Read data at a memory address");
             Console.WriteLine("write <mem|reg> <address|register-name> <value> - Modify the value of a memory address or register");
             Console.WriteLine("map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes");
-            Console.WriteLine("stack - Visualise the state of the stack");
+            Console.WriteLine("stack [limit] - Visualise the state of the stack, optionally limited by the number of bytes away from the stack base");
             Console.WriteLine("breakpoint [<add|remove> <register> <value>] - Add or remove a breakpoint for when a register is equal to a value");
             Console.WriteLine("dec2hex <dec-number> - Convert a decimal number to hexadecimal");
             Console.WriteLine("hex2dec <hex-number> - Convert a hexadecimal number to decimal");
