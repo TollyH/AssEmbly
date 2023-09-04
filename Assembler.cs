@@ -738,7 +738,7 @@ namespace AssEmbly
         /// </summary>
         /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
-        /// <exception cref="SyntaxError">Thrown when there are invalid characters in a string literal or the string literal is in an invalid format.</exception>
+        /// <exception cref="SyntaxError">Thrown when a string literal is given in an invalid context or an invalid format.</exception>
         /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
         /// <exception cref="FormatException">Thrown when there are invalid characters in a numeric literal or the numeric literal is in an invalid format.</exception>
         public static byte[] ParseLiteral(string operand, bool allowString, out ulong parsedNumber)
@@ -750,15 +750,11 @@ namespace AssEmbly
                 {
                     throw new SyntaxError("A string literal is not a valid operand in this context.");
                 }
-                if (Regex.Matches(operand, @"(?<!\\)""").Count > 2)
-                {
-                    throw new SyntaxError("An operand can only contain a single string literal. Did you forget to escape a quote mark?");
-                }
                 if (operand[^1] != '"')
                 {
                     throw new SyntaxError("String literal contains characters after closing quote mark.");
                 }
-                string str = operand.Trim('"').Replace("\\\"", "\"");
+                string str = operand[1..^1];
                 return Encoding.UTF8.GetBytes(str);
             }
             operand = operand.ToLowerInvariant().Replace("_", "");
