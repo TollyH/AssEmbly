@@ -1760,6 +1760,76 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
+                            case 0x2:  // Shifting
+                                initial = ReadMemoryRegister(operandStart);
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // SHR reg, reg
+                                        shiftAmount = (int)ReadMemoryRegister(operandStart + 1);
+                                        result = (ulong)((long)initial >> shiftAmount);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // SHR reg, lit
+                                        shiftAmount = (int)ReadMemoryQWord(operandStart + 1);
+                                        result = (ulong)((long)initial >> shiftAmount);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // SHR reg, adr
+                                        shiftAmount = (int)ReadMemoryPointedQWord(operandStart + 1);
+                                        result = (ulong)((long)initial >> shiftAmount);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // SHR reg, ptr
+                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        result = (ulong)((long)initial >> shiftAmount);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set shifting low opcode");
+                                }
+                                // C# only counts the lower 6 bits of the amount to shift by, so values greater than or equal to 64 will not return 0 as
+                                // wanted for AssEmbly.
+                                if (shiftAmount >= 64)
+                                {
+                                    result = initial & SignBit;
+                                }
+                                WriteMemoryRegister(operandStart, result);
+
+                                // We will never overflow when shifting by 0 bits or if the initial value is 0.
+                                // We will always overflow if shifting by 64 bits or more as long as the above isn't the case.
+                                //
+                                // Otherwise, "(initial << (64 - amount)) != 0" checks if there are any 1 bits
+                                // in the portion of the number that will be cutoff during the right shift by cutting off the bits that will remain.
+                                // 8-bit e.g: 0b11001001 >> 3 |> (0b11001001 << (8 - 3)), (0b11001001 << 5) = 0b00100000, result != 0, therefore set carry.
+                                if (shiftAmount != 0 && initial != 0 && (shiftAmount >= 64 || (initial << (64 - shiftAmount)) != 0))
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+                                break;
                             case 0x3:  // Small Sign-Preserving Move
                                 switch (opcodeLow)
                                 {
