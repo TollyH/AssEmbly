@@ -254,6 +254,8 @@ namespace AssEmbly
 
         // Analyzer state variables
 
+        private Opcode instructionOpcode = new();
+        private ulong operandStart = 0;
         private Dictionary<(string File, int Line), ulong> lineAddresses = new();
         private Dictionary<(string File, int Line), string> lineMnemonics = new();
         private Dictionary<(string File, int Line), string[]> lineOperands = new();
@@ -280,6 +282,13 @@ namespace AssEmbly
 
         private void PreAnalyzeStateUpdate()
         {
+            if (newBytes.Length > 0)
+            {
+                operandStart = 0;
+                instructionOpcode = Opcode.ParseBytes(newBytes, ref operandStart);
+                operandStart++;
+            }
+
             lineAddresses[(file, line)] = currentAddress;
             lineMnemonics[(file, line)] = mnemonic;
             lineOperands[(file, line)] = operands;
@@ -310,19 +319,19 @@ namespace AssEmbly
             else if (newBytes.Length > 0)
             {
                 lastExecutableLine[file] = line;
-                if (jumpCallToLabelOpcodes.Contains(newBytes[0]))
+                if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
                     jumpCallToLabels[(line, file)] = currentAddress + 1;
                 }
-                if (writeToMemory.Contains(newBytes[0]))
+                if (writeToMemory.Contains(instructionOpcode))
                 {
                     writesToLabels[(line, file)] = currentAddress + 1;
                 }
-                if (readValueFromMemory.TryGetValue(newBytes[0], out int addressOpcodeIndex))
+                if (readValueFromMemory.TryGetValue(instructionOpcode, out int addressOpcodeIndex))
                 {
                     readsFromLabels[(line, file)] = currentAddress + (uint)addressOpcodeIndex + 1;
                 }
-                if (jumpCallToLabelOpcodes.Contains(newBytes[0]))
+                if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
                     jumpsCalls[(line, file)] = currentAddress + 1;
                 }
@@ -334,7 +343,7 @@ namespace AssEmbly
             currentAddress += (uint)newBytes.Length;
             if (newBytes.Length > 0)
             {
-                lastInstructionWasTerminator = terminators.Contains(newBytes[0]);
+                lastInstructionWasTerminator = terminators.Contains(instructionOpcode);
             }
             lastInstructionWasData = instructionIsData;
             lastInstructionWasString = instructionIsString;
@@ -350,7 +359,7 @@ namespace AssEmbly
         {
             // Non-Fatal Error 0001: Instruction writes to the rpo register.
             if (newBytes.Length > 0 && !instructionIsData
-                && writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+                && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
                 foreach (int operandIndex in writtenOperands)
                 {
@@ -367,7 +376,7 @@ namespace AssEmbly
         {
             // Non-Fatal Error 0002: Division by constant 0.
             if (newBytes.Length > 0 && !instructionIsData
-                && divisionByLiteral.TryGetValue(newBytes[0], out int literalOperandIndex))
+                && divisionByLiteral.TryGetValue(instructionOpcode, out int literalOperandIndex))
             {
                 if (operands[literalOperandIndex][0] == ':')
                 {
@@ -490,25 +499,17 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0007()
         {
             // Warning 0007: Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.
-            if (newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(newBytes[0])
-                && moveBitCounts.TryGetValue(newBytes[0], out int maxBits))
+            if (newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(instructionOpcode)
+                && moveLimits.TryGetValue(instructionOpcode, out (ulong MaxValue, long MinValue) limit))
             {
                 if (operands[1][0] == ':')
                 {
                     return false;
                 }
                 _ = Assembler.ParseLiteral(operands[1], false, out ulong number);
-                if (number == 0)
-                {
-                    return false;
-                }
-                int neededBits = 0;
-                while (number > 0)
-                {
-                    neededBits++;
-                    number >>= 1;
-                }
-                return neededBits > maxBits;
+                return operands[1][0] == '-'
+                    ? (long)number < limit.MinValue
+                    : number > limit.MaxValue;
             }
             return false;
         }
@@ -542,7 +543,7 @@ namespace AssEmbly
         {
             // Warning 0011: Instruction writes to the rsf register.
             if (newBytes.Length > 0 && !instructionIsData
-                && writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+                && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
                 foreach (int operandIndex in writtenOperands)
                 {
@@ -559,7 +560,7 @@ namespace AssEmbly
         {
             // Warning 0012: Instruction writes to the rsb register.
             if (newBytes.Length > 0 && !instructionIsData
-                && writingInstructions.TryGetValue(newBytes[0], out int[]? writtenOperands))
+                && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
                 foreach (int operandIndex in writtenOperands)
                 {
@@ -604,8 +605,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0016()
         {
             // Warning 0016: Addresses are 64-bit values, however this move instruction moves less than 64 bits.
-            return newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(newBytes[0])
-                && operands[1][0] == ':' && moveBitCounts.TryGetValue(newBytes[0], out int bits) && bits < 64;
+            return newBytes.Length > 0 && !instructionIsData && moveLiteral.Contains(instructionOpcode) && operands[1][0] == ':'
+                && moveLimits.TryGetValue(instructionOpcode, out (ulong MaxValue, long MinValue) limit) && limit.MaxValue != ulong.MaxValue;
         }
 
         private bool Analyzer_Rolling_Warning_0017()
@@ -623,7 +624,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0001()
         {
             // Suggestion 0001: Avoid use of NOP instruction.
-            return newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0x01;
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x01);
         }
 
         private bool Analyzer_Rolling_Suggestion_0002()
@@ -678,29 +679,29 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0005()
         {
             // Suggestion 0005: Use `TST {reg}, {reg}` instead of `CMP {reg}, 0`, as it results in less bytes.
-            return newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0x75 && operands[1][0] != ':'
-                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x75) && operands[1][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0;
         }
 
         private bool Analyzer_Rolling_Suggestion_0006()
         {
             // Suggestion 0006: Use `XOR {reg}, {reg}` instead of `MV{B|W|D|Q} {reg}, 0`, as it results in less bytes.
-            return newBytes.Length > 0 && !instructionIsData && moveRegLit.Contains(newBytes[0]) && operands[1][0] != ':'
-                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0;
+            return newBytes.Length > 0 && !instructionIsData && moveRegLit.Contains(instructionOpcode) && operands[1][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0;
         }
 
         private bool Analyzer_Rolling_Suggestion_0007()
         {
             // Suggestion 0007: Use `INC {reg}` instead of `ADD {reg}, 1`, as it results in less bytes.
-            return newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0x11 && operands[1][0] != ':'
-                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x11) && operands[1][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0008()
         {
             // Suggestion 0008: Use `DEC {reg}` instead of `SUB {reg}, 1`, as it results in less bytes.
-            return newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0x21 && operands[1][0] != ':'
-                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1;
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0009()
@@ -710,36 +711,39 @@ namespace AssEmbly
             {
                 return false;
             }
-            switch (newBytes[0])
+            if (instructionOpcode.ExtensionSet == 0x0)
             {
-                // Add, Subtract, Shift, Or, or Xor by 0
-                case 0x11:
-                case 0x21:
-                case 0x51:
-                case 0x55:
-                case 0x65:
-                case 0x69:
-                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 0)
-                    {
-                        return true;
-                    }
-                    break;
-                // Multiply by 1
-                case 0x31:
-                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == 1)
-                    {
-                        return true;
-                    }
-                    break;
-                // And by all 1 bits
-                case 0x61:
-                    if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) == ulong.MaxValue)
-                    {
-                        return true;
-                    }
-                    break;
+                switch (instructionOpcode.InstructionCode)
+                {
+                    // Add, Subtract, Shift, Or, or Xor by 0
+                    case 0x11:
+                    case 0x21:
+                    case 0x51:
+                    case 0x55:
+                    case 0x65:
+                    case 0x69:
+                        if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    // Multiply by 1
+                    case 0x31:
+                        if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 1)
+                        {
+                            return true;
+                        }
+                        break;
+                    // And by all 1 bits
+                    case 0x61:
+                        if (BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == ulong.MaxValue)
+                        {
+                            return true;
+                        }
+                        break;
+                }
             }
-            if (divisionByLiteral.TryGetValue(newBytes[0], out int literalOperandIndex))
+            if (divisionByLiteral.TryGetValue(instructionOpcode, out int literalOperandIndex))
             {
                 if (operands[literalOperandIndex][0] == ':')
                 {
@@ -755,8 +759,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0010()
         {
             // Suggestion 0010: Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {reg}, {reg}` instead.
-            return newBytes.Length > 0 && !instructionIsData && shiftByLiteral.Contains(newBytes[0]) && operands[1][0] != ':'
-                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[2..]) >= 64;
+            return newBytes.Length > 0 && !instructionIsData && shiftByLiteral.Contains(instructionOpcode) && operands[1][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) >= 64;
         }
 
         private bool Analyzer_Rolling_Suggestion_0011()

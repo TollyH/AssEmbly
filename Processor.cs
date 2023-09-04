@@ -1764,22 +1764,22 @@ namespace AssEmbly
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
-                                    case 0x0:  // SHR reg, reg
+                                    case 0x0:  // SIGN_SHR reg, reg
                                         shiftAmount = (int)ReadMemoryRegister(operandStart + 1);
                                         result = (ulong)((long)initial >> shiftAmount);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
-                                    case 0x1:  // SHR reg, lit
+                                    case 0x1:  // SIGN_SHR reg, lit
                                         shiftAmount = (int)ReadMemoryQWord(operandStart + 1);
                                         result = (ulong)((long)initial >> shiftAmount);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x2:  // SHR reg, adr
+                                    case 0x2:  // SIGN_SHR reg, adr
                                         shiftAmount = (int)ReadMemoryPointedQWord(operandStart + 1);
                                         result = (ulong)((long)initial >> shiftAmount);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x3:  // SHR reg, ptr
+                                    case 0x3:  // SIGN_SHR reg, ptr
                                         shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
                                         result = (ulong)((long)initial >> shiftAmount);
                                         Registers[(int)Register.rpo] += 2;

@@ -398,7 +398,7 @@
             // RFC (Read Character from Open File as a Byte)
             { ("RFC", new OperandType[1] { OperandType.Register }), new Opcode(0x00, 0xF1) },
 
-            // SIGNED INSTRUCTION SET
+            // SIGNED EXTENSION SET
 
             // Signed Conditional Jumps
             // SIGN_JLT (Jump If Less Than - Sign Flag != Overflow Flag)
