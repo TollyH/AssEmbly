@@ -37,6 +37,7 @@ namespace AssEmbly
         /// <param name="debugInfo">A string to store generated debug information file text in.</param>
         /// <param name="warnings">A list to store any generated warnings in.</param>
         /// <param name="entryPoint">A ulong to store the entry point of the program in.</param>
+        /// <param name="usedExtensions">The feature flags for all extension sets used in the program.</param>
         /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
         /// <exception cref="LabelNameException">
@@ -49,7 +50,7 @@ namespace AssEmbly
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static byte[] AssembleLines(string[] lines, bool usingV1Format,
             IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions,
-            out string debugInfo, out List<Warning> warnings, out ulong entryPoint)
+            out string debugInfo, out List<Warning> warnings, out ulong entryPoint, out AAPFeatures usedExtensions)
         {
             // The lines to assemble may change during assembly, for example importing a file
             // will extend the list of lines to assemble as and when the import is reached.
@@ -63,6 +64,7 @@ namespace AssEmbly
             List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
             // string -> replacement
             Dictionary<string, string> macros = new();
+            usedExtensions = AAPFeatures.None;
 
             // Used for debug files
             List<(ulong Address, string Line)> assembledLines = new();
@@ -258,19 +260,27 @@ namespace AssEmbly
                         default:
                             break;
                     }
-                    (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) = AssembleStatement(mnemonic, operands);
+
+                    (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
+                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures);
+
+                    usedExtensions |= newFeatures;
+
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count, currentImport?.ImportPath,
                             currentImport is null ? baseFileLine : currentImport.CurrentLine));
                     }
+
                     assembledLines.Add(((uint)program.Count, rawLine));
                     program.AddRange(newBytes);
+
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
                         currentImport is null ? baseFileLine : currentImport.CurrentLine,
                         currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
                     lineIsLabelled = false;
+
                     lineIsEntry = false;
                 }
                 catch (AssemblerException e)
@@ -325,14 +335,16 @@ namespace AssEmbly
         /// <summary>
         /// Assemble a single line of AssEmbly to bytecode.
         /// </summary>
+        /// <param name="usedExtensions">The feature flags for any extension sets used in this instruction.</param>
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands, out AAPFeatures usedExtensions)
         {
             OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string LabelName, ulong AddressOffset)> labels = new();
+            usedExtensions = AAPFeatures.None;
             // Check for byte-inserting assembler directives
             switch (mnemonic.ToUpperInvariant())
             {
@@ -434,6 +446,10 @@ namespace AssEmbly
                 operandBytes.Insert(0, opcode.ExtensionSet);
                 operandBytes.Insert(0, 0xFF);
             }
+            if (Data.ExtensionSetFeatureFlags.TryGetValue(opcode.ExtensionSet, out AAPFeatures newFlag))
+            {
+                usedExtensions |= newFlag;
+            }
 
             // Add length of opcode to all label address offsets
             for (int i = 0; i < labels.Count; i++)
@@ -442,6 +458,18 @@ namespace AssEmbly
             }
 
             return (operandBytes.ToArray(), labels);
+        }
+
+        /// <summary>
+        /// Assemble a single line of AssEmbly to bytecode.
+        /// </summary>
+        /// <param name="features">The variable to store any current and any new extension set feature flags in.</param>
+        /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
+        /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
+        /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
+        {
+            return AssembleStatement(mnemonic, operands, out _);
         }
 
         /// <summary>

@@ -138,12 +138,14 @@ namespace AssEmbly
             byte[] program;
             string debugInfo;
             ulong entryPoint;
+            AAPFeatures extensionFeatures;
             try
             {
                 program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
                     useV1Format,
                     disabledErrors, disabledWarnings, disabledSuggestions,
-                    out debugInfo, out List<Warning> warnings, out entryPoint);
+                    out debugInfo, out List<Warning> warnings, out entryPoint,
+                    out extensionFeatures);
                 foreach (Warning warning in warnings)
                 {
                     Console.ForegroundColor = warning.Severity switch
@@ -181,7 +183,7 @@ namespace AssEmbly
             }
             else
             {
-                AAPFeatures features = AAPFeatures.None;
+                AAPFeatures features = extensionFeatures;
                 if (args.Contains("--v1-call-stack"))
                 {
                     features |= AAPFeatures.V1CallStack;
@@ -238,7 +240,7 @@ namespace AssEmbly
                     AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
                     AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
                     AssemblerWarnings.SuggestionMessages.Keys.ToHashSet(),
-                    out _, out _, out entryPoint);
+                    out _, out _, out entryPoint, out _);
             }
             catch (Exception e)
             {
@@ -356,7 +358,7 @@ namespace AssEmbly
                 _ = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
                     // Never ignore warnings when using 'lint' command
                     new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
-                    out _, out List<Warning> warnings, out _);
+                    out _, out List<Warning> warnings, out _, out _);
                 Console.WriteLine(JsonSerializer.Serialize(warnings, new JsonSerializerOptions { IncludeFields = true }));
             }
             catch (Exception e)

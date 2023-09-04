@@ -104,6 +104,12 @@
     /// </summary>
     public static class Data
     {
+        public static readonly Dictionary<byte, AAPFeatures> ExtensionSetFeatureFlags = new()
+        {
+            { 0x01, AAPFeatures.ExtensionSigned },
+            { 0x02, AAPFeatures.ExtensionFloat },
+        };
+
         /// <summary>
         /// A mapping of what opcode a mnemonic with a particular set of operands should compile to.
         /// </summary>
