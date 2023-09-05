@@ -23,7 +23,7 @@ namespace AssEmbly
             : new Register[2] { Register.rsb, Register.rpo };
 
         private ulong[] replPreviousRegisters = new ulong[Enum.GetNames(typeof(Register)).Length];
-        Dictionary<string, ulong> replLabels = new();
+        Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
         private ulong nextFreeRpoAddress = 0;
 
         public Debugger(bool inReplMode, ulong entryPoint = 0, bool useV1CallStack = false)
