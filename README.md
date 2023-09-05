@@ -1,6 +1,6 @@
 # AssEmbly
 
-A mock assembly language programmed in C# running on .NET
+A custom architecture and assembly language implemented in .NET
 
 For instructions on using the language, see the `Documentation` folder.
 
