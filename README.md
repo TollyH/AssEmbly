@@ -1,6 +1,6 @@
 # AssEmbly
 
-A custom architecture and assembly language implemented in .NET
+A custom processor architecture and assembly language implemented in .NET
 
 For instructions on using the language, see the `Documentation` folder.
 
