@@ -711,16 +711,23 @@ namespace AssEmbly
                         $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
                     : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
             }
-            else if (operand[0] is (>= '0' and <= '9') or '-')
+            else if (operand[0] is (>= '0' and <= '9') or '-' or '.')
             {
                 operand = operand.ToLowerInvariant();
                 Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
                     ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
-                    : Regex.Match(operand, "[^0-9_](?<!^-)");
-                return invalidMatch.Success
-                    ? throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
-                        $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?")
-                    : OperandType.Literal;
+                    : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
+                if (invalidMatch.Success)
+                {
+                    throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
+                        $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?");
+                }
+                if (operand.IndexOf('.') != operand.LastIndexOf('.'))
+                {
+                    throw new SyntaxError("Numeric literal contains more than one decimal point:" +
+                        $"\n    {operand}\n    {new string(' ', operand.LastIndexOf('.'))}^");
+                }
+                return OperandType.Literal;
             }
             else if (operand[0] == '"')
             {
@@ -768,6 +775,8 @@ namespace AssEmbly
                     ? Convert.ToUInt64(operand[2..], 16)
                 : operand.StartsWith("0b")
                     ? Convert.ToUInt64(operand[2..], 2)
+                : operand.Contains('.')
+                    ? BitConverter.DoubleToUInt64Bits(Convert.ToDouble(operand))
                 : operand.StartsWith('-')
                     ? (ulong)Convert.ToInt64(operand)
                     : Convert.ToUInt64(operand);
