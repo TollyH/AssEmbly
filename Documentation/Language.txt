@@ -2,15 +2,14 @@ AssEmbly Language Reference
 
 Applies to versions: 2.0.0
 
-Last revised: 2023-08-27
+Last revised: 2023-09-05
 
 Introduction
 
-AssEmbly is a mock processor architecture and assembly language written
-in C# and running on .NET. It is designed to simplify the process of
-learning and writing in assembly language, while still following the
-same basic concepts and constraints seen in mainstream architectures
-such as x86.
+AssEmbly is a custom processor architecture and assembly language
+implemented in .NET. It is designed to simplify the process of learning
+and writing in assembly language, while still following the same basic
+concepts and constraints seen in mainstream architectures such as x86.
 
 AssEmbly was designed and implemented in its entirety by Tolly Hill.
 

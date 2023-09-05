@@ -159,10 +159,8 @@ namespace AssEmbly
 
         public static void DisplayReplHeader()
         {
-            Console.WriteLine($"AssEmbly REPL Environment {Program.version?.Major}.{Program.version?.Minor}.{Program.version?.Build} " +
-                $"(CLR {Environment.Version}, {Environment.OSVersion} " +
-                $"[{(Environment.Is64BitProcess ? "64" : "32")} on {(Environment.Is64BitOperatingSystem ? "64" : "32")}])");
-            Console.WriteLine("\nType an AssEmbly instruction and press ENTER to insert and execute it.\n" +
+            Console.WriteLine("AssEmbly REPL Environment\n\n" +
+                "Type an AssEmbly instruction and press ENTER to insert and execute it.\n" +
                 "Preface the instruction with one or more spaces to insert it without executing it.\n" +
                 "Press ENTER without typing anything to output the state of all registers.");
         }

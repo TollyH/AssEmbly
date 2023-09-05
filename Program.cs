@@ -17,7 +17,8 @@ namespace AssEmbly
             if (!args.Contains("--no-header"))
             {
                 // Write to stderr to prevent header being included in redirected stdout streams
-                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} - A mock assembly language running on .NET");
+                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} {(Environment.Is64BitProcess ? "64-bit" : "32-bit")}" +
+                    $" - CLR {Environment.Version}, {Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                 Console.Error.WriteLine("Copyright © 2022-2023  Ptolemy Hill");
                 Console.Error.WriteLine();
             }
