@@ -694,9 +694,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0xD:  // RNG reg
-                                        byte[] randomBuffer = new byte[8];
-                                        rng.NextBytes(randomBuffer);
-                                        result = BinaryPrimitives.ReadUInt64LittleEndian(randomBuffer);
+                                        result = (ulong)rng.NextInt64(long.MinValue, long.MaxValue);
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
