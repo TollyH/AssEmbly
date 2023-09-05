@@ -506,6 +506,113 @@
 
             // SIGN_NEG (Two's Compliment Negation)
             { ("SIGN_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x80) },
+
+            // FLOATING POINT EXTENSION SET
+
+            // Math (All operations store result in the first register operand)
+            // FLPT_ADD (Addition)
+            { ("FLPT_ADD", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x00) },  // (reg + reg)
+            { ("FLPT_ADD", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x01) },  // (reg + lit)
+            { ("FLPT_ADD", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x02) },  // (reg + adr)
+            { ("FLPT_ADD", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x03) },  // (reg + ptr)
+
+            // FLPT_SUB (Subtraction)
+            { ("FLPT_SUB", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x10) },  // (reg - reg)
+            { ("FLPT_SUB", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x11) },  // (reg - lit)
+            { ("FLPT_SUB", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x12) },  // (reg - adr)
+            { ("FLPT_SUB", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x13) },  // (reg - ptr)
+
+            // FLPT_MUL (Multiplication)
+            { ("FLPT_MUL", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x20) },  // (reg * reg)
+            { ("FLPT_MUL", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x21) },  // (reg * lit)
+            { ("FLPT_MUL", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x22) },  // (reg * adr)
+            { ("FLPT_MUL", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x23) },  // (reg * ptr)
+
+            // FLPT_DIV (Division)
+            { ("FLPT_DIV", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x30) },  // (reg / reg)
+            { ("FLPT_DIV", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x31) },  // (reg / lit)
+            { ("FLPT_DIV", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x32) },  // (reg / adr)
+            { ("FLPT_DIV", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x33) },  // (reg / ptr)
+
+            // FLPT_DVR (Division With Remainder [Remainder Stored in Second Register])
+            { ("FLPT_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x34) },  // (reg / reg)
+            { ("FLPT_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x35) },  // (reg / lit)
+            { ("FLPT_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x36) },  // (reg / adr)
+            { ("FLPT_DVR", new OperandType[3] { OperandType.Register, OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x37) },  // (reg / ptr)
+
+            // FLPT_REM (Remainder)
+            { ("FLPT_REM", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x38) },  // (reg % reg)
+            { ("FLPT_REM", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x39) },  // (reg % lit)
+            { ("FLPT_REM", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x3A) },  // (reg % adr)
+            { ("FLPT_REM", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x3B) },  // (reg % ptr)
+
+            // Floating point specific math
+            // FLPT_SIN (Sine)
+            { ("FLPT_SIN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x40) },
+            // FLPT_ASN (Inverse sine)
+            { ("FLPT_ASN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x41) },
+            // FLPT_COS (Cosine)
+            { ("FLPT_COS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x42) },
+            // FLPT_ACS (Inverse Cosine)
+            { ("FLPT_ACS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x43) },
+            // FLPT_TAN (Tangent)
+            { ("FLPT_TAN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x44) },
+            // FLPT_ATN (Inverse tangent)
+            { ("FLPT_ATN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x45) },
+            // FLPT_PTN (2 argument inverse tangent)
+            { ("FLPT_PTN", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x46) },
+            { ("FLPT_PTN", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x47) },
+            { ("FLPT_PTN", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x48) },
+            { ("FLPT_PTN", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x49) },
+
+            // FLPT_POW (Exponentiation)
+            { ("FLPT_POW", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x50) },
+            { ("FLPT_POW", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x51) },
+            { ("FLPT_POW", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x52) },
+            { ("FLPT_POW", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x53) },
+
+            // FLPT_LOG (Logarithm)
+            { ("FLPT_LOG", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0x60) },
+            { ("FLPT_LOG", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0x61) },
+            { ("FLPT_LOG", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0x62) },
+            { ("FLPT_LOG", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0x63) },
+
+            // Console Write
+            // FLPT_WCN (Write Double Precision Floating Point Number to Console as Decimal)
+            { ("FLPT_WCN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x70) },
+            { ("FLPT_WCN", new OperandType[1] { OperandType.Literal }), new Opcode(0x02, 0x71) },
+            { ("FLPT_WCN", new OperandType[1] { OperandType.Address }), new Opcode(0x02, 0x72) },
+            { ("FLPT_WCN", new OperandType[1] { OperandType.Pointer }), new Opcode(0x02, 0x73) },
+
+            // File Write
+            // FLPT_WFN (Write Double Precision Floating Point Number to Open File as Decimal)
+            { ("FLPT_WFN", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x80) },
+            { ("FLPT_WFN", new OperandType[1] { OperandType.Literal }), new Opcode(0x02, 0x81) },
+            { ("FLPT_WFN", new OperandType[1] { OperandType.Address }), new Opcode(0x02, 0x82) },
+            { ("FLPT_WFN", new OperandType[1] { OperandType.Pointer }), new Opcode(0x02, 0x83) },
+
+            // Conversions
+            // FLPT_EXS (Extend Single Precision Float to Double Precision Float)
+            { ("FLPT_EXS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x90) },
+            // FLPT_SHD (Shrink Double Precision Float to Single Precision Float)
+            { ("FLPT_SHD", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x91) },
+
+            // FLPT_NEG (Floating Point Negation)
+            { ("FLPT_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xA0) },
+
+            // FLPT_UTF (Convert Unsigned Quad Word to Double Precision Float)
+            { ("FLPT_UTF", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xB0) },
+            // FLPT_STF (Convert Signed Quad Word to Double Precision Float)
+            { ("FLPT_STF", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xB1) },
+
+            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Truncation)
+            { ("FLPT_FTS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC0) },
+            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Ceiling Rounding)
+            { ("FLPT_FCS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC1) },
+            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Floor Rounding)
+            { ("FLPT_FFS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC2) },
+            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Nearest Rounding)
+            { ("FLPT_FNS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC3) },
         };
     }
 }
