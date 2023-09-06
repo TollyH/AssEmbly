@@ -2465,7 +2465,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set exponentiation low opcode");
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set logarithm low opcode");
                                 }
                                 floatingResult = Math.Log(floatingInitial, floatingMathend);
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2606,6 +2606,45 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                }
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (floatingResult == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            case 0xB:  // Integer to Floating Point Conversion
+                                initial = ReadMemoryRegister(operandStart);
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_UTF reg
+                                        floatingResult = initial;
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // FLPT_STF reg
+                                        floatingResult = (long)initial;
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set int to float low opcode");
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
