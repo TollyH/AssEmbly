@@ -2106,7 +2106,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
 
-                                if (result == 0)
+                                if (floatingResult == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -2162,7 +2162,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
 
-                                if (result == 0)
+                                if (floatingResult == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -2218,7 +2218,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
 
-                                if (result == 0)
+                                if (floatingResult == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
@@ -2309,7 +2309,78 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
 
-                                if (result == 0)
+                                if (floatingResult == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            case 0x4:  // Trigonometric functions
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_SIN reg
+                                        floatingResult = Math.Sin(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // FLPT_ASN reg
+                                        floatingResult = Math.Asin(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // FLPT_COS reg
+                                        floatingResult = Math.Cos(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x3:  // FLPT_ACS reg
+                                        floatingResult = Math.Acos(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x4:  // FLPT_TAN reg
+                                        floatingResult = Math.Tan(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x5:  // FLPT_ATN reg
+                                        floatingResult = Math.Atan(floatingInitial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x6:  // FLPT_PTN reg, reg
+                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x7:  // FLPT_PTN reg, lit
+                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x8:  // FLPT_PTN reg, adr
+                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x9:  // FLPT_PTN reg, ptr
+                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set trigonometry low opcode");
+                                }
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (floatingResult == 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
                                 }
