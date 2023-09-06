@@ -2596,6 +2596,41 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
+                            case 0xA:  // Negate
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_NEG reg
+                                        floatingResult = -floatingInitial;
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                }
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (floatingResult == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the floating point extension set");
                         }
