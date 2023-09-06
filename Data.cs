@@ -613,6 +613,12 @@
             { ("FLPT_FFS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC2) },
             // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Nearest Rounding)
             { ("FLPT_FNS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC3) },
+
+            // FLPT_CMP (Compare [Subtract Then Discard Result])
+            { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x02, 0xD0) },  // (reg - reg)
+            { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0xD1) },  // (reg - lit)
+            { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0xD2) },  // (reg - adr)
+            { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0xD3) },  // (reg - ptr)
         };
     }
 }
