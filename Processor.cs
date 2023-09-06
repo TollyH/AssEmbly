@@ -2501,6 +2501,56 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
+                            case 0x7:  // Console Write
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_WCN reg
+                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // FLPT_WCN lit
+                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // FLPT_WCN adr
+                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // FLPT_WCN ptr
+                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set console write low opcode");
+                                }
+                                break;
+                            case 0x8:  // File Write
+                                if (openFile is null)
+                                {
+                                    throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                                }
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_WFN reg
+                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString());
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // FLPT_WFN lit
+                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString());
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // FLPT_WFN adr
+                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString());
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // FLPT_WFN ptr
+                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString());
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set file write low opcode");
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the floating point extension set");
                         }
