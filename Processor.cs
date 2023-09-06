@@ -116,6 +116,9 @@ namespace AssEmbly
                 string filepath;
                 long signedInitial;
                 long signedMathend;
+                double floatingInitial;
+                double floatingMathend;
+                double floatingResult;
 
                 switch (opcode.ExtensionSet)
                 {
@@ -2051,6 +2054,272 @@ namespace AssEmbly
                                 break;
                             default:
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
+                        }
+                        break;
+                    case 0x2:  // Floating point extension set
+                        switch (opcodeHigh)
+                        {
+                            case 0x0:  // Addition
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_ADD reg, reg
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // FLPT_ADD reg, lit
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // FLPT_ADD reg, adr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FLPT_ADD reg, ptr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set addition low opcode");
+                                }
+                                floatingResult = floatingInitial + floatingMathend;
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (floatingResult < floatingInitial)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            case 0x1:  // Subtraction
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_SUB reg, reg
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // FLPT_SUB reg, lit
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // FLPT_SUB reg, adr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FLPT_SUB reg, ptr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set subtraction low opcode");
+                                }
+                                floatingResult = floatingInitial - floatingMathend;
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (floatingResult > floatingInitial)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            case 0x2:  // Multiplication
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_MUL reg, reg
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // FLPT_MUL reg, lit
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // FLPT_MUL reg, adr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FLPT_MUL reg, ptr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set multiplication low opcode");
+                                }
+                                floatingResult = floatingInitial * floatingMathend;
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if (floatingResult < floatingInitial)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                }
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            case 0x3:  // Division
+                                floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_DIV reg, reg
+                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // FLPT_DIV reg, lit
+                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // FLPT_DIV reg, adr
+                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FLPT_DIV reg, ptr
+                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // FLPT_DVR reg, reg, reg
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 2));
+                                        floatingResult = floatingInitial / floatingMathend;
+                                        remainder = BitConverter.DoubleToUInt64Bits(floatingInitial % floatingMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
+                                        Registers[(int)Register.rpo] += 3;
+                                        break;
+                                    case 0x5:  // FLPT_DVR reg, reg, lit
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 2));
+                                        floatingResult = floatingInitial / floatingMathend;
+                                        remainder = BitConverter.DoubleToUInt64Bits(floatingInitial % floatingMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
+                                        Registers[(int)Register.rpo] += 10;
+                                        break;
+                                    case 0x6:  // FLPT_DVR reg, reg, adr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 2));
+                                        floatingResult = floatingInitial / floatingMathend;
+                                        remainder = BitConverter.DoubleToUInt64Bits(floatingInitial % floatingMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
+                                        Registers[(int)Register.rpo] += 10;
+                                        break;
+                                    case 0x7:  // FLPT_DVR reg, reg, ptr
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 2));
+                                        floatingResult = floatingInitial / floatingMathend;
+                                        remainder = BitConverter.DoubleToUInt64Bits(floatingInitial % floatingMathend);
+                                        WriteMemoryRegister(operandStart + 1, remainder);
+                                        Registers[(int)Register.rpo] += 3;
+                                        break;
+                                    case 0x8:  // FLPT_REM reg, reg
+                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x9:  // FLPT_REM reg, lit
+                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0xA:  // FLPT_REM reg, adr
+                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0xB:  // FLPT_REM reg, ptr
+                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set division low opcode");
+                                }
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the floating point extension set");
                         }
                         break;
                     default:
