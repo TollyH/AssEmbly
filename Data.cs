@@ -611,11 +611,11 @@
 
             // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Truncation)
             { ("FLPT_FTS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC0) },
-            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Ceiling Rounding)
+            // FLPT_FCS (Convert Double Precision Float to Signed Quad Word through Ceiling Rounding)
             { ("FLPT_FCS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC1) },
-            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Floor Rounding)
+            // FLPT_FFS (Convert Double Precision Float to Signed Quad Word through Floor Rounding)
             { ("FLPT_FFS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC2) },
-            // FLPT_FTS (Convert Double Precision Float to Signed Quad Word through Nearest Rounding)
+            // FLPT_FNS (Convert Double Precision Float to Signed Quad Word through Nearest Rounding)
             { ("FLPT_FNS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xC3) },
 
             // FLPT_CMP (Compare [Subtract Then Discard Result])
