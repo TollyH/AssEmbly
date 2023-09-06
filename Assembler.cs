@@ -348,7 +348,7 @@ namespace AssEmbly
             // Check for byte-inserting assembler directives
             switch (mnemonic.ToUpperInvariant())
             {
-                // Single byte insertion
+                // Single byte/string insertion
                 case "DAT":
                     if (operands.Length != 1)
                     {
@@ -360,9 +360,12 @@ namespace AssEmbly
                         throw new OperandException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
                     byte[] parsedBytes = ParseLiteral(operands[0], true);
-                    return operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0)
-                        ? throw new OperandException($"Numeric literal too large for DAT. 255 is the maximum value:\n    {operands[0]}")
-                        : (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
+                    if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
+                    {
+                        throw new OperandException(
+                            $"Numeric literal too large for DAT, or is negative/floating point. 255 is the maximum value:\n    {operands[0]}");
+                    }
+                    return (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
                 // 0-padding
                 case "PAD":
                     if (operands.Length != 1)
@@ -376,7 +379,7 @@ namespace AssEmbly
                             ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
                         : throw new OperandException($"The operand to the PAD mnemonic must be a literal. " +
                             $"An operand of type {operandType} was provided.");
-                // 64-bit number insertion
+                // 64-bit/floating point number insertion
                 case "NUM":
                     if (operands.Length != 1)
                     {
