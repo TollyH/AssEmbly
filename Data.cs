@@ -596,7 +596,7 @@
             { ("FLPT_EXH", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x90) },
             // FLPT_EXS (Extend Single Precision Float to Double Precision Float)
             { ("FLPT_EXS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x91) },
-            // FLPT_SHD (Shrink Double Precision Float to Single Precision Float)
+            // FLPT_SHS (Shrink Double Precision Float to Single Precision Float)
             { ("FLPT_SHS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x92) },
             // FLPT_SHH (Shrink Double Precision Float to Half Precision Float)
             { ("FLPT_SHH", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x93) },

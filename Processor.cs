@@ -2016,7 +2016,6 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
-
                                 break;
                             case 0x8:  // Negate
                                 initial = ReadMemoryRegister(operandStart);
@@ -2549,6 +2548,52 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set file write low opcode");
+                                }
+                                break;
+                            case 0x9:  // Float Size Conversions
+                                initial = ReadMemoryRegister(operandStart);
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FLPT_EXH reg
+                                        result = BitConverter.DoubleToUInt64Bits((double)BitConverter.UInt16BitsToHalf((ushort)initial));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // FLPT_EXS reg
+                                        result = BitConverter.DoubleToUInt64Bits((double)BitConverter.UInt32BitsToSingle((uint)initial));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // FLPT_SHS reg
+                                        result = BitConverter.SingleToUInt32Bits((float)BitConverter.UInt64BitsToDouble(initial));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x3:  // FLPT_SHH reg
+                                        result = BitConverter.HalfToUInt16Bits((Half)BitConverter.UInt64BitsToDouble(initial));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set size conversion low opcode");
+                                }
+                                WriteMemoryRegister(operandStart, result);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
+                                if ((result & SignBit) != 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
+                                }
+
+                                if (result == 0)
+                                {
+                                    Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                }
+                                else
+                                {
+                                    Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
                             default:
