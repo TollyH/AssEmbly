@@ -592,10 +592,14 @@
             { ("FLPT_WFN", new OperandType[1] { OperandType.Pointer }), new Opcode(0x02, 0x83) },
 
             // Conversions
+            // FLPT_EXH (Extend Half Precision Float to Double Precision Float)
+            { ("FLPT_EXH", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x90) },
             // FLPT_EXS (Extend Single Precision Float to Double Precision Float)
-            { ("FLPT_EXS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x90) },
+            { ("FLPT_EXS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x91) },
             // FLPT_SHD (Shrink Double Precision Float to Single Precision Float)
-            { ("FLPT_SHD", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x91) },
+            { ("FLPT_SHS", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x92) },
+            // FLPT_SHH (Shrink Double Precision Float to Half Precision Float)
+            { ("FLPT_SHH", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0x93) },
 
             // FLPT_NEG (Floating Point Negation)
             { ("FLPT_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x02, 0xA0) },
