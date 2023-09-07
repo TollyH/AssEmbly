@@ -98,11 +98,22 @@ namespace AssEmbly
             using Stream stdout = Console.OpenStandardOutput();
             do
             {
-                Opcode opcode = Opcode.ParseBytes(Memory, ref Registers[(int)Register.rpo]);
+                byte extensionSet;
+                byte opcode;
+                if (Memory[Registers[(int)Register.rpo]] == 0xFF)
+                {
+                    extensionSet = Memory[++Registers[(int)Register.rpo]];
+                    opcode = Memory[++Registers[(int)Register.rpo]];
+                }
+                else
+                {
+                    extensionSet = 0x0;
+                    opcode = Memory[Registers[(int)Register.rpo]];
+                }
                 // Upper 4-bytes (general category of instruction)
-                byte opcodeHigh = (byte)((0xF0 & opcode.InstructionCode) >> 4);
+                byte opcodeHigh = (byte)((0xF0 & opcode) >> 4);
                 // Lower 4-bytes (specific operation and operand types)
-                byte opcodeLow = (byte)(0x0F & opcode.InstructionCode);
+                byte opcodeLow = (byte)(0x0F & opcode);
                 ulong operandStart = ++Registers[(int)Register.rpo];
 
                 // Local variables used to hold additional state information while executing instructions
@@ -120,7 +131,7 @@ namespace AssEmbly
                 double floatingMathend;
                 double floatingResult;
 
-                switch (opcode.ExtensionSet)
+                switch (extensionSet)
                 {
                     case 0x00:  // Base instruction set
                         switch (opcodeHigh)
@@ -2796,7 +2807,7 @@ namespace AssEmbly
                         }
                         break;
                     default:
-                        throw new InvalidOpcodeException($"{opcode.ExtensionSet:X} is not a recognised extension set");
+                        throw new InvalidOpcodeException($"{extensionSet:X} is not a recognised extension set");
                 }
             } while (runUntilHalt && !halt);
             return halt;
