@@ -749,14 +749,21 @@ namespace AssEmbly
         /// <summary>
         /// Parse a operand of literal type to its representation as bytes. 
         /// </summary>
-        /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
+        /// <remarks>
+        /// Integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/>.
+        /// Strings are also converted to UTF-8 bytes by this method,
+        /// though only strings that have already been pre-parsed and validated by <see cref="PreParseStringLiteral"/> should be passed.
+        /// </remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
+        /// <param name="parsedNumber">
+        /// The value of the numeric literal parsed by the method,
+        /// or the number of <see cref="char"/> contained in the given literal string if the literal was a string.
+        /// </param>
         /// <exception cref="SyntaxError">Thrown when a string literal is given in an invalid context or an invalid format.</exception>
         /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
         /// <exception cref="FormatException">Thrown when there are invalid characters in a numeric literal or the numeric literal is in an invalid format.</exception>
         public static byte[] ParseLiteral(string operand, bool allowString, out ulong parsedNumber)
         {
-            parsedNumber = 0;
             if (operand[0] == '"')
             {
                 if (!allowString)
@@ -768,6 +775,7 @@ namespace AssEmbly
                     throw new SyntaxError("String literal contains characters after closing quote mark.");
                 }
                 string str = operand[1..^1];
+                parsedNumber = (uint)str.Length;
                 return Encoding.UTF8.GetBytes(str);
             }
             operand = operand.ToLowerInvariant().Replace("_", "");
