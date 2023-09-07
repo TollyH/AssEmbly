@@ -147,6 +147,76 @@
             { new Opcode(0x01, 0x72), new int[] { 0 } },  // SIGN_EXD reg
 
             { new Opcode(0x01, 0x80), new int[] { 0 } },  // SIGN_NEG reg
+
+            // Floating point extension set
+
+            { new Opcode(0x02, 0x00), new int[] { 0 } },  // FLPT_ADD reg, reg
+            { new Opcode(0x02, 0x01), new int[] { 0 } },  // FLPT_ADD reg, lit
+            { new Opcode(0x02, 0x02), new int[] { 0 } },  // FLPT_ADD reg, adr
+            { new Opcode(0x02, 0x03), new int[] { 0 } },  // FLPT_ADD reg, ptr
+
+            { new Opcode(0x02, 0x10), new int[] { 0 } },  // FLPT_SUB reg, reg
+            { new Opcode(0x02, 0x11), new int[] { 0 } },  // FLPT_SUB reg, lit
+            { new Opcode(0x02, 0x12), new int[] { 0 } },  // FLPT_SUB reg, adr
+            { new Opcode(0x02, 0x13), new int[] { 0 } },  // FLPT_SUB reg, ptr
+
+            { new Opcode(0x02, 0x20), new int[] { 0 } },  // FLPT_MUL reg, reg
+            { new Opcode(0x02, 0x21), new int[] { 0 } },  // FLPT_MUL reg, lit
+            { new Opcode(0x02, 0x22), new int[] { 0 } },  // FLPT_MUL reg, adr
+            { new Opcode(0x02, 0x23), new int[] { 0 } },  // FLPT_MUL reg, ptr
+
+            { new Opcode(0x02, 0x30), new int[] { 0 } },  // FLPT_DIV reg, reg
+            { new Opcode(0x02, 0x31), new int[] { 0 } },  // FLPT_DIV reg, lit
+            { new Opcode(0x02, 0x32), new int[] { 0 } },  // FLPT_DIV reg, adr
+            { new Opcode(0x02, 0x33), new int[] { 0 } },  // FLPT_DIV reg, ptr
+            { new Opcode(0x02, 0x34), new int[] { 0, 1 } },  // FLPT_DVR reg, reg, reg
+            { new Opcode(0x02, 0x35), new int[] { 0, 1 } },  // FLPT_DVR reg, reg, lit
+            { new Opcode(0x02, 0x36), new int[] { 0, 1 } },  // FLPT_DVR reg, reg, adr
+            { new Opcode(0x02, 0x37), new int[] { 0, 1 } },  // FLPT_DVR reg, reg, ptr
+            { new Opcode(0x02, 0x38), new int[] { 0 } },  // FLPT_REM reg, reg
+            { new Opcode(0x02, 0x39), new int[] { 0 } },  // FLPT_REM reg, lit
+            { new Opcode(0x02, 0x3A), new int[] { 0 } },  // FLPT_REM reg, adr
+            { new Opcode(0x02, 0x3B), new int[] { 0 } },  // FLPT_REM reg, ptr
+
+            { new Opcode(0x02, 0x40), new int[] { 0 } },  // FLPT_SIN reg
+            { new Opcode(0x02, 0x41), new int[] { 0 } },  // FLPT_ASN reg
+            { new Opcode(0x02, 0x42), new int[] { 0 } },  // FLPT_COS reg
+            { new Opcode(0x02, 0x43), new int[] { 0 } },  // FLPT_ACS reg
+            { new Opcode(0x02, 0x44), new int[] { 0 } },  // FLPT_TAN reg
+            { new Opcode(0x02, 0x45), new int[] { 0 } },  // FLPT_ATN reg
+            { new Opcode(0x02, 0x46), new int[] { 0 } },  // FLPT_PTN reg, reg
+            { new Opcode(0x02, 0x47), new int[] { 0 } },  // FLPT_PTN reg, lit
+            { new Opcode(0x02, 0x48), new int[] { 0 } },  // FLPT_PTN reg, adr
+            { new Opcode(0x02, 0x49), new int[] { 0 } },  // FLPT_PTN reg, ptr
+
+            { new Opcode(0x02, 0x50), new int[] { 0 } },  // FLPT_POW reg, reg
+            { new Opcode(0x02, 0x51), new int[] { 0 } },  // FLPT_POW reg, lit
+            { new Opcode(0x02, 0x52), new int[] { 0 } },  // FLPT_POW reg, adr
+            { new Opcode(0x02, 0x53), new int[] { 0 } },  // FLPT_POW reg, ptr
+
+            { new Opcode(0x02, 0x60), new int[] { 0 } },  // FLPT_LOG reg, reg
+            { new Opcode(0x02, 0x61), new int[] { 0 } },  // FLPT_LOG reg, lit
+            { new Opcode(0x02, 0x62), new int[] { 0 } },  // FLPT_LOG reg, adr
+            { new Opcode(0x02, 0x63), new int[] { 0 } },  // FLPT_LOG reg, ptr
+
+            { new Opcode(0x02, 0x90), new int[] { 0 } },  // FLPT_EXH reg
+            { new Opcode(0x02, 0x91), new int[] { 0 } },  // FLPT_EXS reg
+            { new Opcode(0x02, 0x92), new int[] { 0 } },  // FLPT_SHS reg
+            { new Opcode(0x02, 0x93), new int[] { 0 } },  // FLPT_SHH reg
+
+            { new Opcode(0x02, 0xA0), new int[] { 0 } },  // FLPT_NEG reg
+
+            { new Opcode(0x02, 0xB0), new int[] { 0 } },  // FLPT_UTF reg
+            { new Opcode(0x02, 0xB1), new int[] { 0 } },  // FLPT_STF reg
+
+            { new Opcode(0x02, 0xC0), new int[] { 0 } },  // FLPT_FTS reg
+            { new Opcode(0x02, 0xC1), new int[] { 0 } },  // FLPT_FCS reg
+            { new Opcode(0x02, 0xC2), new int[] { 0 } },  // FLPT_FFS reg
+            { new Opcode(0x02, 0xC3), new int[] { 0 } },  // FLPT_FNS reg
+
+            // Extended base set
+
+            { new Opcode(0x03, 0x00), new int[] { 0 } },  // EXTD_BSW reg
         };
         /// <summary>
         /// Every opcode that writes to a literal memory location.
@@ -214,6 +284,19 @@
             { new Opcode(0x01, 0x56), 0 },  // SIGN_WCB adr
             { new Opcode(0x01, 0x62), 0 },  // SIGN_WFN adr
             { new Opcode(0x01, 0x66), 0 },  // SIGN_WFB adr
+
+            { new Opcode(0x02, 0x02), 1 },  // FLPT_ADD reg, adr
+            { new Opcode(0x02, 0x12), 1 },  // FLPT_SUB reg, adr
+            { new Opcode(0x02, 0x22), 1 },  // FLPT_MUL reg, adr
+            { new Opcode(0x02, 0x32), 1 },  // FLPT_DIV reg, adr
+            { new Opcode(0x02, 0x36), 2 },  // FLPT_DVR reg, reg, adr
+            { new Opcode(0x02, 0x3A), 1 },  // FLPT_REM reg, adr
+            { new Opcode(0x02, 0x48), 1 },  // FLPT_PTN reg, adr
+            { new Opcode(0x02, 0x52), 1 },  // FLPT_POW reg, adr
+            { new Opcode(0x02, 0x62), 1 },  // FLPT_LOG reg, adr
+            { new Opcode(0x02, 0x72), 0 },  // FLPT_WCN adr
+            { new Opcode(0x02, 0x82), 0 },  // FLPT_WFN adr
+            { new Opcode(0x02, 0xD2), 1 },  // FLPT_CMP reg, adr
         };
 
         /// <summary>
@@ -325,6 +408,10 @@
             { new Opcode(0x01, 0x11), 1 },
             { new Opcode(0x01, 0x15), 2 },
             { new Opcode(0x01, 0x19), 1 },
+
+            { new Opcode(0x02, 0x31), 1 },
+            { new Opcode(0x02, 0x35), 2 },
+            { new Opcode(0x02, 0x39), 1 },
         };
 
         /// <summary>
