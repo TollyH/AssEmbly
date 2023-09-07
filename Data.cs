@@ -505,7 +505,7 @@
             // SIGN_EXD (Extend Signed Double Word to Signed Quad Word)
             { ("SIGN_EXD", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x72) },
 
-            // SIGN_NEG (Two's Compliment Negation)
+            // SIGN_NEG (Two's Complement Negation)
             { ("SIGN_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x80) },
 
             // FLOATING POINT EXTENSION SET
