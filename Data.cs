@@ -108,6 +108,7 @@
         {
             { 0x01, AAPFeatures.ExtensionSigned },
             { 0x02, AAPFeatures.ExtensionFloat },
+            { 0x03, AAPFeatures.ExtensionExtendedBase },
         };
 
         /// <summary>
@@ -623,6 +624,11 @@
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0xD1) },  // (reg - lit)
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0xD2) },  // (reg - adr)
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0xD3) },  // (reg - ptr)
+
+            // EXTENDED BASE SET
+
+            // EXTD_BSW (Reverse Byte Order)
+            { ("EXTD_BSW", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x00) },
         };
     }
 }

@@ -2775,6 +2775,26 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the floating point extension set");
                         }
                         break;
+                    case 0x3:  // Extended base set
+                        switch (opcodeHigh)
+                        {
+                            case 0x0:  // Byte swap
+                                initial = ReadMemoryRegister(operandStart);
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // EXTD_BSW reg
+                                        result = BinaryPrimitives.ReverseEndianness(initial);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised extended base set byte swap low opcode");
+                                }
+                                WriteMemoryRegister(operandStart, result);
+                                break;
+                            default:
+                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the extended base set");
+                        }
+                        break;
                     default:
                         throw new InvalidOpcodeException($"{opcode.ExtensionSet:X} is not a recognised extension set");
                 }

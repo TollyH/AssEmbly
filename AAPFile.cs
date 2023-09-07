@@ -9,8 +9,9 @@ namespace AssEmbly
         V1CallStack = 0b1,
         ExtensionSigned = 0b10,
         ExtensionFloat = 0b100,
+        ExtensionExtendedBase = 0b1000,
 
-        All = 0b111,
+        All = 0b1111,
         Incompatible = ~All
     }
 
