@@ -219,6 +219,13 @@ namespace AssEmbly
                 { 0016, Analyzer_Rolling_Warning_0016 },
                 { 0017, Analyzer_Rolling_Warning_0017 },
                 { 0018, Analyzer_Rolling_Warning_0018 },
+                { 0019, Analyzer_Rolling_Warning_0019 },
+                { 0020, Analyzer_Rolling_Warning_0020 },
+                { 0021, Analyzer_Rolling_Warning_0021 },
+                { 0022, Analyzer_Rolling_Warning_0022 },
+                { 0023, Analyzer_Rolling_Warning_0023 },
+                { 0024, Analyzer_Rolling_Warning_0024 },
+                { 0025, Analyzer_Rolling_Warning_0025 },
             };
             suggestionRollingAnalyzers = new()
             {
@@ -232,6 +239,8 @@ namespace AssEmbly
                 { 0010, Analyzer_Rolling_Suggestion_0010 },
                 { 0011, Analyzer_Rolling_Suggestion_0011 },
                 { 0012, Analyzer_Rolling_Suggestion_0012 },
+                { 0013, Analyzer_Rolling_Suggestion_0013 },
+                { 0014, Analyzer_Rolling_Suggestion_0014 },
             };
 
             nonFatalErrorFinalAnalyzers = new();
@@ -621,6 +630,67 @@ namespace AssEmbly
             return isEntry && instructionIsImport;
         }
 
+        private bool Analyzer_Rolling_Warning_0019()
+        {
+            // Warning 0019: Signed literal given to an instruction that expects an unsigned literal.
+            return newBytes.Length > 0 && !instructionIsData && !signedLiteralAccepting.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] != ':' && o[0] == '-');
+        }
+
+        private bool Analyzer_Rolling_Warning_0020()
+        {
+            // Warning 0020: Floating point literal given to an instruction that expects an integer literal.
+            return newBytes.Length > 0 && !instructionIsData && !floatLiteralAccepting.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] != ':' && o.Contains('.'));
+        }
+
+        private bool Analyzer_Rolling_Warning_0021()
+        {
+            // Warning 0021: Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point.
+            return newBytes.Length > 0 && !instructionIsData && floatLiteralOnly.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] != ':' && !o.Contains('.'));
+        }
+
+        private bool Analyzer_Rolling_Warning_0022()
+        {
+            // Warning 0022: Value is too large for a signed instruction. This positive value will overflow into a negative one.
+            if (newBytes.Length > 0 && !instructionIsData && signedLiteralOnly.Contains(instructionOpcode))
+            {
+                foreach (string operand in operands)
+                {
+                    if (Assembler.DetermineOperandType(operand) == OperandType.Literal && operand[0] != ':')
+                    {
+                        _ = Assembler.ParseLiteral(operand, false, out ulong number);
+                        if (number > long.MaxValue)
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool Analyzer_Rolling_Warning_0023()
+        {
+            // Warning 0023: Addresses are unsigned, however this operation is signed.
+            return newBytes.Length > 0 && !instructionIsData && signedLiteralOnly.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] == ':');
+        }
+
+        private bool Analyzer_Rolling_Warning_0024()
+        {
+            // Warning 0024: Addresses are integers, however this operation is floating point.
+            return newBytes.Length > 0 && !instructionIsData && floatLiteralOnly.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] == ':');
+        }
+
+        private bool Analyzer_Rolling_Warning_0025()
+        {
+            // Warning 0025: Use of an extension instruction when assembling to v1 format.
+            return usingV1Format && newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0xFF;
+        }
+
         private bool Analyzer_Rolling_Suggestion_0001()
         {
             // Suggestion 0001: Avoid use of NOP instruction.
@@ -791,6 +861,20 @@ namespace AssEmbly
                 return number == 0;
             }
             return false;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0013()
+        {
+            // Suggestion 0013: Use `DEC {reg}` instead of `ADD {reg}, -1`, as it results in less bytes.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x11) && operands[1][0] != ':'
+                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0014()
+        {
+            // Suggestion 0014: Use `INC {reg}` instead of `SUB {reg}, -1`, as it results in less bytes.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
+                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
         }
     }
 }

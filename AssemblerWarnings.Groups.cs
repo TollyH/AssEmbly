@@ -472,5 +472,113 @@
             { new Opcode(0x01, 0x42), (uint.MaxValue, int.MinValue) },
             { new Opcode(0x01, 0x43), (uint.MaxValue, int.MinValue) },
         };
+
+        /// <summary>
+        /// All opcodes that can operate as intended when given signed integer literals as an operand
+        /// </summary>
+        internal static readonly HashSet<Opcode> signedLiteralAccepting = new()
+        {
+            new Opcode(0x00, 0x11),  // ADD reg, lit
+            new Opcode(0x00, 0x21),  // SUB reg, lit
+            new Opcode(0x00, 0x31),  // MUL reg, lit
+            new Opcode(0x00, 0x51),  // SHL reg, lit
+            new Opcode(0x00, 0x55),  // SHR reg, lit
+            new Opcode(0x00, 0x61),  // AND reg, lit
+            new Opcode(0x00, 0x65),  // ORR reg, lit
+            new Opcode(0x00, 0x69),  // XOR reg, lit
+            new Opcode(0x00, 0x71),  // TST reg, lit
+            new Opcode(0x00, 0x75),  // CMP reg, lit
+            new Opcode(0x00, 0x81),  // MVB reg, lit
+            new Opcode(0x00, 0x85),  // MVB adr, lit
+            new Opcode(0x00, 0x87),  // MVB ptr, lit
+            new Opcode(0x00, 0x89),  // MVW reg, lit
+            new Opcode(0x00, 0x8D),  // MVW adr, lit
+            new Opcode(0x00, 0x8F),  // MVW ptr, lit
+            new Opcode(0x00, 0x91),  // MVD reg, lit
+            new Opcode(0x00, 0x95),  // MVD adr, lit
+            new Opcode(0x00, 0x97),  // MVD ptr, lit
+            new Opcode(0x00, 0x99),  // MVQ reg, lit
+            new Opcode(0x00, 0x9D),  // MVQ adr, lit
+            new Opcode(0x00, 0x9F),  // MVQ ptr, lit
+            new Opcode(0x00, 0xA1),  // PSH lit
+            new Opcode(0x00, 0xB3),  // CAL adr, lit
+            new Opcode(0x00, 0xB7),  // CAL ptr, lit
+            new Opcode(0x00, 0xBC),  // RET lit
+            new Opcode(0x00, 0xC9),  // WCX lit
+            new Opcode(0x00, 0xD9),  // WFX lit
+
+            new Opcode(0x01, 0x11),  // SIGN_DIV reg, lit
+            new Opcode(0x01, 0x15),  // SIGN_DVR reg, lit
+            new Opcode(0x01, 0x19),  // SIGN_REM reg, lit
+            new Opcode(0x01, 0x21),  // SIGN_SHR reg, lit
+            new Opcode(0x01, 0x31),  // SIGN_MVB reg, lit
+            new Opcode(0x01, 0x35),  // SIGN_MVW reg, lit
+            new Opcode(0x01, 0x41),  // SIGN_MVD reg, lit
+            new Opcode(0x01, 0x51),  // SIGN_WCN lit
+            new Opcode(0x01, 0x55),  // SIGN_WCB lit
+            new Opcode(0x01, 0x61),  // SIGN_WFN lit
+            new Opcode(0x01, 0x65),  // SIGN_WFB lit
+        };
+        /// <summary>
+        /// All opcodes that can only operate as intended when given literals within the range of a signed 64-bit integer as an operand
+        /// </summary>
+        internal static readonly HashSet<Opcode> signedLiteralOnly = new()
+        {
+            new Opcode(0x01, 0x11),  // SIGN_DIV reg, lit
+            new Opcode(0x01, 0x15),  // SIGN_DVR reg, lit
+            new Opcode(0x01, 0x19),  // SIGN_REM reg, lit
+            new Opcode(0x01, 0x21),  // SIGN_SHR reg, lit
+            new Opcode(0x01, 0x31),  // SIGN_MVB reg, lit
+            new Opcode(0x01, 0x35),  // SIGN_MVW reg, lit
+            new Opcode(0x01, 0x41),  // SIGN_MVD reg, lit
+            new Opcode(0x01, 0x51),  // SIGN_WCN lit
+            new Opcode(0x01, 0x55),  // SIGN_WCB lit
+            new Opcode(0x01, 0x61),  // SIGN_WFN lit
+            new Opcode(0x01, 0x65),  // SIGN_WFB lit
+        };
+        /// <summary>
+        /// All opcodes that can operate as intended when given floating point literals as an operand
+        /// </summary>
+        internal static readonly HashSet<Opcode> floatLiteralAccepting = new()
+        {
+            new Opcode(0x00, 0x99),  // MVQ reg, lit
+            new Opcode(0x00, 0x9D),  // MVQ adr, lit
+            new Opcode(0x00, 0x9F),  // MVQ ptr, lit
+            new Opcode(0x00, 0xA1),  // PSH lit
+            new Opcode(0x00, 0xB3),  // CAL adr, lit
+            new Opcode(0x00, 0xB7),  // CAL ptr, lit
+            new Opcode(0x00, 0xBC),  // RET lit
+
+            new Opcode(0x02, 0x01),  // FLPT_ADD reg, lit
+            new Opcode(0x02, 0x11),  // FLPT_SUB reg, lit
+            new Opcode(0x02, 0x21),  // FLPT_MUL reg, lit
+            new Opcode(0x02, 0x31),  // FLPT_DIV reg, lit
+            new Opcode(0x02, 0x35),  // FLPT_DVR reg, lit
+            new Opcode(0x02, 0x39),  // FLPT_REM reg, lit
+            new Opcode(0x02, 0x47),  // FLPT_PTN reg, lit
+            new Opcode(0x02, 0x51),  // FLPT_POW reg, lit
+            new Opcode(0x02, 0x61),  // FLPT_LOG reg, lit
+            new Opcode(0x02, 0x71),  // FLPT_WCN reg, lit
+            new Opcode(0x02, 0x81),  // FLPT_WFN reg, lit
+            new Opcode(0x02, 0xD1),  // FLPT_CMP reg, lit
+        };
+        /// <summary>
+        /// All opcodes that can only operate as intended when given floating point literals as an operand
+        /// </summary>
+        internal static readonly HashSet<Opcode> floatLiteralOnly = new()
+        {
+            new Opcode(0x02, 0x01),  // FLPT_ADD reg, lit
+            new Opcode(0x02, 0x11),  // FLPT_SUB reg, lit
+            new Opcode(0x02, 0x21),  // FLPT_MUL reg, lit
+            new Opcode(0x02, 0x31),  // FLPT_DIV reg, lit
+            new Opcode(0x02, 0x35),  // FLPT_DVR reg, lit
+            new Opcode(0x02, 0x39),  // FLPT_REM reg, lit
+            new Opcode(0x02, 0x47),  // FLPT_PTN reg, lit
+            new Opcode(0x02, 0x51),  // FLPT_POW reg, lit
+            new Opcode(0x02, 0x61),  // FLPT_LOG reg, lit
+            new Opcode(0x02, 0x71),  // FLPT_WCN reg, lit
+            new Opcode(0x02, 0x81),  // FLPT_WFN reg, lit
+            new Opcode(0x02, 0xD1),  // FLPT_CMP reg, lit
+        };
     }
 }

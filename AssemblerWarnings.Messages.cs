@@ -29,6 +29,13 @@
             { 0016, "Addresses are 64-bit values, however this move instruction moves less than 64 bits." },
             { 0017, "Entry point points to data, not executable code." },
             { 0018, "Entry point points to an import." },
+            { 0019, "Signed literal given to an instruction that expects an unsigned literal." },
+            { 0020, "Floating point literal given to an instruction that expects an integer literal." },
+            { 0021, "Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point." },
+            { 0022, "Value is too large for a signed instruction. This positive value will overflow into a negative one." },
+            { 0023, "Addresses are unsigned, however this operation is signed." },
+            { 0024, "Addresses are integers, however this operation is floating point." },
+            { 0025, "Use of an extension instruction when assembling to v1 format." },
         };
 
         public static readonly Dictionary<int, string> SuggestionMessages = new()
@@ -45,6 +52,8 @@
             { 0010, "Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {1}, {1}` instead." },
             { 0011, "Remove leading 0 digits from denary number." },
             { 0012, "Remove useless `PAD 0` directive." },
+            { 0013, "Use `DEC {1}` instead of `ADD {1}, -1`, as it results in less bytes." },
+            { 0014, "Use `INC {1}` instead of `SUB {1}, -1`, as it results in less bytes." },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)
