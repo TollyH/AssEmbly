@@ -633,8 +633,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0019()
         {
             // Warning 0019: Signed literal given to an instruction that expects an unsigned literal.
-            return newBytes.Length > 0 && !instructionIsData && !signedLiteralAccepting.Contains(instructionOpcode)
-                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] != ':' && o[0] == '-');
+            return newBytes.Length > 0 && !instructionIsData && !signedLiteralAccepting.Contains(instructionOpcode) && !floatLiteralOnly.Contains(instructionOpcode)
+                && operands.Any(o => Assembler.DetermineOperandType(o) == OperandType.Literal && o[0] != ':' && o[0] == '-' && !o.Contains('.'));
         }
 
         private bool Analyzer_Rolling_Warning_0020()
