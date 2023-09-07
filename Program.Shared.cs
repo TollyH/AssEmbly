@@ -5,7 +5,7 @@
         public static readonly ulong DefaultMemorySize = 2046;
 
         // Shared methods that are used by multiple commands
-        public static AAPFile? LoadAAPFile(string appPath)
+        public static AAPFile? LoadAAPFile(string appPath, bool ignoreNewerVersion)
         {
             AAPFile file;
             try
@@ -30,18 +30,28 @@
                 Environment.Exit(1);
                 return null;
             }
-            if (file.LanguageVersion > (version ?? new Version()))
+            if (!ignoreNewerVersion && file.LanguageVersion > (version ?? new Version()))
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
                     $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
                     $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
                 Console.ResetColor();
+                if (file.LanguageVersion.Major > version?.Major)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"Because the major release number is higher ({file.LanguageVersion.Major} > {version?.Major}), " +
+                        "this program will not be executed. Use the --ignore-newer-version parameter to override this.");
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                    return null;
+                }
             }
             return file;
         }
 
-        public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize, bool useV1Format, bool useV1CallStack)
+        public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize,
+            bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion)
         {
             byte[] program;
             Processor processor;
@@ -52,7 +62,7 @@
             }
             else
             {
-                AAPFile? file = LoadAAPFile(appPath);
+                AAPFile? file = LoadAAPFile(appPath, ignoreNewerVersion);
                 if (file is null)
                 {
                     return null;

@@ -212,7 +212,8 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor? processor = LoadExecutableToProcessor(appPath, memSize, args.Contains("--v1-format"), args.Contains("--v1-call-stack"));
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
+                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
             if (processor is null)
             {
                 return;
@@ -266,7 +267,8 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor? processor = LoadExecutableToProcessor(appPath, memSize, args.Contains("--v1-format"), args.Contains("--v1-call-stack"));
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
+                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
             if (processor is null)
             {
                 return;
@@ -298,7 +300,7 @@ namespace AssEmbly
             }
             else
             {
-                AAPFile? file = LoadAAPFile(sourcePath);
+                AAPFile? file = LoadAAPFile(sourcePath, args.Contains("--ignore-newer-version"));
                 if (file is null)
                 {
                     return;
@@ -394,23 +396,22 @@ namespace AssEmbly
             Console.WriteLine();
             Console.WriteLine("execute - Execute an already assembled executable file");
             Console.WriteLine("    Usage: 'AssEmbly execute <file-path> [options]'");
-            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
+            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
             Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack");
-            Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
+            Console.WriteLine("    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.");
             Console.WriteLine();
             Console.WriteLine("run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.");
             Console.WriteLine("    Usage: 'AssEmbly run <file-path> [options]'");
-            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
+            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
-            Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine();
             Console.WriteLine("debug - Step through an assembled executable file, pausing before each instruction begins execution.");
             Console.WriteLine("    Usage: 'AssEmbly debug <file-path> [debug-info-file-path] [options]'");
-            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes.");
+            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
             Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack");
-            Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
+            Console.WriteLine("    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.");
             Console.WriteLine("    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.");
             Console.WriteLine();
             Console.WriteLine("disassemble - Generate an AssEmbly program listing from an already assembled executable.");
@@ -418,12 +419,13 @@ namespace AssEmbly
             Console.WriteLine("    --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes");
             Console.WriteLine("    --no-pads - Don't attempt to locate uses of the PAD directive; keep them as chains of HLT");
             Console.WriteLine("    --v1-format - Specifies that the given executable uses the v1.x.x header-less format.");
+            Console.WriteLine("    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.");
             Console.WriteLine();
             Console.WriteLine("repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions.");
             Console.WriteLine("    Usage: 'AssEmbly repl [options]'");
-            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the REPL in bytes.");
+            Console.WriteLine("    --mem-size=2046 - Sets the total size of memory available to the REPL in bytes. Memory size will be 2046 bytes if parameter is not given.");
             Console.WriteLine("    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.");
-            Console.WriteLine("    Memory size will be 2046 bytes if parameter is not given.");
+            Console.WriteLine("    ");
             Console.WriteLine();
         }
     }
