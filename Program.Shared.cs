@@ -148,15 +148,8 @@
                     : e is DivideByZeroException
                         ? "An instruction attempted to divide by zero."
                         : "An instruction tried to access an invalid memory address.";
-                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}\nRegister states:");
-                if (processor is not null)
-                {
-                    foreach (int register in Enum.GetValues(typeof(Register)))
-                    {
-                        ulong value = processor.Registers[register];
-                        Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
-                    }
-                }
+                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}");
+                PrintRegisterStates(processor);
             }
             else
             {
@@ -189,6 +182,37 @@
                 Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
             }
             Console.ResetColor();
+        }
+
+        public static void PrintRegisterStates(Processor processor)
+        {
+            Console.WriteLine("Register states:");
+            foreach (int register in Enum.GetValues(typeof(Register)))
+            {
+                ulong value = processor.Registers[register];
+                Console.Write($"    {Enum.GetName((Register)register)}: {value}");
+                if (value != 0)
+                {
+                    if (value >= 10)
+                    {
+                        Console.Write($" (0x{value:X})");
+                    }
+                    if ((value & Processor.SignBit) != 0)
+                    {
+                        Console.Write($" ({(long)value})");
+                    }
+                    else
+                    {
+                        Console.Write($" (0b{Convert.ToString((long)value, 2)})");
+                    }
+                    // >= ' ' and <= '~'
+                    if (value is >= 32 and <= 126)
+                    {
+                        Console.Write($" ('{(char)value}')");
+                    }
+                }
+                Console.WriteLine();
+            }
         }
     }
 }

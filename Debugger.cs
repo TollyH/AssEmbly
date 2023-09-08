@@ -98,12 +98,7 @@ namespace AssEmbly
                 Console.Write("\n\n");
             }
 
-            Console.WriteLine("Register states:");
-            foreach (int register in Enum.GetValues(typeof(Register)))
-            {
-                ulong value = DebuggingProcessor.Registers[register];
-                Console.WriteLine($"    {Enum.GetName((Register)register)}: {value} (0x{value:X}) (0b{Convert.ToString((long)value, 2)})");
-            }
+            Program.PrintRegisterStates(DebuggingProcessor);
 
             StatusFlags statusFlags = (StatusFlags)DebuggingProcessor.Registers[(int)Register.rsf];
             Console.Write("Flags:");
