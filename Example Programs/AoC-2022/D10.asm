@@ -66,7 +66,7 @@ HLT
 :FUNC_INCREMENT_CYCLE
 ; Takes increment amount as fast pass parameter
 ; rg0 - loop counter
-; rg7 - absolute difference between x and screen x
+; rg7 - difference between x and screen x
 ; rg8 - screen x value
 ; rg9 - cycle check value / new signal strength
 PSH rg0
@@ -82,14 +82,10 @@ MVQ rg8, rg2
 REM rg8, 40
 MVQ rg7, rg8
 SUB rg7, rg1
-JNC :NOT_NEGATIVE
-CMP rg1, 1000000000  ; x is probably 'negative' if larger than this, so we want check to be inverted
-JGT :NOT_NEGATIVE
-NOT rg7
-ICR rg7
-:NOT_NEGATIVE
 CMP rg7, 2
-JGE :PIXEL_OFF
+SIGN_JGE :PIXEL_OFF
+CMP rg7, -2
+SIGN_JLE :PIXEL_OFF
 MVB *rg4, 35  ; '#'
 ADD rg4, 3
 JMP :NEWLINE_INSERTION_CHECK

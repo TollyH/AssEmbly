@@ -56,24 +56,10 @@ CMP rg0, MagicBytes
 JNE :QOI_DECODE_EXIT
 
 ; Width (stored in big endian)
-MVB rg0, *rfp
-SHL rg0, 24
-MVB rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-SHL rg0, 16
-ORR rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-SHL rg0, 8
-ORR rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-ORR rg4, rg0
-ICR rfp
+MVD rg4, *rfp
+SHL rg4, 32
+EXTD_BSW rg4
+ADD rfp, 4
 
 MVD *rg1, rg4
 ADD rg1, 4
@@ -81,24 +67,10 @@ ADD rg1, 4
 PSH rg4
 
 ; Height (stored in big endian)
-MVB rg0, *rfp
-SHL rg0, 24
-MVB rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-SHL rg0, 16
-ORR rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-SHL rg0, 8
-ORR rg4, rg0
-ICR rfp
-
-MVB rg0, *rfp
-ORR rg4, rg0
-ICR rfp
+MVD rg4, *rfp
+SHL rg4, 32
+EXTD_BSW rg4
+ADD rfp, 4
 
 MVD *rg1, rg4
 ADD rg1, 4

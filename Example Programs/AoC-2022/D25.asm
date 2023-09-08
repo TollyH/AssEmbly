@@ -24,13 +24,11 @@ MVQ rg2, :&LINE_STORE
 MVB rg3, *rg2
 
 ; Raise 5 to the power of current digit place
+MVQ rg5, 5.0
 MVQ rg4, rg1
-MVQ rg5, 1
-:POWER_LOOP
-DCR rg4
-MUL rg5, 5
-TST rg4, rg4
-JNZ :POWER_LOOP
+FLPT_UTF rg4
+FLPT_POW rg5, rg4
+FLPT_FTS rg5
 
 ; Determine digit value and add to total
 CMP rg3, 50  ; '2'
@@ -50,10 +48,10 @@ JMP :BASE_CHECK_END
 :DIGIT_DASH_CHECK
 CMP rg3, 45  ; '-'
 JNE :DIGIT_EQUALS_CHECK
-MVQ rg6, 18446744073709551615  ; -1 unsigned equivalent
+MVQ rg6, -1
 JMP :BASE_CHECK_END
 :DIGIT_EQUALS_CHECK
-MVQ rg6, 18446744073709551614  ; -2 unsigned equivalent
+MVQ rg6, -2
 :BASE_CHECK_END
 MUL rg5, rg6
 ADD rg0, rg5
@@ -75,8 +73,8 @@ XOR rg1, rg1
 :TO_SNAFU_LOOP
 MVQ rg7, rg0
 REM rg7, 5
-CMP rg7, 0
-JNE :MOD_ONE_CHECK
+TST rg7, rg7
+JNZ :MOD_ONE_CHECK
 PSH 48  ; '0'
 DIV rg0, 5
 JMP :MOD_CHECK_END
@@ -84,7 +82,7 @@ JMP :MOD_CHECK_END
 CMP rg7, 1
 JNE :MOD_TWO_CHECK
 PSH 49  ; '1'
-SUB rg0, 1
+DCR rg0
 DIV rg0, 5
 JMP :MOD_CHECK_END
 :MOD_TWO_CHECK
@@ -103,18 +101,18 @@ DIV rg0, 5
 JMP :MOD_CHECK_END
 :MOD_FOUR_CHECK
 PSH 45  ; '-'
-ADD rg0, 1
+ICR rg0
 DIV rg0, 5
 :MOD_CHECK_END
 ICR rg1
-CMP rg0, 0
-JEQ :PRINT_RESULT
+TST rg0, rg0
+JZO :PRINT_RESULT
 JMP :TO_SNAFU_LOOP
 
 :PRINT_RESULT
 DCR rg1
-CMP rg1, 0
-JGT :WRITE
+TST rg1, rg1
+JNZ :WRITE
 HLT
 :WRITE
 POP rg8

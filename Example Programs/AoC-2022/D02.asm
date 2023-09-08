@@ -22,6 +22,7 @@ MVQ rg5, rg1
 DCR rg4
 SUB rg5, rg4
 ; Add 3 to prevent negatives while keeping MOD result the same
+; (AssEmbly SIGN_REM finds the remainder, not modulo, so this saves implementing a MOD function)
 ADD rg4, 3
 ADD rg5, 3
 REM rg5, 3
@@ -36,6 +37,7 @@ MVQ rg5, rg1
 DCR rg4
 ADD rg5, rg4
 ; Add 3 to prevent negatives while keeping MOD result the same
+; (AssEmbly SIGN_REM finds the remainder, not modulo, so this saves implementing a MOD function)
 ADD rg4, 3
 ADD rg5, 3
 REM rg5, 3
