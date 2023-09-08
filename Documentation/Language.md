@@ -74,6 +74,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
   - [Text Encoding](#text-encoding)
   - [Full Instruction Reference](#full-instruction-reference)
     - [Base Instruction Set](#base-instruction-set)
+    - [Signed Extension Set](#signed-extension-set)
   - [ASCII Table](#ascii-table)
 
 ## Technical Information
@@ -1828,6 +1829,84 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | **Reading** |||||
 | `RCC` | Read Raw Byte from Console | Register | Read a raw byte from the console, storing it in a register | `0xF0` |
 | `RFC` | Read Raw Byte from File | Register | Read the next byte from the currently open file, storing it in a register | `0xF1` |
+
+### Signed Extension Set
+
+Extension set number `0x01`, opcodes start with `0xFF, 0x01`.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code |
+|----------|-----------|----------|----------|------------------|
+| **Signed Conditional Jumps** |||||
+| `SIGN_JLT` | Jump if Less Than | Address | Jump to an address in a label only if the sign and overflow status flags are different | `0x00` |
+| `SIGN_JLT` | Jump if Less Than | Pointer | Jump to an address in a register only if the sign and overflow status flags are different | `0x01` |
+| `SIGN_JLE` | Jump if Less Than or Equal To | Address | Jump to an address in a label only if the sign and overflow status flags are different or the zero status flag is set | `0x02` |
+| `SIGN_JLE` | Jump if Less Than or Equal To | Pointer | Jump to an address in a register only if the sign and overflow status flags are different or the zero status flag is set | `0x03` |
+| `SIGN_JGT` | Jump if Greater Than | Address | Jump to an address in a label only if the sign and overflow status flags are the same and the zero status flag is unset | `0x04` |
+| `SIGN_JGT` | Jump if Greater Than | Pointer | Jump to an address in a register only if the sign and overflow status flags are the same and the zero status flag is unset | `0x05` |
+| `SIGN_JGE` | Jump if Greater Than or Equal To | Address | Jump to an address in a label only if the sign and overflow status flags are the same | `0x06` |
+| `SIGN_JGE` | Jump if Greater Than or Equal To | Pointer | Jump to an address in a register only if the sign and overflow status flags are the same | `0x07` |
+| `SIGN_JSI` | Jump if Signed | Address | Jump to an address in a label only if the sign status flag is set | `0x08` |
+| `SIGN_JSI` | Jump if Signed | Pointer | Jump to an address in a register only if the sign status flag is set | `0x09` |
+| `SIGN_JNS` | Jump if not Signed | Address | Jump to an address in a label only if the sign status flag is unset | `0x0A` |
+| `SIGN_JNS` | Jump if not Signed | Pointer | Jump to an address in a register only the sign status flag is unset | `0x0B` |
+| `SIGN_JOV` | Jump if Overflow | Address | Jump to an address in a label only if the overflow status flag is set | `0x0C` |
+| `SIGN_JOV` | Jump if Overflow | Pointer | Jump to an address in a register only if the overflow status flag is set | `0x0D` |
+| `SIGN_JNO` | Jump if not Overflow | Address | Jump to an address in a label only if the overflow status flag is unset | `0x0E` |
+| `SIGN_JNO` | Jump if not Overflow | Pointer | Jump to an address in a register only if the overflow status flag is unset | `0x0F` |
+| **Math** |||||
+| `SIGN_DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x10` |
+| `SIGN_DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x11` |
+| `SIGN_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address in a label, discarding the remainder | `0x12` |
+| `SIGN_DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x13` |
+| `SIGN_DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x14` |
+| `SIGN_DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x15` |
+| `SIGN_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address in a label, storing the remainder | `0x16` |
+| `SIGN_DVR` | Divide With Remainder | Register, Register, Pointer | Divide a register by the contents of memory at an address in a register, storing the remainder | `0x17` |
+| `SIGN_REM` | Remainder Only | Register, Register | Divide the contents of one register by another, storing only the remainder | `0x18` |
+| `SIGN_REM` | Remainder Only | Register, Literal | Divide the contents of a register by a literal value, storing only the remainder | `0x19` |
+| `SIGN_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address in a label, storing only the remainder | `0x1A` |
+| `SIGN_REM` | Remainder Only | Register, Pointer | Divide a register by the contents of memory at an address in a register, storing only the remainder | `0x1B` |
+| `SIGN_SHR` | Arithmetic Shift Right | Register, Register | Shift the bits of one register right by another register, preserving the sign of the original value | `0x20` |
+| `SIGN_SHR` | Arithmetic Shift Right | Register, Literal | Shift the bits of a register right by a literal value, preserving the sign of the original value | `0x21` |
+| `SIGN_SHR` | Arithmetic Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address in a label, preserving the sign of the original value | `0x22` |
+| `SIGN_SHR` | Arithmetic Shift Right | Register, Pointer | Shift the bits of a register right by the contents of memory at an address in a register, preserving the sign of the original value | `0x23` |
+| **Sign-Extending Data Moves** |||||
+| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Register | Move the lower 8-bits of one register to another, extending the resulting value to a signed 64-bit value | `0x30` |
+| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Literal | Move the lower 8-bits of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x31` |
+| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Address | Move 8-bits of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x32` |
+| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Pointer | Move 8-bits of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x33` |
+| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Register | Move the lower 16-bits (2 bytes) of one register to another, extending the resulting value to a signed 64-bit value | `0x34` |
+| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Literal | Move the lower 16-bits (2 bytes) of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x35` |
+| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Address | Move 16-bits (2 bytes) of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x36` |
+| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Pointer | Move 16-bits (2 bytes) of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x37` |
+| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Register | Move the lower 32-bits (4 bytes) of one register to another, extending the resulting value to a signed 64-bit value | `0x40` |
+| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Literal | Move the lower 32-bits (4 bytes) of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x41` |
+| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Address | Move 32-bits (4 bytes) of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x42` |
+| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Pointer | Move 32-bits (4 bytes) of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x43` |
+| **Console Writing** |||||
+| `SIGN_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x50` |
+| `SIGN_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x51` |
+| `SIGN_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the console | `0x52` |
+| `SIGN_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x53` |
+| `SIGN_WCB` | Write Numeric Byte to Console | Register | Write the lower 8-bits of a register value as a signed decimal number to the console | `0x54` |
+| `SIGN_WCB` | Write Numeric Byte to Console | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the console | `0x55` |
+| `SIGN_WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address in a label as a signed decimal number to the console | `0x56` |
+| `SIGN_WCB` | Write Numeric Byte to Console | Pointer | Write contents of memory at the address in a register as a signed decimal number to the console | `0x57` |
+| **File Writing** |||||
+| `SIGN_WFN` | Write Number to File | Register | Write a register value as a signed decimal number to the opened file | `0x60` |
+| `SIGN_WFN` | Write Number to File | Literal | Write a literal value as a signed decimal number to the opened file | `0x61` |
+| `SIGN_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the opened file | `0x62` |
+| `SIGN_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the opened file | `0x63` |
+| `SIGN_WFB` | Write Numeric Byte to File | Register | Write the lower 8-bits of a register value as a signed decimal number to the opened file | `0x64` |
+| `SIGN_WFB` | Write Numeric Byte to File | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the opened file | `0x65` |
+| `SIGN_WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address in a label as a signed decimal number to the opened file | `0x66` |
+| `SIGN_WFB` | Write Numeric Byte to File | Pointer | Write contents of memory at the address in a register as a signed decimal number to the opened file | `0x67` |
+| **Sign Extension** |||||
+| `SIGN_EXB` | Extend Signed Byte to Signed Quad Word | Register | Convert the signed value in the lower 8-bits of a register to its equivalent representation as a signed 64-bit number  | `0x70` |
+| `SIGN_EXW` | Extend Signed Word to Signed Quad Word | Register | Convert the signed value in the lower 16-bits of a register to its equivalent representation as a signed 64-bit number | `0x71` |
+| `SIGN_EXD` | Extend Signed Double Word to Signed Quad Word | Register | Convert the signed value in the lower 32-bits of a register to its equivalent representation as a signed 64-bit number | `0x72` |
+| **Negation** |||||
+| `SIGN_NEG` | Two's Complement Negation | Register | Replace the value in a register with its two's complement, thereby flipping the sign of the value. | `0x80` |
 
 ## ASCII Table
 

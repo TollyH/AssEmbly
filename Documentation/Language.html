@@ -294,6 +294,7 @@ Parameters</a></li>
 <li><a href="#full-instruction-reference">Full Instruction Reference</a>
 <ul>
 <li><a href="#base-instruction-set">Base Instruction Set</a></li>
+<li><a href="#signed-extension-set">Signed Extension Set</a></li>
 </ul></li>
 <li><a href="#ascii-table">ASCII Table</a></li>
 </ul></li>
@@ -3597,6 +3598,595 @@ in memory starting at an address in a register</td>
 <td>Read the next byte from the currently open file, storing it in a
 register</td>
 <td><code>0xF1</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="signed-extension-set">Signed Extension Set</h3>
+<p>Extension set number <code>0x01</code>, opcodes start with
+<code>0xFF, 0x01</code>.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mnemonic</th>
+<th>Full Name</th>
+<th>Operands</th>
+<th>Function</th>
+<th>Instruction Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Signed Conditional Jumps</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JLT</code></td>
+<td>Jump if Less Than</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign and overflow status
+flags are different</td>
+<td><code>0x00</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JLT</code></td>
+<td>Jump if Less Than</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the sign and overflow
+status flags are different</td>
+<td><code>0x01</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JLE</code></td>
+<td>Jump if Less Than or Equal To</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign and overflow status
+flags are different or the zero status flag is set</td>
+<td><code>0x02</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JLE</code></td>
+<td>Jump if Less Than or Equal To</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the sign and overflow
+status flags are different or the zero status flag is set</td>
+<td><code>0x03</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JGT</code></td>
+<td>Jump if Greater Than</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign and overflow status
+flags are the same and the zero status flag is unset</td>
+<td><code>0x04</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JGT</code></td>
+<td>Jump if Greater Than</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the sign and overflow
+status flags are the same and the zero status flag is unset</td>
+<td><code>0x05</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JGE</code></td>
+<td>Jump if Greater Than or Equal To</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign and overflow status
+flags are the same</td>
+<td><code>0x06</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JGE</code></td>
+<td>Jump if Greater Than or Equal To</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the sign and overflow
+status flags are the same</td>
+<td><code>0x07</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JSI</code></td>
+<td>Jump if Signed</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign status flag is
+set</td>
+<td><code>0x08</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JSI</code></td>
+<td>Jump if Signed</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the sign status flag is
+set</td>
+<td><code>0x09</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JNS</code></td>
+<td>Jump if not Signed</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the sign status flag is
+unset</td>
+<td><code>0x0A</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JNS</code></td>
+<td>Jump if not Signed</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only the sign status flag is
+unset</td>
+<td><code>0x0B</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JOV</code></td>
+<td>Jump if Overflow</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the overflow status flag is
+set</td>
+<td><code>0x0C</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JOV</code></td>
+<td>Jump if Overflow</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the overflow status flag is
+set</td>
+<td><code>0x0D</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JNO</code></td>
+<td>Jump if not Overflow</td>
+<td>Address</td>
+<td>Jump to an address in a label only if the overflow status flag is
+unset</td>
+<td><code>0x0E</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JNO</code></td>
+<td>Jump if not Overflow</td>
+<td>Pointer</td>
+<td>Jump to an address in a register only if the overflow status flag is
+unset</td>
+<td><code>0x0F</code></td>
+</tr>
+<tr class="even">
+<td><strong>Math</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Register</td>
+<td>Divide the contents of one register by another, discarding the
+remainder</td>
+<td><code>0x10</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Literal</td>
+<td>Divide the contents of a register by a literal value, discarding the
+remainder</td>
+<td><code>0x11</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, discarding the remainder</td>
+<td><code>0x12</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, discarding the remainder</td>
+<td><code>0x13</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Register</td>
+<td>Divide the contents of one register by another, storing the
+remainder</td>
+<td><code>0x14</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Literal</td>
+<td>Divide the contents of a register by a literal value, storing the
+remainder</td>
+<td><code>0x15</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, storing the remainder</td>
+<td><code>0x16</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, storing the remainder</td>
+<td><code>0x17</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Register</td>
+<td>Divide the contents of one register by another, storing only the
+remainder</td>
+<td><code>0x18</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Literal</td>
+<td>Divide the contents of a register by a literal value, storing only
+the remainder</td>
+<td><code>0x19</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, storing only the remainder</td>
+<td><code>0x1A</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, storing only the remainder</td>
+<td><code>0x1B</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_SHR</code></td>
+<td>Arithmetic Shift Right</td>
+<td>Register, Register</td>
+<td>Shift the bits of one register right by another register, preserving
+the sign of the original value</td>
+<td><code>0x20</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_SHR</code></td>
+<td>Arithmetic Shift Right</td>
+<td>Register, Literal</td>
+<td>Shift the bits of a register right by a literal value, preserving
+the sign of the original value</td>
+<td><code>0x21</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_SHR</code></td>
+<td>Arithmetic Shift Right</td>
+<td>Register, Address</td>
+<td>Shift the bits of a register right by the contents of memory at an
+address in a label, preserving the sign of the original value</td>
+<td><code>0x22</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_SHR</code></td>
+<td>Arithmetic Shift Right</td>
+<td>Register, Pointer</td>
+<td>Shift the bits of a register right by the contents of memory at an
+address in a register, preserving the sign of the original value</td>
+<td><code>0x23</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Sign-Extending Data Moves</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVB</code></td>
+<td>Move Byte, Extend to Quad Word</td>
+<td>Register, Register</td>
+<td>Move the lower 8-bits of one register to another, extending the
+resulting value to a signed 64-bit value</td>
+<td><code>0x30</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVB</code></td>
+<td>Move Byte, Extend to Quad Word</td>
+<td>Register, Literal</td>
+<td>Move the lower 8-bits of a literal value to a register, extending
+the resulting value to a signed 64-bit value</td>
+<td><code>0x31</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVB</code></td>
+<td>Move Byte, Extend to Quad Word</td>
+<td>Register, Address</td>
+<td>Move 8-bits of the contents of memory starting at an address in a
+label to a register, extending the resulting value to a signed 64-bit
+value</td>
+<td><code>0x32</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVB</code></td>
+<td>Move Byte, Extend to Quad Word</td>
+<td>Register, Pointer</td>
+<td>Move 8-bits of the contents of memory starting at an address in a
+register to a register, extending the resulting value to a signed 64-bit
+value</td>
+<td><code>0x33</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVW</code></td>
+<td>Move Word, Extend to Quad Word</td>
+<td>Register, Register</td>
+<td>Move the lower 16-bits (2 bytes) of one register to another,
+extending the resulting value to a signed 64-bit value</td>
+<td><code>0x34</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVW</code></td>
+<td>Move Word, Extend to Quad Word</td>
+<td>Register, Literal</td>
+<td>Move the lower 16-bits (2 bytes) of a literal value to a register,
+extending the resulting value to a signed 64-bit value</td>
+<td><code>0x35</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVW</code></td>
+<td>Move Word, Extend to Quad Word</td>
+<td>Register, Address</td>
+<td>Move 16-bits (2 bytes) of the contents of memory starting at an
+address in a label to a register, extending the resulting value to a
+signed 64-bit value</td>
+<td><code>0x36</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVW</code></td>
+<td>Move Word, Extend to Quad Word</td>
+<td>Register, Pointer</td>
+<td>Move 16-bits (2 bytes) of the contents of memory starting at an
+address in a register to a register, extending the resulting value to a
+signed 64-bit value</td>
+<td><code>0x37</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVD</code></td>
+<td>Move Double Word, Extend to Quad Word</td>
+<td>Register, Register</td>
+<td>Move the lower 32-bits (4 bytes) of one register to another,
+extending the resulting value to a signed 64-bit value</td>
+<td><code>0x40</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVD</code></td>
+<td>Move Double Word, Extend to Quad Word</td>
+<td>Register, Literal</td>
+<td>Move the lower 32-bits (4 bytes) of a literal value to a register,
+extending the resulting value to a signed 64-bit value</td>
+<td><code>0x41</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVD</code></td>
+<td>Move Double Word, Extend to Quad Word</td>
+<td>Register, Address</td>
+<td>Move 32-bits (4 bytes) of the contents of memory starting at an
+address in a label to a register, extending the resulting value to a
+signed 64-bit value</td>
+<td><code>0x42</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVD</code></td>
+<td>Move Double Word, Extend to Quad Word</td>
+<td>Register, Pointer</td>
+<td>Move 32-bits (4 bytes) of the contents of memory starting at an
+address in a register to a register, extending the resulting value to a
+signed 64-bit value</td>
+<td><code>0x43</code></td>
+</tr>
+<tr class="even">
+<td><strong>Console Writing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Register</td>
+<td>Write a register value as a signed decimal number to the
+console</td>
+<td><code>0x50</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Literal</td>
+<td>Write a literal value as a signed decimal number to the console</td>
+<td><code>0x51</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Address</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a label
+as a signed decimal number to the console</td>
+<td><code>0x52</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Pointer</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a
+register as a signed decimal number to the console</td>
+<td><code>0x53</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WCB</code></td>
+<td>Write Numeric Byte to Console</td>
+<td>Register</td>
+<td>Write the lower 8-bits of a register value as a signed decimal
+number to the console</td>
+<td><code>0x54</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WCB</code></td>
+<td>Write Numeric Byte to Console</td>
+<td>Literal</td>
+<td>Write the lower 8-bits of a literal value as a signed decimal number
+to the console</td>
+<td><code>0x55</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WCB</code></td>
+<td>Write Numeric Byte to Console</td>
+<td>Address</td>
+<td>Write contents of memory at the address in a label as a signed
+decimal number to the console</td>
+<td><code>0x56</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WCB</code></td>
+<td>Write Numeric Byte to Console</td>
+<td>Pointer</td>
+<td>Write contents of memory at the address in a register as a signed
+decimal number to the console</td>
+<td><code>0x57</code></td>
+</tr>
+<tr class="odd">
+<td><strong>File Writing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WFN</code></td>
+<td>Write Number to File</td>
+<td>Register</td>
+<td>Write a register value as a signed decimal number to the opened
+file</td>
+<td><code>0x60</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WFN</code></td>
+<td>Write Number to File</td>
+<td>Literal</td>
+<td>Write a literal value as a signed decimal number to the opened
+file</td>
+<td><code>0x61</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WFN</code></td>
+<td>Write Number to File</td>
+<td>Address</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a label
+as a signed decimal number to the opened file</td>
+<td><code>0x62</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WFN</code></td>
+<td>Write Number to File</td>
+<td>Pointer</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a
+register as a signed decimal number to the opened file</td>
+<td><code>0x63</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WFB</code></td>
+<td>Write Numeric Byte to File</td>
+<td>Register</td>
+<td>Write the lower 8-bits of a register value as a signed decimal
+number to the opened file</td>
+<td><code>0x64</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WFB</code></td>
+<td>Write Numeric Byte to File</td>
+<td>Literal</td>
+<td>Write the lower 8-bits of a literal value as a signed decimal number
+to the opened file</td>
+<td><code>0x65</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WFB</code></td>
+<td>Write Numeric Byte to File</td>
+<td>Address</td>
+<td>Write contents of memory at the address in a label as a signed
+decimal number to the opened file</td>
+<td><code>0x66</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WFB</code></td>
+<td>Write Numeric Byte to File</td>
+<td>Pointer</td>
+<td>Write contents of memory at the address in a register as a signed
+decimal number to the opened file</td>
+<td><code>0x67</code></td>
+</tr>
+<tr class="even">
+<td><strong>Sign Extension</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_EXB</code></td>
+<td>Extend Signed Byte to Signed Quad Word</td>
+<td>Register</td>
+<td>Convert the signed value in the lower 8-bits of a register to its
+equivalent representation as a signed 64-bit number</td>
+<td><code>0x70</code></td>
+</tr>
+<tr class="even">
+<td><code>SIGN_EXW</code></td>
+<td>Extend Signed Word to Signed Quad Word</td>
+<td>Register</td>
+<td>Convert the signed value in the lower 16-bits of a register to its
+equivalent representation as a signed 64-bit number</td>
+<td><code>0x71</code></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_EXD</code></td>
+<td>Extend Signed Double Word to Signed Quad Word</td>
+<td>Register</td>
+<td>Convert the signed value in the lower 32-bits of a register to its
+equivalent representation as a signed 64-bit number</td>
+<td><code>0x72</code></td>
+</tr>
+<tr class="even">
+<td><strong>Negation</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_NEG</code></td>
+<td>Two’s Complement Negation</td>
+<td>Register</td>
+<td>Replace the value in a register with its two’s complement, thereby
+flipping the sign of the value.</td>
+<td><code>0x80</code></td>
 </tr>
 </tbody>
 </table>

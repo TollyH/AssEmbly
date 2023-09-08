@@ -77,6 +77,7 @@ Table of Contents
     -   Text Encoding
     -   Full Instruction Reference
         -   Base Instruction Set
+        -   Signed Extension Set
     -   ASCII Table
 
 Technical Information
@@ -3235,6 +3236,574 @@ instruction set opcodes.
                                            file, storing it  
                                            in a register     
   --------------------------------------------------------------------------------
+
+Signed Extension Set
+
+Extension set number 0x01, opcodes start with 0xFF, 0x01.
+
+  ----------------------------------------------------------------------------------
+  Mnemonic         Full Name     Operands     Function         Instruction Code
+  ---------------- ------------- ------------ ---------------- ---------------------
+  Signed                                                       
+  Conditional                                                  
+  Jumps                                                        
+
+  SIGN_JLT         Jump if Less  Address      Jump to an       0x00
+                   Than                       address in a     
+                                              label only if    
+                                              the sign and     
+                                              overflow status  
+                                              flags are        
+                                              different        
+
+  SIGN_JLT         Jump if Less  Pointer      Jump to an       0x01
+                   Than                       address in a     
+                                              register only if 
+                                              the sign and     
+                                              overflow status  
+                                              flags are        
+                                              different        
+
+  SIGN_JLE         Jump if Less  Address      Jump to an       0x02
+                   Than or Equal              address in a     
+                   To                         label only if    
+                                              the sign and     
+                                              overflow status  
+                                              flags are        
+                                              different or the 
+                                              zero status flag 
+                                              is set           
+
+  SIGN_JLE         Jump if Less  Pointer      Jump to an       0x03
+                   Than or Equal              address in a     
+                   To                         register only if 
+                                              the sign and     
+                                              overflow status  
+                                              flags are        
+                                              different or the 
+                                              zero status flag 
+                                              is set           
+
+  SIGN_JGT         Jump if       Address      Jump to an       0x04
+                   Greater Than               address in a     
+                                              label only if    
+                                              the sign and     
+                                              overflow status  
+                                              flags are the    
+                                              same and the     
+                                              zero status flag 
+                                              is unset         
+
+  SIGN_JGT         Jump if       Pointer      Jump to an       0x05
+                   Greater Than               address in a     
+                                              register only if 
+                                              the sign and     
+                                              overflow status  
+                                              flags are the    
+                                              same and the     
+                                              zero status flag 
+                                              is unset         
+
+  SIGN_JGE         Jump if       Address      Jump to an       0x06
+                   Greater Than               address in a     
+                   or Equal To                label only if    
+                                              the sign and     
+                                              overflow status  
+                                              flags are the    
+                                              same             
+
+  SIGN_JGE         Jump if       Pointer      Jump to an       0x07
+                   Greater Than               address in a     
+                   or Equal To                register only if 
+                                              the sign and     
+                                              overflow status  
+                                              flags are the    
+                                              same             
+
+  SIGN_JSI         Jump if       Address      Jump to an       0x08
+                   Signed                     address in a     
+                                              label only if    
+                                              the sign status  
+                                              flag is set      
+
+  SIGN_JSI         Jump if       Pointer      Jump to an       0x09
+                   Signed                     address in a     
+                                              register only if 
+                                              the sign status  
+                                              flag is set      
+
+  SIGN_JNS         Jump if not   Address      Jump to an       0x0A
+                   Signed                     address in a     
+                                              label only if    
+                                              the sign status  
+                                              flag is unset    
+
+  SIGN_JNS         Jump if not   Pointer      Jump to an       0x0B
+                   Signed                     address in a     
+                                              register only    
+                                              the sign status  
+                                              flag is unset    
+
+  SIGN_JOV         Jump if       Address      Jump to an       0x0C
+                   Overflow                   address in a     
+                                              label only if    
+                                              the overflow     
+                                              status flag is   
+                                              set              
+
+  SIGN_JOV         Jump if       Pointer      Jump to an       0x0D
+                   Overflow                   address in a     
+                                              register only if 
+                                              the overflow     
+                                              status flag is   
+                                              set              
+
+  SIGN_JNO         Jump if not   Address      Jump to an       0x0E
+                   Overflow                   address in a     
+                                              label only if    
+                                              the overflow     
+                                              status flag is   
+                                              unset            
+
+  SIGN_JNO         Jump if not   Pointer      Jump to an       0x0F
+                   Overflow                   address in a     
+                                              register only if 
+                                              the overflow     
+                                              status flag is   
+                                              unset            
+
+  Math                                                         
+
+  SIGN_DIV         Integer       Register,    Divide the       0x10
+                   Divide        Register     contents of one  
+                                              register by      
+                                              another,         
+                                              discarding the   
+                                              remainder        
+
+  SIGN_DIV         Integer       Register,    Divide the       0x11
+                   Divide        Literal      contents of a    
+                                              register by a    
+                                              literal value,   
+                                              discarding the   
+                                              remainder        
+
+  SIGN_DIV         Integer       Register,    Divide a         0x12
+                   Divide        Address      register by the  
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              label,           
+                                              discarding the   
+                                              remainder        
+
+  SIGN_DIV         Integer       Register,    Divide a         0x13
+                   Divide        Pointer      register by the  
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              register,        
+                                              discarding the   
+                                              remainder        
+
+  SIGN_DVR         Divide With   Register,    Divide the       0x14
+                   Remainder     Register,    contents of one  
+                                 Register     register by      
+                                              another, storing 
+                                              the remainder    
+
+  SIGN_DVR         Divide With   Register,    Divide the       0x15
+                   Remainder     Register,    contents of a    
+                                 Literal      register by a    
+                                              literal value,   
+                                              storing the      
+                                              remainder        
+
+  SIGN_DVR         Divide With   Register,    Divide a         0x16
+                   Remainder     Register,    register by the  
+                                 Address      contents of      
+                                              memory at an     
+                                              address in a     
+                                              label, storing   
+                                              the remainder    
+
+  SIGN_DVR         Divide With   Register,    Divide a         0x17
+                   Remainder     Register,    register by the  
+                                 Pointer      contents of      
+                                              memory at an     
+                                              address in a     
+                                              register,        
+                                              storing the      
+                                              remainder        
+
+  SIGN_REM         Remainder     Register,    Divide the       0x18
+                   Only          Register     contents of one  
+                                              register by      
+                                              another, storing 
+                                              only the         
+                                              remainder        
+
+  SIGN_REM         Remainder     Register,    Divide the       0x19
+                   Only          Literal      contents of a    
+                                              register by a    
+                                              literal value,   
+                                              storing only the 
+                                              remainder        
+
+  SIGN_REM         Remainder     Register,    Divide a         0x1A
+                   Only          Address      register by the  
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              label, storing   
+                                              only the         
+                                              remainder        
+
+  SIGN_REM         Remainder     Register,    Divide a         0x1B
+                   Only          Pointer      register by the  
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              register,        
+                                              storing only the 
+                                              remainder        
+
+  SIGN_SHR         Arithmetic    Register,    Shift the bits   0x20
+                   Shift Right   Register     of one register  
+                                              right by another 
+                                              register,        
+                                              preserving the   
+                                              sign of the      
+                                              original value   
+
+  SIGN_SHR         Arithmetic    Register,    Shift the bits   0x21
+                   Shift Right   Literal      of a register    
+                                              right by a       
+                                              literal value,   
+                                              preserving the   
+                                              sign of the      
+                                              original value   
+
+  SIGN_SHR         Arithmetic    Register,    Shift the bits   0x22
+                   Shift Right   Address      of a register    
+                                              right by the     
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              label,           
+                                              preserving the   
+                                              sign of the      
+                                              original value   
+
+  SIGN_SHR         Arithmetic    Register,    Shift the bits   0x23
+                   Shift Right   Pointer      of a register    
+                                              right by the     
+                                              contents of      
+                                              memory at an     
+                                              address in a     
+                                              register,        
+                                              preserving the   
+                                              sign of the      
+                                              original value   
+
+  Sign-Extending                                               
+  Data Moves                                                   
+
+  SIGN_MVB         Move Byte,    Register,    Move the lower   0x30
+                   Extend to     Register     8-bits of one    
+                   Quad Word                  register to      
+                                              another,         
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVB         Move Byte,    Register,    Move the lower   0x31
+                   Extend to     Literal      8-bits of a      
+                   Quad Word                  literal value to 
+                                              a register,      
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVB         Move Byte,    Register,    Move 8-bits of   0x32
+                   Extend to     Address      the contents of  
+                   Quad Word                  memory starting  
+                                              at an address in 
+                                              a label to a     
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVB         Move Byte,    Register,    Move 8-bits of   0x33
+                   Extend to     Pointer      the contents of  
+                   Quad Word                  memory starting  
+                                              at an address in 
+                                              a register to a  
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVW         Move Word,    Register,    Move the lower   0x34
+                   Extend to     Register     16-bits (2       
+                   Quad Word                  bytes) of one    
+                                              register to      
+                                              another,         
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVW         Move Word,    Register,    Move the lower   0x35
+                   Extend to     Literal      16-bits (2       
+                   Quad Word                  bytes) of a      
+                                              literal value to 
+                                              a register,      
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVW         Move Word,    Register,    Move 16-bits (2  0x36
+                   Extend to     Address      bytes) of the    
+                   Quad Word                  contents of      
+                                              memory starting  
+                                              at an address in 
+                                              a label to a     
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVW         Move Word,    Register,    Move 16-bits (2  0x37
+                   Extend to     Pointer      bytes) of the    
+                   Quad Word                  contents of      
+                                              memory starting  
+                                              at an address in 
+                                              a register to a  
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVD         Move Double   Register,    Move the lower   0x40
+                   Word, Extend  Register     32-bits (4       
+                   to Quad Word               bytes) of one    
+                                              register to      
+                                              another,         
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVD         Move Double   Register,    Move the lower   0x41
+                   Word, Extend  Literal      32-bits (4       
+                   to Quad Word               bytes) of a      
+                                              literal value to 
+                                              a register,      
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVD         Move Double   Register,    Move 32-bits (4  0x42
+                   Word, Extend  Address      bytes) of the    
+                   to Quad Word               contents of      
+                                              memory starting  
+                                              at an address in 
+                                              a label to a     
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  SIGN_MVD         Move Double   Register,    Move 32-bits (4  0x43
+                   Word, Extend  Pointer      bytes) of the    
+                   to Quad Word               contents of      
+                                              memory starting  
+                                              at an address in 
+                                              a register to a  
+                                              register,        
+                                              extending the    
+                                              resulting value  
+                                              to a signed      
+                                              64-bit value     
+
+  Console Writing                                              
+
+  SIGN_WCN         Write Number  Register     Write a register 0x50
+                   to Console                 value as a       
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  SIGN_WCN         Write Number  Literal      Write a literal  0x51
+                   to Console                 value as a       
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  SIGN_WCN         Write Number  Address      Write 64-bits (4 0x52
+                   to Console                 bytes) of memory 
+                                              starting at the  
+                                              address in a     
+                                              label as a       
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  SIGN_WCN         Write Number  Pointer      Write 64-bits (4 0x53
+                   to Console                 bytes) of memory 
+                                              starting at the  
+                                              address in a     
+                                              register as a    
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  SIGN_WCB         Write Numeric Register     Write the lower  0x54
+                   Byte to                    8-bits of a      
+                   Console                    register value   
+                                              as a signed      
+                                              decimal number   
+                                              to the console   
+
+  SIGN_WCB         Write Numeric Literal      Write the lower  0x55
+                   Byte to                    8-bits of a      
+                   Console                    literal value as 
+                                              a signed decimal 
+                                              number to the    
+                                              console          
+
+  SIGN_WCB         Write Numeric Address      Write contents   0x56
+                   Byte to                    of memory at the 
+                   Console                    address in a     
+                                              label as a       
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  SIGN_WCB         Write Numeric Pointer      Write contents   0x57
+                   Byte to                    of memory at the 
+                   Console                    address in a     
+                                              register as a    
+                                              signed decimal   
+                                              number to the    
+                                              console          
+
+  File Writing                                                 
+
+  SIGN_WFN         Write Number  Register     Write a register 0x60
+                   to File                    value as a       
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFN         Write Number  Literal      Write a literal  0x61
+                   to File                    value as a       
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFN         Write Number  Address      Write 64-bits (4 0x62
+                   to File                    bytes) of memory 
+                                              starting at the  
+                                              address in a     
+                                              label as a       
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFN         Write Number  Pointer      Write 64-bits (4 0x63
+                   to File                    bytes) of memory 
+                                              starting at the  
+                                              address in a     
+                                              register as a    
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFB         Write Numeric Register     Write the lower  0x64
+                   Byte to File               8-bits of a      
+                                              register value   
+                                              as a signed      
+                                              decimal number   
+                                              to the opened    
+                                              file             
+
+  SIGN_WFB         Write Numeric Literal      Write the lower  0x65
+                   Byte to File               8-bits of a      
+                                              literal value as 
+                                              a signed decimal 
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFB         Write Numeric Address      Write contents   0x66
+                   Byte to File               of memory at the 
+                                              address in a     
+                                              label as a       
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  SIGN_WFB         Write Numeric Pointer      Write contents   0x67
+                   Byte to File               of memory at the 
+                                              address in a     
+                                              register as a    
+                                              signed decimal   
+                                              number to the    
+                                              opened file      
+
+  Sign Extension                                               
+
+  SIGN_EXB         Extend Signed Register     Convert the      0x70
+                   Byte to                    signed value in  
+                   Signed Quad                the lower 8-bits 
+                   Word                       of a register to 
+                                              its equivalent   
+                                              representation   
+                                              as a signed      
+                                              64-bit number    
+
+  SIGN_EXW         Extend Signed Register     Convert the      0x71
+                   Word to                    signed value in  
+                   Signed Quad                the lower        
+                   Word                       16-bits of a     
+                                              register to its  
+                                              equivalent       
+                                              representation   
+                                              as a signed      
+                                              64-bit number    
+
+  SIGN_EXD         Extend Signed Register     Convert the      0x72
+                   Double Word                signed value in  
+                   to Signed                  the lower        
+                   Quad Word                  32-bits of a     
+                                              register to its  
+                                              equivalent       
+                                              representation   
+                                              as a signed      
+                                              64-bit number    
+
+  Negation                                                     
+
+  SIGN_NEG         Two’s         Register     Replace the      0x80
+                   Complement                 value in a       
+                   Negation                   register with    
+                                              its two’s        
+                                              complement,      
+                                              thereby flipping 
+                                              the sign of the  
+                                              value.           
+  ----------------------------------------------------------------------------------
 
 ASCII Table
 
