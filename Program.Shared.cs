@@ -141,20 +141,23 @@
         public static void OnExecutionException(Exception e, Processor processor)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException or DivideByZeroException)
+            if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException
+                or DivideByZeroException or FileNotFoundException or DirectoryNotFoundException)
             {
                 string message = e is RuntimeException runtimeException
                     ? runtimeException.ConsoleMessage
                     : e is DivideByZeroException
                         ? "An instruction attempted to divide by zero."
+                    : e is FileNotFoundException or DirectoryNotFoundException
+                        ? e.Message
                         : "An instruction tried to access an invalid memory address.";
                 Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}");
-                PrintRegisterStates(processor);
             }
             else
             {
                 Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
             }
+            PrintRegisterStates(processor);
             Console.ResetColor();
         }
 
