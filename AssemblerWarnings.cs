@@ -762,14 +762,14 @@ namespace AssEmbly
 
         private bool Analyzer_Rolling_Suggestion_0007()
         {
-            // Suggestion 0007: Use `INC {reg}` instead of `ADD {reg}, 1`, as it results in less bytes.
+            // Suggestion 0007: Use `ICR {reg}` instead of `ADD {reg}, 1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x11) && operands[1][0] != ':'
                 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0008()
         {
-            // Suggestion 0008: Use `DEC {reg}` instead of `SUB {reg}, 1`, as it results in less bytes.
+            // Suggestion 0008: Use `DCR {reg}` instead of `SUB {reg}, 1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
                 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 1;
         }
@@ -865,14 +865,14 @@ namespace AssEmbly
 
         private bool Analyzer_Rolling_Suggestion_0013()
         {
-            // Suggestion 0013: Use `DEC {reg}` instead of `ADD {reg}, -1`, as it results in less bytes.
+            // Suggestion 0013: Use `DCR {reg}` instead of `ADD {reg}, -1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x11) && operands[1][0] != ':'
                 && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0014()
         {
-            // Suggestion 0014: Use `INC {reg}` instead of `SUB {reg}, -1`, as it results in less bytes.
+            // Suggestion 0014: Use `ICR {reg}` instead of `SUB {reg}, -1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
                 && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
         }
