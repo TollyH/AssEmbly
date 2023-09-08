@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>2.0.0</code></p>
-<p>Last revised: 2023-09-05</p>
+<p>Last revised: 2023-09-08</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -295,6 +295,9 @@ Parameters</a></li>
 <ul>
 <li><a href="#base-instruction-set">Base Instruction Set</a></li>
 <li><a href="#signed-extension-set">Signed Extension Set</a></li>
+<li><a href="#floating-point-extension-set">Floating Point Extension
+Set</a></li>
+<li><a href="#extended-base-set">Extended Base Set</a></li>
 </ul></li>
 <li><a href="#ascii-table">ASCII Table</a></li>
 </ul></li>
@@ -2759,7 +2762,7 @@ whilst still updating status flags</td>
 <td>Test</td>
 <td>Register, Address</td>
 <td>Bitwise and a register and the contents of memory at an address in a
-label, discarding the result</td>
+label, discarding the result whilst still updating status flags</td>
 <td><code>0x72</code></td>
 </tr>
 <tr class="odd">
@@ -2767,7 +2770,7 @@ label, discarding the result</td>
 <td>Test</td>
 <td>Register, Pointer</td>
 <td>Bitwise and a register and the contents of memory at an address in a
-register, discarding the result</td>
+register, discarding the result whilst still updating status flags</td>
 <td><code>0x73</code></td>
 </tr>
 <tr class="even">
@@ -2791,7 +2794,7 @@ whilst still updating status flags</td>
 <td>Compare</td>
 <td>Register, Address</td>
 <td>Subtract the contents of memory at an address in a label from a
-register, discarding the result</td>
+register, discarding the result whilst still updating status flags</td>
 <td><code>0x76</code></td>
 </tr>
 <tr class="odd">
@@ -2799,7 +2802,7 @@ register, discarding the result</td>
 <td>Compare</td>
 <td>Register, Pointer</td>
 <td>Subtract the contents of memory at an address in a register from a
-register, discarding the result</td>
+register, discarding the result whilst still updating status flags</td>
 <td><code>0x77</code></td>
 </tr>
 <tr class="even">
@@ -4187,6 +4190,617 @@ equivalent representation as a signed 64-bit number</td>
 <td>Replace the value in a register with its two’s complement, thereby
 flipping the sign of the value.</td>
 <td><code>0x80</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="floating-point-extension-set">Floating Point Extension Set</h3>
+<p>Extension set number <code>0x02</code>, opcodes start with
+<code>0xFF, 0x02</code>.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mnemonic</th>
+<th>Full Name</th>
+<th>Operands</th>
+<th>Function</th>
+<th>Instruction Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Math</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_ADD</code></td>
+<td>Add</td>
+<td>Register, Register</td>
+<td>Add the contents of one register to another</td>
+<td><code>0x00</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ADD</code></td>
+<td>Add</td>
+<td>Register, Literal</td>
+<td>Add a literal value to the contents of a register</td>
+<td><code>0x01</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_ADD</code></td>
+<td>Add</td>
+<td>Register, Address</td>
+<td>Add the contents of memory at an address in a label to a
+register</td>
+<td><code>0x02</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ADD</code></td>
+<td>Add</td>
+<td>Register, Pointer</td>
+<td>Add the contents of memory at an address in a register to a
+register</td>
+<td><code>0x03</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SUB</code></td>
+<td>Subtract</td>
+<td>Register, Register</td>
+<td>Subtract the contents of one register from another</td>
+<td><code>0x10</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_SUB</code></td>
+<td>Subtract</td>
+<td>Register, Literal</td>
+<td>Subtract a literal value from the contents of a register</td>
+<td><code>0x11</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SUB</code></td>
+<td>Subtract</td>
+<td>Register, Address</td>
+<td>Subtract the contents of memory at an address in a label from a
+register</td>
+<td><code>0x12</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_SUB</code></td>
+<td>Subtract</td>
+<td>Register, Pointer</td>
+<td>Subtract the contents of memory at an address in a register from a
+register</td>
+<td><code>0x13</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_MUL</code></td>
+<td>Multiply</td>
+<td>Register, Register</td>
+<td>Multiply the contents of one register by another</td>
+<td><code>0x20</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_MUL</code></td>
+<td>Multiply</td>
+<td>Register, Literal</td>
+<td>Multiply the contents of a register by a literal value</td>
+<td><code>0x21</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_MUL</code></td>
+<td>Multiply</td>
+<td>Register, Address</td>
+<td>Multiply a register by the contents of memory at an address in a
+label</td>
+<td><code>0x22</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_MUL</code></td>
+<td>Multiply</td>
+<td>Register, Pointer</td>
+<td>Multiply a register by the contents of memory at an address in a
+register</td>
+<td><code>0x23</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Register</td>
+<td>Divide the contents of one register by another, discarding the
+remainder</td>
+<td><code>0x30</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Literal</td>
+<td>Divide the contents of a register by a literal value, discarding the
+remainder</td>
+<td><code>0x31</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, discarding the remainder</td>
+<td><code>0x32</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_DIV</code></td>
+<td>Integer Divide</td>
+<td>Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, discarding the remainder</td>
+<td><code>0x33</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Register</td>
+<td>Divide the contents of one register by another, storing the
+remainder</td>
+<td><code>0x34</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Literal</td>
+<td>Divide the contents of a register by a literal value, storing the
+remainder</td>
+<td><code>0x35</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, storing the remainder</td>
+<td><code>0x36</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_DVR</code></td>
+<td>Divide With Remainder</td>
+<td>Register, Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, storing the remainder</td>
+<td><code>0x37</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Register</td>
+<td>Divide the contents of one register by another, storing only the
+remainder</td>
+<td><code>0x38</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Literal</td>
+<td>Divide the contents of a register by a literal value, storing only
+the remainder</td>
+<td><code>0x39</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Address</td>
+<td>Divide a register by the contents of memory at an address in a
+label, storing only the remainder</td>
+<td><code>0x3A</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_REM</code></td>
+<td>Remainder Only</td>
+<td>Register, Pointer</td>
+<td>Divide a register by the contents of memory at an address in a
+register, storing only the remainder</td>
+<td><code>0x3B</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SIN</code></td>
+<td>Sine</td>
+<td>Register</td>
+<td>Calculate the sine of the value in a register in radians</td>
+<td><code>0x40</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ASN</code></td>
+<td>Inverse Sine</td>
+<td>Register</td>
+<td>Calculate the inverse sine of the value in a register in
+radians</td>
+<td><code>0x41</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_COS</code></td>
+<td>Cosine</td>
+<td>Register</td>
+<td>Calculate the cosine of the value in a register in radians</td>
+<td><code>0x42</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ACS</code></td>
+<td>Inverse Cosine</td>
+<td>Register</td>
+<td>Calculate the inverse cosine of the value in a register in
+radians</td>
+<td><code>0x43</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_TAN</code></td>
+<td>Tangent</td>
+<td>Register</td>
+<td>Calculate the tangent of the value in a register in radians</td>
+<td><code>0x44</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ATN</code></td>
+<td>Inverse Tangent</td>
+<td>Register</td>
+<td>Calculate the inverse tangent of the value in a register in
+radians</td>
+<td><code>0x45</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_PTN</code></td>
+<td>2 Argument Inverse Tangent</td>
+<td>Register, Register</td>
+<td>Calculate the 2 argument inverse tangent between 2 registers in the
+order y, x</td>
+<td><code>0x46</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_PTN</code></td>
+<td>2 Argument Inverse Tangent</td>
+<td>Register, Literal</td>
+<td>Calculate the 2 argument inverse tangent between a register and a
+literal in the order y, x</td>
+<td><code>0x47</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_PTN</code></td>
+<td>2 Argument Inverse Tangent</td>
+<td>Register, Address</td>
+<td>Calculate the 2 argument inverse tangent between a register and the
+contents of memory at an address in a label in the order y, x</td>
+<td><code>0x48</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_PTN</code></td>
+<td>2 Argument Inverse Tangent</td>
+<td>Register, Pointer</td>
+<td>Calculate the 2 argument inverse tangent between a register and the
+contents of memory at an address in a register in the order y, x</td>
+<td><code>0x49</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_POW</code></td>
+<td>Exponentiation</td>
+<td>Register, Register</td>
+<td>Calculate the value of a register raised to the power of another
+register</td>
+<td><code>0x50</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_POW</code></td>
+<td>Exponentiation</td>
+<td>Register, Literal</td>
+<td>Calculate the value of a register raised to the power of a
+literal</td>
+<td><code>0x51</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_POW</code></td>
+<td>Exponentiation</td>
+<td>Register, Address</td>
+<td>Calculate the value of a register raised to the power of the
+contents of memory at an address in a label</td>
+<td><code>0x52</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_POW</code></td>
+<td>Exponentiation</td>
+<td>Register, Pointer</td>
+<td>Calculate the value of a register raised to the power of the
+contents of memory at an address in a register</td>
+<td><code>0x53</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_LOG</code></td>
+<td>Logarithm</td>
+<td>Register, Register</td>
+<td>Calculate the logarithm of a register with the base from another
+register</td>
+<td><code>0x50</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_LOG</code></td>
+<td>Logarithm</td>
+<td>Register, Literal</td>
+<td>Calculate the logarithm of a register with the base from a
+literal</td>
+<td><code>0x51</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_LOG</code></td>
+<td>Logarithm</td>
+<td>Register, Address</td>
+<td>Calculate the logarithm of a register with the base from the
+contents of memory at an address in a label</td>
+<td><code>0x52</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_LOG</code></td>
+<td>Logarithm</td>
+<td>Register, Pointer</td>
+<td>Calculate the logarithm of a register with the base from the
+contents of memory at an address in a register</td>
+<td><code>0x53</code></td>
+</tr>
+<tr class="even">
+<td><strong>Console Writing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Register</td>
+<td>Write a register value as a signed decimal number to the
+console</td>
+<td><code>0x70</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Literal</td>
+<td>Write a literal value as a signed decimal number to the console</td>
+<td><code>0x71</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Address</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a label
+as a signed decimal number to the console</td>
+<td><code>0x72</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_WCN</code></td>
+<td>Write Number to Console</td>
+<td>Pointer</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a
+register as a signed decimal number to the console</td>
+<td><code>0x73</code></td>
+</tr>
+<tr class="odd">
+<td><strong>File Writing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_WFN</code></td>
+<td>Write Number to File</td>
+<td>Register</td>
+<td>Write a register value as a floating point decimal number to the
+opened file</td>
+<td><code>0x80</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_WFN</code></td>
+<td>Write Number to File</td>
+<td>Literal</td>
+<td>Write a literal value as a floating point decimal number to the
+opened file</td>
+<td><code>0x81</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_WFN</code></td>
+<td>Write Number to File</td>
+<td>Address</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a label
+as a floating point decimal number to the opened file</td>
+<td><code>0x82</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_WFN</code></td>
+<td>Write Number to File</td>
+<td>Pointer</td>
+<td>Write 64-bits (4 bytes) of memory starting at the address in a
+register as a floating point decimal number to the opened file</td>
+<td><code>0x83</code></td>
+</tr>
+<tr class="even">
+<td><strong>Conversions</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_EXH</code></td>
+<td>Extend Half Precision Float to Double Precision Float</td>
+<td>Register</td>
+<td>Convert the value in a register from a half-precision float
+(16-bits) to a double-precision float (64-bits)</td>
+<td><code>0x90</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_EXS</code></td>
+<td>Extend Single Precision Float to Double Precision Float</td>
+<td>Register</td>
+<td>Convert the value in a register from a single-precision float
+(32-bits) to a double-precision float (64-bits)</td>
+<td><code>0x91</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_SHS</code></td>
+<td>Shrink Double Precision Float to Single Precision Float</td>
+<td>Register</td>
+<td>Convert the value in a register from a double-precision float
+(64-bits) to a single-precision float (32-bits)</td>
+<td><code>0x92</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SHH</code></td>
+<td>Shrink Double Precision Float to Half Precision Float</td>
+<td>Register</td>
+<td>Convert the value in a register from a double-precision float
+(64-bits) to a half-precision float (16-bits)</td>
+<td><code>0x93</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_NEG</code></td>
+<td>Negation</td>
+<td>Register</td>
+<td>Reverse the sign of the floating point number in a register,
+equivalent to flipping the sign bit.</td>
+<td><code>0xA0</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_UTF</code></td>
+<td>Convert Unsigned Quad Word to Double Precision Float</td>
+<td>Register</td>
+<td>Convert the unsigned value in a register to a double-precision float
+(64-bits)</td>
+<td><code>0xB0</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_STF</code></td>
+<td>Convert Signed Quad Word to Double Precision Float</td>
+<td>Register</td>
+<td>Convert the signed value in a register to a double-precision float
+(64-bits)</td>
+<td><code>0xB1</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_FTS</code></td>
+<td>Convert Double Precision Float to Signed Quad Word through
+Truncation</td>
+<td>Register</td>
+<td>Convert the double-precision float (64-bits) value in a register to
+a signed 64-bit integer by rounding toward 0</td>
+<td><code>0xC0</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_FCS</code></td>
+<td>Convert Double Precision Float to Signed Quad Word through Ceiling
+Rounding</td>
+<td>Register</td>
+<td>Convert the double-precision float (64-bits) value in a register to
+a signed 64-bit integer by rounding to the greater integer</td>
+<td><code>0xC1</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_FFS</code></td>
+<td>Convert Double Precision Float to Signed Quad Word through Floor
+Rounding</td>
+<td>Register</td>
+<td>Convert the double-precision float (64-bits) value in a register to
+a signed 64-bit integer by rounding to the lesser integer</td>
+<td><code>0xC2</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_FNS</code></td>
+<td>Convert Double Precision Float to Signed Quad Word through Nearest
+Rounding</td>
+<td>Register</td>
+<td>Convert the double-precision float (64-bits) value in a register to
+the nearest signed 64-bit integer, rounding midpoints to the nearest
+even number</td>
+<td><code>0xC3</code></td>
+</tr>
+<tr class="even">
+<td><strong>Comparison</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_CMP</code></td>
+<td>Compare</td>
+<td>Register, Register</td>
+<td>Subtract a register from another, discarding the result whilst still
+updating status flags</td>
+<td><code>0xD0</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_CMP</code></td>
+<td>Compare</td>
+<td>Register, Literal</td>
+<td>Subtract a literal value from a register, discarding the result
+whilst still updating status flags</td>
+<td><code>0xD1</code></td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_CMP</code></td>
+<td>Compare</td>
+<td>Register, Address</td>
+<td>Subtract the contents of memory at an address in a label from a
+register, discarding the result whilst still updating status flags</td>
+<td><code>0xD2</code></td>
+</tr>
+<tr class="even">
+<td><code>FLPT_CMP</code></td>
+<td>Compare</td>
+<td>Register, Pointer</td>
+<td>Subtract the contents of memory at an address in a register from a
+register, discarding the result whilst still updating status flags</td>
+<td><code>0xD3</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="extended-base-set">Extended Base Set</h3>
+<p>Extension set number <code>0x03</code>, opcodes start with
+<code>0xFF, 0x03</code>.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mnemonic</th>
+<th>Full Name</th>
+<th>Operands</th>
+<th>Function</th>
+<th>Instruction Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Byte Operations</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>EXTD_BSW</code></td>
+<td>Reverse Byte Order</td>
+<td>Register</td>
+<td>Reverse the byte order of a register, thereby converting little
+endian to big endian and vice versa</td>
+<td><code>0x00</code></td>
 </tr>
 </tbody>
 </table>

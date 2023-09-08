@@ -2,7 +2,7 @@
 
 Applies to versions: `2.0.0`
 
-Last revised: 2023-09-05
+Last revised: 2023-09-08
 
 ## Introduction
 
@@ -75,6 +75,8 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
   - [Full Instruction Reference](#full-instruction-reference)
     - [Base Instruction Set](#base-instruction-set)
     - [Signed Extension Set](#signed-extension-set)
+    - [Floating Point Extension Set](#floating-point-extension-set)
+    - [Extended Base Set](#extended-base-set)
   - [ASCII Table](#ascii-table)
 
 ## Technical Information
@@ -1721,12 +1723,12 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | **Comparison** |||||
 | `TST` | Test | Register, Register | Bitwise and two registers, discarding the result whilst still updating status flags | `0x70` |
 | `TST` | Test | Register, Literal | Bitwise and a register and a literal value, discarding the result whilst still updating status flags | `0x71` |
-| `TST` | Test | Register, Address | Bitwise and a register and the contents of memory at an address in a label, discarding the result | `0x72` |
-| `TST` | Test | Register, Pointer | Bitwise and a register and the contents of memory at an address in a register, discarding the result | `0x73` |
+| `TST` | Test | Register, Address | Bitwise and a register and the contents of memory at an address in a label, discarding the result whilst still updating status flags | `0x72` |
+| `TST` | Test | Register, Pointer | Bitwise and a register and the contents of memory at an address in a register, discarding the result whilst still updating status flags | `0x73` |
 | `CMP` | Compare | Register, Register | Subtract a register from another, discarding the result whilst still updating status flags | `0x74` |
 | `CMP` | Compare | Register, Literal | Subtract a literal value from a register, discarding the result whilst still updating status flags | `0x75` |
-| `CMP` | Compare | Register, Address | Subtract the contents of memory at an address in a label from a register, discarding the result | `0x76` |
-| `CMP` | Compare | Register, Pointer | Subtract the contents of memory at an address in a register from a register, discarding the result | `0x77` |
+| `CMP` | Compare | Register, Address | Subtract the contents of memory at an address in a label from a register, discarding the result whilst still updating status flags | `0x76` |
+| `CMP` | Compare | Register, Pointer | Subtract the contents of memory at an address in a register from a register, discarding the result whilst still updating status flags | `0x77` |
 | **Data Moving** |||||
 | `MVB` | Move Byte | Register, Register | Move the lower 8-bits of one register to another | `0x80` |
 | `MVB` | Move Byte | Register, Literal | Move the lower 8-bits of a literal value to a register | `0x81` |
@@ -1907,6 +1909,92 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`.
 | `SIGN_EXD` | Extend Signed Double Word to Signed Quad Word | Register | Convert the signed value in the lower 32-bits of a register to its equivalent representation as a signed 64-bit number | `0x72` |
 | **Negation** |||||
 | `SIGN_NEG` | Two's Complement Negation | Register | Replace the value in a register with its two's complement, thereby flipping the sign of the value. | `0x80` |
+
+### Floating Point Extension Set
+
+Extension set number `0x02`, opcodes start with `0xFF, 0x02`.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code |
+|----------|-----------|----------|----------|------------------|
+| **Math** |||||
+| `FLPT_ADD` | Add | Register, Register | Add the contents of one register to another | `0x00` |
+| `FLPT_ADD` | Add | Register, Literal | Add a literal value to the contents of a register | `0x01` |
+| `FLPT_ADD` | Add | Register, Address | Add the contents of memory at an address in a label to a register | `0x02` |
+| `FLPT_ADD` | Add | Register, Pointer | Add the contents of memory at an address in a register to a register | `0x03` |
+| `FLPT_SUB` | Subtract | Register, Register | Subtract the contents of one register from another | `0x10` |
+| `FLPT_SUB` | Subtract | Register, Literal | Subtract a literal value from the contents of a register | `0x11` |
+| `FLPT_SUB` | Subtract | Register, Address | Subtract the contents of memory at an address in a label from a register | `0x12` |
+| `FLPT_SUB` | Subtract | Register, Pointer | Subtract the contents of memory at an address in a register from a register | `0x13` |
+| `FLPT_MUL` | Multiply | Register, Register | Multiply the contents of one register by another | `0x20` |
+| `FLPT_MUL` | Multiply | Register, Literal | Multiply the contents of a register by a literal value | `0x21` |
+| `FLPT_MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address in a label | `0x22` |
+| `FLPT_MUL` | Multiply | Register, Pointer | Multiply a register by the contents of memory at an address in a register | `0x23` |
+| `FLPT_DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x30` |
+| `FLPT_DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x31` |
+| `FLPT_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address in a label, discarding the remainder | `0x32` |
+| `FLPT_DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x33` |
+| `FLPT_DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x34` |
+| `FLPT_DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x35` |
+| `FLPT_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address in a label, storing the remainder | `0x36` |
+| `FLPT_DVR` | Divide With Remainder | Register, Register, Pointer | Divide a register by the contents of memory at an address in a register, storing the remainder | `0x37` |
+| `FLPT_REM` | Remainder Only | Register, Register | Divide the contents of one register by another, storing only the remainder | `0x38` |
+| `FLPT_REM` | Remainder Only | Register, Literal | Divide the contents of a register by a literal value, storing only the remainder | `0x39` |
+| `FLPT_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address in a label, storing only the remainder | `0x3A` |
+| `FLPT_REM` | Remainder Only | Register, Pointer | Divide a register by the contents of memory at an address in a register, storing only the remainder | `0x3B` |
+| `FLPT_SIN` | Sine | Register | Calculate the sine of the value in a register in radians | `0x40` |
+| `FLPT_ASN` | Inverse Sine | Register | Calculate the inverse sine of the value in a register in radians | `0x41` |
+| `FLPT_COS` | Cosine | Register | Calculate the cosine of the value in a register in radians | `0x42` |
+| `FLPT_ACS` | Inverse Cosine | Register | Calculate the inverse cosine of the value in a register in radians | `0x43` |
+| `FLPT_TAN` | Tangent | Register | Calculate the tangent of the value in a register in radians | `0x44` |
+| `FLPT_ATN` | Inverse Tangent | Register | Calculate the inverse tangent of the value in a register in radians | `0x45` |
+| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Register | Calculate the 2 argument inverse tangent between 2 registers in the order y, x | `0x46` |
+| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Literal | Calculate the 2 argument inverse tangent between a register and a literal in the order y, x | `0x47` |
+| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Address | Calculate the 2 argument inverse tangent between a register and the contents of memory at an address in a label in the order y, x | `0x48` |
+| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Pointer | Calculate the 2 argument inverse tangent between a register and the contents of memory at an address in a register in the order y, x | `0x49` |
+| `FLPT_POW` | Exponentiation | Register, Register | Calculate the value of a register raised to the power of another register | `0x50` |
+| `FLPT_POW` | Exponentiation | Register, Literal | Calculate the value of a register raised to the power of a literal | `0x51` |
+| `FLPT_POW` | Exponentiation | Register, Address | Calculate the value of a register raised to the power of the contents of memory at an address in a label | `0x52` |
+| `FLPT_POW` | Exponentiation | Register, Pointer | Calculate the value of a register raised to the power of the contents of memory at an address in a register | `0x53` |
+| `FLPT_LOG` | Logarithm | Register, Register | Calculate the logarithm of a register with the base from another register | `0x50` |
+| `FLPT_LOG` | Logarithm | Register, Literal | Calculate the logarithm of a register with the base from a literal | `0x51` |
+| `FLPT_LOG` | Logarithm | Register, Address | Calculate the logarithm of a register with the base from the contents of memory at an address in a label | `0x52` |
+| `FLPT_LOG` | Logarithm | Register, Pointer | Calculate the logarithm of a register with the base from the contents of memory at an address in a register | `0x53` |
+| **Console Writing** |||||
+| `FLPT_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x70` |
+| `FLPT_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x71` |
+| `FLPT_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the console | `0x72` |
+| `FLPT_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x73` |
+| **File Writing** |||||
+| `FLPT_WFN` | Write Number to File | Register | Write a register value as a floating point decimal number to the opened file | `0x80` |
+| `FLPT_WFN` | Write Number to File | Literal | Write a literal value as a floating point decimal number to the opened file | `0x81` |
+| `FLPT_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a floating point decimal number to the opened file | `0x82` |
+| `FLPT_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a floating point decimal number to the opened file | `0x83` |
+| **Conversions** |||||
+| `FLPT_EXH` | Extend Half Precision Float to Double Precision Float | Register | Convert the value in a register from a half-precision float (16-bits) to a double-precision float (64-bits) | `0x90` |
+| `FLPT_EXS` | Extend Single Precision Float to Double Precision Float | Register | Convert the value in a register from a single-precision float (32-bits) to a double-precision float (64-bits) | `0x91` |
+| `FLPT_SHS` | Shrink Double Precision Float to Single Precision Float | Register | Convert the value in a register from a double-precision float (64-bits) to a single-precision float (32-bits) | `0x92` |
+| `FLPT_SHH` | Shrink Double Precision Float to Half Precision Float | Register | Convert the value in a register from a double-precision float (64-bits) to a half-precision float (16-bits) | `0x93` |
+| `FLPT_NEG` | Negation | Register | Reverse the sign of the floating point number in a register, equivalent to flipping the sign bit. | `0xA0` |
+| `FLPT_UTF` | Convert Unsigned Quad Word to Double Precision Float | Register | Convert the unsigned value in a register to a double-precision float (64-bits) | `0xB0` |
+| `FLPT_STF` | Convert Signed Quad Word to Double Precision Float | Register | Convert the signed value in a register to a double-precision float (64-bits) | `0xB1` |
+| `FLPT_FTS` | Convert Double Precision Float to Signed Quad Word through Truncation | Register | Convert the double-precision float (64-bits) value in a register to a signed 64-bit integer by rounding toward 0 | `0xC0` |
+| `FLPT_FCS` | Convert Double Precision Float to Signed Quad Word through Ceiling Rounding | Register | Convert the double-precision float (64-bits) value in a register to a signed 64-bit integer by rounding to the greater integer | `0xC1` |
+| `FLPT_FFS` | Convert Double Precision Float to Signed Quad Word through Floor Rounding | Register | Convert the double-precision float (64-bits) value in a register to a signed 64-bit integer by rounding to the lesser integer | `0xC2` |
+| `FLPT_FNS` | Convert Double Precision Float to Signed Quad Word through Nearest Rounding | Register | Convert the double-precision float (64-bits) value in a register to the nearest signed 64-bit integer, rounding midpoints to the nearest even number | `0xC3` |
+| **Comparison** |||||
+| `FLPT_CMP` | Compare | Register, Register | Subtract a register from another, discarding the result whilst still updating status flags | `0xD0` |
+| `FLPT_CMP` | Compare | Register, Literal | Subtract a literal value from a register, discarding the result whilst still updating status flags | `0xD1` |
+| `FLPT_CMP` | Compare | Register, Address | Subtract the contents of memory at an address in a label from a register, discarding the result whilst still updating status flags | `0xD2` |
+| `FLPT_CMP` | Compare | Register, Pointer | Subtract the contents of memory at an address in a register from a register, discarding the result whilst still updating status flags | `0xD3` |
+
+### Extended Base Set
+
+Extension set number `0x03`, opcodes start with `0xFF, 0x03`.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code |
+|----------|-----------|----------|----------|------------------|
+| **Byte Operations** |||||
+| `EXTD_BSW` | Reverse Byte Order | Register | Reverse the byte order of a register, thereby converting little endian to big endian and vice versa | `0x00` |
 
 ## ASCII Table
 

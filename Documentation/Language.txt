@@ -2,7 +2,7 @@ AssEmbly Language Reference
 
 Applies to versions: 2.0.0
 
-Last revised: 2023-09-05
+Last revised: 2023-09-08
 
 Introduction
 
@@ -78,6 +78,8 @@ Table of Contents
     -   Full Instruction Reference
         -   Base Instruction Set
         -   Signed Extension Set
+        -   Floating Point Extension Set
+        -   Extended Base Set
     -   ASCII Table
 
 Technical Information
@@ -2497,7 +2499,9 @@ instruction set opcodes.
                                            memory at an      
                                            address in a      
                                            label, discarding 
-                                           the result        
+                                           the result whilst 
+                                           still updating    
+                                           status flags      
 
   TST           Test          Register,    Bitwise and a     0x73
                               Pointer      register and the  
@@ -2506,7 +2510,9 @@ instruction set opcodes.
                                            address in a      
                                            register,         
                                            discarding the    
-                                           result            
+                                           result whilst     
+                                           still updating    
+                                           status flags      
 
   CMP           Compare       Register,    Subtract a        0x74
                               Register     register from     
@@ -2531,7 +2537,9 @@ instruction set opcodes.
                                            label from a      
                                            register,         
                                            discarding the    
-                                           result            
+                                           result whilst     
+                                           still updating    
+                                           status flags      
 
   CMP           Compare       Register,    Subtract the      0x77
                               Pointer      contents of       
@@ -2540,7 +2548,9 @@ instruction set opcodes.
                                            register from a   
                                            register,         
                                            discarding the    
-                                           result            
+                                           result whilst     
+                                           still updating    
+                                           status flags      
 
   Data Moving                                                
 
@@ -3804,6 +3814,498 @@ Extension set number 0x01, opcodes start with 0xFF, 0x01.
                                               the sign of the  
                                               value.           
   ----------------------------------------------------------------------------------
+
+Floating Point Extension Set
+
+Extension set number 0x02, opcodes start with 0xFF, 0x02.
+
+  ------------------------------------------------------------------------------------
+  Mnemonic      Full Name        Operands     Function           Instruction Code
+  ------------- ---------------- ------------ ------------------ ---------------------
+  Math                                                           
+
+  FLPT_ADD      Add              Register,    Add the contents   0x00
+                                 Register     of one register to 
+                                              another            
+
+  FLPT_ADD      Add              Register,    Add a literal      0x01
+                                 Literal      value to the       
+                                              contents of a      
+                                              register           
+
+  FLPT_ADD      Add              Register,    Add the contents   0x02
+                                 Address      of memory at an    
+                                              address in a label 
+                                              to a register      
+
+  FLPT_ADD      Add              Register,    Add the contents   0x03
+                                 Pointer      of memory at an    
+                                              address in a       
+                                              register to a      
+                                              register           
+
+  FLPT_SUB      Subtract         Register,    Subtract the       0x10
+                                 Register     contents of one    
+                                              register from      
+                                              another            
+
+  FLPT_SUB      Subtract         Register,    Subtract a literal 0x11
+                                 Literal      value from the     
+                                              contents of a      
+                                              register           
+
+  FLPT_SUB      Subtract         Register,    Subtract the       0x12
+                                 Address      contents of memory 
+                                              at an address in a 
+                                              label from a       
+                                              register           
+
+  FLPT_SUB      Subtract         Register,    Subtract the       0x13
+                                 Pointer      contents of memory 
+                                              at an address in a 
+                                              register from a    
+                                              register           
+
+  FLPT_MUL      Multiply         Register,    Multiply the       0x20
+                                 Register     contents of one    
+                                              register by        
+                                              another            
+
+  FLPT_MUL      Multiply         Register,    Multiply the       0x21
+                                 Literal      contents of a      
+                                              register by a      
+                                              literal value      
+
+  FLPT_MUL      Multiply         Register,    Multiply a         0x22
+                                 Address      register by the    
+                                              contents of memory 
+                                              at an address in a 
+                                              label              
+
+  FLPT_MUL      Multiply         Register,    Multiply a         0x23
+                                 Pointer      register by the    
+                                              contents of memory 
+                                              at an address in a 
+                                              register           
+
+  FLPT_DIV      Integer Divide   Register,    Divide the         0x30
+                                 Register     contents of one    
+                                              register by        
+                                              another,           
+                                              discarding the     
+                                              remainder          
+
+  FLPT_DIV      Integer Divide   Register,    Divide the         0x31
+                                 Literal      contents of a      
+                                              register by a      
+                                              literal value,     
+                                              discarding the     
+                                              remainder          
+
+  FLPT_DIV      Integer Divide   Register,    Divide a register  0x32
+                                 Address      by the contents of 
+                                              memory at an       
+                                              address in a       
+                                              label, discarding  
+                                              the remainder      
+
+  FLPT_DIV      Integer Divide   Register,    Divide a register  0x33
+                                 Pointer      by the contents of 
+                                              memory at an       
+                                              address in a       
+                                              register,          
+                                              discarding the     
+                                              remainder          
+
+  FLPT_DVR      Divide With      Register,    Divide the         0x34
+                Remainder        Register,    contents of one    
+                                 Register     register by        
+                                              another, storing   
+                                              the remainder      
+
+  FLPT_DVR      Divide With      Register,    Divide the         0x35
+                Remainder        Register,    contents of a      
+                                 Literal      register by a      
+                                              literal value,     
+                                              storing the        
+                                              remainder          
+
+  FLPT_DVR      Divide With      Register,    Divide a register  0x36
+                Remainder        Register,    by the contents of 
+                                 Address      memory at an       
+                                              address in a       
+                                              label, storing the 
+                                              remainder          
+
+  FLPT_DVR      Divide With      Register,    Divide a register  0x37
+                Remainder        Register,    by the contents of 
+                                 Pointer      memory at an       
+                                              address in a       
+                                              register, storing  
+                                              the remainder      
+
+  FLPT_REM      Remainder Only   Register,    Divide the         0x38
+                                 Register     contents of one    
+                                              register by        
+                                              another, storing   
+                                              only the remainder 
+
+  FLPT_REM      Remainder Only   Register,    Divide the         0x39
+                                 Literal      contents of a      
+                                              register by a      
+                                              literal value,     
+                                              storing only the   
+                                              remainder          
+
+  FLPT_REM      Remainder Only   Register,    Divide a register  0x3A
+                                 Address      by the contents of 
+                                              memory at an       
+                                              address in a       
+                                              label, storing     
+                                              only the remainder 
+
+  FLPT_REM      Remainder Only   Register,    Divide a register  0x3B
+                                 Pointer      by the contents of 
+                                              memory at an       
+                                              address in a       
+                                              register, storing  
+                                              only the remainder 
+
+  FLPT_SIN      Sine             Register     Calculate the sine 0x40
+                                              of the value in a  
+                                              register in        
+                                              radians            
+
+  FLPT_ASN      Inverse Sine     Register     Calculate the      0x41
+                                              inverse sine of    
+                                              the value in a     
+                                              register in        
+                                              radians            
+
+  FLPT_COS      Cosine           Register     Calculate the      0x42
+                                              cosine of the      
+                                              value in a         
+                                              register in        
+                                              radians            
+
+  FLPT_ACS      Inverse Cosine   Register     Calculate the      0x43
+                                              inverse cosine of  
+                                              the value in a     
+                                              register in        
+                                              radians            
+
+  FLPT_TAN      Tangent          Register     Calculate the      0x44
+                                              tangent of the     
+                                              value in a         
+                                              register in        
+                                              radians            
+
+  FLPT_ATN      Inverse Tangent  Register     Calculate the      0x45
+                                              inverse tangent of 
+                                              the value in a     
+                                              register in        
+                                              radians            
+
+  FLPT_PTN      2 Argument       Register,    Calculate the 2    0x46
+                Inverse Tangent  Register     argument inverse   
+                                              tangent between 2  
+                                              registers in the   
+                                              order y, x         
+
+  FLPT_PTN      2 Argument       Register,    Calculate the 2    0x47
+                Inverse Tangent  Literal      argument inverse   
+                                              tangent between a  
+                                              register and a     
+                                              literal in the     
+                                              order y, x         
+
+  FLPT_PTN      2 Argument       Register,    Calculate the 2    0x48
+                Inverse Tangent  Address      argument inverse   
+                                              tangent between a  
+                                              register and the   
+                                              contents of memory 
+                                              at an address in a 
+                                              label in the order 
+                                              y, x               
+
+  FLPT_PTN      2 Argument       Register,    Calculate the 2    0x49
+                Inverse Tangent  Pointer      argument inverse   
+                                              tangent between a  
+                                              register and the   
+                                              contents of memory 
+                                              at an address in a 
+                                              register in the    
+                                              order y, x         
+
+  FLPT_POW      Exponentiation   Register,    Calculate the      0x50
+                                 Register     value of a         
+                                              register raised to 
+                                              the power of       
+                                              another register   
+
+  FLPT_POW      Exponentiation   Register,    Calculate the      0x51
+                                 Literal      value of a         
+                                              register raised to 
+                                              the power of a     
+                                              literal            
+
+  FLPT_POW      Exponentiation   Register,    Calculate the      0x52
+                                 Address      value of a         
+                                              register raised to 
+                                              the power of the   
+                                              contents of memory 
+                                              at an address in a 
+                                              label              
+
+  FLPT_POW      Exponentiation   Register,    Calculate the      0x53
+                                 Pointer      value of a         
+                                              register raised to 
+                                              the power of the   
+                                              contents of memory 
+                                              at an address in a 
+                                              register           
+
+  FLPT_LOG      Logarithm        Register,    Calculate the      0x50
+                                 Register     logarithm of a     
+                                              register with the  
+                                              base from another  
+                                              register           
+
+  FLPT_LOG      Logarithm        Register,    Calculate the      0x51
+                                 Literal      logarithm of a     
+                                              register with the  
+                                              base from a        
+                                              literal            
+
+  FLPT_LOG      Logarithm        Register,    Calculate the      0x52
+                                 Address      logarithm of a     
+                                              register with the  
+                                              base from the      
+                                              contents of memory 
+                                              at an address in a 
+                                              label              
+
+  FLPT_LOG      Logarithm        Register,    Calculate the      0x53
+                                 Pointer      logarithm of a     
+                                              register with the  
+                                              base from the      
+                                              contents of memory 
+                                              at an address in a 
+                                              register           
+
+  Console                                                        
+  Writing                                                        
+
+  FLPT_WCN      Write Number to  Register     Write a register   0x70
+                Console                       value as a signed  
+                                              decimal number to  
+                                              the console        
+
+  FLPT_WCN      Write Number to  Literal      Write a literal    0x71
+                Console                       value as a signed  
+                                              decimal number to  
+                                              the console        
+
+  FLPT_WCN      Write Number to  Address      Write 64-bits (4   0x72
+                Console                       bytes) of memory   
+                                              starting at the    
+                                              address in a label 
+                                              as a signed        
+                                              decimal number to  
+                                              the console        
+
+  FLPT_WCN      Write Number to  Pointer      Write 64-bits (4   0x73
+                Console                       bytes) of memory   
+                                              starting at the    
+                                              address in a       
+                                              register as a      
+                                              signed decimal     
+                                              number to the      
+                                              console            
+
+  File Writing                                                   
+
+  FLPT_WFN      Write Number to  Register     Write a register   0x80
+                File                          value as a         
+                                              floating point     
+                                              decimal number to  
+                                              the opened file    
+
+  FLPT_WFN      Write Number to  Literal      Write a literal    0x81
+                File                          value as a         
+                                              floating point     
+                                              decimal number to  
+                                              the opened file    
+
+  FLPT_WFN      Write Number to  Address      Write 64-bits (4   0x82
+                File                          bytes) of memory   
+                                              starting at the    
+                                              address in a label 
+                                              as a floating      
+                                              point decimal      
+                                              number to the      
+                                              opened file        
+
+  FLPT_WFN      Write Number to  Pointer      Write 64-bits (4   0x83
+                File                          bytes) of memory   
+                                              starting at the    
+                                              address in a       
+                                              register as a      
+                                              floating point     
+                                              decimal number to  
+                                              the opened file    
+
+  Conversions                                                    
+
+  FLPT_EXH      Extend Half      Register     Convert the value  0x90
+                Precision Float               in a register from 
+                to Double                     a half-precision   
+                Precision Float               float (16-bits) to 
+                                              a double-precision 
+                                              float (64-bits)    
+
+  FLPT_EXS      Extend Single    Register     Convert the value  0x91
+                Precision Float               in a register from 
+                to Double                     a single-precision 
+                Precision Float               float (32-bits) to 
+                                              a double-precision 
+                                              float (64-bits)    
+
+  FLPT_SHS      Shrink Double    Register     Convert the value  0x92
+                Precision Float               in a register from 
+                to Single                     a double-precision 
+                Precision Float               float (64-bits) to 
+                                              a single-precision 
+                                              float (32-bits)    
+
+  FLPT_SHH      Shrink Double    Register     Convert the value  0x93
+                Precision Float               in a register from 
+                to Half                       a double-precision 
+                Precision Float               float (64-bits) to 
+                                              a half-precision   
+                                              float (16-bits)    
+
+  FLPT_NEG      Negation         Register     Reverse the sign   0xA0
+                                              of the floating    
+                                              point number in a  
+                                              register,          
+                                              equivalent to      
+                                              flipping the sign  
+                                              bit.               
+
+  FLPT_UTF      Convert Unsigned Register     Convert the        0xB0
+                Quad Word to                  unsigned value in  
+                Double Precision              a register to a    
+                Float                         double-precision   
+                                              float (64-bits)    
+
+  FLPT_STF      Convert Signed   Register     Convert the signed 0xB1
+                Quad Word to                  value in a         
+                Double Precision              register to a      
+                Float                         double-precision   
+                                              float (64-bits)    
+
+  FLPT_FTS      Convert Double   Register     Convert the        0xC0
+                Precision Float               double-precision   
+                to Signed Quad                float (64-bits)    
+                Word through                  value in a         
+                Truncation                    register to a      
+                                              signed 64-bit      
+                                              integer by         
+                                              rounding toward 0  
+
+  FLPT_FCS      Convert Double   Register     Convert the        0xC1
+                Precision Float               double-precision   
+                to Signed Quad                float (64-bits)    
+                Word through                  value in a         
+                Ceiling Rounding              register to a      
+                                              signed 64-bit      
+                                              integer by         
+                                              rounding to the    
+                                              greater integer    
+
+  FLPT_FFS      Convert Double   Register     Convert the        0xC2
+                Precision Float               double-precision   
+                to Signed Quad                float (64-bits)    
+                Word through                  value in a         
+                Floor Rounding                register to a      
+                                              signed 64-bit      
+                                              integer by         
+                                              rounding to the    
+                                              lesser integer     
+
+  FLPT_FNS      Convert Double   Register     Convert the        0xC3
+                Precision Float               double-precision   
+                to Signed Quad                float (64-bits)    
+                Word through                  value in a         
+                Nearest Rounding              register to the    
+                                              nearest signed     
+                                              64-bit integer,    
+                                              rounding midpoints 
+                                              to the nearest     
+                                              even number        
+
+  Comparison                                                     
+
+  FLPT_CMP      Compare          Register,    Subtract a         0xD0
+                                 Register     register from      
+                                              another,           
+                                              discarding the     
+                                              result whilst      
+                                              still updating     
+                                              status flags       
+
+  FLPT_CMP      Compare          Register,    Subtract a literal 0xD1
+                                 Literal      value from a       
+                                              register,          
+                                              discarding the     
+                                              result whilst      
+                                              still updating     
+                                              status flags       
+
+  FLPT_CMP      Compare          Register,    Subtract the       0xD2
+                                 Address      contents of memory 
+                                              at an address in a 
+                                              label from a       
+                                              register,          
+                                              discarding the     
+                                              result whilst      
+                                              still updating     
+                                              status flags       
+
+  FLPT_CMP      Compare          Register,    Subtract the       0xD3
+                                 Pointer      contents of memory 
+                                              at an address in a 
+                                              register from a    
+                                              register,          
+                                              discarding the     
+                                              result whilst      
+                                              still updating     
+                                              status flags       
+  ------------------------------------------------------------------------------------
+
+Extended Base Set
+
+Extension set number 0x03, opcodes start with 0xFF, 0x03.
+
+  --------------------------------------------------------------------------
+  Mnemonic     Full Name     Operands     Function     Instruction Code
+  ------------ ------------- ------------ ------------ ---------------------
+  Byte                                                 
+  Operations                                           
+
+  EXTD_BSW     Reverse Byte  Register     Reverse the  0x00
+               Order                      byte order   
+                                          of a         
+                                          register,    
+                                          thereby      
+                                          converting   
+                                          little       
+                                          endian to    
+                                          big endian   
+                                          and vice     
+                                          versa        
+  --------------------------------------------------------------------------
 
 ASCII Table
 
