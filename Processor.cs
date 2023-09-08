@@ -1485,7 +1485,15 @@ namespace AssEmbly
                                             break;
                                         }
                                     case 0x1:  // RFC reg
-                                        WriteMemoryRegister(operandStart, fileRead!.ReadByte());
+                                        if (fileRead is null)
+                                        {
+                                            throw new FileOperationException("Cannot execute file read instruction if a file is not open");
+                                        }
+                                        if (fileRead.BaseStream.Position >= openFileSize)
+                                        {
+                                            throw new FileOperationException("Cannot execute file read instruction. The end of the file has already been reached.");
+                                        }
+                                        WriteMemoryRegister(operandStart, fileRead.ReadByte());
                                         if (fileRead.BaseStream.Position >= openFileSize)
                                         {
                                             Registers[(int)Register.rsf] |= (ulong)StatusFlags.FileEnd;
