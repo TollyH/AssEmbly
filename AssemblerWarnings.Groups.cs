@@ -235,9 +235,9 @@
         };
 
         /// <summary>
-        /// Every opcode that reads a value from memory as data, mapped to the index of the operand that is the memory address.
+        /// Every opcode that reads a value from memory as data, mapped to the byte offset of the operand that is the memory address (not including the opcode).
         /// </summary>
-        internal static readonly Dictionary<Opcode, int> readValueFromMemory = new()
+        internal static readonly Dictionary<Opcode, ulong> readValueFromMemory = new()
         {
             { new Opcode(0x00, 0x12), 1 },  // ADD reg, adr
             { new Opcode(0x00, 0x22), 1 },  // SUB reg, adr
@@ -257,7 +257,7 @@
             { new Opcode(0x00, 0x92), 1 },  // MVD reg, adr
             { new Opcode(0x00, 0x9A), 1 },  // MVQ reg, adr
             { new Opcode(0x00, 0xA2), 0 },  // PSH adr
-            { new Opcode(0x00, 0xB4), 1 },  // CAL adr, adr
+            { new Opcode(0x00, 0xB4), 8 },  // CAL adr, adr
             { new Opcode(0x00, 0xB8), 1 },  // CAL ptr, adr
             { new Opcode(0x00, 0xBD), 0 },  // RET adr
             { new Opcode(0x00, 0xC2), 0 },  // WCN adr

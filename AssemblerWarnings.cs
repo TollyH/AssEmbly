@@ -330,19 +330,19 @@ namespace AssEmbly
                 lastExecutableLine[file] = line;
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
-                    jumpCallToLabels[(line, file)] = currentAddress + 1;
+                    jumpCallToLabels[(line, file)] = currentAddress + operandStart;
                 }
                 if (writeToMemory.Contains(instructionOpcode))
                 {
-                    writesToLabels[(line, file)] = currentAddress + 1;
+                    writesToLabels[(line, file)] = currentAddress + operandStart;
                 }
-                if (readValueFromMemory.TryGetValue(instructionOpcode, out int addressOpcodeIndex))
+                if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong addressOpcodeOffset))
                 {
-                    readsFromLabels[(line, file)] = currentAddress + (uint)addressOpcodeIndex + 1;
+                    readsFromLabels[(line, file)] = currentAddress + operandStart + addressOpcodeOffset;
                 }
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
-                    jumpsCalls[(line, file)] = currentAddress + 1;
+                    jumpsCalls[(line, file)] = currentAddress + operandStart;
                 }
             }
         }
@@ -455,7 +455,7 @@ namespace AssEmbly
             foreach (((int writeLine, string writeFile), ulong labelAddress) in writesToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (!dataAddresses.Contains(address))
+                if (!dataAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0004, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
@@ -472,7 +472,7 @@ namespace AssEmbly
             foreach (((int writeLine, string writeFile), ulong labelAddress) in readsFromLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (!dataAddresses.Contains(address))
+                if (!dataAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
