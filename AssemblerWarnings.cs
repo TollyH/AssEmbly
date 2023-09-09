@@ -828,7 +828,7 @@ namespace AssEmbly
 
         private bool Analyzer_Rolling_Suggestion_0010()
         {
-            // Suggestion 0010: Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {reg}, {reg}` instead.
+            // Suggestion 0010: Shift operation shifts by 64 bits or more, which will always shift out all bits.
             return newBytes.Length > 0 && !instructionIsData && shiftByLiteral.Contains(instructionOpcode) && operands[1][0] != ':'
                 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) >= 64;
         }

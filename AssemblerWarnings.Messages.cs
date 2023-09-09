@@ -49,7 +49,7 @@
             { 0007, "Use `ICR {1}` instead of `ADD {1}, 1`, as it results in less bytes." },
             { 0008, "Use `DCR {1}` instead of `SUB {1}, 1`, as it results in less bytes." },
             { 0009, "Operation has no effect." },
-            { 0010, "Shift operation shifts by 64 bits or more, which will always result in 0. Use `XOR {1}, {1}` instead." },
+            { 0010, "Shift operation shifts by 64 bits or more, which will always shift out all bits." },
             { 0011, "Remove leading 0 digits from denary number." },
             { 0012, "Remove useless `PAD 0` directive." },
             { 0013, "Use `DCR {1}` instead of `ADD {1}, -1`, as it results in less bytes." },
