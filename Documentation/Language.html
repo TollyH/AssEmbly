@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-language-reference">AssEmbly Language Reference</h1>
 <p>Applies to versions: <code>2.0.0</code></p>
-<p>Last revised: 2023-09-08</p>
+<p>Last revised: 2023-09-09</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -291,6 +291,7 @@ Stack</a></li>
 Parameters</a></li>
 </ul></li>
 <li><a href="#text-encoding">Text Encoding</a></li>
+<li><a href="#status-flag-behaviour">Status Flag Behaviour</a></li>
 <li><a href="#full-instruction-reference">Full Instruction Reference</a>
 <ul>
 <li><a href="#base-instruction-set">Base Instruction Set</a></li>
@@ -2191,6 +2192,865 @@ at a time. As long as you read/write all of the UTF-8 bytes in the
 correct order, they should be stored and displayed correctly.</p>
 <p>Text bytes read from files <strong>will not</strong> be automatically
 converted to UTF-8 if the file was saved with another encoding.</p>
+<h2 id="status-flag-behaviour">Status Flag Behaviour</h2>
+<ul>
+<li><code>0</code> = Instruction always unsets flag</li>
+<li><code>1</code> = Instruction always sets flag</li>
+<li><code>(...)</code> = Instruction sets flag if the given condition is
+satisfied, otherwise it unsets it</li>
+<li><code>[...]</code> = Instruction sets flag if the given condition is
+satisfied, otherwise it maintains its current value</li>
+<li><code>{...}</code> = Instruction unsets flag if the given condition
+is satisfied, otherwise it maintains its current value</li>
+<li><code>X</code> = Instruction does not affect flag</li>
+<li><code>STD</code> = Instructions uses standard behaviour for flag
+according to result, unaffected by operands. They are as follows:
+<ul>
+<li>For zero flag, set if the result is equal to 0, otherwise unset (for
+floating point operations, <code>-0</code> is considered equal to
+<code>0</code> and will set the zero flag)</li>
+<li>For sign flag, set if the most significant bit of the result is set,
+otherwise unset</li>
+</ul></li>
+</ul>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 4%" />
+<col style="width: 31%" />
+<col style="width: 22%" />
+<col style="width: 4%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Instruction</th>
+<th>Zero</th>
+<th>Carry</th>
+<th>File End</th>
+<th>Sign</th>
+<th>Overflow</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>HLT</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>NOP</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>JMP</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>JEQ</code> / <code>JZO</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>JNE</code> / <code>JNZ</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>JLT</code> / <code>JCA</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>JLE</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>JGT</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>JGE</code> / <code>JNC</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>ADD</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>(Result is unrepresentable as signed)</td>
+</tr>
+<tr class="odd">
+<td><code>ICR</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>(Result is unrepresentable as signed)</td>
+</tr>
+<tr class="even">
+<td><code>SUB</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>(Result is unrepresentable as signed)</td>
+</tr>
+<tr class="odd">
+<td><code>DCR</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>(Result is unrepresentable as signed)</td>
+</tr>
+<tr class="even">
+<td><code>MUL</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>DIV</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>DVR</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>REM</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>SHL</code></td>
+<td>STD</td>
+<td>(Any <code>1</code> bit was shifted past MSB)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>SHR</code></td>
+<td>STD</td>
+<td>(Any <code>1</code> bit was shifted past LSB)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>AND</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>ORR</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>XOR</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>NOT</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>RNG</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>TST</code></td>
+<td>STD</td>
+<td>X</td>
+<td>X</td>
+<td>STD</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>CMP</code></td>
+<td>STD</td>
+<td>(Result is unrepresentable as unsigned)</td>
+<td>X</td>
+<td>STD</td>
+<td>(Result is unrepresentable as signed)</td>
+</tr>
+<tr class="odd">
+<td><code>MVB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>MVW</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>MVD</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>MVQ</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>PSH</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>POP</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>CAL</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>RET</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>WCN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>WCB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>WCX</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>WCC</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>WFN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>WFB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>WFX</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>WFC</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>OFL</code></td>
+<td>X</td>
+<td>X</td>
+<td>(File is empty)</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>CFL</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>DFL</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>FEX</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>FSZ</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>RCC</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>RFC</code></td>
+<td>X</td>
+<td>X</td>
+<td>[No more unread bytes in file]</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JLT</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JLE</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JGT</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JGE</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JSI</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JNS</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_JOV</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_JNO</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_DIV</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_DVR</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_REM</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_SHR</code></td>
+<td>STD</td>
+<td>(Any <code>1</code> bit was shifted past LSB)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_MVW</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_MVD</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WCN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WCB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_WFN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_WFB</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_EXB</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_EXW</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>SIGN_EXD</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>SIGN_NEG</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_ADD</code></td>
+<td>STD</td>
+<td>(Result is less than the initial value)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SUB</code></td>
+<td>STD</td>
+<td>(Result is greater than the initial value)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_MUL</code></td>
+<td>STD</td>
+<td>(Result is less than the initial value)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_DIV</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_DVR</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_REM</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_SIN</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_ASN</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_COS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_ACS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_TAN</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_ATN</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_PTN</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_POW</code></td>
+<td>STD</td>
+<td>(Result is less than the initial value)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_LOG</code></td>
+<td>STD</td>
+<td>(Result is greater than the initial value)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_WCN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_WFN</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_EXH</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_EXS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_SHS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_SHH</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_NEG</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_UTF</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_STF</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_FTS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_FCS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_FFS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>FLPT_FNS</code></td>
+<td>STD</td>
+<td>0</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td><code>FLPT_CMP</code></td>
+<td>STD</td>
+<td>(Value of first operand is less than second)</td>
+<td>X</td>
+<td>STD</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><code>EXTD_BSW</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+</tbody>
+</table>
 <h2 id="full-instruction-reference">Full Instruction Reference</h2>
 <h3 id="base-instruction-set">Base Instruction Set</h3>
 <p>Extension set number <code>0x00</code>, opcodes start with

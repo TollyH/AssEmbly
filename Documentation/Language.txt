@@ -2,7 +2,7 @@ AssEmbly Language Reference
 
 Applies to versions: 2.0.0
 
-Last revised: 2023-09-08
+Last revised: 2023-09-09
 
 Introduction
 
@@ -75,6 +75,7 @@ Table of Contents
         -   Subroutines and the Stack
         -   Passing Multiple Parameters
     -   Text Encoding
+    -   Status Flag Behaviour
     -   Full Instruction Reference
         -   Base Instruction Set
         -   Signed Extension Set
@@ -2077,6 +2078,258 @@ correct order, they should be stored and displayed correctly.
 
 Text bytes read from files will not be automatically converted to UTF-8
 if the file was saved with another encoding.
+
+Status Flag Behaviour
+
+-   0 = Instruction always unsets flag
+-   1 = Instruction always sets flag
+-   (...) = Instruction sets flag if the given condition is satisfied,
+    otherwise it unsets it
+-   [...] = Instruction sets flag if the given condition is satisfied,
+    otherwise it maintains its current value
+-   {...} = Instruction unsets flag if the given condition is satisfied,
+    otherwise it maintains its current value
+-   X = Instruction does not affect flag
+-   STD = Instructions uses standard behaviour for flag according to
+    result, unaffected by operands. They are as follows:
+    -   For zero flag, set if the result is equal to 0, otherwise unset
+        (for floating point operations, -0 is considered equal to 0 and
+        will set the zero flag)
+    -   For sign flag, set if the most significant bit of the result is
+        set, otherwise unset
+
+  --------------------------------------------------------------------------------------
+  Instruction   Zero   Carry                  File End        Sign   Overflow
+  ------------- ------ ---------------------- --------------- ------ -------------------
+  HLT           X      X                      X               X      X
+
+  NOP           X      X                      X               X      X
+
+  JMP           X      X                      X               X      X
+
+  JEQ / JZO     X      X                      X               X      X
+
+  JNE / JNZ     X      X                      X               X      X
+
+  JLT / JCA     X      X                      X               X      X
+
+  JLE           X      X                      X               X      X
+
+  JGT           X      X                      X               X      X
+
+  JGE / JNC     X      X                      X               X      X
+
+  ADD           STD    (Result is             X               STD    (Result is
+                       unrepresentable as                            unrepresentable as
+                       unsigned)                                     signed)
+
+  ICR           STD    (Result is             X               STD    (Result is
+                       unrepresentable as                            unrepresentable as
+                       unsigned)                                     signed)
+
+  SUB           STD    (Result is             X               STD    (Result is
+                       unrepresentable as                            unrepresentable as
+                       unsigned)                                     signed)
+
+  DCR           STD    (Result is             X               STD    (Result is
+                       unrepresentable as                            unrepresentable as
+                       unsigned)                                     signed)
+
+  MUL           STD    (Result is             X               STD    0
+                       unrepresentable as                            
+                       unsigned)                                     
+
+  DIV           STD    0                      X               STD    0
+
+  DVR           STD    0                      X               STD    0
+
+  REM           STD    0                      X               STD    0
+
+  SHL           STD    (Any 1 bit was shifted X               STD    0
+                       past MSB)                                     
+
+  SHR           STD    (Any 1 bit was shifted X               STD    0
+                       past LSB)                                     
+
+  AND           STD    0                      X               STD    0
+
+  ORR           STD    0                      X               STD    0
+
+  XOR           STD    0                      X               STD    0
+
+  NOT           STD    0                      X               STD    0
+
+  RNG           STD    0                      X               STD    0
+
+  TST           STD    X                      X               STD    X
+
+  CMP           STD    (Result is             X               STD    (Result is
+                       unrepresentable as                            unrepresentable as
+                       unsigned)                                     signed)
+
+  MVB           X      X                      X               X      X
+
+  MVW           X      X                      X               X      X
+
+  MVD           X      X                      X               X      X
+
+  MVQ           X      X                      X               X      X
+
+  PSH           X      X                      X               X      X
+
+  POP           X      X                      X               X      X
+
+  CAL           X      X                      X               X      X
+
+  RET           X      X                      X               X      X
+
+  WCN           X      X                      X               X      X
+
+  WCB           X      X                      X               X      X
+
+  WCX           X      X                      X               X      X
+
+  WCC           X      X                      X               X      X
+
+  WFN           X      X                      X               X      X
+
+  WFB           X      X                      X               X      X
+
+  WFX           X      X                      X               X      X
+
+  WFC           X      X                      X               X      X
+
+  OFL           X      X                      (File is empty) X      X
+
+  CFL           X      X                      X               X      X
+
+  DFL           X      X                      X               X      X
+
+  FEX           X      X                      X               X      X
+
+  FSZ           X      X                      X               X      X
+
+  RCC           X      X                      X               X      X
+
+  RFC           X      X                      [No more unread X      X
+                                              bytes in file]         
+
+  SIGN_JLT      X      X                      X               X      X
+
+  SIGN_JLE      X      X                      X               X      X
+
+  SIGN_JGT      X      X                      X               X      X
+
+  SIGN_JGE      X      X                      X               X      X
+
+  SIGN_JSI      X      X                      X               X      X
+
+  SIGN_JNS      X      X                      X               X      X
+
+  SIGN_JOV      X      X                      X               X      X
+
+  SIGN_JNO      X      X                      X               X      X
+
+  SIGN_DIV      STD    0                      X               STD    0
+
+  SIGN_DVR      STD    0                      X               STD    0
+
+  SIGN_REM      STD    0                      X               STD    0
+
+  SIGN_SHR      STD    (Any 1 bit was shifted X               STD    0
+                       past LSB)                                     
+
+  SIGN_MVB      X      X                      X               X      X
+
+  SIGN_MVW      X      X                      X               X      X
+
+  SIGN_MVD      X      X                      X               X      X
+
+  SIGN_WCN      X      X                      X               X      X
+
+  SIGN_WCB      X      X                      X               X      X
+
+  SIGN_WFN      X      X                      X               X      X
+
+  SIGN_WFB      X      X                      X               X      X
+
+  SIGN_EXB      STD    0                      X               STD    0
+
+  SIGN_EXW      STD    0                      X               STD    0
+
+  SIGN_EXD      STD    0                      X               STD    0
+
+  SIGN_NEG      STD    0                      X               STD    0
+
+  FLPT_ADD      STD    (Result is less than   X               STD    0
+                       the initial value)                            
+
+  FLPT_SUB      STD    (Result is greater     X               STD    0
+                       than the initial                              
+                       value)                                        
+
+  FLPT_MUL      STD    (Result is less than   X               STD    0
+                       the initial value)                            
+
+  FLPT_DIV      STD    0                      X               STD    0
+
+  FLPT_DVR      STD    0                      X               STD    0
+
+  FLPT_REM      STD    0                      X               STD    0
+
+  FLPT_SIN      STD    0                      X               STD    0
+
+  FLPT_ASN      STD    0                      X               STD    0
+
+  FLPT_COS      STD    0                      X               STD    0
+
+  FLPT_ACS      STD    0                      X               STD    0
+
+  FLPT_TAN      STD    0                      X               STD    0
+
+  FLPT_ATN      STD    0                      X               STD    0
+
+  FLPT_PTN      STD    0                      X               STD    0
+
+  FLPT_POW      STD    (Result is less than   X               STD    0
+                       the initial value)                            
+
+  FLPT_LOG      STD    (Result is greater     X               STD    0
+                       than the initial                              
+                       value)                                        
+
+  FLPT_WCN      X      X                      X               X      X
+
+  FLPT_WFN      X      X                      X               X      X
+
+  FLPT_EXH      STD    0                      X               STD    0
+
+  FLPT_EXS      STD    0                      X               STD    0
+
+  FLPT_SHS      STD    0                      X               STD    0
+
+  FLPT_SHH      STD    0                      X               STD    0
+
+  FLPT_NEG      STD    0                      X               STD    0
+
+  FLPT_UTF      STD    0                      X               STD    0
+
+  FLPT_STF      STD    0                      X               STD    0
+
+  FLPT_FTS      STD    0                      X               STD    0
+
+  FLPT_FCS      STD    0                      X               STD    0
+
+  FLPT_FFS      STD    0                      X               STD    0
+
+  FLPT_FNS      STD    0                      X               STD    0
+
+  FLPT_CMP      STD    (Value of first        X               STD    0
+                       operand is less than                          
+                       second)                                       
+
+  EXTD_BSW      X      X                      X               X      X
+  --------------------------------------------------------------------------------------
 
 Full Instruction Reference
 
