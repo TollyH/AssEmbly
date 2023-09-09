@@ -93,8 +93,8 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 | Branching                | Condition code (status register)                                    |
 | Opcode Size              | 1 byte (base instruction set) / 3 bytes (extension sets)            |
 | Operand Size             | 1 byte (registers, pointers) / 8 bytes (literals, addresses/labels) |
-| Instruction Size         | 1 byte – 17 bytes (practical) / unlimited (theoretical)             |
-| Instruction Count        | 167 opcodes (49 unique operations)                                  |
+| Instruction Size         | 1 byte – 17 bytes (current) / unlimited (theoretical)               |
+| Instruction Count        | 297 opcodes (102 unique operations)                                 |
 | Text Encoding            | UTF-8                                                               |
 
 ## Basic Syntax
