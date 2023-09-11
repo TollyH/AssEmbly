@@ -198,7 +198,7 @@
                 {
                     double floatingValue = BitConverter.UInt64BitsToDouble(value);
                     // Don't print extreme values as floating point
-                    if (floatingValue is >= 0.0000000000000001 and <= ulong.MaxValue)
+                    if (Math.Abs(floatingValue) is >= 0.0000000000000001 and <= ulong.MaxValue)
                     {
                         Console.Write($" ({floatingValue:0.0###############})");
                     }
