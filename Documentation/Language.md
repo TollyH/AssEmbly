@@ -2,7 +2,7 @@
 
 Applies to versions: `2.0.0`
 
-Last revised: 2023-09-09
+Last revised: 2023-09-11
 
 ## Introduction
 
@@ -45,12 +45,21 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Shifting](#shifting)
     - [Bitwise](#bitwise)
     - [Random Number Generation](#random-number-generation)
-    - [Lack of Signed Numbers and Workarounds](#lack-of-signed-numbers-and-workarounds)
+  - [Negative Numbers](#negative-numbers)
+    - [Arithmetic Right Shifting](#arithmetic-right-shifting)
+    - [Extending Smaller Signed Values](#extending-smaller-signed-values)
+    - [The Overflow Flag vs. the Carry Flag](#the-overflow-flag-vs-the-carry-flag)
+  - [Floating Point Numbers](#floating-point-numbers)
+    - [Floating Point Math](#floating-point-math)
+    - [Converting Between Integers and Floats](#converting-between-integers-and-floats)
+    - [Converting Between Floating Point Sizes](#converting-between-floating-point-sizes)
   - [Jumping](#jumping)
   - [Comparing, Testing, and Branching](#comparing-testing-and-branching)
-    - [Comparing Numbers](#comparing-numbers)
+    - [Comparing Unsigned Numbers](#comparing-unsigned-numbers)
+    - [Comparing Signed Numbers](#comparing-signed-numbers)
+    - [Comparing Floating Point Numbers](#comparing-floating-point-numbers)
     - [Testing Bits](#testing-bits)
-    - [Checking For a Carry or For Zero](#checking-for-a-carry-or-for-zero)
+    - [Checking the Carry, Overflow, Zero, and Sign Flags](#checking-the-carry-overflow-zero-and-sign-flags)
   - [Assembler Directives](#assembler-directives)
     - [`PAD` — Byte Padding](#pad--byte-padding)
     - [`DAT` — Byte Insertion](#dat--byte-insertion)
@@ -72,6 +81,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Subroutines and the Stack](#subroutines-and-the-stack)
     - [Passing Multiple Parameters](#passing-multiple-parameters)
   - [Text Encoding](#text-encoding)
+  - [Instruction Data Type Acceptance](#instruction-data-type-acceptance)
   - [Status Flag Behaviour](#status-flag-behaviour)
   - [Full Instruction Reference](#full-instruction-reference)
     - [Base Instruction Set](#base-instruction-set)
@@ -82,20 +92,21 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 
 ## Technical Information
 
-|                          |                                                                     |
-|--------------------------|---------------------------------------------------------------------|
-| Bits                     | 64 (registers, operands & addresses)                                |
-| Word Size                | 8 bytes (64-bits – called a Quad Word for consistency with x86)     |
-| Minimum Addressable Unit | Byte (8-bits)                                                       |
-| Register Count           | 16 (10 general purpose)                                             |
-| Architecture Type        | Register–memory                                                     |
-| Endianness               | Little                                                              |
-| Branching                | Condition code (status register)                                    |
-| Opcode Size              | 1 byte (base instruction set) / 3 bytes (extension sets)            |
-| Operand Size             | 1 byte (registers, pointers) / 8 bytes (literals, addresses/labels) |
-| Instruction Size         | 1 byte – 17 bytes (current) / unlimited (theoretical)               |
-| Instruction Count        | 297 opcodes (102 unique operations)                                 |
-| Text Encoding            | UTF-8                                                               |
+|                              |                                                                     |
+|------------------------------|---------------------------------------------------------------------|
+| Bits                         | 64 (registers, operands & addresses)                                |
+| Word Size                    | 8 bytes (64-bits – called a Quad Word for consistency with x86)     |
+| Minimum Addressable Unit     | Byte (8-bits)                                                       |
+| Register Count               | 16 (10 general purpose)                                             |
+| Architecture Type            | Register–memory                                                     |
+| Endianness                   | Little                                                              |
+| Signed Number Representation | Two's Complement                                                    |
+| Branching                    | Condition code (status register)                                    |
+| Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)            |
+| Operand Size                 | 1 byte (registers, pointers) / 8 bytes (literals, addresses/labels) |
+| Instruction Size             | 1 byte – 17 bytes (current) / unlimited (theoretical)               |
+| Instruction Count            | 297 opcodes (102 unique operations)                                 |
+| Text Encoding                | UTF-8                                                               |
 
 ## Basic Syntax
 
@@ -177,7 +188,7 @@ MVQ rg1, 10
 :END
 ```
 
-`:END` here will have a value of `34` when referenced, as each instruction prior will take up `17` bytes (more on this later).
+`:END` here will have a value of `20` when referenced, as each instruction prior will take up `10` bytes (more on this later).
 
 The label name `:ENTRY` (case insensitive) has a special meaning. If it is present in a file, execution will start from wherever the entry label points to. If it is not present, execution will start from the first line.
 
@@ -230,6 +241,8 @@ MVQ rg0, 0x_1_000_000  ; This is not valid
 MVQ rg0, 0_x1_000_000  ; This is also not valid
 MVQ rg0, _0x1_000_000  ; Nor is this
 ```
+
+Literals can be made negative by putting a `-` sign directly before them (e.g. `-42`), or be made floating point by putting a `.` anywhere in them (e.g. `2.3`). Floating point literals can also be made negative (e.g. `-2.3`). This is explained in more detail in the relevant sections on negative and floating point values.
 
 ### Address
 
@@ -335,47 +348,26 @@ Before execution of the instruction begins, `rpo` will point to the opcode corre
 
 The status flags register is used to mark some information about previously executed instructions. While it stores a 64-bit number just like every other register, its value should instead be treated bit-by-bit rather than as one number.
 
-Currently, the **lowest 3** bits of the 64-bit value have a special use — the remaining 61 will not be automatically modified as of current, though it is recommended that you do not use them for anything else in case this changes in the future.
+Currently, the **lowest 5** bits of the 64-bit value have a special use — the remaining 59 will not be automatically modified as of current, though it is recommended that you do not use them for anything else in case this changes in the future.
 
-The 3 bits currently in use are:
+The 5 bits currently in use are:
 
 ```text
-0b00...0000000FCZ
+0b00...00000OSFCZ
 
 ... = 52 omitted bits
-F = File end flag
-C = Carry flag
 Z = Zero flag
+C = Carry flag
+F = File end flag
+S = Sign Flag
+O = Overflow Flag
 ```
 
 Each bit of this number can be considered as a `true` (`1`) or `false` (`0`) value as to whether the flag is "set" or not.
 
-The file end flag is set to `1` by the `RFC` operation if the byte that has just been read from the currently open file was the last byte in that file. It is reset to `0` only upon opening a file again.
-
-The carry flag is set to `1` after a mathematical or bitwise operation if the result of that operation caused the destination register to go below `0` and wrap around to the upper limit, go above the limit of a 64-bit integer and wrap around to `0` (more info in the section on maths), otherwise it is proactively set to `0`.
-
-The zero flag is set to `1` after a mathematical or bitwise operation if the result of that operation caused the destination register to become equal to `0`, otherwise it is proactively set to `0`.
-
-For example:
-
-```text
-MVQ rg0, 0  ; Set rg0 to 0
-; The zero flag has NOT been set here, moving is not a mathematical or bitwise operation
-SUB rg0, 1  ; Subtract 1 from rg0
-; rg0 will now equal the 64-bit integer limit, as it went below 0
-; The second bit (carry flag) in rsf is now 1
-; The first bit (zero flag) has not changed from 0
-ADD rg0, 1  ; Add 1 back to rg0
-; rg0 will now once again equal 0, as it went over the 64-bit integer limit
-; The second bit (carry flag) in rsf is still 1
-; The first bit (zero flag) has now been changed to 1
-ADD rg0, 1
-; rg0 is now 1, no limits were exceeded
-; The second bit (carry flag) in rsf has been set back to 0
-; The first bit (zero flag) in rsf has been set back to 0
-```
-
 More information on using these flags can be found in the section on comparison and testing.
+
+A full table of how each instruction modifies the status flag register can be found toward the end of the document.
 
 ### `rrv` — Return Value
 
@@ -551,7 +543,7 @@ When using any move instruction larger than `MVB`, be careful to ensure that not
 
 ## Maths and Bitwise Operations
 
-AssEmbly supports ten different mathematical operations and five different bitwise operations (one being the random number generator). Each one operates **in-place**, meaning the first operand for the operation is also used as the destination for the resulting value to be stored to. Destinations, and thus the first operand, must always be a **register**.
+Math and bitwise instructions operate **in-place** in AssEmbly, meaning the first operand for the operation is also used as the destination for the resulting value to be stored to. Destinations, and thus the first operand, must always be a **register**.
 
 Mathematical and bitwise operations are always done with 64-bits, therefore if an address (i.e. a label or pointer) is used as the second operand, 8 bytes will be read starting at that address for the operation in little endian encoding (see the "moving with memory" section above for more info on little endian).
 
@@ -605,19 +597,21 @@ SUB rg1, rg0  ; Subtract the value of rg0 from rg1, storing in rg1
 ; rg1 is now 0
 ```
 
-Numbers in AssEmbly are **unsigned**, meaning that negative numbers cannot be natively represented (more on how to work around this later). If a subtraction causes the result to go below 0, the carry status flag will be set to `1`, and the result will be wrapped around up to the upper limit `18446744073709551615`, minus however much the limit was exceeded by.
+If a subtraction causes the result to go below 0, the carry status flag will be set to `1`, and the result will be wrapped around up to the upper limit `18446744073709551615`, minus however much the limit was exceeded by.
 
 For example:
 
 ```text
 MVQ rg0, 0  ; Set rg0 to 0
 SUB rg0, 1  ; Subtract 1 from rg0
-; rg0 is now 18446744073709551615
+; rg0 is now 18446744073709551615 (-1) 
 
 MVQ rg0, 25  ; Set rg0 to 25
 SUB rg0, 50  ; Subtract 50 from rg0
-; rg0 is now 18446744073709551591
+; rg0 is now 18446744073709551591 (-25)
 ```
+
+This overflowed value can also be interpreted as a negative number using two's complement if desired, which is explained further in the section on negative numbers.
 
 In the specific case of subtracting `1` from a register, the `DCR` (decrement) operation can be used instead.
 
@@ -802,41 +796,406 @@ REM rg0, 5  ; rg0 is now constrained between 0 and 4 depending on its initial va
 ADD rg0, 5  ; rg0 is now constrained between 5 and 9
 ```
 
-### Lack of Signed Numbers and Workarounds
+## Negative Numbers
 
-AssEmbly can only store and operate on **unsigned** integers, meaning it has no native support for negative numbers.
+Negative numbers are stored using two's complement in AssEmbly, which means that negative values are stored as their positive counterpart with a bitwise NOT performed, then incremented by `1`.
 
-In some scenarios, this won't make a difference. For example, if a negative number is simply a midpoint for an addition/subtraction with a positive overall answer, you can continue to use the wrapped-around value without error:
+For example:
 
 ```text
-MVQ rg0, 5
-SUB rg0, 10
-; Expected value is -5, rg0 is actually 18446744073709551611
-MVQ rg1, 25
-ADD rg1, rg0
-; rg1 is still 20 now as expected, even though rg0 doesn't have the value we expect
+MVQ rg0, 9547
+; rg0 is 0b0000000000000000000000000000000000000000000000000010010101001011 in binary
+MVQ rg0, -9547  ; You can use a '-' sign anywhere a regular literal would be accepted
+; rg0 is 0b1111111111111111111111111111111111111111111111111101101010110101 in binary
 ```
 
-If a result of a subtraction has wrapped around (which can be checked using the carry flag), the absolute result (the non-negative result) can be found by performing a bitwise not on and incrementing the result by 1, like so:
+To switch between the positive and negative form of a number, use the `SIGN_NEG` instruction:
 
 ```text
-MVQ rg0, 5
-SUB rg0, 10
-NOT rg0
-ICR rg0
-; rg0 is now 5, carry bit is set
+MVQ rg0, 9547
+SIGN_NEG rg0  ; Performs the equivalent of "NOT rg0" then "ICR rg0" in one instruction
+; rg0 is now -9547 (or 18446744073709542069 when interpreted as unsigned)
 ```
 
-Using the carry flag, this operation can be done conditionally (more in the section on branching), as it should not be done on positive results:
+Stored values can be interpreted as either **unsigned** or **signed**. Unsigned values are always positive and use all 64 bits to store their value, giving a range of `0` to `18,446,744,073,709,551,615`. Signed values can be either positive *or* negative and, while still stored using 64-bits, the highest bit is instead to store the sign. This gives a range of `-9,223,372,036,854,775,808` to `9,223,372,036,854,775,807` for signed operations. The number of distinct values is the same as unsigned values, but now half of the values are negative.
+
+To check if the limits of a signed number have been exceeded after an operation instead of the limits of an unsigned number, the **overflow flag** should be used instead of the carry flag. This is explained in detail in the dedicated section on the overflow flag vs. the carry flag.
+
+Numeric literals can be made negative by prepending the `-` sign onto them. Much of the base instruction set can take negative numbers as operands and work exactly as expected, though there are some exceptions. A full table of which instructions work as expected with negative values and which ones do not can be found toward the end of the document, though as a general rule, if an instruction has an equivalent that begins with `SIGN_`, you should use the signed one instead if negative values are expected.
+
+Some instructions that work normally with negative values include `ADD`, `SUB`, and `MUL`. Some that do not include `DIV` and `WCN`, where the distinction between unsigned and signed values becomes important, as it will affect the result. The `SIGN_DIV` and `SIGN_WCN` instructions for example should be used instead when negative numbers are possible and desired. It is worth noting that instructions in the base instruction set (instructions not beginning with an extension like `SIGN_`) always interpret numbers as unsigned; the reason some operations do not need a signed counterpart to counteract this is that the usage of two's complement allows overflowed unsigned results and signed results to have the same bit representation with these compatible operations.
+
+For example:
+
+```text
+MVQ rg0, 12
+ADD rg0, -5
+; rg0 is now 7, ADD works as expected with negative values
+
+MVQ rg0, 12
+SUB rg0, -5
+; rg0 is now 17, SUB works as expected with negative values
+
+MVQ rg0, 12
+DIV rg0, -6
+; rg0 is NOT -2, the SIGN_DIV instruction needs to be used instead
+
+MVQ rg0, 12
+SIGN_DIV rg0, -6
+; rg0 is now -2, as expected
+
+WCN rg0
+; 18446744073709551614 has been printed to the console, as WCN always assumes that the value is unsigned
+SIGN_WCN rg0
+; -2 has now been printed to the console, as expected
+```
+
+There are other instructions that have signed equivalents, these are simply used as an example. The signed operations also work on positive values, so the signed equivalent of relevant instructions should always be used wherever negative values are *possible* and desired, not just where they are guaranteed.
+
+### Arithmetic Right Shifting
+
+When shifting bits to the right, there are two options: logical shifting (as explained in the previous shifting section), or arithmetic shifting. Arithmetic shifting should be used when you wish to shift a value whilst retaining its sign.
+
+Arithmetic right shifts can be performed with the `SIGN_SHR`, which takes the same operands as `SHR`, but behaves slightly differently when the sign bit of the initial value is set.
+
+For example:
+
+```text
+MVQ rg0, 0b11010
+; rg0:
+; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
+; | Value | ... | 0  | 0  | 1  | 1  | 0  | 1  | 0  |
+; All omitted bits are 0
+
+SIGN_SHR rg0, 2
+; rg0:
+; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
+; | Value | ... | 0  | 0  | 0  | 0  | 1  | 1  | 0  |
+; All omitted bits are 0
+```
+
+This behaviour is identical to `SHR`, as the value is not signed.
+
+Here's an example with a negative value:
+
+```text
+MVQ rg0, -26
+; rg0:
+; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
+; | Value | ... | 1  | 1  | 0  | 0  | 1  | 1  | 0  |
+; All omitted bits are 1
+
+SIGN_SHR rg0, 2
+; rg0:
+; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
+; | Value | ... | 1  | 1  | 1  | 1  | 0  | 0  | 1  |
+; All omitted bits are 1
+```
+
+Because the sign bit was set in the original value, all new bits shifted into the most significant bit were set to `1` instead of `0`, keeping the sign of the result the same as the initial value.
+
+The behaviour of the carry flag is also altered when performing an arithmetic shift. Where `SHR` sets the carry flag if any `1` bit is shifted past the least significant bit and discarded, `SIGN_SHR` instead sets the carry flag if any bits **not equal to the sign bit** are discarded. This means that for initial values that are negative, any `0` bit being discarded will set the carry bit, and for initial values that are positive, any `1` bit being discarded will set the carry bit.
+
+Using an 8-bit number for demonstration, the behaviour of a **logical shift** (`SHR`) looks like this:
+
+```text
+-26 >> 1
+| 1   | 1   | 1   | 0   | 0   | 1   | 1   | 0   |-> discarded bit not 1, UNSET carry flag
+     \     \     \     \     \     \     \
+      \     \     \     \     \     \     \
+| 0   | 1   | 1   | 1   | 0   | 0   | 1   | 1   |
+= 115
+```
+
+Whereas the behaviour of an **arithmetic shift** (`SIGN_SHR`) looks like this:
+
+```text
+-26 >> 1
+| 1   | 1   | 1   | 0   | 0   | 1   | 1   | 0   |-> discard not equal to sign, SET carry flag
+  |  \     \     \     \     \     \     \  
+  |   \     \     \     \     \     \     \ 
+| 1   | 1   | 1   | 1   | 0   | 0   | 1   | 1   |
+= -13
+```
+
+### Extending Smaller Signed Values
+
+Operations on signed numbers will always expect them to be 64-bits in size, with the 64th bit as the sign bit. If you have a signed value stored in a smaller format, using the 8th (byte), 16th (word), or 32nd (double word) bits as the sign bit, you can use one of the extension instructions (`SIGN_EXB`, `SIGN_EXW`, and `SIGN_EXD` respectively) to convert the number to its equivalent value in 64 bits.
+
+For example:
+
+```text
+MVW rg0, 0b1111111101011011
+; rg0 is 0b0000000000000000000000000000000000000000000000001111111101011011 in binary
+; This is -165 when considering only the lower 16 bits as a signed number,
+; however we need the value to occupy all 64-bits to be interpreted properly.
+; As of current, even the signed instructions will read rg0 as 65371
+
+SIGN_EXW rg0  ; SIGN_EXW is for extending 16->64, use SIGN_EXB for 8->64 or SIGN_EXD for 32->64
+; rg0 is now 0b1111111111111111111111111111111111111111111111111111111101011011 in binary
+; This occupies all 64-bits, so rg0 will now work correctly as -165
+```
+
+Using the extending instructions with a positive value will not affect the value of the register up to the specified size of bits, though any bits higher than the number supported by the used extend instruction will be set to `0` instead of `1`.
+
+For example:
+
+```text
+MVB rg0, 12
+; rg0 is 0b0000000000000000000000000000000000000000000000000000000000001100 in binary
+
+SIGN_EXB rg0
+; rg0 is unchanged
+
+MVW rg0, 569
+; rg0 is 0b0000000000000000000000000000000000000000000000000000001000111001 in binary
+; rg0 doesn't fit in a single byte!
+
+SIGN_EXB rg0
+; rg0 is now 0b0000000000000000000000000000000000000000000000000000000000111001
+; Any bits higher than the 8th bit have been unset, making rg0 equal to only 57
+```
+
+The second example here caused part of the number to be lost as `SIGN_EXB` was used when the value was larger than 8-bits. A similar scenario will occur if a negative value requires more bits than the used extend instruction can handle, though the upper bits will all be set to `1` instead of `0` in this case.
+
+Converting from a larger size of signed integer to a smaller one is as simple as taking only the desired number of lower bits. Assuming the value can fit within the target signed integer size's limits, no specific operation needs to be used.
+
+### The Overflow Flag vs. the Carry Flag
+
+As explained earlier, during most mathematical operations the carry flag is set whenever a subtraction goes below `0`, or an addition goes above `18446744073709551615`. This is useful in unsigned arithmetic, as it will inform you when the result of an operation is not mathematically correct, however in signed arithmetic, it cannot be used for this purpose. To overcome this, the status flag register also contains an **overflow flag**. This flag is set specifically when the result of an operation is incorrect when interpreted as a *signed* value. It has no useful meaning during unsigned arithmetic.
+
+Some examples:
+
+```text
+MVQ rg0, 10
+SUB rg0, 5
+; As unsigned, rg0 is now 5. As signed it is also 5.
+; Carry flag has been UNSET, answer is correct as unsigned.
+; Overflow flag has been UNSET, answer is correct as signed.
+
+MVQ rg0, 0
+SUB rg0, 5
+; As unsigned, rg0 is now 18446744073709551611. As signed it is -5.
+; Carry flag has been SET, answer is incorrect as unsigned.
+; Overflow flag has been UNSET, answer is correct as signed.
+
+MVQ rg0, 0x7FFFFFFFFFFFFFFF  ; (hexadecimal for 9223372036854775807 as both signed and unsigned)
+ADD rg0, 5
+; As unsigned, rg0 is now 9223372036854775812. As signed it is -9223372036854775804.
+; Carry flag has been UNSET, answer is correct as unsigned.
+; Overflow flag has been SET, answer is incorrect as signed.
+
+MVQ rg0, 0x7FFFFFFFFFFFFFFF
+SUB rg0, 0xFFFFFFFFFFFFFFFF
+; As unsigned, rg0 is now 9223372036854775808. As signed it is -9223372036854775808.
+; Carry flag has been SET, answer is incorrect as unsigned.
+; Overflow flag has been SET, answer is incorrect as signed.
+```
+
+## Floating Point Numbers
+
+AssEmbly has instructions to perform operations on floating point values. These instructions work with the IEEE 754 double-precision floating point format (also known as `float64` or `double`). In this format, values, including whole numbers, are stored using an entirely different format from regular integer values, which means that, unlike with signed values, very little of the base instruction set can work with floating point values. Instead, instructions in the floating point instruction set (mnemonics starting with `FLPT_`) must be used instead. There is a full table towards the end of the document that details which instructions accept which formats of data.
+
+To make an integer literal into a floating point literal, it must contain a decimal point (`.`). Any numeric literal containing a decimal point will be assembled into a 64-bit float.
+
+For example:
 
 ```text
 MVQ rg0, 5
-SUB rg0, rg1  ; Assume rg1 has a value that could cause rg0 to be negative or positive
-JNC :NOT_NEGATIVE  ; Jump to label if carry flag is unset
-NOT rg0  ; These will only run if rg0 wrapped (setting carry flag)
-ICR rg0
-:NOT_NEGATIVE
-; rg0 is now the absolute result
+; rg0 is 0x0000000000000005, which cannot be used in floating point operations
+
+MVQ rg0, 5.0  ; The trailing 0 can be omitted to just have "5." if desired
+; rg0 is 0x4014000000000000, or 5.0 in double floating point format,
+; and can now be used in floating point operations
+```
+
+### Floating Point Math
+
+There are floating point equivalents of all the math operations in the base instruction set, as well as some additional mathematical operations exclusive to floating point values. Integers and floating point values *cannot* be mixed when performing floating point operations; any integer values must be converted to a float first, as explained in the following section.
+
+Some examples of basic floating point math:
+
+```text
+MVQ rg0, 5.7
+FLPT_ADD rg0, 3.2
+FLPT_WCN rg0
+; "8.9" is printed to the console
+
+MVQ rg1, -12.3
+FLPT_MUL rg0, rg1
+FLPT_WCN rg0
+; "-109.47000000000001" is printed to the console (note the floating point inaccuracy)
+
+MVQ rg0, 1.0
+FLPT_DIV rg0, 3.0
+FLPT_WCN rg0
+; "0.3333333333333333" is printed to the console
+```
+
+As can be seen with the second operation, floating point values cannot always represent decimal numbers with 100% accuracy, and may sometimes be off by a tiny fractional amount when converted to and from base 10.
+
+Operations exclusive to floating point include trigonometric functions (i.e. Sine, Cosine, and Tangent and their inverses), single-instruction exponentiation, and logarithms. The trigonometric functions all operate on **radians** (a full circle is `2 * PI` radians). You can convert degrees to radians by multiplying the degrees by `0.017453292519943295` (`PI / 180`), and you can convert radians to degrees by multiplying the radians by `57.295779513082323` (`180 / PI`).
+
+Some examples:
+
+```text
+MVQ rg0, 5.0
+FLPT_POW rg0, 2.0
+FLPT_WCN rg0
+; "25" is printed to the console
+
+FLPT_LOG rg0, 5.0
+FLPT_WCN rg0
+; "2" is printed to the console
+
+FLPT_SIN rg0
+FLPT_WCN rg0
+; "0.9092974268256817" is printed to the console
+```
+
+### Converting Between Integers and Floats
+
+Because integers and floating point values are stored in separate formats and are not implicitly compatible, you must explicitly convert between them to have data in the format expected by each instruction being used.
+
+There are two instructions for converting integers to floats: `FLPT_UTF` and `FLPT_STF`. These interpret the integer value of a register as either unsigned or signed respectively, and convert it to its closest equivalent in floating point format. Be aware that integers that require more than 53 bits to represent as an integer may not be converted to an identical value as a float, due to precision limitations with large numbers in the double-precision floating point format.
+
+Examples of integer to float conversion:
+
+```text
+MVQ rg0, 5
+; rg0 is 0x0000000000000005, which cannot be used in floating point operations
+
+FLPT_UTF rg0  ; FLPT_STF would produce the same result in this case
+; rg0 is 0x4014000000000000, or 5.0 in double floating point format,
+; and can now be used in floating point operations
+
+MVQ rg0, -8
+; rg0 is 0xFFFFFFFFFFFFFFF8
+FLPT_STF rg0
+; rg0 is 0xC020000000000000 (-8.0)
+
+MVQ rg0, -8
+; rg0 is 0xFFFFFFFFFFFFFFF8
+FLPT_UTF rg0
+; rg0 is 0x43F0000000000000 (18446744073709552000.0)
+```
+
+There are four instructions for converting floats to integers: `FLPT_FTS`, `FLPT_FCS`, `FLPT_FFS`, and `FLPT_FNS`. These convert the floating point value to an integer which can be interpreted as signed, using one of four rounding methods respectively: truncation (rounding toward zero), ceiling (rounding to the greater adjacent integer), floor (rounding to the lesser adjacent integer), and nearest (rounding to the closest integer, with exact midpoints being rounded to the adjacent integer that is even).
+
+Examples of float to integer conversion:
+
+```text
+MVQ rg0, 5.7
+FLPT_FTS rg0
+SIGN_WCN rg0
+; "5" is printed to console
+
+MVQ rg0, 5.7
+FLPT_FCS rg0
+SIGN_WCN rg0
+; "6" is printed to console
+
+MVQ rg0, 5.7
+FLPT_FFS rg0
+SIGN_WCN rg0
+; "5" is printed to console
+
+MVQ rg0, 5.7
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "6" is printed to console
+
+MVQ rg0, -5.7
+FLPT_FTS rg0
+SIGN_WCN rg0
+; "-5" is printed to console
+
+MVQ rg0, -5.7
+FLPT_FCS rg0
+SIGN_WCN rg0
+; "-5" is printed to console
+
+MVQ rg0, -5.7
+FLPT_FFS rg0
+SIGN_WCN rg0
+; "-6" is printed to console
+
+MVQ rg0, -5.7
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "-6" is printed to console
+```
+
+Some further examples of `FLPT_FNS` with midpoint and lower values:
+
+```text
+MVQ rg0, 5.5
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "6" is printed to console
+
+MVQ rg0, 6.5
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "6" is printed to console
+
+MVQ rg0, 2.5
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "2" is printed to console
+
+MVQ rg0, 3.5
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "4" is printed to console
+
+MVQ rg0, 12.4
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "12" is printed to console
+
+MVQ rg0, 3.2
+FLPT_FNS rg0
+SIGN_WCN rg0
+; "3" is printed to console
+```
+
+### Converting Between Floating Point Sizes
+
+Floating point operations work solely on 64-bit floating point values, however there are other common sizes of floating point value which you may wish to convert between. There are instructions to convert to and from the half-precision (16-bit) and single-precision (32-bit) IEEE 754 floating point formats. To convert **to** a double-precision float, the `FLPT_EXH` and `FLPT_EXS` instructions are used to convert from half-precision and single-precision floats respectively. To convert **from** a double-precision float, the `FLPT_SHH` and `FLPT_SHS` instructions are used to convert to half-precision and single-precision floats respectively. You cannot convert directly between half- and single-precision floats without converting to a double-precision float first.
+
+Here are some examples of direct conversion:
+
+```text
+MVQ rg0, 0x4248  ; 3.141 as a half-precision float
+; rg0 cannot currently be used with floating point operations
+FLPT_EXH rg0
+; rg0 is now 0x4009200000000000 (3.140625) and can be used in floating point operations
+
+MVQ rg0, 0x40490FDB  ; 3.1415927 as a single-precision float
+; rg0 cannot currently be used with floating point operations
+FLPT_EXS rg0
+; rg0 is now 0x400921FB60000000 (3.14159274101257) and can be used in floating point operations
+
+MVQ rg0, 3.141592653589793
+; rg0 is 0x400921FB54442D18
+FLPT_SHH rg0
+; rg0 is now 0x4248 (3.141 as a half-precision float)
+
+MVQ rg0, 3.141592653589793
+; rg0 is 0x400921FB54442D18
+FLPT_SHS rg0
+; rg0 is now 0x40490FDB (3.1415927 as a single-precision float)
+```
+
+And one for converting a single-precision to a half-precision float:
+
+```text
+MVQ rg0, 0x40490FDB  ; 3.1415927 as a single-precision float
+FLPT_EXS rg0
+; rg0 is now 0x400921FB60000000 (3.14159274101257)
+FLPT_SHH rg0
+; rg0 is now 0x4248 (3.141 as a half-precision float)
 ```
 
 ## Jumping
@@ -903,13 +1262,25 @@ The conditional jump instructions are as follows:
 | JCA      | Jump if Carry (=JLT)             |
 | JNC      | Jump if no Carry (=JGE)          |
 +----------+----------------------------------+
+| SIGN_JLT | Jump if Less Than                |
+| SIGN_JLE | Jump if Less Than or Equal To    |
+| SIGN_JGT | Jump if Greater Than             |
+| SIGN_JGE | Jump if Greater Than or Equal To |
++----------+----------------------------------+
+| SIGN_JSI | Jump if Sign                     |
+| SIGN_JNS | Jump if not Sign                 |
+| SIGN_JOV | Jump if Overflow                 |
+| SIGN_JNO | Jump if not Overflow             |
++----------+----------------------------------+
 ```
 
-The top section of instructions should be performed following a `CMP` instruction (explained in the section on comparing). The bottom section are aliases of four of the mnemonics in the top section (i.e. they share the same opcode) designed for use after mathematical operations or for bit testing (explained more in the relevant sections).
+The top section of instructions should be performed following a `CMP` operation on unsigned values, or a `FLPT_CMP` operation on floating point values. The instructions in the second section are aliases of four of the mnemonics in the top section (i.e. they share the same opcode) designed for use after mathematical operations or for bit testing (explained more in the relevant sections).
 
-### Comparing Numbers
+The bottom two sections are part of the signed extension set, with the higher of the two being designed for use following a `CMP` instruction on signed values, and the bottom section being for use specifically to branch based on the state of the sign or overflow flags.
 
-One of the most common types of branch is checking how two numbers relate to each other. This can be achieved with the `CMP` instruction. It takes two operands (the first of which must be a register — it won't be modified), and compares them for use with a conditional jump instruction immediately afterwards.
+### Comparing Unsigned Numbers
+
+To branch based on how two unsigned (always positive) numbers relate to each other, the `CMP` instruction can be utilised. It takes two operands (the first of which must be a register — it won't be modified), and compares them for use with a conditional jump instruction immediately afterwards.
 
 For example:
 
@@ -941,6 +1312,57 @@ The `CMP` instruction works by subtracting the second operand from the first, bu
 
 A full list of what each conditional jump instruction is checking for in terms of the status flags can be found in the full instruction reference.
 
+### Comparing Signed Numbers
+
+The `CMP` instruction can also be used to compare signed (negative and positive) values, with its usage and behaviour remaining unchanged. After using the `CMP` instruction, however, you should use the signed version of the base conditional jump instructions, e.g. `SIGN_JLT` instead of `JLT`. The only exception to this is `JEQ` and `JNE`, which do not have signed versions, as they work with both signed and unsigned values.
+
+For example:
+
+```text
+MVQ rg0, 25
+MVQ rg1, -6
+CMP rg0, rg1
+SIGN_JGT :GREATER
+WCN 10  ; This will not execute, 25 is greater than -6
+:GREATER
+WCN 20  ; This will execute
+; Only "20" is output to the console
+```
+
+And what would happen if the regular `JGT` instruction was used:
+
+```text
+MVQ rg0, 25
+MVQ rg1, -6
+CMP rg0, rg1
+JGT :GREATER
+WCN 10  ; This will execute, even though 25 is greater than -6
+:GREATER
+WCN 20  ; This will execute
+; "1020" is output to the console, -6 was interpreted instead as 18446744073709551610
+```
+
+Here the comparison doesn't work as expected because the conditional jump used (`JGT`) only works assuming the comparison was intended to be unsigned. The signed versions of these instructions (like `SIGN_JGT`) use the state of the sign, overflow, and zero status flags so that they work as expected when used after signed comparisons. A full list of what each conditional jump instruction is checking for in terms of the status flags can be found in the full instruction reference.
+
+### Comparing Floating Point Numbers
+
+In order to compare two floating point values, the `FLPT_CMP` instruction needs to be used instead of the `CMP` instruction. After using `FLPT_CMP`, the **unsigned** version of the desired conditional jump should be used, **even if one or both of the floating point values were negative**. There are no dedicated conditional jump instructions for floating point values.
+
+For example:
+
+```text
+MVQ rg0, 25.4
+MVQ rg1, -6.3
+FLPT_CMP rg0, rg1
+JGT :GREATER
+WCN 10  ; This will not execute, 25.4 is greater than -6.3
+:GREATER
+WCN 20  ; This will execute
+; Only "20" is output to the console
+```
+
+`FLPT_CMP` updates the status flags with the unsigned conditional jumps in mind. If the first operand is less than the second, the carry flag is set. If they are equal, the zero flag is set. The overflow flag is always `0` after using `FLPT_CMP`.
+
 ### Testing Bits
 
 To test if a single bit of a number is set or not, the `TST` instruction can be used. Just like `CMP`, it takes two operands, the first of which being a register. The second should usually be a binary literal with only a single bit (the one to check) set as 1. It should then be followed by either `JZO` (jump if zero), or `JNZ` (jump if not zero). An example of where this may be used is checking if the third bit of `rsf` is set (the file end flag), as there isn't a built-in conditional jump that checks this flag.
@@ -958,23 +1380,23 @@ This program will keep looping until the third bit of `rsf` becomes `1`. meaning
 
 Similarly to `CMP`, `TST` works by performing a bitwise and on the two operands, discarding the result, but still updating the status flags. A bitwise and will ensure that only the bit you want to check remains as `1`, but only if it started as `1`. If a bit is not one that you are checking, or it wasn't `1` to start with, it will end up as `0`. If the resulting number isn't zero, leaving the zero flag unset, the bit must've been `1`, and vice versa.
 
-### Checking For a Carry or For Zero
+### Checking the Carry, Overflow, Zero, and Sign Flags
 
-As shown in the section on working around unsigned numbers, the carry flags and zero flags can also be checked following a mathematical operation.
+The carry, overflow, zero, and sign flags also have specific jump operations that can check if they are currently set or unset.
 
-To repeat that example:
+For example:
 
 ```text
 MVQ rg0, 5
-SUB rg0, rg1  ; Assume rg1 has a value that could cause rg0 to be negative or positive
-JNC :NOT_NEGATIVE  ; Jump to label if carry flag is unset
-NOT rg0  ; This will only run if rg0 wrapped (setting carry flag)
-ICR rg0
-:NOT_NEGATIVE
-; rg0 is now the absolute result
+SUB rg0, 10
+JCA :CARRY  ; Jump to label if carry flag is set
+WCN 10  ; This will not execute, as 5 SUB 10 will cause the carry flag to be set
+:CARRY
+WCN 20
+; Only "20" will be written to the console
 ```
 
-`JNC` here is checking if the carry flag is set or not following the subtraction. The jump will only occur if the carry flag is `0` (unset), otherwise, as with the other jump types, execution will continue as normal. `JCA` can be used to perform the inverse, jump only if the carry flag is set.
+`JCA` here is checking if the carry flag is set or not following the subtraction. The jump will only occur if the carry flag is `1` (set), otherwise, as with the other jump types, execution will continue as normal. `JNC` can be used to perform the inverse, jump only if the carry flag is unset.
 
 The zero flag checks can also be used following a mathematical operation like so:
 
@@ -986,6 +1408,28 @@ ADD rg0, 1  ; Only execute this if rg0 became 0 because of the SUB operation
 ```
 
 The `ADD` instruction here will only execute if the subtraction by 7 caused `rg0` to become exactly equal to `0`.
+
+The `SIGN_JOV`, `SIGN_JNO`, `SIGN_JSI`, and `SIGN_JNS` instructions can be used to check if the overflow and sign flags are set and unset respectively in the same way:
+
+```text
+SUB rg0, 7  ; Subtract 7 from rg0
+SIGN_JNS :NOT_NEGATIVE  ; Jump straight to NOT_NEGATIVE if rg0 didn't become negative
+SIGN_NEG rg0  ; Only execute this if rg0 became negative because of the SUB operation
+:NOT_NEGATIVE
+; rg0 is now the absolute result
+```
+
+An equivalent of the first example, but for the overflow flag instead of the carry flag, as should be used for signed operations:
+
+```text
+MVQ rg0, 5
+SUB rg0, 10
+JOV :OVERFLOW  ; Jump to label if overflow flag is set
+WCN 10  ; This will execute, as 5 SUB 10 will not cause the overflow flag to be set
+:OVERFLOW
+WCN 20
+; "1020" will be written to the console
+```
 
 ## Assembler Directives
 
@@ -1157,7 +1601,7 @@ There are some sequences of characters that have special meanings when found ins
 
 ### `NUM` — Number Insertion
 
-The `NUM` directive is similar to `DAT`, except it always inserts 8 bytes exactly, so can be used to represent 64-bit numbers for use in instructions which always work on 64-bit values, like maths and bitwise operations. `NUM` cannot be used to insert strings, only single 64-bit integers.
+The `NUM` directive is similar to `DAT`, except it always inserts 8 bytes exactly, so can be used to represent 64-bit numbers for use in instructions which always work on 64-bit values, like maths and bitwise operations. `NUM` cannot be used to insert strings, only single 64-bit numerical values (including unsigned, signed, and floating point).
 
 An example:
 
@@ -1213,19 +1657,15 @@ MVQ rg0, Number
 MAC Number, 678
 MVQ rg1, Number
 ; rg1 is now 678
-
-MAC Inst, ICR rg1
-Inst
-; rg1 is now 679
 ```
 
-The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics).
+The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`.
 
-Note that macros cannot contain commas or unclosed quotes (`"`), and surrounding whitespace will be ignored. They are case sensitive, and macros with the same name but different capitalisation can exist simultaneously.
+Note that macros cannot contain spaces, commas, unclosed quotes (`"`), characters before or after opening and closing quotes respectively, and surrounding whitespace will be ignored. Macros with string literals containing escape characters will have the escape characters resolved **before** the macro is inserted. They are case sensitive, and macros with the same name but different capitalisation can exist simultaneously.
 
 ### `IMP` — File Importing
 
-The `IMP` directive inserts the contents of another file wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:\Folder\Folder\file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder\file.asm`, or `..\Folder\file.asm`).
+The `IMP` directive inserts the contents of another file wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
 
@@ -1643,6 +2083,100 @@ Be aware that when working with characters that require multiple bytes, instruct
 
 Text bytes read from files **will not** be automatically converted to UTF-8 if the file was saved with another encoding.
 
+## Instruction Data Type Acceptance
+
+The following is a table of which types of numeric data can be given to each instruction and have them function as expected. AssEmbly **does not** keep track of data types, it is your responsibility to do so. If you use the wrong instruction for the type of data you have, it is unlikely you will receive an error - you will most likely simply get an unexpected answer, as the processor is interpreting the data as a valid, but different, numeric value in a different format.
+
+If an instruction supports signed integers but not unsigned integers, the instruction *will* still accept positive values, but those positive values must be below the signed limit (`9,223,372,036,854,775,807`), or they will be erroneously interpreted as negative.
+
+- `O` = Instruction accepts the data type
+- `X` = Instruction does not accept the data type
+- `(...)` = Instruction accepts the data type, but see the numbered footnote below the table on additional information to keep in mind
+
+Instructions that don't take any data or are otherwise not applicable have been omitted.
+
+| Instruction   | Unsigned Integer | Signed Integer | Floating Point |
+|---------------|------------------|----------------|----------------|
+| `ADD`         | O                | O              | X              |
+| `ICR`         | O                | O              | X              |
+| `SUB`         | O                | O              | X              |
+| `DCR`         | O                | O              | X              |
+| `MUL`         | O                | O              | X              |
+| `DIV`         | O                | X              | X              |
+| `DVR`         | O                | X              | X              |
+| `REM`         | O                | X              | X              |
+| `SHL`         | O                | O              | X              |
+| `SHR`         | O                | (1)            | X              |
+| `AND`         | O                | (2)            | X              |
+| `ORR`         | O                | (2)            | X              |
+| `XOR`         | O                | (2)            | X              |
+| `NOT`         | O                | (2)            | X              |
+| `TST`         | O                | (2)            | X              |
+| `CMP`         | O                | X              | X              |
+| `MVB`         | O                | (3)            | X              |
+| `MVW`         | O                | (3)            | X              |
+| `MVD`         | O                | (3)            | X              |
+| `MVQ`         | O                | O              | O              |
+| `PSH`         | O                | O              | O              |
+| `CAL`         | O                | O              | O              |
+| `RET`         | O                | O              | O              |
+| `WCN`         | O                | X              | X              |
+| `WCB`         | O                | X              | X              |
+| `WCX`         | O                | X              | X              |
+| `WCC`         | O                | X              | X              |
+| `WFN`         | O                | X              | X              |
+| `WFB`         | O                | X              | X              |
+| `WFX`         | O                | X              | X              |
+| `WFC`         | O                | X              | X              |
+| `SIGN_DIV`    | X                | O              | X              |
+| `SIGN_DVR`    | X                | O              | X              |
+| `SIGN_REM`    | X                | O              | X              |
+| `SIGN_SHR`    | X                | O              | X              |
+| `SIGN_MVB`    | X                | O              | X              |
+| `SIGN_MVW`    | X                | O              | X              |
+| `SIGN_MVD`    | X                | O              | X              |
+| `SIGN_WCN`    | X                | O              | X              |
+| `SIGN_WCB`    | X                | O              | X              |
+| `SIGN_WFN`    | X                | O              | X              |
+| `SIGN_WFB`    | X                | O              | X              |
+| `SIGN_EXB`    | X                | O              | X              |
+| `SIGN_EXW`    | X                | O              | X              |
+| `SIGN_EXD`    | X                | O              | X              |
+| `SIGN_NEG`    | X                | O              | X              |
+| `FLPT_ADD`    | X                | X              | O              |
+| `FLPT_SUB`    | X                | X              | O              |
+| `FLPT_MUL`    | X                | X              | O              |
+| `FLPT_DIV`    | X                | X              | O              |
+| `FLPT_DVR`    | X                | X              | O              |
+| `FLPT_REM`    | X                | X              | O              |
+| `FLPT_SIN`    | X                | X              | O              |
+| `FLPT_ASN`    | X                | X              | O              |
+| `FLPT_COS`    | X                | X              | O              |
+| `FLPT_ACS`    | X                | X              | O              |
+| `FLPT_TAN`    | X                | X              | O              |
+| `FLPT_ATN`    | X                | X              | O              |
+| `FLPT_PTN`    | X                | X              | O              |
+| `FLPT_POW`    | X                | X              | O              |
+| `FLPT_LOG`    | X                | X              | O              |
+| `FLPT_WCN`    | X                | X              | O              |
+| `FLPT_WFN`    | X                | X              | O              |
+| `FLPT_EXH`    | X                | X              | O              |
+| `FLPT_EXS`    | X                | X              | O              |
+| `FLPT_SHS`    | X                | X              | O              |
+| `FLPT_SHH`    | X                | X              | O              |
+| `FLPT_NEG`    | X                | X              | O              |
+| `FLPT_UTF`    | O                | X              | X              |
+| `FLPT_STF`    | X                | O              | X              |
+| `FLPT_FTS`    | X                | X              | O              |
+| `FLPT_FCS`    | X                | X              | O              |
+| `FLPT_FFS`    | X                | X              | O              |
+| `FLPT_FNS`    | X                | X              | O              |
+| `FLPT_CMP`    | X                | X              | O              |
+
+1. Signed integers *can* still be used with `SHR`, though it will perform a logical shift, not an arithmetic one, which may or may not be what you desire. See the section on Arithmetic Right Shifting for the difference.
+2. Bitwise operations on signed integers will treat the sign bit like any other, there is no special logic involving it.
+3. Using smaller-than-64-bit move instructions on signed integers if the target is a label or pointer will work as expected, truncating the upper bits. If the target is a register, however, you may wish to use the signed versions to automatically extend the smaller integer to a signed 64-bit one so it is correctly interpreted by other instructions.
+
 ## Status Flag Behaviour
 
 - `0` = Instruction always unsets flag
@@ -1967,8 +2501,8 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`.
 | `SIGN_JGE` | Jump if Greater Than or Equal To | Pointer | Jump to an address in a register only if the sign and overflow status flags are the same | `0x07` |
 | `SIGN_JSI` | Jump if Signed | Address | Jump to an address in a label only if the sign status flag is set | `0x08` |
 | `SIGN_JSI` | Jump if Signed | Pointer | Jump to an address in a register only if the sign status flag is set | `0x09` |
-| `SIGN_JNS` | Jump if not Signed | Address | Jump to an address in a label only if the sign status flag is unset | `0x0A` |
-| `SIGN_JNS` | Jump if not Signed | Pointer | Jump to an address in a register only the sign status flag is unset | `0x0B` |
+| `SIGN_JNS` | Jump if not Sign | Address | Jump to an address in a label only if the sign status flag is unset | `0x0A` |
+| `SIGN_JNS` | Jump if not Sign | Pointer | Jump to an address in a register only the sign status flag is unset | `0x0B` |
 | `SIGN_JOV` | Jump if Overflow | Address | Jump to an address in a label only if the overflow status flag is set | `0x0C` |
 | `SIGN_JOV` | Jump if Overflow | Pointer | Jump to an address in a register only if the overflow status flag is set | `0x0D` |
 | `SIGN_JNO` | Jump if not Overflow | Address | Jump to an address in a label only if the overflow status flag is unset | `0x0E` |
