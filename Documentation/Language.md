@@ -112,7 +112,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 
 ### Mnemonics and Operands
 
-All AssEmbly instructions are written on a separate line, starting with a **mnemonic** — a human readable code that tells the **assembler** exactly what operation needs to be performed — followed by any and all **operands** for the instruction. The assembler is the program that takes human readable assembly programs and turns them into raw numbers — bytes — that can be read by the processor. This process is called **assembly** or **assembling**. An operand can be thought of like a parameter to a function in a high-level language — data that is given to the processor to read and/or operate on. Mnemonics are separated from operands with spaces, and operands are separated with commas.
+All AssEmbly instructions are written on a separate line, starting with a **mnemonic** — a human-readable code that tells the **assembler** exactly what operation needs to be performed — followed by any **operands** for the instruction. The assembler is the program that takes human-readable assembly programs and turns them into raw numbers — bytes — that can be read by the processor. This process is called **assembly** or **assembling**. An operand can be thought of as a parameter to a function in a high-level language — data that is given to the processor to read and/or operate on. Mnemonics are separated from operands with spaces, and operands are separated with commas.
 
 A simple example:
 
@@ -149,12 +149,12 @@ For example:
 MVQ rg0, 10  ; This text will be ignored
 ; As will this text
 DCR rg0  ; "DCR rg0" will assemble as normal
-; Another Comment ; HLT - This is still a comment and will not insert a HLT instruction!
+; Another Comment ; HLT - This is still a comment and will not insert an HLT instruction!
 ```
 
 ### Labels
 
-Labels mark a position in the file for the program to move (**jump**) to or reference from elsewhere. They can be given any name you like (names are **case sensitive**), but they must be unique per-program and can only contain letters, numbers, and underscores. Label names **may not** begin with a number, however. A definition for a label is marked by beginning a line with a colon — the entire rest of the line will then be read as the new label name (excluding comments).
+Labels mark a position in the file for the program to move (**jump**) to or reference from elsewhere. They can be given any name you like (names are **case-sensitive**), but they must be unique per program and can only contain letters, numbers, and underscores. Label names **may not** begin with a number, however. A definition for a label is marked by beginning a line with a colon — the entire rest of the line will then be read as the new label name (excluding comments).
 
 For example:
 
@@ -459,7 +459,7 @@ There are four different instructions that are used to move data around without 
 
 Data can either be moved between two registers, from a register to a memory location, or from a memory location to a register. You cannot move data between two memory locations, you must use a register as a midpoint instead. To move data to or from a memory location, you can use either a label or a pointer.
 
-The move instructions are also how the value of a register or memory location is set to a literal value. In a sense, they can be considered the equivalent of the `=` assignment operator in higher level languages.
+The move instructions are also how the value of a register or memory location is set to a literal value. In a sense, they can be considered the equivalent of the `=` assignment operator in higher-level languages.
 
 When using move instructions, the destination always comes first. The destination cannot be a literal.
 
@@ -491,7 +491,7 @@ For example:
 MVB rg0, 9874
 ```
 
-`MVB` can only take a single byte, or 8 bits, but in binary `9874` is `10011010010010`, requiring 14 bits at minimum to store. The lower 8 bits will be kept: `10010010` — the remaining 6 (`100110`) will be discarded. After this instruction has executed, `rg0` will have a value of `146`.
+`MVB` can only take a single byte, or 8 bits, but in binary `9874` is `10011010010010`, requiring 14 bits at minimum to store. The lower 8 bits will be kept: `10010010` — the remaining 6 (`100110`) will be discarded. After this instruction has been executed, `rg0` will have a value of `146`.
 
 ### Moving with Registers
 
@@ -896,7 +896,7 @@ SIGN_SHR rg0, 2
 
 Because the sign bit was set in the original value, all new bits shifted into the most significant bit were set to `1` instead of `0`, keeping the sign of the result the same as the initial value.
 
-The behaviour of the carry flag is also altered when performing an arithmetic shift. Where `SHR` sets the carry flag if any `1` bit is shifted past the least significant bit and discarded, `SIGN_SHR` instead sets the carry flag if any bits **not equal to the sign bit** are discarded. This means that for initial values that are negative, any `0` bit being discarded will set the carry bit, and for initial values that are positive, any `1` bit being discarded will set the carry bit.
+The behaviour of the carry flag is also altered when performing an arithmetic shift. Where `SHR` sets the carry flag if any `1` bit is shifted past the least significant bit and discarded, `SIGN_SHR` instead sets the carry flag if any bits **not equal to the sign bit** are discarded. This means that for negative initial values, any `0` bit being discarded will set the carry bit, and for positive initial values, any `1` bit being discarded will set the carry bit.
 
 Using an 8-bit number for demonstration, the behaviour of a **logical shift** (`SHR`) looks like this:
 
@@ -996,7 +996,7 @@ SUB rg0, 0xFFFFFFFFFFFFFFFF
 
 ## Floating Point Numbers
 
-AssEmbly has instructions to perform operations on floating point values. These instructions work with the IEEE 754 double-precision floating point format (also known as `float64` or `double`). In this format, values, including whole numbers, are stored using an entirely different format from regular integer values, which means that, unlike with signed values, very little of the base instruction set can work with floating point values. Instead, instructions in the floating point instruction set (mnemonics starting with `FLPT_`) must be used instead. There is a full table towards the end of the document that details which instructions accept which formats of data.
+AssEmbly has instructions to perform operations on floating point values. These instructions work with the IEEE 754 double-precision floating point format (also known as `float64` or `double`). In this format, values, including whole numbers, are stored using an entirely different format from regular integer values, which means that, unlike with signed values, very little of the base instruction set can work with floating point values. Instead, instructions in the floating point instruction set (mnemonics starting with `FLPT_`) must be used. There is a full table towards the end of the document that details which instructions accept which formats of data.
 
 To make an integer literal into a floating point literal, it must contain a decimal point (`.`). Any numeric literal containing a decimal point will be assembled into a 64-bit float.
 
@@ -1229,7 +1229,7 @@ ADD rg0, 5  ; This won't be executed
 
 `rg0` only ends up being 5 at the end of this example, as jumping to the `SKIP` label prevented the two other `ADD` instructions from being reached.
 
-Jumps can also be made to pointers, though it is important that you are sure that the pointer will contain the address of a valid opcode before jumping there.
+Jumps can also be made to pointers, though you must be sure that the pointer will contain the address of a valid opcode before jumping there.
 
 For example:
 
@@ -1244,7 +1244,7 @@ MVQ rg0, 17
 
 ## Comparing, Testing, and Branching
 
-Branching is similar to jumping in that it changes where in the program execution is currently taking place, however a condition is first checked before performing the jump. If the condition is not met, the program will continue execution as normal without jumping anywhere.
+Branching is similar to jumping in that it changes where in the program execution is currently taking place, however, when branching, a condition is checked first before performing the jump. If the condition is not met, the program will continue execution as normal without jumping anywhere.
 
 The conditional jump instructions are as follows:
 
@@ -1348,7 +1348,7 @@ Here the comparison doesn't work as expected because the conditional jump used (
 
 ### Comparing Floating Point Numbers
 
-In order to compare two floating point values, the `FLPT_CMP` instruction needs to be used instead of the `CMP` instruction. After using `FLPT_CMP`, the **unsigned** version of the desired conditional jump should be used, **even if one or both of the floating point values were negative**. There are no dedicated conditional jump instructions for floating point values.
+To compare two floating point values, the `FLPT_CMP` instruction needs to be used instead of the `CMP` instruction. After using `FLPT_CMP`, the **unsigned** version of the desired conditional jump should be used, **even if one or both of the floating point values were negative**. There are no dedicated conditional jump instructions for floating point values.
 
 For example:
 
@@ -1435,7 +1435,7 @@ WCN 20
 
 ## Assembler Directives
 
-Assembler directives follow the same format as standard instructions, however instead of being assembled to an opcode for the processor to execute, they tell the assembler itself to do something to modify either the final binary file or the lines of the source file as its being assembled.
+Assembler directives follow the same format as standard instructions, however, instead of being assembled to an opcode for the processor to execute, they tell the assembler itself to do something to modify either the final binary file or the lines of the source file as its being assembled.
 
 ### `PAD` — Byte Padding
 
@@ -1520,7 +1520,7 @@ Address | Bytes
         | DAT 54
 ```
 
-Or an example of using a string:
+To insert a string using `DAT`, the desired characters must be surrounded by quotation marks (`"`) and be given as the sole operand to the directive. For example:
 
 ```text
 MVQ rg0, :&STRING  ; Move literal address of string to rg0
@@ -1588,7 +1588,7 @@ There are some sequences of characters that have special meanings when found ins
 | Escape sequence | Character name             | Notes                                                                                                                                                                 |
 |-----------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `\"`            | Double quote               | Used to insert a double quote into the string without causing the string to end.                                                                                      |
-| `\\`            | Backslash                  | In order for a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                              |
+| `\\`            | Backslash                  | For a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                                       |
 | `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
 | `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
 | `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
@@ -1671,7 +1671,7 @@ Inst
 
 The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example).
 
-Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisation can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quote marks, which will not be parsed until they are inserted as part of a replacement.
+Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
 
 ### `IMP` — File Importing
 
@@ -1911,7 +1911,7 @@ As well as reading and writing, there are also instructions for checking whether
 
 The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8 byte) values. Registers, literals, labels, and pointers can all be given as operands to the push (`PSH`) instruction.
 
-Once items have been pushed to the stack, they can be removed (**popped**), starting at the most recently pushed item. As with most other instructions with a destination, items from the stack must be popped into registers with the `POP` instruction. Once an item is removed from the stack, the effective size of the stack shrinks back down, and the popped item will no longer be considered part of the stack until and unless it is pushed again.
+Once items have been pushed to the stack, they can be removed (**popped**), starting with the most recently pushed item. As with most other instructions with a destination, items from the stack must be popped into registers with the `POP` instruction. Once an item is removed from the stack, the effective size of the stack shrinks back down, and the popped item will no longer be considered part of the stack until and unless it is pushed again.
 
 The `rso` register contains the address of the first byte of the top item in the stack. Its value will get **lower** as items are **pushed**, and **greater** as items are **popped**. More info on the `rso` register's behaviour can be found in the registers section.
 
@@ -2050,13 +2050,13 @@ CAL :SUBROUTINE_TWO, 6
 
 In order to store the address to return to when using subroutines, the stack is utilised. Every time the `CAL` instruction is used, the address of the next opcode, and the current value of `rsb`, are pushed to the stack in that order. `rsb` and `rso` will then be updated to the new address of the top of the stack (the address where `rsb` was pushed to). `rsb` will continue to point here (the **base**) until another subroutine is called or the subroutine is returned from. `rso` will continue to update as normal as items are popped to and pushed from the stack, always pointing to the top of it. The area from the current **base** (`rsb`) to the top of the stack (`rso`) is called the current **stack frame**. Multiple stack frames can be stacked on top of each other if a subroutine is called from another subroutine.
 
-When returning from a subroutine, the opposite is performed. `rsb`, and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. It is important that all values apart from these two are popped off the stack prior to using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`). After returning `rso` will point to the same address as when the function was called.
+When returning from a subroutine, the opposite is performed. `rsb`, and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. All values apart from these two must be popped off the stack before using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`). After returning `rso` will point to the same address as when the function was called.
 
 If you utilise registers in a subroutine, you should use the stack to ensure that the value of each modified register is returned to its initial value before returning from the subroutine. See the above section on using the stack to preserve registers for info on how to do this.
 
 ### Passing Multiple Parameters
 
-The `CAL` instruction can only take a single parameter, however there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are all 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
+The `CAL` instruction can only take a single data parameter, however, there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are all 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
 
 For example:
 
@@ -2087,7 +2087,7 @@ RET rfp
 
 ## Text Encoding
 
-All text in AssEmbly (input from/output to the console; strings inserted by `DAT`; strings given to `OFL`, `DFL`, `FEX`, etc) is encoded in UTF-8. This means that all characters that are a part of the ASCII character set only take up a single byte, though some characters may take as many as 4 bytes to store fully.
+All text in AssEmbly (input from/output to the console; strings inserted by `DAT`; strings given to `OFL`, `DFL`, `FEX`, etc.) is encoded in UTF-8. This means that all characters that are a part of the ASCII character set only take up a single byte, though some characters may take as many as 4 bytes to store fully.
 
 Be aware that when working with characters that require multiple bytes, instructions like `RCC`, `RFC`, `WCC`, and `WFC` still only work on single bytes at a time. As long as you read/write all of the UTF-8 bytes in the correct order, they should be stored and displayed correctly.
 
@@ -2101,7 +2101,7 @@ If an instruction supports signed integers but not unsigned integers, the instru
 
 - `O` = Instruction accepts the data type
 - `X` = Instruction does not accept the data type
-- `(...)` = Instruction accepts the data type, but see the numbered footnote below the table on additional information to keep in mind
+- `(...)` = Instruction accepts the data type, but see the numbered footnote below the table for additional information to keep in mind
 
 Instructions that don't take any data or are otherwise not applicable have been omitted.
 
@@ -2195,7 +2195,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 - `[...]` = Instruction sets flag if the given condition is satisfied, otherwise it maintains its current value
 - `{...}` = Instruction unsets flag if the given condition is satisfied, otherwise it maintains its current value
 - `X` = Instruction does not affect flag
-- `STD` = Instructions uses standard behaviour for flag according to result, unaffected by operands. They are as follows:
+- `STD` = Instruction uses standard behaviour for flag according to result, unaffected by operands. They are as follows:
   - For zero flag, set if the result is equal to 0, otherwise unset (for floating point operations, `-0` is considered equal to `0` and will set the zero flag)
   - For sign flag, set if the most significant bit of the result is set, otherwise unset
 

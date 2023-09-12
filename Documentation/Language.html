@@ -390,15 +390,15 @@ addresses/labels)</td>
 <h2 id="basic-syntax">Basic Syntax</h2>
 <h3 id="mnemonics-and-operands">Mnemonics and Operands</h3>
 <p>All AssEmbly instructions are written on a separate line, starting
-with a <strong>mnemonic</strong> — a human readable code that tells the
+with a <strong>mnemonic</strong> — a human-readable code that tells the
 <strong>assembler</strong> exactly what operation needs to be performed
-— followed by any and all <strong>operands</strong> for the instruction.
-The assembler is the program that takes human readable assembly programs
-and turns them into raw numbers — bytes — that can be read by the
-processor. This process is called <strong>assembly</strong> or
-<strong>assembling</strong>. An operand can be thought of like a
-parameter to a function in a high-level language — data that is given to
-the processor to read and/or operate on. Mnemonics are separated from
+— followed by any <strong>operands</strong> for the instruction. The
+assembler is the program that takes human-readable assembly programs and
+turns them into raw numbers — bytes — that can be read by the processor.
+This process is called <strong>assembly</strong> or
+<strong>assembling</strong>. An operand can be thought of as a parameter
+to a function in a high-level language — data that is given to the
+processor to read and/or operate on. Mnemonics are separated from
 operands with spaces, and operands are separated with commas.</p>
 <p>A simple example:</p>
 <pre class="text"><code>MVQ rg0, 10</code></pre>
@@ -449,12 +449,12 @@ comment without any instruction if you wish.</p>
 <pre class="text"><code>MVQ rg0, 10  ; This text will be ignored
 ; As will this text
 DCR rg0  ; &quot;DCR rg0&quot; will assemble as normal
-; Another Comment ; HLT - This is still a comment and will not insert a HLT instruction!</code></pre>
+; Another Comment ; HLT - This is still a comment and will not insert an HLT instruction!</code></pre>
 <h3 id="labels">Labels</h3>
 <p>Labels mark a position in the file for the program to move
 (<strong>jump</strong>) to or reference from elsewhere. They can be
-given any name you like (names are <strong>case sensitive</strong>), but
-they must be unique per-program and can only contain letters, numbers,
+given any name you like (names are <strong>case-sensitive</strong>), but
+they must be unique per program and can only contain letters, numbers,
 and underscores. Label names <strong>may not</strong> begin with a
 number, however. A definition for a label is marked by beginning a line
 with a colon — the entire rest of the line will then be read as the new
@@ -905,7 +905,7 @@ midpoint instead. To move data to or from a memory location, you can use
 either a label or a pointer.</p>
 <p>The move instructions are also how the value of a register or memory
 location is set to a literal value. In a sense, they can be considered
-the equivalent of the <code>=</code> assignment operator in higher level
+the equivalent of the <code>=</code> assignment operator in higher-level
 languages.</p>
 <p>When using move instructions, the destination always comes first. The
 destination cannot be a literal.</p>
@@ -932,8 +932,8 @@ will still be assembled into the binary (literals are
 binary <code>9874</code> is <code>10011010010010</code>, requiring 14
 bits at minimum to store. The lower 8 bits will be kept:
 <code>10010010</code> — the remaining 6 (<code>100110</code>) will be
-discarded. After this instruction has executed, <code>rg0</code> will
-have a value of <code>146</code>.</p>
+discarded. After this instruction has been executed, <code>rg0</code>
+will have a value of <code>146</code>.</p>
 <h3 id="moving-with-registers">Moving with Registers</h3>
 <p>When moving to and from a register, <code>MVQ</code> will update or
 read all of its bits (remember that registers are 64-bit). If any of the
@@ -1327,10 +1327,9 @@ arithmetic shift. Where <code>SHR</code> sets the carry flag if any
 <code>1</code> bit is shifted past the least significant bit and
 discarded, <code>SIGN_SHR</code> instead sets the carry flag if any bits
 <strong>not equal to the sign bit</strong> are discarded. This means
-that for initial values that are negative, any <code>0</code> bit being
-discarded will set the carry bit, and for initial values that are
-positive, any <code>1</code> bit being discarded will set the carry
-bit.</p>
+that for negative initial values, any <code>0</code> bit being discarded
+will set the carry bit, and for positive initial values, any
+<code>1</code> bit being discarded will set the carry bit.</p>
 <p>Using an 8-bit number for demonstration, the behaviour of a
 <strong>logical shift</strong> (<code>SHR</code>) looks like this:</p>
 <pre class="text"><code>-26 &gt;&gt; 1
@@ -1438,9 +1437,9 @@ are stored using an entirely different format from regular integer
 values, which means that, unlike with signed values, very little of the
 base instruction set can work with floating point values. Instead,
 instructions in the floating point instruction set (mnemonics starting
-with <code>FLPT_</code>) must be used instead. There is a full table
-towards the end of the document that details which instructions accept
-which formats of data.</p>
+with <code>FLPT_</code>) must be used. There is a full table towards the
+end of the document that details which instructions accept which formats
+of data.</p>
 <p>To make an integer literal into a floating point literal, it must
 contain a decimal point (<code>.</code>). Any numeric literal containing
 a decimal point will be assembled into a 64-bit float.</p>
@@ -1679,9 +1678,9 @@ ADD rg0, 5  ; This won&#39;t be executed
 <p><code>rg0</code> only ends up being 5 at the end of this example, as
 jumping to the <code>SKIP</code> label prevented the two other
 <code>ADD</code> instructions from being reached.</p>
-<p>Jumps can also be made to pointers, though it is important that you
-are sure that the pointer will contain the address of a valid opcode
-before jumping there.</p>
+<p>Jumps can also be made to pointers, though you must be sure that the
+pointer will contain the address of a valid opcode before jumping
+there.</p>
 <p>For example:</p>
 <pre class="text"><code>MVQ rg0, :&amp;MY_CODE  ; Move the literal address of MY_CODE to rg0
 JMP *rg0  ; Jump to that address
@@ -1692,10 +1691,10 @@ MVQ rg0, 17
 <h2 id="comparing-testing-and-branching">Comparing, Testing, and
 Branching</h2>
 <p>Branching is similar to jumping in that it changes where in the
-program execution is currently taking place, however a condition is
-first checked before performing the jump. If the condition is not met,
-the program will continue execution as normal without jumping
-anywhere.</p>
+program execution is currently taking place, however, when branching, a
+condition is checked first before performing the jump. If the condition
+is not met, the program will continue execution as normal without
+jumping anywhere.</p>
 <p>The conditional jump instructions are as follows:</p>
 <pre class="text"><code>+----------+----------------------------------+
 | Mnemonic | Meaning                          |
@@ -1812,9 +1811,9 @@ checking for in terms of the status flags can be found in the full
 instruction reference.</p>
 <h3 id="comparing-floating-point-numbers">Comparing Floating Point
 Numbers</h3>
-<p>In order to compare two floating point values, the
-<code>FLPT_CMP</code> instruction needs to be used instead of the
-<code>CMP</code> instruction. After using <code>FLPT_CMP</code>, the
+<p>To compare two floating point values, the <code>FLPT_CMP</code>
+instruction needs to be used instead of the <code>CMP</code>
+instruction. After using <code>FLPT_CMP</code>, the
 <strong>unsigned</strong> version of the desired conditional jump should
 be used, <strong>even if one or both of the floating point values were
 negative</strong>. There are no dedicated conditional jump instructions
@@ -1905,7 +1904,7 @@ WCN 20
 ; &quot;1020&quot; will be written to the console</code></pre>
 <h2 id="assembler-directives">Assembler Directives</h2>
 <p>Assembler directives follow the same format as standard instructions,
-however instead of being assembled to an opcode for the processor to
+however, instead of being assembled to an opcode for the processor to
 execute, they tell the assembler itself to do something to modify either
 the final binary file or the lines of the source file as its being
 assembled.</p>
@@ -1977,7 +1976,9 @@ DAT 54  ; Insert a single 54 byte (0x36)</code></pre>
 --------+----------------------------------------------------
  0x0B   | 36
         | DAT 54</code></pre>
-<p>Or an example of using a string:</p>
+<p>To insert a string using <code>DAT</code>, the desired characters
+must be surrounded by quotation marks (<code>"</code>) and be given as
+the sole operand to the directive. For example:</p>
 <pre class="text"><code>MVQ rg0, :&amp;STRING  ; Move literal address of string to rg0
 :STRING_LOOP
 MVB rg1, *rg0  ; Move contents of address stored in rg0 to rg1
@@ -2063,8 +2064,8 @@ string to end.</td>
 <tr class="even">
 <td><code>\\</code></td>
 <td>Backslash</td>
-<td>In order for a string to contain a backslash, you must escape it so
-it isn’t treated as the start of an escape sequence.</td>
+<td>For a string to contain a backslash, you must escape it so it isn’t
+treated as the start of an escape sequence.</td>
 </tr>
 <tr class="odd">
 <td><code>\0</code></td>
@@ -2210,12 +2211,14 @@ instructions, as seen in the last example).</p>
 each operand being interpreted as literal text. Both operands can
 contain whitespace, and the second operand may contain commas. They are
 case sensitive, and macros with the same name but different
-capitalisation can exist simultaneously. Be aware that aside from a
+capitalisations can exist simultaneously. Be aware that aside from a
 <strong>single</strong> space character separating the <code>MAC</code>
 mnemonic from its operands, leading and trailing whitespace in either of
-the operands will not be removed. Macros can also contain quote marks,
-which will not be parsed until they are inserted as part of a
-replacement.</p>
+the operands will not be removed. Macros can also contain quotation
+marks (<code>"</code>), which will not be immediately parsed as a string
+within the macro. If the quotation marks are placed into a line as
+replacement text, they will be parsed normally as a part of the
+line.</p>
 <h3 id="imp-file-importing"><code>IMP</code> — File Importing</h3>
 <p>The <code>IMP</code> directive inserts the contents of another file
 wherever the directive is placed. It allows a program to be split across
@@ -2491,8 +2494,8 @@ exclusively 64-bit (8 byte) values. Registers, literals, labels, and
 pointers can all be given as operands to the push (<code>PSH</code>)
 instruction.</p>
 <p>Once items have been pushed to the stack, they can be removed
-(<strong>popped</strong>), starting at the most recently pushed item. As
-with most other instructions with a destination, items from the stack
+(<strong>popped</strong>), starting with the most recently pushed item.
+As with most other instructions with a destination, items from the stack
 must be popped into registers with the <code>POP</code> instruction.
 Once an item is removed from the stack, the effective size of the stack
 shrinks back down, and the popped item will no longer be considered part
@@ -2655,31 +2658,31 @@ subroutine.</p>
 <p>When returning from a subroutine, the opposite is performed.
 <code>rsb</code>, and <code>rpo</code> are popped off the top of the
 stack, thereby continuing execution as it was before the subroutine was
-called. It is important that all values apart from these two are popped
-off the stack prior to using the <code>RET</code> instruction (you can
-ensure this by moving the value of <code>rsb</code> into
-<code>rso</code>). After returning <code>rso</code> will point to the
-same address as when the function was called.</p>
+called. All values apart from these two must be popped off the stack
+before using the <code>RET</code> instruction (you can ensure this by
+moving the value of <code>rsb</code> into <code>rso</code>). After
+returning <code>rso</code> will point to the same address as when the
+function was called.</p>
 <p>If you utilise registers in a subroutine, you should use the stack to
 ensure that the value of each modified register is returned to its
 initial value before returning from the subroutine. See the above
 section on using the stack to preserve registers for info on how to do
 this.</p>
 <h3 id="passing-multiple-parameters">Passing Multiple Parameters</h3>
-<p>The <code>CAL</code> instruction can only take a single parameter,
-however there may be situations where multiple values need to be passed
-to a subroutine; it is best to use the stack in situations such as
-these. Before calling the subroutine, push any values you want to act as
-parameters to the subroutine, to the stack. Once the subroutine has been
-called, you can use <code>rsb</code> to calculate the address that each
-parameter will be stored at. To access the first parameter (the last one
-pushed before calling), you need to account for the two automatically
-pushed values first. These, along with every other value in the stack,
-are all 8 bytes long, so adding <code>16</code> (<code>8 * 2</code>) to
-<code>rsb</code> will get you the address of this parameter (you should
-do this in another register, <code>rsb</code> should be left
-unmodified). To access any subsequent parameters, simply add another
-<code>8</code> on top of this.</p>
+<p>The <code>CAL</code> instruction can only take a single data
+parameter, however, there may be situations where multiple values need
+to be passed to a subroutine; it is best to use the stack in situations
+such as these. Before calling the subroutine, push any values you want
+to act as parameters to the subroutine, to the stack. Once the
+subroutine has been called, you can use <code>rsb</code> to calculate
+the address that each parameter will be stored at. To access the first
+parameter (the last one pushed before calling), you need to account for
+the two automatically pushed values first. These, along with every other
+value in the stack, are all 8 bytes long, so adding <code>16</code>
+(<code>8 * 2</code>) to <code>rsb</code> will get you the address of
+this parameter (you should do this in another register, <code>rsb</code>
+should be left unmodified). To access any subsequent parameters, simply
+add another <code>8</code> on top of this.</p>
 <p>For example:</p>
 <pre class="text"><code>PSH 4  ; Parameter D
 PSH 3  ; Parameter C
@@ -2706,10 +2709,10 @@ RET rfp</code></pre>
 <h2 id="text-encoding">Text Encoding</h2>
 <p>All text in AssEmbly (input from/output to the console; strings
 inserted by <code>DAT</code>; strings given to <code>OFL</code>,
-<code>DFL</code>, <code>FEX</code>, etc) is encoded in UTF-8. This means
-that all characters that are a part of the ASCII character set only take
-up a single byte, though some characters may take as many as 4 bytes to
-store fully.</p>
+<code>DFL</code>, <code>FEX</code>, etc.) is encoded in UTF-8. This
+means that all characters that are a part of the ASCII character set
+only take up a single byte, though some characters may take as many as 4
+bytes to store fully.</p>
 <p>Be aware that when working with characters that require multiple
 bytes, instructions like <code>RCC</code>, <code>RFC</code>,
 <code>WCC</code>, and <code>WFC</code> still only work on single bytes
@@ -2736,7 +2739,7 @@ interpreted as negative.</p>
 <li><code>O</code> = Instruction accepts the data type</li>
 <li><code>X</code> = Instruction does not accept the data type</li>
 <li><code>(...)</code> = Instruction accepts the data type, but see the
-numbered footnote below the table on additional information to keep in
+numbered footnote below the table for additional information to keep in
 mind</li>
 </ul>
 <p>Instructions that don’t take any data or are otherwise not applicable
@@ -3228,7 +3231,7 @@ satisfied, otherwise it maintains its current value</li>
 <li><code>{...}</code> = Instruction unsets flag if the given condition
 is satisfied, otherwise it maintains its current value</li>
 <li><code>X</code> = Instruction does not affect flag</li>
-<li><code>STD</code> = Instructions uses standard behaviour for flag
+<li><code>STD</code> = Instruction uses standard behaviour for flag
 according to result, unaffected by operands. They are as follows:
 <ul>
 <li>For zero flag, set if the result is equal to 0, otherwise unset (for
