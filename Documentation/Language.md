@@ -131,6 +131,8 @@ You can have as many spaces as you like between commas and mnemonics/operands. T
 
 Some instructions, like `CFL`, don't need any operands. In these cases, simply have the mnemonic alone on the line.
 
+A line may end in a trailing comma as long as there is at least one operand on the line. Mnemonics taking no operands cannot be followed by a trailing comma.
+
 Mnemonics correspond to and are assembled down to **opcodes**, numbers (in the case of AssEmbly either 1 or 3 bytes) that the processor reads to know what instruction to perform and what types of operands it needs to read. If an opcode starts with a `0xFF` byte, the opcode will be 3 bytes long, with the second byte corresponding to an *extension set* number, and the third byte corresponding to an *instruction code*. If an opcode starts with any other byte, that single byte will be the entire opcode, with the byte corresponding to an *instruction code* in the base instruction set (extension set number `0x00`). This means that opcodes in the form `0xFF, 0x00, 0x??` and opcodes in the form `0x??` refer to the same instruction, though this **only** works when the extension set is `0x00`. A full list of extension sets and instruction codes can be found toward the end of the document.
 
 The processor will begin executing from the **first line** in the file downwards, unless a label with the name `ENTRY` is defined, in which case the processor will start there (more in the following section on labels). Programs should *always* end in a `HLT` instruction (with no operands) to stop the processor.
@@ -1657,11 +1659,19 @@ MVQ rg0, Number
 MAC Number, 678
 MVQ rg1, Number
 ; rg1 is now 678
+
+MAC Inst, ICR rg1
+Inst
+; rg1 is now 679
+
+MAC Inst, ADD rg1, 6
+Inst
+; rg1 is now 685
 ```
 
-The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`.
+The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example).
 
-Note that macros cannot contain spaces, commas, unclosed quotes (`"`), characters before or after opening and closing quotes respectively, and surrounding whitespace will be ignored. Macros with string literals containing escape characters will have the escape characters resolved **before** the macro is inserted. They are case sensitive, and macros with the same name but different capitalisation can exist simultaneously.
+Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisation can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quote marks, which will not be parsed until they are inserted as part of a replacement.
 
 ### `IMP` — File Importing
 

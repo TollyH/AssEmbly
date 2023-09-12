@@ -491,6 +491,9 @@ namespace AssEmbly
             StringBuilder sb = new();
             int trailingWhitespace = -1;
             int stringEnd = -1;
+            // Macro definitions have different syntax rules
+            // - quotes don't create strings and operands can contain whitespace
+            bool isMacro = false;
             for (int i = 0; i < line.Length; i++)
             {
                 char c = line[i];
@@ -499,13 +502,15 @@ namespace AssEmbly
                     // Comment found, ignore rest of line
                     break;
                 }
-                if (char.IsWhiteSpace(c))
+                if (char.IsWhiteSpace(c) && !isMacro)
                 {
                     if (sb.Length != 0 && elements.Count == 0)
                     {
                         // End of mnemonic found, add line so far as first item
-                        elements.Add(sb.ToString());
+                        string mnemonic = sb.ToString();
+                        elements.Add(mnemonic);
                         sb = new StringBuilder();
+                        isMacro = mnemonic.ToUpperInvariant() == "MAC";
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -527,24 +532,28 @@ namespace AssEmbly
                     {
                         throw new SyntaxError($"Operands cannot be empty:\n    {line}\n    {new string(' ', i)}^");
                     }
-                    // End of operand found, add stored characters as an element and move on
-                    elements.Add(sb.ToString());
-                    sb = new StringBuilder();
-                    trailingWhitespace = -1;
-                    stringEnd = -1;
-                    continue;
+                    // The replacement portion of macros can contain commas without it being considered a different operand
+                    if (!isMacro || elements.Count < 2)
+                    {
+                        // End of operand found, add stored characters as an element and move on
+                        elements.Add(sb.ToString());
+                        sb = new StringBuilder();
+                        trailingWhitespace = -1;
+                        stringEnd = -1;
+                        continue;
+                    }
                 }
-                if (trailingWhitespace != -1)
+                if (trailingWhitespace != -1 && !isMacro)
                 {
                     throw new SyntaxError(
                         $"Operands cannot contain whitespace. Did you forget a comma?\n    {line}\n    {new string(' ', trailingWhitespace)}^");
                 }
-                if (stringEnd != -1)
+                if (stringEnd != -1 && !isMacro)
                 {
                     throw new SyntaxError(
                         $"Non-whitespace characters found after string literal. Did you forget a comma?\n    {line}\n    {new string(' ', i)}^");
                 }
-                if (c == '"')
+                if (c == '"' && !isMacro)
                 {
                     if (sb.Length != 0)
                     {
