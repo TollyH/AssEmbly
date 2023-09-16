@@ -113,7 +113,7 @@ namespace AssEmbly
                     opcode = Memory[Registers[(int)Register.rpo]];
                 }
                 // Upper 4-bytes (general category of instruction)
-                byte opcodeHigh = (byte)((0xF0 & opcode) >> 4);
+                byte opcodeHigh = (byte)(0xF0 & opcode);
                 // Lower 4-bytes (specific operation and operand types)
                 byte opcodeLow = (byte)(0x0F & opcode);
                 ulong operandStart = ++Registers[(int)Register.rpo];
@@ -139,7 +139,7 @@ namespace AssEmbly
                     case 0x00:  // Base instruction set
                         switch (opcodeHigh)
                         {
-                            case 0x0:  // Control / Jump
+                            case 0x00:  // Control / Jump
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // HLT (Halt)
@@ -277,7 +277,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set control low opcode");
                                 }
                                 break;
-                            case 0x1:  // Addition
+                            case 0x10:  // Addition
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -345,7 +345,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x2:  // Subtraction
+                            case 0x20:  // Subtraction
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -413,7 +413,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x3:  // Multiplication
+                            case 0x30:  // Multiplication
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -468,7 +468,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x4:  // Division
+                            case 0x40:  // Division
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -558,7 +558,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x5:  // Shifting
+                            case 0x50:  // Shifting
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -654,7 +654,7 @@ namespace AssEmbly
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
                                 break;
-                            case 0x6:  // Bitwise
+                            case 0x60:  // Bitwise
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -740,7 +740,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
                                 break;
-                            case 0x7:  // Test
+                            case 0x70:  // Test
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -827,7 +827,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x8:  // Small Move
+                            case 0x80:  // Small Move
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // MVB reg, reg
@@ -898,7 +898,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set small move low opcode");
                                 }
                                 break;
-                            case 0x9:  // Large Move
+                            case 0x90:  // Large Move
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // MVD reg, reg
@@ -969,7 +969,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set large move low opcode");
                                 }
                                 break;
-                            case 0xA:  // Stack
+                            case 0xA0:  // Stack
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // PSH reg
@@ -1001,7 +1001,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set stack low opcode");
                                 }
                                 break;
-                            case 0xB:  // Subroutines
+                            case 0xB0:  // Subroutines
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // CAL adr
@@ -1155,7 +1155,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set subroutine low opcode");
                                 }
                                 break;
-                            case 0xC:  // Console Write
+                            case 0xC0:  // Console Write
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // WCN reg
@@ -1235,7 +1235,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set console write low opcode");
                                 }
                                 break;
-                            case 0xD:  // File Write
+                            case 0xD0:  // File Write
                                 if (openFile is null)
                                 {
                                     throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
@@ -1310,7 +1310,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set file write low opcode");
                                 }
                                 break;
-                            case 0xE:  // File Operations
+                            case 0xE0:  // File Operations
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // OFL adr
@@ -1448,7 +1448,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set file operation low opcode");
                                 }
                                 break;
-                            case 0xF:  // Reading
+                            case 0xF0:  // Reading
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // RCC reg
@@ -1514,7 +1514,7 @@ namespace AssEmbly
                     case 0x01:  // Signed extension set
                         switch (opcodeHigh)
                         {
-                            case 0x0:  // Jumps
+                            case 0x00:  // Jumps
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_JLT adr (Jump If Less Than - Sign Flag != Overflow Flag)
@@ -1693,7 +1693,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set jump low opcode");
                                 }
                                 break;
-                            case 0x1:  // Division
+                            case 0x10:  // Division
                                 signedInitial = (long)ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -1783,7 +1783,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x2:  // Shifting
+                            case 0x20:  // Shifting
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -1857,7 +1857,7 @@ namespace AssEmbly
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
                                 break;
-                            case 0x3:  // Small Sign-Preserving Move
+                            case 0x30:  // Small Sign-Preserving Move
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_MVB reg, reg
@@ -1896,7 +1896,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set small move low opcode");
                                 }
                                 break;
-                            case 0x4:  // Large Sign-Preserving Move
+                            case 0x40:  // Large Sign-Preserving Move
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_MVD reg, reg
@@ -1919,7 +1919,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set large move low opcode");
                                 }
                                 break;
-                            case 0x5:  // Console Write
+                            case 0x50:  // Console Write
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_WCN reg
@@ -1958,7 +1958,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set console write low opcode");
                                 }
                                 break;
-                            case 0x6:  // File Write
+                            case 0x60:  // File Write
                                 if (openFile is null)
                                 {
                                     throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
@@ -2001,7 +2001,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set file write low opcode");
                                 }
                                 break;
-                            case 0x7:  // Extend
+                            case 0x70:  // Extend
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -2043,7 +2043,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x8:  // Negate
+                            case 0x80:  // Negate
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -2084,7 +2084,7 @@ namespace AssEmbly
                     case 0x2:  // Floating point extension set
                         switch (opcodeHigh)
                         {
-                            case 0x0:  // Addition
+                            case 0x00:  // Addition
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2140,7 +2140,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x1:  // Subtraction
+                            case 0x10:  // Subtraction
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2196,7 +2196,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x2:  // Multiplication
+                            case 0x20:  // Multiplication
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2252,7 +2252,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x3:  // Division
+                            case 0x30:  // Division
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2343,7 +2343,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x4:  // Trigonometric functions
+                            case 0x40:  // Trigonometric functions
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2414,7 +2414,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x5:  // Exponentiation
+                            case 0x50:  // Exponentiation
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2470,7 +2470,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x6:  // Logarithm
+                            case 0x60:  // Logarithm
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2526,7 +2526,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0x7:  // Console Write
+                            case 0x70:  // Console Write
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FLPT_WCN reg
@@ -2549,7 +2549,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set console write low opcode");
                                 }
                                 break;
-                            case 0x8:  // File Write
+                            case 0x80:  // File Write
                                 if (openFile is null)
                                 {
                                     throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
@@ -2576,7 +2576,7 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set file write low opcode");
                                 }
                                 break;
-                            case 0x9:  // Float Size Conversions
+                            case 0x90:  // Float Size Conversions
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -2622,7 +2622,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0xA:  // Negate
+                            case 0xA0:  // Negate
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2657,7 +2657,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0xB:  // Integer to Floating Point Conversion
+                            case 0xB0:  // Integer to Floating Point Conversion
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
@@ -2696,7 +2696,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0xC:  // Floating Point to Integer Conversion
+                            case 0xC0:  // Floating Point to Integer Conversion
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2742,7 +2742,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
                                 break;
-                            case 0xD:  // Comparison
+                            case 0xD0:  // Comparison
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
@@ -2804,7 +2804,7 @@ namespace AssEmbly
                     case 0x3:  // Extended base set
                         switch (opcodeHigh)
                         {
-                            case 0x0:  // Byte swap
+                            case 0x00:  // Byte swap
                                 initial = ReadMemoryRegister(operandStart);
                                 switch (opcodeLow)
                                 {
