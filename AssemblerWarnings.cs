@@ -288,6 +288,7 @@ namespace AssEmbly
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
+        private bool insertedAnyExecutable = false;
 
         private void PreAnalyzeStateUpdate()
         {
@@ -359,6 +360,10 @@ namespace AssEmbly
             lastMnemonic = mnemonic;
             lastOperands = operands;
             lastImportStack = importStack;
+            if (!instructionIsData && !instructionIsImport)
+            {
+                insertedAnyExecutable = true;
+            }
         }
 
         // Analyzer methods
@@ -407,11 +412,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0001()
         {
             // Warning 0001: Data insertion is not directly preceded by unconditional jump, return, or halt instruction.
-            if (instructionIsData && !lastInstructionWasTerminator && !lastInstructionWasData)
-            {
-                return true;
-            }
-            return false;
+            return instructionIsData && insertedAnyExecutable && !lastInstructionWasTerminator && !lastInstructionWasData;
         }
 
         private List<Warning> Analyzer_Final_Warning_0002()
@@ -545,7 +546,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0010()
         {
             // Warning 0010: File import is not directly preceded by unconditional jump, return, or halt instruction.
-            return !lastInstructionWasTerminator && !lastInstructionWasData && instructionIsImport;
+            return !lastInstructionWasTerminator && !lastInstructionWasData && insertedAnyExecutable && instructionIsImport;
         }
 
         private bool Analyzer_Rolling_Warning_0011()
