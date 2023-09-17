@@ -1243,51 +1243,51 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // WFN reg
-                                        fileWrite!.Write(ReadMemoryRegister(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegister(operandStart).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // WFN lit
-                                        fileWrite!.Write(ReadMemoryQWord(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryQWord(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // WFN adr
-                                        fileWrite!.Write(ReadMemoryPointedQWord(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryPointedQWord(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // WFN ptr
-                                        fileWrite!.Write(ReadMemoryRegisterPointedQWord(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedQWord(operandStart).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x4:  // WFB reg
-                                        fileWrite!.Write((0xFF & ReadMemoryRegister(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes((0xFF & ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // WFB lit
-                                        fileWrite!.Write(Memory[operandStart].ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(Memory[operandStart].ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // WFB adr
-                                        fileWrite!.Write(ReadMemoryPointedByte(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryPointedByte(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // WFB ptr
-                                        fileWrite!.Write(ReadMemoryRegisterPointedByte(operandStart).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedByte(operandStart).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x8:  // WFX reg
-                                        fileWrite!.Write(string.Format("{0:X}", 0xFF & ReadMemoryRegister(operandStart)));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", 0xFF & ReadMemoryRegister(operandStart))));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WFX lit
-                                        fileWrite!.Write(string.Format("{0:X}", Memory[operandStart]));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", Memory[operandStart])));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WFX adr
-                                        fileWrite!.Write(string.Format("{0:X}", ReadMemoryPointedByte(operandStart)));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", ReadMemoryPointedByte(operandStart))));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WFX ptr
-                                        fileWrite!.Write(string.Format("{0:X}", ReadMemoryRegisterPointedByte(operandStart)));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", ReadMemoryRegisterPointedByte(operandStart))));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0xC:  // WFC reg
@@ -1966,35 +1966,35 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_WFN reg
-                                        fileWrite!.Write(((long)ReadMemoryRegister(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // SIGN_WFN lit
-                                        fileWrite!.Write(((long)ReadMemoryQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // SIGN_WFN adr
-                                        fileWrite!.Write(((long)ReadMemoryPointedQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryPointedQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // SIGN_WFN ptr
-                                        fileWrite!.Write(((long)ReadMemoryRegisterPointedQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegisterPointedQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x4:  // SIGN_WFB reg
-                                        fileWrite!.Write(((sbyte)ReadMemoryRegister(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // SIGN_WFB lit
-                                        fileWrite!.Write(((sbyte)Memory[operandStart]).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)Memory[operandStart]).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // SIGN_WFB adr
-                                        fileWrite!.Write(((sbyte)ReadMemoryPointedByte(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryPointedByte(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // SIGN_WFB ptr
-                                        fileWrite!.Write(((sbyte)ReadMemoryRegisterPointedByte(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegisterPointedByte(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
@@ -2557,19 +2557,19 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FLPT_WFN reg
-                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // FLPT_WFN lit
-                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // FLPT_WFN adr
-                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FLPT_WFN ptr
-                                        fileWrite!.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString());
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
