@@ -42,85 +42,250 @@ namespace AssEmbly.Test
             [TestMethod]
             public void JMP_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 2, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JMP did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void JMP_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg0] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 3, (int)Register.rg0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JMP did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void JEQ_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 4, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JEQ did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 4, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JEQ updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JEQ_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 5, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JEQ did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 5, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JEQ updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JNE_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 6, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JNE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 6, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JNE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JNE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 7, (int)Register.rg2 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JNE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 7, (int)Register.rg2 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JNE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JLT_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 8, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLT did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 8, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JLT updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JLT_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 9, (int)Register.rg3 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLT did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 9, (int)Register.rg3 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JLT updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JLE_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.LoadProgram(new byte[] { 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JLE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JLE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JLE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JGT_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.LoadProgram(new byte[] { 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGT did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void JGT_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGT did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void JGE_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.LoadProgram(new byte[] { 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "JGE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void JGE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGE did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGE updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
