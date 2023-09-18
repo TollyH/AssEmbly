@@ -20,7 +20,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Publish Project
-      run: dotnet publish -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
+      run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
