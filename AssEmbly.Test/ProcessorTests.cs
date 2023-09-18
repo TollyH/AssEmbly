@@ -58,19 +58,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void JZO_Address()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
             public void JEQ_Pointer()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
-            public void JZO_Pointer()
             {
                 throw new NotImplementedException();
             }
@@ -82,19 +70,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void JNZ_Address()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
             public void JNE_Pointer()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
-            public void JNZ_Pointer()
             {
                 throw new NotImplementedException();
             }
@@ -106,19 +82,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void JCA_Address()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
             public void JLT_Pointer()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
-            public void JCA_Pointer()
             {
                 throw new NotImplementedException();
             }
@@ -154,19 +118,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void JNC_Address()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
             public void JGE_Pointer()
-            {
-                throw new NotImplementedException();
-            }
-
-            [TestMethod]
-            public void JNC_Pointer()
             {
                 throw new NotImplementedException();
             }
