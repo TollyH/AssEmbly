@@ -180,7 +180,6 @@ HLT
 PSH rg8
 PSH rg9
 MVQ rg9, rsb
-ADD rg9, 8
 MVQ rg8, rg9
 MVQ rg9, *rg9
 :FUNC_VALUE_IN_STACK_LOOP
