@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssEmbly", "AssEmbly.csproj", "{97020A27-C706-44B9-9BEC-0C68A80A72F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssEmbly", "AssEmbly.csproj", "{97020A27-C706-44B9-9BEC-0C68A80A72F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssEmbly.Test", "AssEmbly.Test\AssEmbly.Test.csproj", "{4DD709D4-0A78-49A0-9762-C7E649832F9B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{97020A27-C706-44B9-9BEC-0C68A80A72F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97020A27-C706-44B9-9BEC-0C68A80A72F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97020A27-C706-44B9-9BEC-0C68A80A72F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DD709D4-0A78-49A0-9762-C7E649832F9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DD709D4-0A78-49A0-9762-C7E649832F9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DD709D4-0A78-49A0-9762-C7E649832F9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DD709D4-0A78-49A0-9762-C7E649832F9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

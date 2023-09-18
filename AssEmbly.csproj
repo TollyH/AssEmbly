@@ -14,4 +14,10 @@
     <Version>2.0.0</Version>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="AssEmbly.Test\**" />
+    <EmbeddedResource Remove="AssEmbly.Test\**" />
+    <None Remove="AssEmbly.Test\**" />
+  </ItemGroup>
+
 </Project>
