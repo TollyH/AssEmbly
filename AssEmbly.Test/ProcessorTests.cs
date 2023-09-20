@@ -555,31 +555,273 @@ namespace AssEmbly.Test
             [TestMethod]
             public void SUB_Register_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg8] = 0x0706050403020100UL;
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x0706050403020100UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
+                testProcessor.Registers[(int)Register.rg8] = 1234567UL;
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Overflow, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 1234567UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-42);
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(98UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Carry, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-42), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = long.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-1234567);
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x800000000012D686UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Carry | StatusFlags.SignAndOverflow), testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-1234567), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000UL;
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x8000000000000000UL, "SUB updated the second operand");
             }
 
             [TestMethod]
             public void SUB_Register_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(2, 0x0706050403020100UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x0706050403020100UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
+                testProcessor.WriteMemoryQWord(2, 1234567UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Overflow, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 1234567UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
+                testProcessor.WriteMemoryQWord(2, unchecked((ulong)-42));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(98UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Carry, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-42), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = long.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
+                testProcessor.WriteMemoryQWord(2, unchecked((ulong)-1234567));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x800000000012D686UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Carry | StatusFlags.SignAndOverflow), testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-1234567), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
+                testProcessor.WriteMemoryQWord(2, 0x8000000000000000UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x8000000000000000UL, "SUB updated the second operand");
             }
 
             [TestMethod]
             public void SUB_Register_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 0x0706050403020100UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x0706050403020100UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Overflow, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(98UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Carry, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = long.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x800000000012D686UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Carry | StatusFlags.SignAndOverflow), testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "SUB updated the second operand");
             }
 
             [TestMethod]
             public void SUB_Register_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, 0x0706050403020100UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x0706050403020100UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Overflow, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(98UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Carry, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = long.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x800000000012D686UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Carry | StatusFlags.SignAndOverflow), testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "SUB updated the second operand");
             }
 
             [TestMethod]
             public void DCR_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x0102030405060707UL, testProcessor.Registers[(int)Register.rg7], "DCR did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "DCR did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
+                testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rg9 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x7FFFFFFFFFFFFFFFUL, testProcessor.Registers[(int)Register.rg9], "DCR did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Overflow, testProcessor.Registers[(int)Register.rsf], "DCR did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rg9 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg9], "DCR did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Carry | StatusFlags.Sign), testProcessor.Registers[(int)Register.rsf], "DCR did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg9] = 1;
+                testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rg9 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DCR did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DCR did not correctly set status flags");
             }
 
             [TestMethod]
