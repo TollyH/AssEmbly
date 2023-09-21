@@ -1103,25 +1103,230 @@ namespace AssEmbly.Test
             [TestMethod]
             public void DIV_Register_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
+                testProcessor.Registers[(int)Register.rg8] = 3456789;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 3456789UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0;
+                testProcessor.Registers[(int)Register.rg8] = 987654321;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 987654321UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 1;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 1UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1;
+                testProcessor.Registers[(int)Register.rg8] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], ulong.MaxValue, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 9876543210;
+                testProcessor.Registers[(int)Register.rg8] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
+                _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
+                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
             public void DIV_Register_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0x15, 0xBF, 0x34, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 3456789UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0xB1, 0x68, 0xDE, 0x3A, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 987654321UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 1UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1;
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), ulong.MaxValue, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 9876543210;
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
+                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
             public void DIV_Register_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 3456789);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 3456789UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 987654321);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 987654321UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 1);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1;
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), ulong.MaxValue, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 9876543210;
+                testProcessor.WriteMemoryQWord(552, 0);
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
+                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
             public void DIV_Register_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 3456789);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 3456789UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 987654321);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 987654321UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1UL, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "DIV did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DIV did not correctly set status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), ulong.MaxValue, "DIV updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 9876543210;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 0);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
+                _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
+                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
