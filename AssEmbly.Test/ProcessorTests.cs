@@ -79,14 +79,14 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 5, (int)Register.rg1 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JEQ did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 5, (int)Register.rg1 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JEQ updated the rpo register when it shouldn't have");
@@ -113,14 +113,14 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 7, (int)Register.rg2 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JNE did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg2] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 7, (int)Register.rg2 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JNE updated the rpo register when it shouldn't have");
@@ -147,14 +147,14 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 9, (int)Register.rg3 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLT did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg3] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 9, (int)Register.rg3 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JLT updated the rpo register when it shouldn't have");
@@ -187,21 +187,21 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JLE did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg4] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0B, (int)Register.rg4 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JLE updated the rpo register when it shouldn't have");
@@ -234,21 +234,21 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGT updated the rpo register when it shouldn't have");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg5] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0D, (int)Register.rg5 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGT did not update rpo register or updated it incorrectly");
@@ -275,14 +275,14 @@ namespace AssEmbly.Test
             {
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
-                testProcessor.Registers[(int)Register.rg6] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg6] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0F, (int)Register.rg6 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "JGE did not update rpo register or updated it incorrectly");
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Carry;
-                testProcessor.Registers[(int)Register.rg6] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg6] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x0F, (int)Register.rg6 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "JGE updated the rpo register when it shouldn't have");
@@ -294,8 +294,8 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
-                testProcessor.Registers[(int)Register.rg8] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
+                testProcessor.Registers[(int)Register.rg8] = 0x0807060504030201;
                 testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rg7, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
@@ -304,8 +304,8 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x0807060504030201UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
-                testProcessor.Registers[(int)Register.rg8] = 1234567UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
+                testProcessor.Registers[(int)Register.rg8] = 1234567;
                 testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
@@ -314,7 +314,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 1234567UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-42);
                 testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -324,7 +324,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-42), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-1234567);
                 testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -334,8 +334,8 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-1234567), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
-                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
+                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
@@ -350,9 +350,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rg7 });
-                testProcessor.WriteMemoryQWord(2, 0x0807060504030201UL);
+                testProcessor.WriteMemoryQWord(2, 0x0807060504030201);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0909090909090909UL, testProcessor.Registers[(int)Register.rg7], "ADD did not produce correct result");
@@ -360,9 +360,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x0807060504030201UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 1234567UL);
+                testProcessor.WriteMemoryQWord(2, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x8000000000000000UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -370,7 +370,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 1234567UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -380,7 +380,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-42), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, unchecked((ulong)-1234567));
                 _ = testProcessor.Execute(false);
@@ -390,9 +390,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-1234567), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(2, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -406,9 +406,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 0x0807060504030201UL);
+                testProcessor.WriteMemoryQWord(552, 0x0807060504030201);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0909090909090909UL, testProcessor.Registers[(int)Register.rg7], "ADD did not produce correct result");
@@ -416,9 +416,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x0807060504030201UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x8000000000000000UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -426,7 +426,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -436,7 +436,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
                 _ = testProcessor.Execute(false);
@@ -446,9 +446,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -462,10 +462,10 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rg7, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 0x0807060504030201UL);
+                testProcessor.WriteMemoryQWord(552, 0x0807060504030201);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0909090909090909UL, testProcessor.Registers[(int)Register.rg7], "ADD did not produce correct result");
@@ -474,10 +474,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x0807060504030201UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x8000000000000000UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -486,7 +486,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
@@ -498,7 +498,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
@@ -510,10 +510,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "ADD updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "ADD updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
@@ -528,7 +528,7 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x14, (int)Register.rg7 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "ICR updated the rpo register by an incorrect amount");
@@ -558,8 +558,8 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
-                testProcessor.Registers[(int)Register.rg8] = 0x0706050403020100UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201;
+                testProcessor.Registers[(int)Register.rg8] = 0x0706050403020100;
                 testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg7, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
@@ -569,7 +569,7 @@ namespace AssEmbly.Test
 
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
-                testProcessor.Registers[(int)Register.rg8] = 1234567UL;
+                testProcessor.Registers[(int)Register.rg8] = 1234567;
                 testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
@@ -578,7 +578,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 1234567UL, "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-42);
                 testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -598,8 +598,8 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-1234567), "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
-                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
+                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
@@ -614,9 +614,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201;
                 testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg7 });
-                testProcessor.WriteMemoryQWord(2, 0x0706050403020100UL);
+                testProcessor.WriteMemoryQWord(2, 0x0706050403020100);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
@@ -626,7 +626,7 @@ namespace AssEmbly.Test
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
                 testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 1234567UL);
+                testProcessor.WriteMemoryQWord(2, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -634,7 +634,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 1234567UL, "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -654,9 +654,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-1234567), "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(2, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -670,9 +670,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201;
                 testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 0x0706050403020100UL);
+                testProcessor.WriteMemoryQWord(552, 0x0706050403020100);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
@@ -682,7 +682,7 @@ namespace AssEmbly.Test
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
                 testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -690,7 +690,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -710,9 +710,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -726,10 +726,10 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0807060504030201;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg7, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 0x0706050403020100UL);
+                testProcessor.WriteMemoryQWord(552, 0x0706050403020100);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x0101010101010101UL, testProcessor.Registers[(int)Register.rg7], "SUB did not produce correct result");
@@ -741,7 +741,7 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg9] = unchecked((ulong)long.MinValue);
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x7FFFFFFFFFED2979UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -750,7 +750,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
@@ -774,10 +774,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "SUB updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "SUB updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
@@ -792,7 +792,7 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708UL;
+                testProcessor.Registers[(int)Register.rg7] = 0x0102030405060708;
                 testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rg7 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
@@ -830,8 +830,8 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 9876543UL;
-                testProcessor.Registers[(int)Register.rg8] = 3456789UL;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
+                testProcessor.Registers[(int)Register.rg8] = 3456789;
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg7, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
@@ -840,8 +840,8 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 3456789UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
-                testProcessor.Registers[(int)Register.rg8] = 1234567UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
+                testProcessor.Registers[(int)Register.rg8] = 1234567;
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
@@ -850,7 +850,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 1234567UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-42);
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -860,7 +860,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-42), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = unchecked((ulong)-1234567);
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -870,7 +870,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], unchecked((ulong)-1234567), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 142536475869UL;
+                testProcessor.Registers[(int)Register.rg9] = 142536475869;
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
@@ -880,8 +880,8 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
-                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
+                testProcessor.Registers[(int)Register.rg8] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rg9, (int)Register.rg8 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
@@ -896,9 +896,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 9876543UL;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg7 });
-                testProcessor.WriteMemoryQWord(2, 3456789UL);
+                testProcessor.WriteMemoryQWord(2, 3456789);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(34141125200427UL, testProcessor.Registers[(int)Register.rg7], "MUL did not produce correct result");
@@ -906,9 +906,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 3456789UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 1234567UL);
+                testProcessor.WriteMemoryQWord(2, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(9223370512699098319UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
@@ -916,7 +916,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 1234567UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -926,7 +926,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-42), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, unchecked((ulong)-1234567));
                 _ = testProcessor.Execute(false);
@@ -936,7 +936,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), unchecked((ulong)-1234567), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 142536475869UL;
+                testProcessor.Registers[(int)Register.rg9] = 142536475869;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg9 });
                 testProcessor.WriteMemoryQWord(2, 0);
                 _ = testProcessor.Execute(false);
@@ -946,9 +946,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rg9 });
-                testProcessor.WriteMemoryQWord(2, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(2, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
@@ -962,9 +962,9 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 9876543UL;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 3456789UL);
+                testProcessor.WriteMemoryQWord(552, 3456789);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(34141125200427UL, testProcessor.Registers[(int)Register.rg7], "MUL did not produce correct result");
@@ -972,9 +972,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 3456789UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(9223370512699098319UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
@@ -982,7 +982,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
                 _ = testProcessor.Execute(false);
@@ -992,7 +992,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
                 _ = testProcessor.Execute(false);
@@ -1002,7 +1002,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 142536475869UL;
+                testProcessor.Registers[(int)Register.rg9] = 142536475869;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 testProcessor.WriteMemoryQWord(552, 0);
                 _ = testProcessor.Execute(false);
@@ -1012,9 +1012,9 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
@@ -1028,10 +1028,10 @@ namespace AssEmbly.Test
                 Processor testProcessor = new(2046);
                 // Set the file end flag to make sure the instruction doesn't affect it
                 testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
-                testProcessor.Registers[(int)Register.rg7] = 9876543UL;
+                testProcessor.Registers[(int)Register.rg7] = 9876543;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg7, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 3456789UL);
+                testProcessor.WriteMemoryQWord(552, 3456789);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(34141125200427UL, testProcessor.Registers[(int)Register.rg7], "MUL did not produce correct result");
@@ -1040,10 +1040,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 3456789UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241UL;
+                testProcessor.Registers[(int)Register.rg9] = 9223372036853541241;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 1234567UL);
+                testProcessor.WriteMemoryQWord(552, 1234567);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(9223370512699098319UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
@@ -1052,7 +1052,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 1234567UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 56UL;
+                testProcessor.Registers[(int)Register.rg9] = 56;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-42));
@@ -1064,7 +1064,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-42), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, unchecked((ulong)-1234567));
@@ -1076,7 +1076,7 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), unchecked((ulong)-1234567), "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 142536475869UL;
+                testProcessor.Registers[(int)Register.rg9] = 142536475869;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg9, (int)Register.rg8 });
                 testProcessor.WriteMemoryQWord(552, 0);
@@ -1088,10 +1088,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "MUL updated the second operand");
 
                 testProcessor = new(2046);
-                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000UL;
+                testProcessor.Registers[(int)Register.rg9] = 0x8000000000000000;
                 testProcessor.Registers[(int)Register.rg8] = 552;
                 testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rg9, (int)Register.rg8 });
-                testProcessor.WriteMemoryQWord(552, 0x8000000000000000UL);
+                testProcessor.WriteMemoryQWord(552, 0x8000000000000000);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "MUL updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
