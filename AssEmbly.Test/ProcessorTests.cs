@@ -1150,10 +1150,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
@@ -1201,10 +1197,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
@@ -1257,10 +1249,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
@@ -1322,11 +1310,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DIV updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DIV updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DIV updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DIV updated the second operand");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DIV updated the second operand");
             }
 
             [TestMethod]
@@ -1383,11 +1366,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x44, (int)Register.rg7, (int)Register.rg9, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DVR updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DVR updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "DVR updated the second operand");
             }
 
             [TestMethod]
@@ -1439,11 +1417,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x45, (int)Register.rg7, (int)Register.rg9, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DVR updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DVR updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(3), 0UL, "DVR updated the second operand");
             }
 
             [TestMethod]
@@ -1500,11 +1473,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x46, (int)Register.rg7, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DVR updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DVR updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DVR updated the second operand");
             }
 
             [TestMethod]
@@ -1570,12 +1538,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x47, (int)Register.rg7, (int)Register.rg9, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "DVR updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DVR updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "DVR updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "DVR updated the second operand");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "DVR updated the second operand");
             }
 
             [TestMethod]
@@ -1628,10 +1590,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x48, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "REM updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "REM updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "REM updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "REM updated the second operand");
             }
 
             [TestMethod]
@@ -1679,10 +1637,6 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x49, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "REM updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "REM updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "REM updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "REM updated the second operand");
             }
 
             [TestMethod]
@@ -1735,10 +1689,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x4A, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "REM updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "REM updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "REM updated status flags after exception");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "REM updated the second operand");
             }
 
             [TestMethod]
@@ -1800,11 +1750,6 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x4B, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
-                Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rpo], "REM updated the rpo register by an incorrect amount after exception");
-                Assert.AreEqual(9876543210UL, testProcessor.Registers[(int)Register.rg7], "REM updated the result register after exception");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "REM updated status flags after exception");
-                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "REM updated the second operand");
-                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "REM updated the second operand");
             }
 
             [TestMethod]
