@@ -342,6 +342,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
                 Assert.AreEqual((ulong)(StatusFlags.ZeroAndCarry | StatusFlags.Overflow), testProcessor.Registers[(int)Register.rsf], "ADD did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x8000000000000000UL, "ADD updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x10, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "ADD with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -398,6 +402,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
                 Assert.AreEqual((ulong)(StatusFlags.ZeroAndCarry | StatusFlags.Overflow), testProcessor.Registers[(int)Register.rsf], "ADD did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x8000000000000000UL, "ADD updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x11, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "ADD with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -454,6 +462,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ADD did not produce correct result");
                 Assert.AreEqual((ulong)(StatusFlags.ZeroAndCarry | StatusFlags.Overflow), testProcessor.Registers[(int)Register.rsf], "ADD did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "ADD updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x12, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "ADD with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -520,6 +532,11 @@ namespace AssEmbly.Test
                 Assert.AreEqual((ulong)(StatusFlags.ZeroAndCarry | StatusFlags.Overflow), testProcessor.Registers[(int)Register.rsf], "ADD did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "ADD updated the second operand");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "ADD updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x13, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "ADD with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -550,6 +567,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "ICR updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "ICR did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.ZeroAndCarry, testProcessor.Registers[(int)Register.rsf], "ICR did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x14, (int)Register.rpo });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "ICR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -606,6 +627,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x8000000000000000UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x20, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "SUB with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -662,6 +687,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x8000000000000000UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x21, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "SUB with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -718,6 +747,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "SUB did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x22, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "SUB with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -784,6 +817,11 @@ namespace AssEmbly.Test
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "SUB did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "SUB updated the second operand");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "SUB updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x23, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "SUB with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -822,6 +860,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "DCR updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "DCR did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "DCR did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x24, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DCR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -888,6 +930,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.ZeroAndCarry, testProcessor.Registers[(int)Register.rsf], "MUL did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0x8000000000000000UL, "MUL updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x30, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "MUL with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -954,6 +1000,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.ZeroAndCarry, testProcessor.Registers[(int)Register.rsf], "MUL did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0x8000000000000000UL, "MUL updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x31, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "MUL with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1020,6 +1070,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg9], "MUL did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.ZeroAndCarry, testProcessor.Registers[(int)Register.rsf], "MUL did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "MUL updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x32, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "MUL with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1098,6 +1152,11 @@ namespace AssEmbly.Test
                 Assert.AreEqual((ulong)StatusFlags.ZeroAndCarry, testProcessor.Registers[(int)Register.rsf], "MUL did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "MUL updated the second operand");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0x8000000000000000UL, "MUL updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x33, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "MUL with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1150,6 +1209,11 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x40, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DIV with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1197,6 +1261,10 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x41, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DIV with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1249,6 +1317,11 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x42, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DIV with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1310,6 +1383,12 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DIV by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x43, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DIV with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1366,6 +1445,16 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x44, (int)Register.rg7, (int)Register.rg9, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x44, (int)Register.rpo, (int)Register.rg9, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x44, (int)Register.rg9, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1417,6 +1506,14 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x45, (int)Register.rg7, (int)Register.rg9, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x45, (int)Register.rpo, (int)Register.rg9, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x45, (int)Register.rg9, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1473,6 +1570,16 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x46, (int)Register.rg7, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x46, (int)Register.rpo, (int)Register.rg9, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
+
+                testProcessor = new(2046);
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x46, (int)Register.rg9, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1538,6 +1645,18 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x47, (int)Register.rg7, (int)Register.rg9, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "DVR by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x47, (int)Register.rpo, (int)Register.rg9, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x47, (int)Register.rg9, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "DVR with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1590,6 +1709,11 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg8] = 0;
                 testProcessor.LoadProgram(new byte[] { 0x48, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x48, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "REM with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1637,6 +1761,10 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg7] = 9876543210;
                 testProcessor.LoadProgram(new byte[] { 0x49, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x49, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "REM with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1689,6 +1817,11 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x4A, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x4A, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "REM with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -1750,6 +1883,12 @@ namespace AssEmbly.Test
                 testProcessor.WriteMemoryQWord(552, 0);
                 testProcessor.LoadProgram(new byte[] { 0x4B, (int)Register.rg7, (int)Register.rg8 });
                 _ = Assert.ThrowsException<DivideByZeroException>(() => testProcessor.Execute(false), "REM by 0 didn't throw DivideByZeroException");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0x4B, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "REM with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
