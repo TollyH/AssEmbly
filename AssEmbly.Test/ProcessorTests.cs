@@ -1955,6 +1955,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x50, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2015,6 +2019,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x51, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2081,6 +2089,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x52, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2159,6 +2171,11 @@ namespace AssEmbly.Test
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x53, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2225,6 +2242,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x54, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2285,6 +2306,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x55, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2351,6 +2376,10 @@ namespace AssEmbly.Test
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x56, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -2429,6 +2458,11 @@ namespace AssEmbly.Test
                 Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
                 Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
                 Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 64UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x57, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
