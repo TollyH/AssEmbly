@@ -3166,7 +3166,38 @@ namespace AssEmbly.Test
             [TestMethod]
             public void RNG_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Overwrite the processor's random number generator to one with a known seed, so we can test expected values
+                typeof(Processor).GetField("rng", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, new Random(123456789));
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.LoadProgram(new byte[] { 0x6D, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2249533549807962317UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                // Overwrite the processor's random number generator to a dummy one that will always generate 0's
+                typeof(Processor).GetField("rng", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, new AllZeroRandom());
+                testProcessor.LoadProgram(new byte[] { 0x6D, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                // Overwrite the processor's random number generator to one with a known seed, so we can test expected values
+                typeof(Processor).GetField("rng", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, new Random(-2147373325));
+                testProcessor.LoadProgram(new byte[] { 0x6D, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(9498905931710079094UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x6D, (int)Register.rpo });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
@@ -4565,6 +4596,14 @@ namespace AssEmbly.Test
             public void EXTD_BSW_Register()
             {
                 throw new NotImplementedException();
+            }
+        }
+
+        private class AllZeroRandom : Random
+        {
+            public override long NextInt64(long minValue, long maxValue)
+            {
+                return 0;
             }
         }
     }
