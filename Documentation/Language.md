@@ -2,7 +2,7 @@
 
 Applies to versions: `2.0.0`
 
-Last revised: 2023-09-11
+Last revised: 2023-09-27
 
 ## Introduction
 
@@ -1082,7 +1082,7 @@ FLPT_UTF rg0
 ; rg0 is 0x43F0000000000000 (18446744073709552000.0)
 ```
 
-There are four instructions for converting floats to integers: `FLPT_FTS`, `FLPT_FCS`, `FLPT_FFS`, and `FLPT_FNS`. These convert the floating point value to an integer which can be interpreted as signed, using one of four rounding methods respectively: truncation (rounding toward zero), ceiling (rounding to the greater adjacent integer), floor (rounding to the lesser adjacent integer), and nearest (rounding to the closest integer, with exact midpoints being rounded to the adjacent integer that is even).
+There are four instructions for converting floats to integers: `FLPT_FTS`, `FLPT_FCS`, `FLPT_FFS`, and `FLPT_FNS`. These convert a floating point value to an integer which can be interpreted as signed, using one of four rounding methods respectively: truncation (rounding toward zero), ceiling (rounding to the greater adjacent integer), floor (rounding to the lesser adjacent integer), and nearest (rounding to the closest integer, with exact midpoints being rounded to the adjacent integer that is even).
 
 Examples of float to integer conversion:
 
