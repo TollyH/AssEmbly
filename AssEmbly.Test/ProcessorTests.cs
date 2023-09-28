@@ -3667,49 +3667,416 @@ namespace AssEmbly.Test
             [TestMethod]
             public void MVB_Register_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = byte.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x80, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x80, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x80, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0b101010101010;
+                testProcessor.LoadProgram(new byte[] { 0x80, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x80, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void MVB_Register_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x81, (int)Register.rg7, 0xFF, 0, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x81, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x81, (int)Register.rg7, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x81, (int)Register.rg7, 0b10101010, 0b1010, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x81, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void MVB_Register_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x82, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, byte.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x82, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 0);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x82, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x82, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, 0b101010101010);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x82, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void MVB_Register_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x83, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, byte.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x83, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, 0);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x83, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x83, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, 0b101010101010);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 552UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(552), 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x83, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void MVB_Address_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = byte.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x84, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0;
+                testProcessor.LoadProgram(new byte[] { 0x84, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(18446744073709551360UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x84, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0b101010101010;
+                testProcessor.LoadProgram(new byte[] { 0x84, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0b11001101;
+                testProcessor.LoadProgram(new byte[] { 0x84, 0xFD, 0x07, 0, 0, 0, 0, 0, 0, (int)Register.rg8 });
+                // Ensure that writing a byte at the end of memory doesn't cause out of range error
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual((byte)0b11001101, testProcessor.Memory[2045], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], (byte)0b11001101, "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void MVB_Address_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0x85, 0x28, 2, 0, 0, 0, 0, 0, 0, 0xFF, 0, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(17UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(9), byte.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x85, 0x28, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(17UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(18446744073709551360UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(9), 0UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x85, 0x28, 2, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(17UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(9), ulong.MaxValue, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x85, 0x28, 2, 0, 0, 0, 0, 0, 0, 0b10101010, 0b1010, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(17UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(9), 0b101010101010UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0x85, 0xFD, 0x07, 0, 0, 0, 0, 0, 0, 0b11001101, 0, 0, 0, 0, 0, 0, 0 });
+                // Ensure that writing a byte at the end of memory doesn't cause out of range error
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(17UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual((byte)0b11001101, testProcessor.Memory[2045], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(9), (byte)0b11001101, "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void MVB_Pointer_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg8] = byte.MaxValue;
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x86, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], byte.MaxValue, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0;
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x86, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(18446744073709551360UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x86, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], ulong.MaxValue, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0b101010101010;
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x86, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], 0b101010101010UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0b11001101;
+                testProcessor.Registers[(int)Register.rg7] = 2045;
+                testProcessor.LoadProgram(new byte[] { 0x86, (int)Register.rg7, (int)Register.rg8 });
+                // Ensure that writing a byte at the end of memory doesn't cause out of range error
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual((byte)0b11001101, testProcessor.Memory[2045], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg8], (byte)0b11001101, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 2045UL, "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void MVB_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x87, (int)Register.rg7, 0xFF, 0, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), byte.MaxValue, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x87, (int)Register.rg7, 0, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, ulong.MaxValue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(18446744073709551360UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x87, (int)Register.rg7, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(byte.MaxValue, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), ulong.MaxValue, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 552;
+                testProcessor.LoadProgram(new byte[] { 0x87, (int)Register.rg7, 0b10101010, 0b1010, 0, 0, 0, 0, 0, 0 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0b10101010UL, testProcessor.ReadMemoryQWord(552), "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), 0b101010101010UL, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 552UL, "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 2045;
+                testProcessor.LoadProgram(new byte[] { 0x87, (int)Register.rg7, 0b11001101, 0, 0, 0, 0, 0, 0, 0 });
+                // Ensure that writing a byte at the end of memory doesn't cause out of range error
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual((byte)0b11001101, testProcessor.Memory[2045], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(testProcessor.ReadMemoryQWord(2), (byte)0b11001101, "Instruction updated the second operand");
+                Assert.AreEqual(testProcessor.Registers[(int)Register.rg7], 2045UL, "Instruction updated the second operand");
             }
 
             [TestMethod]
