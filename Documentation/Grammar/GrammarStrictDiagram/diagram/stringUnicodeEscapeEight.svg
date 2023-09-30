@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="853" height="279">
+   <defs>
+      <style type="text/css">
+    @namespace "http://www.w3.org/2000/svg";
+    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
+    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
+    .filled               {fill: #332900; stroke: none;}
+    text.terminal         {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #141000;
+                            font-weight: bold;
+                          }
+    text.nonterminal      {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1A1400;
+                            font-weight: normal;
+                          }
+    text.regexp           {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1F1800;
+                            font-weight: normal;
+                          }
+    rect, circle, polygon {fill: #332900; stroke: #332900;}
+    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect.text             {fill: none; stroke: none;}
+    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+  </style>
+   </defs>
+   <polygon points="9 17 1 13 1 21"/>
+   <polygon points="17 17 9 13 9 21"/>
+   <rect x="71" y="3" width="66" height="32" rx="10"/>
+   <rect x="69"
+          y="1"
+          width="66"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="79" y="21">U0000</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalZeroToC"
+       xlink:title="hexadecimalZeroToC">
+      <rect x="177" y="3" width="152" height="32"/>
+      <rect x="175" y="1" width="152" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="185" y="21">hexadecimalZeroToC</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalEToF"
+       xlink:title="hexadecimalEToF">
+      <rect x="177" y="47" width="130" height="32"/>
+      <rect x="175" y="45" width="130" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="185" y="65">hexadecimalEToF</text>
+   </a>
+   <rect x="91" y="91" width="56" height="32" rx="10"/>
+   <rect x="89"
+          y="89"
+          width="56"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="99" y="109">U000</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalNonZero"
+       xlink:title="hexadecimalNonZero">
+      <rect x="167" y="91" width="154" height="32"/>
+      <rect x="165" y="89" width="154" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="175" y="109">hexadecimalNonZero</text>
+   </a>
+   <rect x="91" y="135" width="66" height="32" rx="10"/>
+   <rect x="89"
+          y="133"
+          width="66"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="99" y="153">U0010</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalChar"
+       xlink:title="hexadecimalChar">
+      <rect x="361" y="91" width="130" height="32"/>
+      <rect x="359" y="89" width="130" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="369" y="109">hexadecimalChar</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalChar"
+       xlink:title="hexadecimalChar">
+      <rect x="531" y="3" width="130" height="32"/>
+      <rect x="529" y="1" width="130" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="539" y="21">hexadecimalChar</text>
+   </a>
+   <rect x="51" y="179" width="74" height="32" rx="10"/>
+   <rect x="49"
+          y="177"
+          width="74"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="59" y="197">U0000d</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalZeroToSeven"
+       xlink:title="hexadecimalZeroToSeven">
+      <rect x="145" y="179" width="182" height="32"/>
+      <rect x="143" y="177" width="182" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="153" y="197">hexadecimalZeroToSeven</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalChar"
+       xlink:title="hexadecimalChar">
+      <rect x="701" y="3" width="130" height="32"/>
+      <rect x="699" y="1" width="130" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="709" y="21">hexadecimalChar</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#hexadecimalChar"
+       xlink:title="hexadecimalChar">
+      <rect x="695" y="245" width="130" height="32"/>
+      <rect x="693" y="243" width="130" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="703" y="263">hexadecimalChar</text>
+   </a>
+   <path class="line"
+          d="m17 17 h2 m40 0 h10 m66 0 h10 m20 0 h10 m152 0 h10 m-192 0 h20 m172 0 h20 m-212 0 q10 0 10 10 m192 0 q0 -10 10 -10 m-202 10 v24 m192 0 v-24 m-192 24 q0 10 10 10 m172 0 q10 0 10 -10 m-182 10 h10 m130 0 h10 m0 0 h22 m20 -44 h142 m-460 0 h20 m440 0 h20 m-480 0 q10 0 10 10 m460 0 q0 -10 10 -10 m-470 10 v68 m460 0 v-68 m-460 68 q0 10 10 10 m440 0 q10 0 10 -10 m-430 10 h10 m56 0 h10 m0 0 h10 m154 0 h10 m-270 0 h20 m250 0 h20 m-290 0 q10 0 10 10 m270 0 q0 -10 10 -10 m-280 10 v24 m270 0 v-24 m-270 24 q0 10 10 10 m250 0 q10 0 10 -10 m-260 10 h10 m66 0 h10 m0 0 h164 m20 -44 h10 m130 0 h10 m20 -88 h10 m130 0 h10 m-650 0 h20 m630 0 h20 m-670 0 q10 0 10 10 m650 0 q0 -10 10 -10 m-660 10 v156 m650 0 v-156 m-650 156 q0 10 10 10 m630 0 q10 0 10 -10 m-640 10 h10 m74 0 h10 m0 0 h10 m182 0 h10 m0 0 h334 m20 -176 h10 m130 0 h10 m2 0 l2 0 m2 0 l2 0 m2 0 l2 0 m-180 242 l2 0 m2 0 l2 0 m2 0 l2 0 m2 0 h10 m130 0 h10 m3 0 h-3"/>
+   <polygon points="843 259 851 255 851 263"/>
+   <polygon points="843 259 835 255 835 263"/>
+</svg>
