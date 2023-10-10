@@ -5324,61 +5324,331 @@ namespace AssEmbly.Test
             [TestMethod]
             public void CAL_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(9UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(9UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void CAL_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB1, (int)Register.rg8 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB1, (int)Register.rg8 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(2UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the operand");
             }
 
             [TestMethod]
             public void CAL_Address_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1234567890;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB2, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg7 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-1);
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB2, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg7 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void CAL_Address_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB3, 0x28, 2, 0, 0, 0, 0, 0, 0, 0xD2, 0x02, 0x96, 0x49, 0, 0, 0, 0 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(17UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB3, 0x28, 2, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(17UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void CAL_Address_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB4, 0x28, 2, 0, 0, 0, 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(225, 1234567890);
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(17UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB4, 0x28, 2, 0, 0, 0, 0, 0, 0, 225, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(17UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void CAL_Address_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB5, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(225, 1234567890);
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB5, 0x28, 2, 0, 0, 0, 0, 0, 0, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void CAL_Pointer_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 1234567890;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB6, (int)Register.rg8, (int)Register.rg7 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(3UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-1);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB6, (int)Register.rg8, (int)Register.rg7 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(3UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
             }
 
             [TestMethod]
             public void CAL_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB7, (int)Register.rg8, 0xD2, 0x02, 0x96, 0x49, 0, 0, 0, 0 });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB7, (int)Register.rg8, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
             }
 
             [TestMethod]
             public void CAL_Pointer_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB8, (int)Register.rg8, 225, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(225, 1234567890);
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB8, (int)Register.rg8, 225, 0, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(10UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
             }
 
             [TestMethod]
             public void CAL_Pointer_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xB9, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(225, 1234567890);
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(3UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(2046UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+                Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.Registers[(int)Register.rsb] = 12345;
+                testProcessor.LoadProgram(new byte[] { 0xB9, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
+                Assert.AreEqual(2046UL, testProcessor.Registers[(int)Register.rso], "rso register started with incorrect value");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2030UL, testProcessor.Registers[(int)Register.rso], "Instruction updated the rso register by an incorrect amount");
+                Assert.AreEqual(3UL, testProcessor.ReadMemoryQWord(2038), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(12345UL, testProcessor.ReadMemoryQWord(2030), "Instruction did not correctly push values to stack");
+                Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rfp], "Instruction did not correctly update rfp");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the first operand");
+                Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
             }
 
             [TestMethod]
