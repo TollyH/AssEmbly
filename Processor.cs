@@ -86,7 +86,7 @@ namespace AssEmbly
         /// <exception cref="DivideByZeroException">Thrown if a division instruction is executed with a value of zero as the divisor.</exception>
         /// <exception cref="FileNotFoundException">Thrown if an operation that requires a file to exist could not find the target file.</exception>
         /// <exception cref="DirectoryNotFoundException">Thrown if an operation that requires a directory to exist could not find the target directory.</exception>
-        public bool Execute(bool runUntilHalt)
+        public bool Execute(bool runUntilHalt, Stream? stdoutOverride = null)
         {
             if (!ProgramLoaded)
             {
@@ -97,7 +97,7 @@ namespace AssEmbly
                 throw new InvalidOperationException("The processor has reached the end of accessible memory.");
             }
             bool halt = false;
-            using Stream stdout = Console.OpenStandardOutput();
+            using Stream stdout = stdoutOverride ?? Console.OpenStandardOutput();
             do
             {
                 byte extensionSet;
