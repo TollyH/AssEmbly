@@ -16,7 +16,7 @@ namespace AssEmbly
 
         public bool ProgramLoaded { get; private set; }
 
-        private FileStream? openFile;
+        private Stream? openFile;
         private BinaryReader? fileRead;
         private BinaryWriter? fileWrite;
         private long openFileSize = 0;
