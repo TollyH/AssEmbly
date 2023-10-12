@@ -6202,6 +6202,7 @@ namespace AssEmbly.Test
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xCE, 225, 0, 0, 0, 0, 0, 0, 0 });
+                // WCC should only process 1 byte
                 testProcessor.WriteMemoryQWord(225, (ulong)'e' + 0b100000000);
                 MemoryStream consoleOutput = new();
                 _ = testProcessor.Execute(false, consoleOutput);
@@ -6230,6 +6231,7 @@ namespace AssEmbly.Test
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xCF, (int)Register.rg7 });
+                // WCC should only process 1 byte
                 testProcessor.WriteMemoryQWord(225, (ulong)'e' + 0b100000000);
                 MemoryStream consoleOutput = new();
                 _ = testProcessor.Execute(false, consoleOutput);
@@ -6629,7 +6631,7 @@ namespace AssEmbly.Test
             public void WFC_Register()
             {
                 Processor testProcessor = new(2046);
-                // WCC should only process 1 byte
+                // WFC should only process 1 byte
                 testProcessor.Registers[(int)Register.rg7] = (ulong)'e' + 0b100000000;
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -6695,6 +6697,7 @@ namespace AssEmbly.Test
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xDE, 225, 0, 0, 0, 0, 0, 0, 0 });
+                // WFC should only process 1 byte
                 testProcessor.WriteMemoryQWord(225, (ulong)'e' + 0b100000000);
                 MemoryStream fileStream = new();
                 BinaryWriter fileOutput = new(fileStream);
@@ -6729,6 +6732,7 @@ namespace AssEmbly.Test
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xDF, (int)Register.rg7 });
+                // WFC should only process 1 byte
                 testProcessor.WriteMemoryQWord(225, (ulong)'e' + 0b100000000);
                 MemoryStream fileStream = new();
                 BinaryWriter fileOutput = new(fileStream);
