@@ -6765,13 +6765,129 @@ namespace AssEmbly.Test
             [TestMethod]
             public void OFL_Address()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    // "using" is used here so that the open file stream is closed without having to use the CFL instruction
+                    using (Processor testProcessor = new(2046))
+                    {
+                        testProcessor.LoadProgram(new byte[] { 0xE0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                        Encoding.UTF8.GetBytes("OFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                        // Make sure file doesn't exist already
+                        File.Delete("OFL_Address.txt");
+                        _ = testProcessor.Execute(false);
+                        Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.IsTrue(File.Exists("OFL_Address.txt"), "Instruction did not create the file");
+                        Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        File.WriteAllText("OFL_Address.txt", "This file is not empty");
+                        testProcessor.LoadProgram(new byte[] { 0xE0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                        Encoding.UTF8.GetBytes("OFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                        _ = testProcessor.Execute(false);
+                        FileStream? openFile = typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor) as FileStream;
+                        Assert.IsNotNull(openFile, "Instruction did not open a file");
+                        Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.AreEqual("OFL_Address.txt", Path.GetFileName(openFile.Name), "Instruction did not open the correct file");
+                        Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        _ = Directory.CreateDirectory("OFL_Address_DIR");
+                        testProcessor.LoadProgram(new byte[] { 0xE0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                        Encoding.UTF8.GetBytes("OFL_Address_DIR/OFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                        // Make sure file doesn't exist already
+                        File.Delete("OFL_Address_DIR/OFL_Address.txt");
+                        _ = testProcessor.Execute(false);
+                        Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.IsTrue(File.Exists("OFL_Address_DIR/OFL_Address.txt"), "Instruction did not create the file");
+                        Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        testProcessor.LoadProgram(new byte[] { 0xE0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                        Encoding.UTF8.GetBytes("ThisDirDoesntExist/OFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false));
+                    }
+                }
+                finally
+                {
+                    if (Directory.Exists("OFL_Address_DIR"))
+                    {
+                        File.Delete("OFL_Address_DIR/OFL_Address.txt");
+                        Directory.Delete("OFL_Address_DIR");
+                    }
+                    File.Delete("OFL_Address.txt");
+                }
             }
 
             [TestMethod]
             public void OFL_Pointer()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    // "using" is used here so that the open file stream is closed without having to use the CFL instruction
+                    using (Processor testProcessor = new(2046))
+                    {
+                        testProcessor.Registers[(int)Register.rg7] = 552;
+                        testProcessor.LoadProgram(new byte[] { 0xE1, (int)Register.rg7 });
+                        Encoding.UTF8.GetBytes("OFL_Pointer.txt\0").CopyTo(testProcessor.Memory, 552);
+                        // Make sure file doesn't exist already
+                        File.Delete("OFL_Pointer.txt");
+                        _ = testProcessor.Execute(false);
+                        Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.IsTrue(File.Exists("OFL_Pointer.txt"), "Instruction did not create the file");
+                        Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        File.WriteAllText("OFL_Pointer.txt", "This file is not empty");
+                        testProcessor.Registers[(int)Register.rg7] = 552;
+                        testProcessor.LoadProgram(new byte[] { 0xE1, (int)Register.rg7 });
+                        Encoding.UTF8.GetBytes("OFL_Pointer.txt\0").CopyTo(testProcessor.Memory, 552);
+                        _ = testProcessor.Execute(false);
+                        FileStream? openFile = typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor) as FileStream;
+                        Assert.IsNotNull(openFile, "Instruction did not open a file");
+                        Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.AreEqual("OFL_Pointer.txt", Path.GetFileName(openFile.Name), "Instruction did not open the correct file");
+                        Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        _ = Directory.CreateDirectory("OFL_Pointer_DIR");
+                        testProcessor.Registers[(int)Register.rg7] = 552;
+                        testProcessor.LoadProgram(new byte[] { 0xE1, (int)Register.rg7 });
+                        Encoding.UTF8.GetBytes("OFL_Pointer_DIR/OFL_Pointer.txt\0").CopyTo(testProcessor.Memory, 552);
+                        // Make sure file doesn't exist already
+                        File.Delete("OFL_Pointer_DIR/OFL_Pointer.txt");
+                        _ = testProcessor.Execute(false);
+                        Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                        Assert.IsTrue(File.Exists("OFL_Pointer_DIR/OFL_Pointer.txt"), "Instruction did not create the file");
+                        Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        testProcessor.Registers[(int)Register.rg7] = 552;
+                        testProcessor.LoadProgram(new byte[] { 0xE1, (int)Register.rg7 });
+                        Encoding.UTF8.GetBytes("ThisDirDoesntExist/OFL_Pointer.txt\0").CopyTo(testProcessor.Memory, 552);
+                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false));
+                    }
+                }
+                finally
+                {
+                    if (Directory.Exists("OFL_Pointer_DIR"))
+                    {
+                        File.Delete("OFL_Pointer_DIR/OFL_Pointer.txt");
+                        Directory.Delete("OFL_Pointer_DIR");
+                    }
+                    File.Delete("OFL_Pointer.txt");
+                }
             }
 
             [TestMethod]
