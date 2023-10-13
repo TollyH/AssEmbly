@@ -6,7 +6,7 @@ namespace AssEmbly
     /// <summary>
     /// Executes compiled AssEmbly programs.
     /// </summary>
-    public class Processor
+    public class Processor : IDisposable
     {
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
@@ -42,6 +42,19 @@ namespace AssEmbly
             Console.OutputEncoding = Encoding.UTF8;
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
+        }
+
+        ~Processor()
+        {
+            Dispose();
+        }
+
+        public void Dispose()
+        {
+            openFile?.Dispose();
+            fileRead?.Dispose();
+            fileWrite?.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
