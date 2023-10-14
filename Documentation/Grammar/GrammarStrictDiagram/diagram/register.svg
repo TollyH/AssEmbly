@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="559" height="697">
+   <defs>
+      <style type="text/css">
+    @namespace "http://www.w3.org/2000/svg";
+    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
+    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
+    .filled               {fill: #332900; stroke: none;}
+    text.terminal         {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #141000;
+                            font-weight: bold;
+                          }
+    text.nonterminal      {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1A1400;
+                            font-weight: normal;
+                          }
+    text.regexp           {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1F1800;
+                            font-weight: normal;
+                          }
+    rect, circle, polygon {fill: #332900; stroke: #332900;}
+    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect.text             {fill: none; stroke: none;}
+    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+  </style>
+   </defs>
+   <polygon points="9 17 1 13 1 21"/>
+   <polygon points="17 17 9 13 9 21"/>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveR"
+       xlink:title="caseInsensitiveR">
+      <rect x="31" y="3" width="126" height="32"/>
+      <rect x="29" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="39" y="21">caseInsensitiveR</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveP"
+       xlink:title="caseInsensitiveP">
+      <rect x="197" y="3" width="126" height="32"/>
+      <rect x="195" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="205" y="21">caseInsensitiveP</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveO"
+       xlink:title="caseInsensitiveO">
+      <rect x="343" y="3" width="128" height="32"/>
+      <rect x="341" y="1" width="128" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="351" y="21">caseInsensitiveO</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveS"
+       xlink:title="caseInsensitiveS">
+      <rect x="197" y="47" width="126" height="32"/>
+      <rect x="195" y="45" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="205" y="65">caseInsensitiveS</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveO"
+       xlink:title="caseInsensitiveO">
+      <rect x="363" y="47" width="128" height="32"/>
+      <rect x="361" y="45" width="128" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="371" y="65">caseInsensitiveO</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveB"
+       xlink:title="caseInsensitiveB">
+      <rect x="363" y="91" width="126" height="32"/>
+      <rect x="361" y="89" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="371" y="109">caseInsensitiveB</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveF"
+       xlink:title="caseInsensitiveF">
+      <rect x="363" y="135" width="126" height="32"/>
+      <rect x="361" y="133" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="371" y="153">caseInsensitiveF</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveR"
+       xlink:title="caseInsensitiveR">
+      <rect x="197" y="179" width="126" height="32"/>
+      <rect x="195" y="177" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="205" y="197">caseInsensitiveR</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveV"
+       xlink:title="caseInsensitiveV">
+      <rect x="343" y="179" width="126" height="32"/>
+      <rect x="341" y="177" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="351" y="197">caseInsensitiveV</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveF"
+       xlink:title="caseInsensitiveF">
+      <rect x="197" y="223" width="126" height="32"/>
+      <rect x="195" y="221" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="205" y="241">caseInsensitiveF</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveP"
+       xlink:title="caseInsensitiveP">
+      <rect x="343" y="223" width="126" height="32"/>
+      <rect x="341" y="221" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="351" y="241">caseInsensitiveP</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveG"
+       xlink:title="caseInsensitiveG">
+      <rect x="197" y="267" width="128" height="32"/>
+      <rect x="195" y="265" width="128" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="205" y="285">caseInsensitiveG</text>
+   </a>
+   <rect x="365" y="267" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="265"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="285">0</text>
+   <rect x="365" y="311" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="309"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="329">1</text>
+   <rect x="365" y="355" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="353"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="373">2</text>
+   <rect x="365" y="399" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="397"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="417">3</text>
+   <rect x="365" y="443" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="441"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="461">4</text>
+   <rect x="365" y="487" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="485"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="505">5</text>
+   <rect x="365" y="531" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="529"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="549">6</text>
+   <rect x="365" y="575" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="573"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="593">7</text>
+   <rect x="365" y="619" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="617"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="637">8</text>
+   <rect x="365" y="663" width="28" height="32" rx="10"/>
+   <rect x="363"
+          y="661"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="373" y="681">9</text>
+   <path class="line"
+          d="m17 17 h2 m0 0 h10 m126 0 h10 m20 0 h10 m126 0 h10 m0 0 h10 m128 0 h10 m0 0 h40 m-354 0 h20 m334 0 h20 m-374 0 q10 0 10 10 m354 0 q0 -10 10 -10 m-364 10 v24 m354 0 v-24 m-354 24 q0 10 10 10 m334 0 q10 0 10 -10 m-344 10 h10 m126 0 h10 m20 0 h10 m128 0 h10 m-168 0 h20 m148 0 h20 m-188 0 q10 0 10 10 m168 0 q0 -10 10 -10 m-178 10 v24 m168 0 v-24 m-168 24 q0 10 10 10 m148 0 q10 0 10 -10 m-158 10 h10 m126 0 h10 m0 0 h2 m-158 -10 v20 m168 0 v-20 m-168 20 v24 m168 0 v-24 m-168 24 q0 10 10 10 m148 0 q10 0 10 -10 m-158 10 h10 m126 0 h10 m0 0 h2 m-324 -98 v20 m354 0 v-20 m-354 20 v112 m354 0 v-112 m-354 112 q0 10 10 10 m334 0 q10 0 10 -10 m-344 10 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h42 m-344 -10 v20 m354 0 v-20 m-354 20 v24 m354 0 v-24 m-354 24 q0 10 10 10 m334 0 q10 0 10 -10 m-344 10 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h42 m-344 -10 v20 m354 0 v-20 m-354 20 v24 m354 0 v-24 m-354 24 q0 10 10 10 m334 0 q10 0 10 -10 m-344 10 h10 m128 0 h10 m20 0 h10 m28 0 h10 m-68 0 h20 m48 0 h20 m-88 0 q10 0 10 10 m68 0 q0 -10 10 -10 m-78 10 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m-58 -10 v20 m68 0 v-20 m-68 20 v24 m68 0 v-24 m-68 24 q0 10 10 10 m48 0 q10 0 10 -10 m-58 10 h10 m28 0 h10 m20 -396 h98 m23 -264 h-3"/>
+   <polygon points="549 17 557 13 557 21"/>
+   <polygon points="549 17 541 13 541 21"/>
+</svg>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="963" height="135">
+   <defs>
+      <style type="text/css">
+    @namespace "http://www.w3.org/2000/svg";
+    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
+    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
+    .filled               {fill: #332900; stroke: none;}
+    text.terminal         {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #141000;
+                            font-weight: bold;
+                          }
+    text.nonterminal      {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1A1400;
+                            font-weight: normal;
+                          }
+    text.regexp           {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1F1800;
+                            font-weight: normal;
+                          }
+    rect, circle, polygon {fill: #332900; stroke: #332900;}
+    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect.text             {fill: none; stroke: none;}
+    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+  </style>
+   </defs>
+   <polygon points="9 17 1 13 1 21"/>
+   <polygon points="17 17 9 13 9 21"/>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveF"
+       xlink:title="caseInsensitiveF">
+      <rect x="31" y="3" width="126" height="32"/>
+      <rect x="29" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="39" y="21">caseInsensitiveF</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveL"
+       xlink:title="caseInsensitiveL">
+      <rect x="177" y="3" width="126" height="32"/>
+      <rect x="175" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="185" y="21">caseInsensitiveL</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveP"
+       xlink:title="caseInsensitiveP">
+      <rect x="323" y="3" width="126" height="32"/>
+      <rect x="321" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="331" y="21">caseInsensitiveP</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveT"
+       xlink:title="caseInsensitiveT">
+      <rect x="469" y="3" width="126" height="32"/>
+      <rect x="467" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="477" y="21">caseInsensitiveT</text>
+   </a>
+   <rect x="615" y="3" width="28" height="32" rx="10"/>
+   <rect x="613"
+          y="1"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="623" y="21">_</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveW"
+       xlink:title="caseInsensitiveW">
+      <rect x="663" y="3" width="132" height="32"/>
+      <rect x="661" y="1" width="132" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="671" y="21">caseInsensitiveW</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveF"
+       xlink:title="caseInsensitiveF">
+      <rect x="815" y="3" width="126" height="32"/>
+      <rect x="813" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="823" y="21">caseInsensitiveF</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveN"
+       xlink:title="caseInsensitiveN">
+      <rect x="431" y="69" width="128" height="32"/>
+      <rect x="429" y="67" width="128" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="439" y="87">caseInsensitiveN</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#whitespace"
+       xlink:title="whitespace">
+      <rect x="579" y="69" width="90" height="32"/>
+      <rect x="577" y="67" width="90" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="587" y="87">whitespace</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#label"
+       xlink:title="label">
+      <rect x="689" y="69" width="50" height="32"/>
+      <rect x="687" y="67" width="50" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="697" y="87">label</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#operandSeparator"
+       xlink:title="operandSeparator">
+      <rect x="779" y="101" width="136" height="32"/>
+      <rect x="777" y="99" width="136" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="787" y="119">operandSeparator</text>
+   </a>
+   <path class="line"
+          d="m17 17 h2 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m28 0 h10 m0 0 h10 m132 0 h10 m0 0 h10 m126 0 h10 m2 0 l2 0 m2 0 l2 0 m2 0 l2 0 m-554 66 l2 0 m2 0 l2 0 m2 0 l2 0 m2 0 h10 m128 0 h10 m0 0 h10 m90 0 h10 m0 0 h10 m50 0 h10 m20 0 h10 m0 0 h146 m-176 0 h20 m156 0 h20 m-196 0 q10 0 10 10 m176 0 q0 -10 10 -10 m-186 10 v12 m176 0 v-12 m-176 12 q0 10 10 10 m156 0 q10 0 10 -10 m-166 10 h10 m136 0 h10 m23 -32 h-3"/>
+   <polygon points="953 83 961 79 961 87"/>
+   <polygon points="953 83 945 79 945 87"/>
+</svg>

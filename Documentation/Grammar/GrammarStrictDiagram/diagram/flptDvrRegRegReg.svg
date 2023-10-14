@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="959" height="189">
+   <defs>
+      <style type="text/css">
+    @namespace "http://www.w3.org/2000/svg";
+    .line                 {fill: none; stroke: #332900; stroke-width: 1;}
+    .bold-line            {stroke: #141000; shape-rendering: crispEdges; stroke-width: 2;}
+    .thin-line            {stroke: #1F1800; shape-rendering: crispEdges}
+    .filled               {fill: #332900; stroke: none;}
+    text.terminal         {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #141000;
+                            font-weight: bold;
+                          }
+    text.nonterminal      {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1A1400;
+                            font-weight: normal;
+                          }
+    text.regexp           {font-family: Verdana, Sans-serif;
+                            font-size: 12px;
+                            fill: #1F1800;
+                            font-weight: normal;
+                          }
+    rect, circle, polygon {fill: #332900; stroke: #332900;}
+    rect.terminal         {fill: #FFDB4D; stroke: #332900; stroke-width: 1;}
+    rect.nonterminal      {fill: #FFEC9E; stroke: #332900; stroke-width: 1;}
+    rect.text             {fill: none; stroke: none;}
+    polygon.regexp        {fill: #FFF4C7; stroke: #332900; stroke-width: 1;}
+  </style>
+   </defs>
+   <polygon points="9 17 1 13 1 21"/>
+   <polygon points="17 17 9 13 9 21"/>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveF"
+       xlink:title="caseInsensitiveF">
+      <rect x="31" y="3" width="126" height="32"/>
+      <rect x="29" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="39" y="21">caseInsensitiveF</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveL"
+       xlink:title="caseInsensitiveL">
+      <rect x="177" y="3" width="126" height="32"/>
+      <rect x="175" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="185" y="21">caseInsensitiveL</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveP"
+       xlink:title="caseInsensitiveP">
+      <rect x="323" y="3" width="126" height="32"/>
+      <rect x="321" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="331" y="21">caseInsensitiveP</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveT"
+       xlink:title="caseInsensitiveT">
+      <rect x="469" y="3" width="126" height="32"/>
+      <rect x="467" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="477" y="21">caseInsensitiveT</text>
+   </a>
+   <rect x="615" y="3" width="28" height="32" rx="10"/>
+   <rect x="613"
+          y="1"
+          width="28"
+          height="32"
+          class="terminal"
+          rx="10"/>
+   <text class="terminal" x="623" y="21">_</text>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveD"
+       xlink:title="caseInsensitiveD">
+      <rect x="663" y="3" width="128" height="32"/>
+      <rect x="661" y="1" width="128" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="671" y="21">caseInsensitiveD</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveV"
+       xlink:title="caseInsensitiveV">
+      <rect x="811" y="3" width="126" height="32"/>
+      <rect x="809" y="1" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="819" y="21">caseInsensitiveV</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#caseInsensitiveR"
+       xlink:title="caseInsensitiveR">
+      <rect x="72" y="69" width="126" height="32"/>
+      <rect x="70" y="67" width="126" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="80" y="87">caseInsensitiveR</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#whitespace"
+       xlink:title="whitespace">
+      <rect x="218" y="69" width="90" height="32"/>
+      <rect x="216" y="67" width="90" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="226" y="87">whitespace</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#register"
+       xlink:title="register">
+      <rect x="328" y="69" width="70" height="32"/>
+      <rect x="326" y="67" width="70" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="336" y="87">register</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#operandSeparator"
+       xlink:title="operandSeparator">
+      <rect x="418" y="69" width="136" height="32"/>
+      <rect x="416" y="67" width="136" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="426" y="87">operandSeparator</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#register"
+       xlink:title="register">
+      <rect x="574" y="69" width="70" height="32"/>
+      <rect x="572" y="67" width="70" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="582" y="87">register</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#operandSeparator"
+       xlink:title="operandSeparator">
+      <rect x="664" y="69" width="136" height="32"/>
+      <rect x="662" y="67" width="136" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="672" y="87">operandSeparator</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#register"
+       xlink:title="register">
+      <rect x="820" y="69" width="70" height="32"/>
+      <rect x="818" y="67" width="70" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="828" y="87">register</text>
+   </a>
+   <a xmlns:xlink="http://www.w3.org/1999/xlink"
+       xlink:href="#operandSeparator"
+       xlink:title="operandSeparator">
+      <rect x="775" y="155" width="136" height="32"/>
+      <rect x="773" y="153" width="136" height="32" class="nonterminal"/>
+      <text class="nonterminal" x="783" y="173">operandSeparator</text>
+   </a>
+   <path class="line"
+          d="m17 17 h2 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m126 0 h10 m0 0 h10 m28 0 h10 m0 0 h10 m128 0 h10 m0 0 h10 m126 0 h10 m2 0 l2 0 m2 0 l2 0 m2 0 l2 0 m-909 66 l2 0 m2 0 l2 0 m2 0 l2 0 m2 0 h10 m126 0 h10 m0 0 h10 m90 0 h10 m0 0 h10 m70 0 h10 m0 0 h10 m136 0 h10 m0 0 h10 m70 0 h10 m0 0 h10 m136 0 h10 m0 0 h10 m70 0 h10 m2 0 l2 0 m2 0 l2 0 m2 0 l2 0 m-179 54 l2 0 m2 0 l2 0 m2 0 l2 0 m22 0 h10 m0 0 h146 m-176 0 h20 m156 0 h20 m-196 0 q10 0 10 10 m176 0 q0 -10 10 -10 m-186 10 v12 m176 0 v-12 m-176 12 q0 10 10 10 m156 0 q10 0 10 -10 m-166 10 h10 m136 0 h10 m23 -32 h-3"/>
+   <polygon points="949 137 957 133 957 141"/>
+   <polygon points="949 137 941 133 941 141"/>
+</svg>
