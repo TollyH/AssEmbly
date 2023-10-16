@@ -6353,6 +6353,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6385,6 +6390,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD1, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6419,6 +6429,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD2, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6457,6 +6472,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD3, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6493,6 +6513,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD4, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6525,6 +6550,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("255", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD5, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6559,6 +6589,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("255", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD6, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6597,6 +6632,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD7, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6633,6 +6673,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD8, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6665,6 +6710,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("FF", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xD9, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6699,6 +6749,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("FF", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDA, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6737,6 +6792,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDB, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6775,6 +6835,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("\u30C8", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDC, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6808,6 +6873,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("\u30C8", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDD, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6846,6 +6916,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("\u30C8", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDE, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6888,6 +6963,11 @@ namespace AssEmbly.Test
                     Assert.AreEqual("\u30C8", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xDF, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
@@ -6938,7 +7018,8 @@ namespace AssEmbly.Test
                     {
                         testProcessor.LoadProgram(new byte[] { 0xE0, 0x28, 2, 0, 0, 0, 0, 0, 0 });
                         Encoding.UTF8.GetBytes("ThisDirDoesntExist/OFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
-                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false));
+                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                            "Instruction did not throw an exception when creating file in non-existent directory");
                     }
                 }
                 finally
@@ -7004,7 +7085,8 @@ namespace AssEmbly.Test
                         testProcessor.Registers[(int)Register.rg7] = 552;
                         testProcessor.LoadProgram(new byte[] { 0xE1, (int)Register.rg7 });
                         Encoding.UTF8.GetBytes("ThisDirDoesntExist/OFL_Pointer.txt\0").CopyTo(testProcessor.Memory, 552);
-                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false));
+                        _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                            "Instruction did not throw an exception when creating file in non-existent directory");
                     }
                 }
                 finally
