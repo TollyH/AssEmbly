@@ -7103,7 +7103,33 @@ namespace AssEmbly.Test
             [TestMethod]
             public void CFL()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    using (Processor testProcessor = new(2046))
+                    {
+                        FileStream openFile = new("CFL.txt", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+                        BinaryWriter fileWrite = new(openFile, Encoding.UTF8);
+                        BinaryReader fileRead = new(openFile, Encoding.UTF8);
+                        typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, openFile);
+                        typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileWrite);
+                        typeof(Processor).GetField("fileRead", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileRead);
+                        testProcessor.LoadProgram(new byte[] { 0xE2 });
+                        _ = testProcessor.Execute(false);
+                        Assert.IsFalse(openFile.CanRead, "Instruction did not close the file stream");
+                        Assert.IsFalse(openFile.CanWrite, "Instruction did not close the file stream");
+                    }
+
+                    using (Processor testProcessor = new(2046))
+                    {
+                        testProcessor.LoadProgram(new byte[] { 0xE2 });
+                        _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                            "Instruction did not throw an exception when closing file without one open");
+                    }
+                }
+                finally
+                {
+                    File.Delete("CFL.txt");
+                }
             }
 
             [TestMethod]
