@@ -7135,13 +7135,82 @@ namespace AssEmbly.Test
             [TestMethod]
             public void DFL_Address()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    Processor testProcessor = new(2046);
+                    File.CreateText("DFL_Address.txt").Close();
+                    testProcessor.LoadProgram(new byte[] { 0xE3, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.IsFalse(File.Exists("DFL_Address.txt"), "Instruction did not delete the file");
+
+                    testProcessor = new(2046);
+                    _ = Directory.CreateDirectory("DFL_Address_DIR");
+                    File.CreateText("DFL_Address_DIR/DFL_Address.txt").Close();
+                    testProcessor.LoadProgram(new byte[] { 0xE3, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("DFL_Address_DIR/DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.IsFalse(File.Exists("DFL_Address_DIR/DFL_Address.txt"), "Instruction did not delete the file");
+
+                    testProcessor = new(2046);
+                    testProcessor.LoadProgram(new byte[] { 0xE3, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("ThisDirDoesntExist/DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when deleting file in non-existent directory");
+                }
+                finally
+                {
+                    if (Directory.Exists("DFL_Address_DIR"))
+                    {
+                        File.Delete("DFL_Address_DIR/DFL_Address.txt");
+                        Directory.Delete("DFL_Address_DIR");
+                    }
+                    File.Delete("DFL_Address.txt");
+                }
             }
 
             [TestMethod]
             public void DFL_Pointer()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    Processor testProcessor = new(2046);
+                    File.CreateText("DFL_Address.txt").Close();
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE4, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.IsFalse(File.Exists("DFL_Address.txt"), "Instruction did not delete the file");
+
+                    testProcessor = new(2046);
+                    _ = Directory.CreateDirectory("DFL_Address_DIR");
+                    File.CreateText("DFL_Address_DIR/DFL_Address.txt").Close();
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE4, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("DFL_Address_DIR/DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.IsFalse(File.Exists("DFL_Address_DIR/DFL_Address.txt"), "Instruction did not delete the file");
+
+                    testProcessor = new(2046);
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE4, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("ThisDirDoesntExist/DFL_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when deleting file in non-existent directory");
+                }
+                finally
+                {
+                    if (Directory.Exists("DFL_Address_DIR"))
+                    {
+                        File.Delete("DFL_Address_DIR/DFL_Address.txt");
+                        Directory.Delete("DFL_Address_DIR");
+                    }
+                    File.Delete("DFL_Address.txt");
+                }
             }
 
             [TestMethod]
