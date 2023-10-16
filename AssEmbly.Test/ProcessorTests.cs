@@ -7216,13 +7216,101 @@ namespace AssEmbly.Test
             [TestMethod]
             public void FEX_Register_Address()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    Processor testProcessor = new(2046);
+                    File.CreateText("FEX_Register_Address.txt").Close();
+                    testProcessor.LoadProgram(new byte[] { 0xE5, (int)Register.rg8, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    File.Delete("FEX_Register_Address.txt");
+                    testProcessor.LoadProgram(new byte[] { 0xE5, (int)Register.rg8, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    _ = Directory.CreateDirectory("FEX_Register_Address_DIR");
+                    File.CreateText("FEX_Register_Address_DIR/FEX_Register_Address.txt").Close();
+                    testProcessor.LoadProgram(new byte[] { 0xE5, (int)Register.rg8, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address_DIR/FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    testProcessor.LoadProgram(new byte[] { 0xE5, (int)Register.rg8, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                    Encoding.UTF8.GetBytes("ThisDirDoesntExist/FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(10UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+                }
+                finally
+                {
+                    if (Directory.Exists("FEX_Register_Address_DIR"))
+                    {
+                        File.Delete("FEX_Register_Address_DIR/FEX_Register_Address.txt");
+                        Directory.Delete("FEX_Register_Address_DIR");
+                    }
+                    File.Delete("FEX_Register_Address.txt");
+                }
             }
 
             [TestMethod]
             public void FEX_Register_Pointer()
             {
-                throw new NotImplementedException();
+                try
+                {
+                    Processor testProcessor = new(2046);
+                    File.CreateText("FEX_Register_Address.txt").Close();
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE6, (int)Register.rg8, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    File.Delete("FEX_Register_Address.txt");
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE6, (int)Register.rg8, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    _ = Directory.CreateDirectory("FEX_Register_Address_DIR");
+                    File.CreateText("FEX_Register_Address_DIR/FEX_Register_Address.txt").Close();
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE6, (int)Register.rg8, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("FEX_Register_Address_DIR/FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(1UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+
+                    testProcessor = new(2046);
+                    testProcessor.Registers[(int)Register.rg7] = 552;
+                    testProcessor.LoadProgram(new byte[] { 0xE6, (int)Register.rg8, (int)Register.rg7 });
+                    Encoding.UTF8.GetBytes("ThisDirDoesntExist/FEX_Register_Address.txt\0").CopyTo(testProcessor.Memory, 552);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+                }
+                finally
+                {
+                    if (Directory.Exists("FEX_Register_Address_DIR"))
+                    {
+                        File.Delete("FEX_Register_Address_DIR/FEX_Register_Address.txt");
+                        Directory.Delete("FEX_Register_Address_DIR");
+                    }
+                    File.Delete("FEX_Register_Address.txt");
+                }
             }
 
             [TestMethod]
