@@ -7429,13 +7429,97 @@ namespace AssEmbly.Test
             [TestMethod]
             public void RCC_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xF0, (int)Register.rg7 });
+                Queue<byte> characterQueue = new();
+                characterQueue.Enqueue((byte)'e');
+                typeof(Processor).GetField("stdinByteQueue", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, characterQueue);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual('e', testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xF0, (int)Register.rg7, 0xF0, (int)Register.rg8, 0xF0, (int)Register.rg9, 0 });
+                characterQueue = new();
+                // U+30C8 (Katakana Letter To) in UTF-8
+                characterQueue.Enqueue(0xE3);
+                characterQueue.Enqueue(0x83);
+                characterQueue.Enqueue(0x88);
+                typeof(Processor).GetField("stdinByteQueue", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, characterQueue);
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(7UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(227UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(131UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+                Assert.AreEqual(136UL, testProcessor.Registers[(int)Register.rg9], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void RFC_Register()
             {
-                throw new NotImplementedException();
+                using (MemoryStream fileStream = new(new byte[] { (byte)'e' }))
+                {
+                    Processor testProcessor = new(2046);
+                    using BinaryReader fileInput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileRead", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileInput);
+                    typeof(Processor).GetField("openFileSize", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, 1L);
+                    testProcessor.LoadProgram(new byte[] { 0xF1, (int)Register.rg7 });
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual('e', testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                    Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                }
+
+                // U+30C8 (Katakana Letter To) in UTF-8
+                using (MemoryStream fileStream = new(new byte[] { 0xE3, 0x83, 0x88 }))
+                {
+                    Processor testProcessor = new(2046);
+                    using BinaryReader fileInput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileRead", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileInput);
+                    typeof(Processor).GetField("openFileSize", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, 3L);
+                    testProcessor.LoadProgram(new byte[] { 0xF1, (int)Register.rg7, 0xF1, (int)Register.rg8, 0xF1, (int)Register.rg9, 0 });
+                    _ = testProcessor.Execute(true);
+                    Assert.AreEqual(7UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(227UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                    Assert.AreEqual(131UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+                    Assert.AreEqual(136UL, testProcessor.Registers[(int)Register.rg9], "Instruction did not produce correct result");
+                    Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                }
+
+                // U+30C8 (Katakana Letter To) in UTF-8
+                using (MemoryStream fileStream = new(new byte[] { 0xE3, 0x83, 0x88 }))
+                {
+                    Processor testProcessor = new(2046);
+                    using BinaryReader fileInput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileRead", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileInput);
+                    typeof(Processor).GetField("openFileSize", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, 3L);
+                    // Read less characters than there are in stream to check that file end flag isn't set
+                    testProcessor.LoadProgram(new byte[] { 0xF1, (int)Register.rg7, 0xF1, (int)Register.rg8, 0 });
+                    _ = testProcessor.Execute(true);
+                    Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(227UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                    Assert.AreEqual(131UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                }
+
+                // U+30C8 (Katakana Letter To) in UTF-8
+                using (MemoryStream fileStream = new(new byte[] { 0xE3, 0x83, 0x88 }))
+                {
+                    Processor testProcessor = new(2046);
+                    using BinaryReader fileInput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileRead", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileInput);
+                    typeof(Processor).GetField("openFileSize", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, 3L);
+                    testProcessor.LoadProgram(new byte[] { 0xF1, (int)Register.rg7, 0xF1, (int)Register.rg8, 0xF1, (int)Register.rg9, 0xF1, (int)Register.rg9, 0 });
+                    _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(true),
+                        "Instruction did not throw an exception when reading past end of file");
+                }
             }
 
             [TestMethod]
