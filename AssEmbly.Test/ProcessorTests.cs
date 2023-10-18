@@ -7525,97 +7525,689 @@ namespace AssEmbly.Test
             [TestMethod]
             public void SIGN_JLT_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x00, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JLT_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x01, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JLE_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x02, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JLE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x03, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JGT_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x04, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JGT_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x05, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JGE_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x06, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JGE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x07, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JSI_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x08, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JSI_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x09, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JNS_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0A, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JNS_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0B, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JOV_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0C, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JOV_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0D, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
             }
 
             [TestMethod]
             public void SIGN_JNO_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0E, 8, 7, 6, 5, 4, 3, 2, 1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
             public void SIGN_JNO_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Sign;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Overflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.Zero;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)(StatusFlags.SignAndOverflow | StatusFlags.Zero);
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.SignAndOverflow;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register when it shouldn't have");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rsf] = 0;
+                testProcessor.Registers[(int)Register.rg1] = 0x0102030405060708;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x0F, (int)Register.rg1 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(0x0102030405060708UL, testProcessor.Registers[(int)Register.rpo], "Instruction did not update rpo register or updated it incorrectly");
             }
 
             [TestMethod]
