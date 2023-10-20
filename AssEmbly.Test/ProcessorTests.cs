@@ -10487,7 +10487,37 @@ namespace AssEmbly.Test
             [TestMethod]
             public void SIGN_NEG_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-123456789);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x80, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(123456789UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 987654321;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x80, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(unchecked((ulong)-987654321), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = ulong.MaxValue - 123456;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x80, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(123457UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x01, 0x80, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
             }
 
             [TestMethod]
