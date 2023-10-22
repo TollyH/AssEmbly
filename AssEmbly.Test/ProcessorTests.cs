@@ -12486,25 +12486,171 @@ namespace AssEmbly.Test
             [TestMethod]
             public void FLPT_LOG_Register_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(2.345);
+                testProcessor.Registers[(int)Register.rg8] = BitConverter.DoubleToUInt64Bits(1.23456);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x60, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(2.345, 1.23456)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.FileEnd | StatusFlags.Carry), testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.23456), testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(1.0);
+                testProcessor.Registers[(int)Register.rg8] = BitConverter.DoubleToUInt64Bits(5.6);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x60, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(5.6), testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
+                testProcessor.Registers[(int)Register.rg8] = BitConverter.DoubleToUInt64Bits(3.567);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x60, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x60, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void FLPT_LOG_Register_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(2.345);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x61, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(4, BitConverter.DoubleToUInt64Bits(1.23456));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(2.345, 1.23456)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.FileEnd | StatusFlags.Carry), testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.23456), testProcessor.ReadMemoryQWord(4), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(1.0);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x61, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(4, BitConverter.DoubleToUInt64Bits(5.6));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(5.6), testProcessor.ReadMemoryQWord(4), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x61, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(4, BitConverter.DoubleToUInt64Bits(3.567));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(4), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x61, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void FLPT_LOG_Register_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(2.345);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x62, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(1.23456));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(2.345, 1.23456)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.FileEnd | StatusFlags.Carry), testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.23456), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(1.0);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x62, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(5.6));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(5.6), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x62, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.567));
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x62, (int)Register.rpo, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
             public void FLPT_LOG_Register_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(2.345);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(1.23456));
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x63, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(2.345, 1.23456)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.FileEnd | StatusFlags.Carry), testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.23456), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(1.0);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(5.6));
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x63, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(5.6), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.567));
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x63, (int)Register.rg7, (int)Register.rg8 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Log(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+                Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.WriteMemoryQWord(552, 1);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x63, (int)Register.rpo, (int)Register.rg8 });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
