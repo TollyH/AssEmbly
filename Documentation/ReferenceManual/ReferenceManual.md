@@ -2,7 +2,7 @@
 
 Applies to versions: `2.0.0`
 
-Last revised: 2023-09-30
+Last revised: 2023-10-22
 
 ## Introduction
 
@@ -2617,10 +2617,10 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`.
 | `FLPT_POW` | Exponentiation | Register, Literal | Calculate the value of a register raised to the power of a literal | `0x51` |
 | `FLPT_POW` | Exponentiation | Register, Address | Calculate the value of a register raised to the power of the contents of memory at an address in a label | `0x52` |
 | `FLPT_POW` | Exponentiation | Register, Pointer | Calculate the value of a register raised to the power of the contents of memory at an address in a register | `0x53` |
-| `FLPT_LOG` | Logarithm | Register, Register | Calculate the logarithm of a register with the base from another register | `0x50` |
-| `FLPT_LOG` | Logarithm | Register, Literal | Calculate the logarithm of a register with the base from a literal | `0x51` |
-| `FLPT_LOG` | Logarithm | Register, Address | Calculate the logarithm of a register with the base from the contents of memory at an address in a label | `0x52` |
-| `FLPT_LOG` | Logarithm | Register, Pointer | Calculate the logarithm of a register with the base from the contents of memory at an address in a register | `0x53` |
+| `FLPT_LOG` | Logarithm | Register, Register | Calculate the logarithm of a register with the base from another register | `0x60` |
+| `FLPT_LOG` | Logarithm | Register, Literal | Calculate the logarithm of a register with the base from a literal | `0x61` |
+| `FLPT_LOG` | Logarithm | Register, Address | Calculate the logarithm of a register with the base from the contents of memory at an address in a label | `0x62` |
+| `FLPT_LOG` | Logarithm | Register, Pointer | Calculate the logarithm of a register with the base from the contents of memory at an address in a register | `0x63` |
 | **Console Writing** |||||
 | `FLPT_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x70` |
 | `FLPT_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x71` |
