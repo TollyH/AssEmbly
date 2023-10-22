@@ -12656,49 +12656,289 @@ namespace AssEmbly.Test
             [TestMethod]
             public void FLPT_WCN_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(123.456);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x70, (int)Register.rg7 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(BitConverter.DoubleToUInt64Bits(123.456), testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-123.456);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x70, (int)Register.rg7 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(BitConverter.DoubleToUInt64Bits(-123.456), testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
             }
 
             [TestMethod]
             public void FLPT_WCN_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x71 });
+                testProcessor.WriteMemoryQWord(3, BitConverter.DoubleToUInt64Bits(123.456));
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x71 });
+                testProcessor.WriteMemoryQWord(3, BitConverter.DoubleToUInt64Bits(-123.456));
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
             }
 
             [TestMethod]
             public void FLPT_WCN_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x72, 225, 0, 0, 0, 0, 0, 0, 0 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x72, 225, 0, 0, 0, 0, 0, 0, 0 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(-123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
             }
 
             [TestMethod]
             public void FLPT_WCN_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x73, (int)Register.rg7 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x73, (int)Register.rg7 });
+                using (StringWriter consoleOutput = new())
+                {
+                    Console.SetOut(consoleOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(-123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
             }
 
             [TestMethod]
             public void FLPT_WFN_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(123.456);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x80, (int)Register.rg7 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(BitConverter.DoubleToUInt64Bits(123.456), testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-123.456);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x80, (int)Register.rg7 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(BitConverter.DoubleToUInt64Bits(-123.456), testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x80, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
             public void FLPT_WFN_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x81 });
+                testProcessor.WriteMemoryQWord(3, BitConverter.DoubleToUInt64Bits(123.456));
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x81 });
+                testProcessor.WriteMemoryQWord(3, BitConverter.DoubleToUInt64Bits(-123.456));
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x81, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
             public void FLPT_WFN_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x82, 225, 0, 0, 0, 0, 0, 0, 0 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x82, 225, 0, 0, 0, 0, 0, 0, 0 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(-123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x82, 0, 0, 0, 0, 0, 0, 0, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
             public void FLPT_WFN_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                // Set all status flags to ensure the instruction doesn't update them
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x83, (int)Register.rg7 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 225;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x83, (int)Register.rg7 });
+                using (MemoryStream fileStream = new())
+                {
+                    using BinaryWriter fileOutput = new(fileStream);
+                    typeof(Processor).GetField("openFile", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileStream);
+                    typeof(Processor).GetField("fileWrite", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, fileOutput);
+                    testProcessor.WriteMemoryQWord(225, BitConverter.DoubleToUInt64Bits(-123.456));
+                    _ = testProcessor.Execute(false);
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual("-123.456", Encoding.UTF8.GetString(fileStream.ToArray()), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                    Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the operand");
+                }
+
+                testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x83, 0 });
+                _ = Assert.ThrowsException<FileOperationException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception when writing to file without one open");
             }
 
             [TestMethod]
