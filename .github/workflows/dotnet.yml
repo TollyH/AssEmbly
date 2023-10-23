@@ -19,6 +19,8 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Test Project
+      run: dotnet test
     - name: Publish Project
       run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
     - name: Upload Build Artifact
