@@ -174,7 +174,7 @@
 <body>
 <h1 id="assembly-reference-manual">AssEmbly Reference Manual</h1>
 <p>Applies to versions: <code>2.0.0</code></p>
-<p>Last revised: 2023-10-22</p>
+<p>Last revised: 2023-10-23</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -528,10 +528,10 @@ MVQ rg0, 0xA  ; Base 16</code></pre>
 the number value to separate the digits. Underscores cannot be the first
 character of the number.</p>
 <p>For example:</p>
-<pre class="text"><code>MVQ rg0, 0x1_000_000  ; This is valid, will be assembled as 0x1000000 (16777216)
-MVQ rg0, 0x10_0__000_0  ; This is still valid, underscores don&#39;t have to be uniform
+<pre class="text"><code>MVQ rg0, 1_000_000  ; This is valid, will be assembled as 1000000 (0xF4240)
+MVQ rg0, 0x_10_0__000_0  ; This is still valid, underscores don&#39;t have to be uniform
 
-MVQ rg0, 0x_1_000_000  ; This is not valid
+MVQ rg0, _1_000_000  ; This is not valid
 MVQ rg0, 0_x1_000_000  ; This is also not valid
 MVQ rg0, _0x1_000_000  ; Nor is this</code></pre>
 <p>Literals can be made negative by putting a <code>-</code> sign
@@ -3367,7 +3367,7 @@ otherwise unset</li>
 <tr class="even">
 <td><code>MUL</code></td>
 <td>STD</td>
-<td>(Result is unrepresentable as unsigned)</td>
+<td>(Result is unrepresentable as both unsigned and signed)</td>
 <td>X</td>
 <td>STD</td>
 <td>0</td>

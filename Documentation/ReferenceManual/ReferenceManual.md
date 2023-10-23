@@ -2,7 +2,7 @@
 
 Applies to versions: `2.0.0`
 
-Last revised: 2023-10-22
+Last revised: 2023-10-23
 
 ## Introduction
 
@@ -236,10 +236,10 @@ When writing literals, you can place an underscore anywhere within the number va
 For example:
 
 ```text
-MVQ rg0, 0x1_000_000  ; This is valid, will be assembled as 0x1000000 (16777216)
-MVQ rg0, 0x10_0__000_0  ; This is still valid, underscores don't have to be uniform
+MVQ rg0, 1_000_000  ; This is valid, will be assembled as 1000000 (0xF4240)
+MVQ rg0, 0x_10_0__000_0  ; This is still valid, underscores don't have to be uniform
 
-MVQ rg0, 0x_1_000_000  ; This is not valid
+MVQ rg0, _1_000_000  ; This is not valid
 MVQ rg0, 0_x1_000_000  ; This is also not valid
 MVQ rg0, _0x1_000_000  ; Nor is this
 ```
@@ -2214,7 +2214,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `ICR`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
 | `SUB`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
 | `DCR`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `MUL`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | 0                                     |
+| `MUL`         | STD  | (Result is unrepresentable as both unsigned and signed)  | X                              | STD  | 0                                     |
 | `DIV`         | STD  | 0                                                        | X                              | STD  | 0                                     |
 | `DVR`         | STD  | 0                                                        | X                              | STD  | 0                                     |
 | `REM`         | STD  | 0                                                        | X                              | STD  | 0                                     |
