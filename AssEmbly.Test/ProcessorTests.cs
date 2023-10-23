@@ -13084,7 +13084,36 @@ namespace AssEmbly.Test
             [TestMethod]
             public void FLPT_NEG_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                // Set the file end flag to make sure the instruction doesn't affect it
+                testProcessor.Registers[(int)Register.rsf] = (ulong)StatusFlags.FileEnd;
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-1.2345);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0xA0, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.2345), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(0);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0xA0, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(-0.0), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)(StatusFlags.Zero | StatusFlags.Sign), testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(1.23456);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0xA0, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(-1.23456), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 552;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0xA0, (int)Register.rpo });
+                _ = Assert.ThrowsException<ReadOnlyRegisterException>(() => testProcessor.Execute(false), "Instruction with rpo as destination didn't throw ReadOnlyRegisterException");
             }
 
             [TestMethod]
