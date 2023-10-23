@@ -454,7 +454,7 @@ namespace AssEmbly
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
-                                if (result < initial)
+                                if (result < initial && mathend != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
                                 }
