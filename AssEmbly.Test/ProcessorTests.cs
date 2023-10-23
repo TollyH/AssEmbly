@@ -13669,7 +13669,21 @@ namespace AssEmbly.Test
             [TestMethod]
             public void EXTD_BSW_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0x1122334455667788;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x00, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0x8877665544332211, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0x123456789ABCDEF0;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x00, (int)Register.rg7 });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0xF0DEBC9A78563412, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
         }
 
