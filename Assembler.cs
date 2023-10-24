@@ -359,6 +359,10 @@ namespace AssEmbly
                     {
                         throw new OperandException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
                     }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException("The literal operand to the DAT mnemonic cannot be a label reference.");
+                    }
                     byte[] parsedBytes = ParseLiteral(operands[0], true);
                     if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
                     {
@@ -373,12 +377,17 @@ namespace AssEmbly
                         throw new OperandException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
                     }
                     operandType = DetermineOperandType(operands[0]);
-                    return operandType == OperandType.Literal
-                        // Generate an array of 0-bytes with the specified length
-                        ? (Enumerable.Repeat((byte)0, (int)BinaryPrimitives.ReadUInt64LittleEndian(
-                            ParseLiteral(operands[0], false))).ToArray(), new List<(string, ulong)>())
-                        : throw new OperandException($"The operand to the PAD mnemonic must be a literal. " +
-                            $"An operand of type {operandType} was provided.");
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException($"The operand to the PAD mnemonic must be a literal. An operand of type {operandType} was provided.");
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException("The literal operand to the PAD mnemonic cannot be a label reference.");
+                    }
+                    _ = ParseLiteral(operands[0], false, out ulong parsedNumber);
+                    // Generate an array of 0-bytes with the specified length
+                    return (Enumerable.Repeat((byte)0, (int)parsedNumber).ToArray(), new List<(string, ulong)>());
                 // 64-bit/floating point number insertion
                 case "NUM":
                     if (operands.Length != 1)
@@ -389,6 +398,10 @@ namespace AssEmbly
                     if (operandType != OperandType.Literal)
                     {
                         throw new OperandException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException("The literal operand to the NUM mnemonic cannot be a label reference.");
                     }
                     parsedBytes = ParseLiteral(operands[0], false);
                     return (parsedBytes, new List<(string, ulong)>());
