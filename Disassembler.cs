@@ -37,7 +37,7 @@ namespace AssEmbly
                     foreach (int lineIndex in references.Where(a => a.Address == address).Select(a => a.SourceLineIndex))
                     {
                         int toReplaceIndex = lineIndex + inserted.Count(l => l <= lineIndex);
-                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", ":INVALID-LABEL");
+                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", ":INVALID-LABEL") + $"  ; ADDR_{address:X}";
                     }
                 }
             }
