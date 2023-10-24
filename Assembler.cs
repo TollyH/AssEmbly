@@ -734,6 +734,10 @@ namespace AssEmbly
                     throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
                         $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?");
                 }
+                if (operand[0] == '.' && operand.Length == 1)
+                {
+                    throw new SyntaxError($"Floating point numeric literals must contain a digit on at least one side of the decimal point.");
+                }
                 if (operand.IndexOf('.') != operand.LastIndexOf('.'))
                 {
                     throw new SyntaxError("Numeric literal contains more than one decimal point:" +
