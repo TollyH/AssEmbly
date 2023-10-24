@@ -739,23 +739,23 @@ namespace AssEmbly
                     DisplayDebugInfo();
                     return false;
                 }
-                string menmonic = instruction[0];
+                string mnemonic = instruction[0];
 
-                if (menmonic[0] == ':')
+                if (mnemonic[0] == ':')
                 {
                     // Will throw an error if label is not valid
-                    OperandType operandType = Assembler.DetermineOperandType(menmonic);
+                    OperandType operandType = Assembler.DetermineOperandType(mnemonic);
                     if (operandType != OperandType.Address)
                     {
                         throw new SyntaxError("The first character of a label cannot be '&'");
                     }
-                    string labelName = menmonic[1..];
+                    string labelName = mnemonic[1..];
                     replLabels[labelName] = DebuggingProcessor.Registers[(int)Register.rpo];
                     return false;
                 }
 
                 (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
-                    Assembler.AssembleStatement(menmonic, instruction[1..]);
+                    Assembler.AssembleStatement(mnemonic, instruction[1..]);
 
                 foreach ((string labelName, ulong addressOffset) in newLabels)
                 {
