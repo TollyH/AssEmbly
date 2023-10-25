@@ -564,14 +564,14 @@ namespace AssEmbly
                 if (stringEnd != -1 && !isMacro)
                 {
                     throw new SyntaxError(
-                        $"Non-whitespace characters found after string literal. Did you forget a comma?\n    {line}\n    {new string(' ', i)}^");
+                        $"Non-whitespace characters found after quoted literal. Did you forget a comma?\n    {line}\n    {new string(' ', i)}^");
                 }
-                if (c == '"' && !isMacro)
+                if (c is '"' or '\'' && !isMacro)
                 {
                     if (sb.Length != 0)
                     {
                         throw new SyntaxError(
-                            $"String literal defined after non-whitespace characters. Did you forget a comma?:\n    {line}\n    {new string(' ', i)}^");
+                            $"Quoted literal defined after non-whitespace characters. Did you forget a comma?:\n    {line}\n    {new string(' ', i)}^");
                     }
                     _ = sb.Append(PreParseStringLiteral(line, ref i));
                     stringEnd = i;
@@ -588,7 +588,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Process a string literal as a part of an entire line of AssEmbly source.
+        /// Process a string or character literal as a part of an entire line of AssEmbly source.
         /// Resolves escape sequences and ensures that the string ends with an unescaped quote mark.
         /// </summary>
         /// <param name="line">The entire source line with the string contained.</param>
@@ -596,7 +596,11 @@ namespace AssEmbly
         /// The index in the line to the opening quote.
         /// It will be incremented automatically by this method to the index of the closing quote.
         /// </param>
-        /// <returns>The processed string literal, including opening and closing quotes.</returns>
+        /// <returns>
+        /// For double quoted (") string literals, the processed string literal, including opening and closing quotes.
+        /// For single quoted (') character literals, the 32-bit numeric value corresponding to the
+        /// UTF-8 representation as a base-10 string of the single contained character.
+        /// </returns>
         /// <remarks>
         /// The string returned by this method is not fully ready to be inserted into a binary stream.
         /// Use <see cref="ParseLiteral"/> with the returned string to get an array of bytes for the final executable.
@@ -614,21 +618,39 @@ namespace AssEmbly
             {
                 throw new ArgumentException("Given line is less than two characters long, which is invalid.");
             }
+            bool singleCharacterLiteral = false;
+            bool containsHighSurrogate = false;  // Only used for character literals
             if (line[startIndex] != '"')
             {
-                throw new ArgumentException("Given string start index does not point to a quote mark.");
+                if (line[startIndex] != '\'')
+                {
+                    throw new ArgumentException("Given string start index does not point to a quote mark.");
+                }
+                singleCharacterLiteral = true;
             }
-            StringBuilder sb = new("\"");
+            StringBuilder sb = singleCharacterLiteral ? new() : new("\"");
             int i = startIndex;
             while (true)
             {
                 if (++i >= line.Length)
                 {
                     throw new SyntaxError(
-                        "End of line found while processing string literal. Did you forget a closing quote?" +
+                        "End of line found while processing quoted literal. Did you forget a closing quote?" +
+                        $"\n    {line}\n    {new string(' ', i - 1)}^");
+                }
+                // If the character literal contains a high surrogate, we need to allow 2 UTF-16 chars to get the full pair.
+                // This will result in a single final represented character to convert to UTF-8.
+                if (singleCharacterLiteral && sb.Length > (containsHighSurrogate ? 2 : 1))
+                {
+                    throw new SyntaxError(
+                        "Character literals may only contain a single character. Did you mean to use double quotes for a string literal?" +
                         $"\n    {line}\n    {new string(' ', i - 1)}^");
                 }
                 char c = line[i];
+                if (char.IsHighSurrogate(c))
+                {
+                    containsHighSurrogate = true;
+                }
                 if (c == '\\')
                 {
                     char escape = line[++i];
@@ -707,15 +729,29 @@ namespace AssEmbly
                     _ = sb.Append(escape);
                     continue;
                 }
-                if (c == '"')
+                if ((singleCharacterLiteral && c == '\'') || (!singleCharacterLiteral && c == '"'))
                 {
                     break;
                 }
                 _ = sb.Append(c);
             }
             startIndex = i;
-            _ = sb.Append('"');
-            return sb.ToString();
+            if (singleCharacterLiteral)
+            {
+                if (sb.Length == 0)
+                {
+                    throw new SyntaxError("Character literals must contain at least 1 character." +
+                        $"\n    {line}\n    {new string(' ', i)}^");
+                }
+                byte[] characterBytes = new byte[4];
+                _ = Encoding.UTF8.GetBytes(sb.ToString(), characterBytes);
+                return BinaryPrimitives.ReadUInt32LittleEndian(characterBytes).ToString();
+            }
+            else
+            {
+                _ = sb.Append('"');
+                return sb.ToString();
+            }
         }
 
         /// <summary>
