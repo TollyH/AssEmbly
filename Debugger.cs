@@ -164,6 +164,8 @@ namespace AssEmbly
         {
             if (InReplMode)
             {
+                // AssEmbly expects UTF-8 encoding for special characters, make sure REPL input complies
+                Console.InputEncoding = System.Text.Encoding.UTF8;
                 DisplayReplHeader();
             }
             while (true)
