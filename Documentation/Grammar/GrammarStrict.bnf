@@ -326,6 +326,15 @@
 <optOperandSeparator> ::= <operandSeparator> | ε
 <operandSeparator> ::= <optWhitespace> "," <optWhitespace>
 
+<numericLiteral> ::= <staticNumericLiteral> | <labelLiteral> | <characterLiteral>
+<staticNumericLiteral> ::= <hexadecimalNumber> | <anyDecimalNumber> | <binaryNumber>
+<labelLiteral> ::= ":&" <labelName>
+<label> ::= ":" <labelName>
+<pointer> ::= "*" <register>
+<register> ::= <caseInsensitiveR> <caseInsensitiveP> <caseInsensitiveO> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveO> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveB> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveF> | <caseInsensitiveR> <caseInsensitiveR> <caseInsensitiveV> | <caseInsensitiveR> <caseInsensitiveF> <caseInsensitiveP> | <caseInsensitiveR> <caseInsensitiveG> "0" | <caseInsensitiveR> <caseInsensitiveG> "1" | <caseInsensitiveR> <caseInsensitiveG> "2" | <caseInsensitiveR> <caseInsensitiveG> "3" | <caseInsensitiveR> <caseInsensitiveG> "4" | <caseInsensitiveR> <caseInsensitiveG> "5" | <caseInsensitiveR> <caseInsensitiveG> "6" | <caseInsensitiveR> <caseInsensitiveG> "7" | <caseInsensitiveR> <caseInsensitiveG> "8" | <caseInsensitiveR> <caseInsensitiveG> "9"
+
+<characterLiteral> ::= "'" <stringChar> "'"
+
 <stringLiteral> ::= "\"" <stringContent> "\""
 <stringContent> ::= <stringChar> | <stringContent> <stringChar>
 <stringChar> ::= <letter> | <digit> | <stringSymbol> | <stringBackslash>
@@ -338,13 +347,6 @@
 <hexadecimalZeroToSeven> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7"
 <hexadecimalZeroToC> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "a" | "b" | "c" | "A" | "B" | "C"
 <hexadecimalEToF> ::= "e" | "f" | "E" | "F"
-
-<numericLiteral> ::= <staticNumericLiteral> | <labelLiteral>
-<staticNumericLiteral> ::= <hexadecimalNumber> | <anyDecimalNumber> | <binaryNumber>
-<labelLiteral> ::= ":&" <labelName>
-<label> ::= ":" <labelName>
-<pointer> ::= "*" <register>
-<register> ::= <caseInsensitiveR> <caseInsensitiveP> <caseInsensitiveO> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveO> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveB> | <caseInsensitiveR> <caseInsensitiveS> <caseInsensitiveF> | <caseInsensitiveR> <caseInsensitiveR> <caseInsensitiveV> | <caseInsensitiveR> <caseInsensitiveF> <caseInsensitiveP> | <caseInsensitiveR> <caseInsensitiveG> "0" | <caseInsensitiveR> <caseInsensitiveG> "1" | <caseInsensitiveR> <caseInsensitiveG> "2" | <caseInsensitiveR> <caseInsensitiveG> "3" | <caseInsensitiveR> <caseInsensitiveG> "4" | <caseInsensitiveR> <caseInsensitiveG> "5" | <caseInsensitiveR> <caseInsensitiveG> "6" | <caseInsensitiveR> <caseInsensitiveG> "7" | <caseInsensitiveR> <caseInsensitiveG> "8" | <caseInsensitiveR> <caseInsensitiveG> "9"
 
 <hexadecimalNumber> ::= "0x" <hexadecimalNumberDigits>
 <hexadecimalNumberDigits> ::= <hexadecimalDigit> | <hexadecimalNumberDigits> <hexadecimalDigit>
