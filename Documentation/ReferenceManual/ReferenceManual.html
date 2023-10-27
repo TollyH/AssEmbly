@@ -173,8 +173,8 @@
 </head>
 <body>
 <h1 id="assembly-reference-manual">AssEmbly Reference Manual</h1>
-<p>Applies to versions: <code>2.0.0</code></p>
-<p>Last revised: 2023-10-23</p>
+<p>Applies to versions: <code>2.1.0</code></p>
+<p>Last revised: 2023-10-27</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -199,7 +199,10 @@ href="https://github.com/TollyH">Tolly Hill</a>.</p>
 <li><a href="#operand-types">Operand Types</a>
 <ul>
 <li><a href="#register">Register</a></li>
-<li><a href="#literal">Literal</a></li>
+<li><a href="#literal">Literal</a>
+<ul>
+<li><a href="#character-literal">Character Literal</a></li>
+</ul></li>
 <li><a href="#address">Address</a></li>
 <li><a href="#pointer">Pointer</a></li>
 </ul></li>
@@ -273,10 +276,8 @@ the Carry, Overflow, Zero, and Sign Flags</a></li>
 <ul>
 <li><a href="#pad--byte-padding"><code>PAD</code> — Byte
 Padding</a></li>
-<li><a href="#dat--byte-insertion"><code>DAT</code> — Byte Insertion</a>
-<ul>
-<li><a href="#escape-sequences">Escape Sequences</a></li>
-</ul></li>
+<li><a href="#dat--byte-insertion"><code>DAT</code> — Byte
+Insertion</a></li>
 <li><a href="#num--number-insertion"><code>NUM</code> — Number
 Insertion</a></li>
 <li><a href="#mac--macro-definition"><code>MAC</code> — Macro
@@ -310,6 +311,7 @@ Stack</a></li>
 Parameters</a></li>
 </ul></li>
 <li><a href="#text-encoding">Text Encoding</a></li>
+<li><a href="#escape-sequences">Escape Sequences</a></li>
 <li><a href="#instruction-data-type-acceptance">Instruction Data Type
 Acceptance</a></li>
 <li><a href="#status-flag-behaviour">Status Flag Behaviour</a></li>
@@ -540,6 +542,34 @@ by putting a <code>.</code> anywhere in them (e.g. <code>2.3</code>).
 Floating point literals can also be made negative
 (e.g. <code>-2.3</code>). This is explained in more detail in the
 relevant sections on negative and floating point values.</p>
+<h4 id="character-literal">Character Literal</h4>
+<p>In addition to numeric literals, literal values can also be written
+in the form of <strong>character literals</strong>. A character literal
+is a single character, surrounded by single quotes (<code>'</code>),
+that is assembled into the numeric representation of the contained
+character in UTF-8.</p>
+<p>For example:</p>
+<pre class="text"><code>MVQ rg0, &#39;a&#39;  ; Move the value 97 to rg0
+MVQ rg0, &#39;*&#39;  ; Move the value 42 to rg0
+MVQ rg0, &#39;ト&#39;  ; Move the value 8946659 to rg0
+; 8946659 is the numeric value of the UTF-8 bytes 0xE3, 0x83, 0x88 that represent &#39;ト&#39; when interpreted as little endian
+
+MVQ rg0, &#39;aa&#39;  ; Results in an error (character literals can only contain a single character)
+MVQ rg0, &#39;&#39;  ; Results in an error (character literals cannot be empty)</code></pre>
+<p>Character literals can also contain escape sequences, assuming the
+escape sequence is the only thing in the literal and there is only
+one.</p>
+<p>For example:</p>
+<pre class="text"><code>MVQ rg0, &#39;\&#39;&#39;  ; Move the value 39 to rg0
+MVQ rg0, &#39;\\&#39;  ; Move the value 92 to rg0
+MVQ rg0, &#39;\n&#39;  ; Move the value 10 to rg0
+MVQ rg0, &#39;\uABCD&#39;  ; Move the value 9285610 to rg0
+; 9285610 is the numeric value of the UTF-8 bytes 0xEA, 0xAF, 0x8D that represent the unicode codepoint U+ABCD when interpreted as little endian
+
+MVQ rg0, &#39;\r\n&#39;  ; Results in an error (character literals can only contain a single character)
+MVQ rg0, &#39;\&#39;  ; Results in an error (the only closing quote of the literal has been escaped)</code></pre>
+<p>Escape sequences are explained in more detail and listed in full in a
+dedicated section toward the end of the document.</p>
 <h3 id="address">Address</h3>
 <p>An address is a value that is interpreted as a location to be read
 from, written to, or jumped to in a processor’s main memory. In
@@ -1052,7 +1082,7 @@ however much the limit was exceeded by.</p>
 <p>For example:</p>
 <pre class="text"><code>MVQ rg0, 0  ; Set rg0 to 0
 SUB rg0, 1  ; Subtract 1 from rg0
-; rg0 is now 18446744073709551615 (-1) 
+; rg0 is now 18446744073709551615 (-1)
 
 MVQ rg0, 25  ; Set rg0 to 25
 SUB rg0, 50  ; Subtract 50 from rg0
@@ -1341,8 +1371,8 @@ will set the carry bit, and for positive initial values, any
 (<code>SIGN_SHR</code>) looks like this:</p>
 <pre class="text"><code>-26 &gt;&gt; 1
 | 1   | 1   | 1   | 0   | 0   | 1   | 1   | 0   |-&gt; discard not equal to sign, SET carry flag
-  |  \     \     \     \     \     \     \  
-  |   \     \     \     \     \     \     \ 
+  |  \     \     \     \     \     \     \
+  |   \     \     \     \     \     \     \
 | 1   | 1   | 1   | 1   | 0   | 0   | 1   | 1   |
 = -13</code></pre>
 <h3 id="extending-smaller-signed-values">Extending Smaller Signed
@@ -1976,8 +2006,8 @@ DAT 54  ; Insert a single 54 byte (0x36)</code></pre>
  0x0B   | 36
         | DAT 54</code></pre>
 <p>To insert a string using <code>DAT</code>, the desired characters
-must be surrounded by quotation marks (<code>"</code>) and be given as
-the sole operand to the directive. For example:</p>
+must be surrounded by double quote marks (<code>"</code>) and be given
+as the sole operand to the directive. For example:</p>
 <pre class="text"><code>MVQ rg0, :&amp;STRING  ; Move literal address of string to rg0
 :STRING_LOOP
 MVB rg1, *rg0  ; Move contents of address stored in rg0 to rg1
@@ -2002,7 +2032,8 @@ when the end of a string has been reached. Placing a <code>DAT 0</code>
 directive on the line after the string insertion will also achieve this
 0 termination, and will result in the exact same bytes being assembled,
 however using the <code>\0</code> escape sequence is more compact.
-Escape sequences are explained after this example.</p>
+Escape sequences are explained toward the end of the document along with
+a table listing all of the possible sequences.</p>
 <p>The example program assembles down to the following bytes:</p>
 <pre class="text"><code>99 06 2E 00 00 00 00 00 00 00 83 07 06 75 07 00 00 00 00 00 00 00 00 04 2D 00 00 00 00 00 00 00 14 06 CC 07 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 21 00</code></pre>
 <p>Which can be broken down to:</p>
@@ -2034,103 +2065,6 @@ Escape sequences are explained after this example.</p>
 --------+----------------------------------------------------
  0x2E   | 48 65 6C 6C 6F 21 00
         | DAT &quot;Hello!\0&quot;</code></pre>
-<h4 id="escape-sequences">Escape Sequences</h4>
-<p>There are some sequences of characters that have special meanings
-when found inside a string. Each of these begins with a backslash
-(<code>\</code>) character and are used to insert characters into the
-string that couldn’t be inserted normally. Every supported sequence is
-as follows:</p>
-<table>
-<colgroup>
-<col style="width: 8%" />
-<col style="width: 13%" />
-<col style="width: 78%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Escape sequence</th>
-<th>Character name</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>\"</code></td>
-<td>Double quote</td>
-<td>Used to insert a double quote into the string without causing the
-string to end.</td>
-</tr>
-<tr class="even">
-<td><code>\\</code></td>
-<td>Backslash</td>
-<td>For a string to contain a backslash, you must escape it so it isn’t
-treated as the start of an escape sequence.</td>
-</tr>
-<tr class="odd">
-<td><code>\0</code></td>
-<td>Null</td>
-<td>ASCII 0x00. Should be used to terminate every string.</td>
-</tr>
-<tr class="even">
-<td><code>\a</code></td>
-<td>Alert</td>
-<td>ASCII 0x07.</td>
-</tr>
-<tr class="odd">
-<td><code>\b</code></td>
-<td>Backspace</td>
-<td>ASCII 0x08.</td>
-</tr>
-<tr class="even">
-<td><code>\f</code></td>
-<td>Form feed</td>
-<td>ASCII 0x0C.</td>
-</tr>
-<tr class="odd">
-<td><code>\n</code></td>
-<td>Newline</td>
-<td>ASCII 0x0A. Will cause the string to move onto a new console/file
-line when printed. Should be preceded by <code>\r</code> on
-Windows.</td>
-</tr>
-<tr class="even">
-<td><code>\r</code></td>
-<td>Carriage return</td>
-<td>ASCII 0x0D.</td>
-</tr>
-<tr class="odd">
-<td><code>\t</code></td>
-<td>Horizontal tab</td>
-<td>ASCII 0x09.</td>
-</tr>
-<tr class="even">
-<td><code>\v</code></td>
-<td>Vertical tab</td>
-<td>ASCII 0x0B.</td>
-</tr>
-<tr class="odd">
-<td><code>\u....</code></td>
-<td>Unicode codepoint (16-bit)</td>
-<td>Inserts the unicode character with a codepoint represented by 4
-hexadecimal digits in the range <code>0x0000</code> to
-<code>0xFFFF</code>.</td>
-</tr>
-<tr class="even">
-<td><code>\U........</code></td>
-<td>Unicode codepoint (32-bit)</td>
-<td>Inserts the unicode character with a codepoint represented by 8
-hexadecimal digits in the range <code>0x00000000</code> to
-<code>0x0010FFFF</code>, excluding <code>0x0000d800</code> to
-<code>0x0000dfff</code>.</td>
-</tr>
-<tr class="odd">
-<td><code>\'</code></td>
-<td>Single quote</td>
-<td>Included for future expansion. Not currently required - simply type
-a <code>'</code> character instead.</td>
-</tr>
-</tbody>
-</table>
 <h3 id="num-number-insertion"><code>NUM</code> — Number Insertion</h3>
 <p>The <code>NUM</code> directive is similar to <code>DAT</code>, except
 it always inserts 8 bytes exactly, so can be used to represent 64-bit
@@ -2719,6 +2653,104 @@ at a time. As long as you read/write all of the UTF-8 bytes in the
 correct order, they should be stored and displayed correctly.</p>
 <p>Text bytes read from files <strong>will not</strong> be automatically
 converted to UTF-8 if the file was saved with another encoding.</p>
+<h2 id="escape-sequences">Escape Sequences</h2>
+<p>There are some sequences of characters that have special meanings
+when found inside a string or character literal. Each of these begins
+with a backslash (<code>\</code>) character and are used to insert
+characters that couldn’t be included normally. Every supported sequence
+is as follows:</p>
+<table>
+<colgroup>
+<col style="width: 8%" />
+<col style="width: 13%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Escape sequence</th>
+<th>Character name</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>\"</code></td>
+<td>Double quote</td>
+<td>Used to insert a double quote into a string without causing the
+string to end. Not required in single character literals.</td>
+</tr>
+<tr class="even">
+<td><code>\'</code></td>
+<td>Single quote</td>
+<td>Used to insert a single quote into a single character literal
+without causing the literal to end. Not required in string
+literals.</td>
+</tr>
+<tr class="odd">
+<td><code>\\</code></td>
+<td>Backslash</td>
+<td>For a string to contain a backslash, you must escape it so it isn’t
+treated as the start of an escape sequence.</td>
+</tr>
+<tr class="even">
+<td><code>\0</code></td>
+<td>Null</td>
+<td>ASCII 0x00. Should be used to terminate every string.</td>
+</tr>
+<tr class="odd">
+<td><code>\a</code></td>
+<td>Alert</td>
+<td>ASCII 0x07.</td>
+</tr>
+<tr class="even">
+<td><code>\b</code></td>
+<td>Backspace</td>
+<td>ASCII 0x08.</td>
+</tr>
+<tr class="odd">
+<td><code>\f</code></td>
+<td>Form feed</td>
+<td>ASCII 0x0C.</td>
+</tr>
+<tr class="even">
+<td><code>\n</code></td>
+<td>Newline</td>
+<td>ASCII 0x0A. Will cause the string to move onto a new console/file
+line when printed. Should be preceded by <code>\r</code> on
+Windows.</td>
+</tr>
+<tr class="odd">
+<td><code>\r</code></td>
+<td>Carriage return</td>
+<td>ASCII 0x0D.</td>
+</tr>
+<tr class="even">
+<td><code>\t</code></td>
+<td>Horizontal tab</td>
+<td>ASCII 0x09.</td>
+</tr>
+<tr class="odd">
+<td><code>\v</code></td>
+<td>Vertical tab</td>
+<td>ASCII 0x0B.</td>
+</tr>
+<tr class="even">
+<td><code>\u....</code></td>
+<td>Unicode codepoint (16-bit)</td>
+<td>Inserts the unicode character with a codepoint represented by 4
+hexadecimal digits in the range <code>0x0000</code> to
+<code>0xFFFF</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>\U........</code></td>
+<td>Unicode codepoint (32-bit)</td>
+<td>Inserts the unicode character with a codepoint represented by 8
+hexadecimal digits in the range <code>0x00000000</code> to
+<code>0x0010FFFF</code>, excluding <code>0x0000d800</code> to
+<code>0x0000dfff</code>.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="instruction-data-type-acceptance">Instruction Data Type
 Acceptance</h2>
 <p>The following is a table of which types of numeric data can be given

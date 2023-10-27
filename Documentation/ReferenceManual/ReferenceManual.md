@@ -1,8 +1,8 @@
 # AssEmbly Reference Manual
 
-Applies to versions: `2.0.0`
+Applies to versions: `2.1.0`
 
-Last revised: 2023-10-23
+Last revised: 2023-10-27
 
 ## Introduction
 
@@ -23,6 +23,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
   - [Operand Types](#operand-types)
     - [Register](#register)
     - [Literal](#literal)
+      - [Character Literal](#character-literal)
     - [Address](#address)
     - [Pointer](#pointer)
   - [Registers](#registers)
@@ -63,7 +64,6 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
   - [Assembler Directives](#assembler-directives)
     - [`PAD` — Byte Padding](#pad--byte-padding)
     - [`DAT` — Byte Insertion](#dat--byte-insertion)
-      - [Escape Sequences](#escape-sequences)
     - [`NUM` — Number Insertion](#num--number-insertion)
     - [`MAC` — Macro Definition](#mac--macro-definition)
     - [`IMP` — File Importing](#imp--file-importing)
@@ -81,6 +81,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Subroutines and the Stack](#subroutines-and-the-stack)
     - [Passing Multiple Parameters](#passing-multiple-parameters)
   - [Text Encoding](#text-encoding)
+  - [Escape Sequences](#escape-sequences)
   - [Instruction Data Type Acceptance](#instruction-data-type-acceptance)
   - [Status Flag Behaviour](#status-flag-behaviour)
   - [Full Instruction Reference](#full-instruction-reference)
@@ -245,6 +246,39 @@ MVQ rg0, _0x1_000_000  ; Nor is this
 ```
 
 Literals can be made negative by putting a `-` sign directly before them (e.g. `-42`), or be made floating point by putting a `.` anywhere in them (e.g. `2.3`). Floating point literals can also be made negative (e.g. `-2.3`). This is explained in more detail in the relevant sections on negative and floating point values.
+
+#### Character Literal
+
+In addition to numeric literals, literal values can also be written in the form of **character literals**. A character literal is a single character, surrounded by single quotes (`'`), that is assembled into the numeric representation of the contained character in UTF-8.
+
+For example:
+
+```text
+MVQ rg0, 'a'  ; Move the value 97 to rg0
+MVQ rg0, '*'  ; Move the value 42 to rg0
+MVQ rg0, 'ト'  ; Move the value 8946659 to rg0
+; 8946659 is the numeric value of the UTF-8 bytes 0xE3, 0x83, 0x88 that represent 'ト' when interpreted as little endian
+
+MVQ rg0, 'aa'  ; Results in an error (character literals can only contain a single character)
+MVQ rg0, ''  ; Results in an error (character literals cannot be empty)
+```
+
+Character literals can also contain escape sequences, assuming the escape sequence is the only thing in the literal and there is only one.
+
+For example:
+
+```text
+MVQ rg0, '\''  ; Move the value 39 to rg0
+MVQ rg0, '\\'  ; Move the value 92 to rg0
+MVQ rg0, '\n'  ; Move the value 10 to rg0
+MVQ rg0, '\uABCD'  ; Move the value 9285610 to rg0
+; 9285610 is the numeric value of the UTF-8 bytes 0xEA, 0xAF, 0x8D that represent the unicode codepoint U+ABCD when interpreted as little endian
+
+MVQ rg0, '\r\n'  ; Results in an error (character literals can only contain a single character)
+MVQ rg0, '\'  ; Results in an error (the only closing quote of the literal has been escaped)
+```
+
+Escape sequences are explained in more detail and listed in full in a dedicated section toward the end of the document.
 
 ### Address
 
@@ -606,7 +640,7 @@ For example:
 ```text
 MVQ rg0, 0  ; Set rg0 to 0
 SUB rg0, 1  ; Subtract 1 from rg0
-; rg0 is now 18446744073709551615 (-1) 
+; rg0 is now 18446744073709551615 (-1)
 
 MVQ rg0, 25  ; Set rg0 to 25
 SUB rg0, 50  ; Subtract 50 from rg0
@@ -914,8 +948,8 @@ Whereas the behaviour of an **arithmetic shift** (`SIGN_SHR`) looks like this:
 ```text
 -26 >> 1
 | 1   | 1   | 1   | 0   | 0   | 1   | 1   | 0   |-> discard not equal to sign, SET carry flag
-  |  \     \     \     \     \     \     \  
-  |   \     \     \     \     \     \     \ 
+  |  \     \     \     \     \     \     \
+  |   \     \     \     \     \     \     \
 | 1   | 1   | 1   | 1   | 0   | 0   | 1   | 1   |
 = -13
 ```
@@ -1520,7 +1554,7 @@ Address | Bytes
         | DAT 54
 ```
 
-To insert a string using `DAT`, the desired characters must be surrounded by quotation marks (`"`) and be given as the sole operand to the directive. For example:
+To insert a string using `DAT`, the desired characters must be surrounded by double quote marks (`"`) and be given as the sole operand to the directive. For example:
 
 ```text
 MVQ rg0, :&STRING  ; Move literal address of string to rg0
@@ -1540,7 +1574,7 @@ DAT "Hello!\0"  ; Store a string of character bytes after program data.
 ; Note that the string ends with '\0' (a 0 or "null" byte)
 ```
 
-This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained after this example.
+This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained toward the end of the document along with a table listing all of the possible sequences.
 
 The example program assembles down to the following bytes:
 
@@ -1580,26 +1614,6 @@ Address | Bytes
  0x2E   | 48 65 6C 6C 6F 21 00
         | DAT "Hello!\0"
 ```
-
-#### Escape Sequences
-
-There are some sequences of characters that have special meanings when found inside a string. Each of these begins with a backslash (`\`) character and are used to insert characters into the string that couldn't be inserted normally. Every supported sequence is as follows:
-
-| Escape sequence | Character name             | Notes                                                                                                                                                                 |
-|-----------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `\"`            | Double quote               | Used to insert a double quote into the string without causing the string to end.                                                                                      |
-| `\\`            | Backslash                  | For a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                                       |
-| `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
-| `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
-| `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
-| `\f`            | Form feed                  | ASCII 0x0C.                                                                                                                                                           |
-| `\n`            | Newline                    | ASCII 0x0A. Will cause the string to move onto a new console/file line when printed. Should be preceded by `\r` on Windows.                                           |
-| `\r`            | Carriage return            | ASCII 0x0D.                                                                                                                                                           |
-| `\t`            | Horizontal tab             | ASCII 0x09.                                                                                                                                                           |
-| `\v`            | Vertical tab               | ASCII 0x0B.                                                                                                                                                           |
-| `\u....`        | Unicode codepoint (16-bit) | Inserts the unicode character with a codepoint represented by 4 hexadecimal digits in the range `0x0000` to `0xFFFF`.                                                 |
-| `\U........`    | Unicode codepoint (32-bit) | Inserts the unicode character with a codepoint represented by 8 hexadecimal digits in the range `0x00000000` to `0x0010FFFF`, excluding `0x0000d800` to `0x0000dfff`. |
-| `\'`            | Single quote               | Included for future expansion. Not currently required - simply type a `'` character instead.                                                                          |
 
 ### `NUM` — Number Insertion
 
@@ -2092,6 +2106,26 @@ All text in AssEmbly (input from/output to the console; strings inserted by `DAT
 Be aware that when working with characters that require multiple bytes, instructions like `RCC`, `RFC`, `WCC`, and `WFC` still only work on single bytes at a time. As long as you read/write all of the UTF-8 bytes in the correct order, they should be stored and displayed correctly.
 
 Text bytes read from files **will not** be automatically converted to UTF-8 if the file was saved with another encoding.
+
+## Escape Sequences
+
+There are some sequences of characters that have special meanings when found inside a string or character literal. Each of these begins with a backslash (`\`) character and are used to insert characters that couldn't be included normally. Every supported sequence is as follows:
+
+| Escape sequence | Character name             | Notes                                                                                                                                                                 |
+|-----------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `\"`            | Double quote               | Used to insert a double quote into a string without causing the string to end. Not required in single character literals.                                             |
+| `\'`            | Single quote               | Used to insert a single quote into a single character literal without causing the literal to end. Not required in string literals.                                    |
+| `\\`            | Backslash                  | For a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                                       |
+| `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
+| `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
+| `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
+| `\f`            | Form feed                  | ASCII 0x0C.                                                                                                                                                           |
+| `\n`            | Newline                    | ASCII 0x0A. Will cause the string to move onto a new console/file line when printed. Should be preceded by `\r` on Windows.                                           |
+| `\r`            | Carriage return            | ASCII 0x0D.                                                                                                                                                           |
+| `\t`            | Horizontal tab             | ASCII 0x09.                                                                                                                                                           |
+| `\v`            | Vertical tab               | ASCII 0x0B.                                                                                                                                                           |
+| `\u....`        | Unicode codepoint (16-bit) | Inserts the unicode character with a codepoint represented by 4 hexadecimal digits in the range `0x0000` to `0xFFFF`.                                                 |
+| `\U........`    | Unicode codepoint (32-bit) | Inserts the unicode character with a codepoint represented by 8 hexadecimal digits in the range `0x00000000` to `0x0010FFFF`, excluding `0x0000d800` to `0x0000dfff`. |
 
 ## Instruction Data Type Acceptance
 
