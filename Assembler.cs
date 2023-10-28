@@ -232,23 +232,17 @@ namespace AssEmbly
                             {
                                 throw new OperandException("The second operand to the ANALYZER directive must be an integer.");
                             }
-                            switch (operands[2].ToUpperInvariant())
+                            _ = operands[2].ToUpperInvariant() switch
                             {
                                 // Disable
-                                case "0":
-                                    _ = disabledSet.Add(code);
-                                    break;
+                                "0" => disabledSet.Add(code),
                                 // Enable
-                                case "1":
-                                    _ = disabledSet.Remove(code);
-                                    break;
+                                "1" => disabledSet.Remove(code),
                                 // Restore
-                                case "R":
-                                    _ = initialSet.Contains(code) ? disabledSet.Add(code) : disabledSet.Remove(code);
-                                    break;
-                                default:
-                                    throw new OperandException("The third operand to the ANALYZER directive must be one of '0', '1', or 'r'.");
-                            }
+                                "R" => initialSet.Contains(code) ? disabledSet.Add(code) : disabledSet.Remove(code),
+                                _ => throw new OperandException(
+                                    "The third operand to the ANALYZER directive must be one of '0', '1', or 'r'.")
+                            };
                             continue;
                         default:
                             break;
@@ -362,7 +356,7 @@ namespace AssEmbly
                         throw new OperandException(
                             $"Numeric literal too large for DAT, or is negative/floating point. 255 is the maximum value:\n    {operands[0]}");
                     }
-                    return (operands[0][0] != '"' ? parsedBytes[0..1] : parsedBytes, new List<(string, ulong)>());
+                    return (operands[0][0] != '"' ? parsedBytes[..1] : parsedBytes, new List<(string, ulong)>());
                 // 0-padding
                 case "PAD":
                     if (operands.Length != 1)
@@ -739,11 +733,9 @@ namespace AssEmbly
                 _ = Encoding.UTF8.GetBytes(sb.ToString(), characterBytes);
                 return BinaryPrimitives.ReadUInt32LittleEndian(characterBytes).ToString();
             }
-            else
-            {
-                _ = sb.Append('"');
-                return sb.ToString();
-            }
+
+            _ = sb.Append('"');
+            return sb.ToString();
         }
 
         /// <summary>
@@ -759,7 +751,7 @@ namespace AssEmbly
                 case ':':
                 {
                     int offset = operand[1] == '&' ? 2 : 1;
-                    Match invalidMatch = Regex.Match(operand[offset..], @"^[0-9]|[^A-Za-z0-9_]");
+                    Match invalidMatch = Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success
                         ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
@@ -779,7 +771,7 @@ namespace AssEmbly
                     }
                     if (operand[0] == '.' && operand.Length == 1)
                     {
-                        throw new SyntaxError($"Floating point numeric literals must contain a digit on at least one side of the decimal point.");
+                        throw new SyntaxError("Floating point numeric literals must contain a digit on at least one side of the decimal point.");
                     }
                     if (operand.IndexOf('.') != operand.LastIndexOf('.'))
                     {

@@ -229,9 +229,6 @@ namespace AssEmbly
                             {
                                 endCommandEntryLoop = true;
                             }
-                            else
-                            {
-                            }
                         }
                         else
                         {

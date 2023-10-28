@@ -153,7 +153,7 @@ namespace AssEmbly
                         case OperandType.Pointer:
                             if (Enum.IsDefined((Register)instruction[(int)totalBytes]))
                             {
-                                operandStrings.Add("*" + ((Register)instruction[(int)totalBytes]).ToString());
+                                operandStrings.Add("*" + (Register)instruction[(int)totalBytes]);
                                 totalBytes++;
                             }
                             else

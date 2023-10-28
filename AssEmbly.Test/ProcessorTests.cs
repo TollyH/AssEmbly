@@ -7460,7 +7460,7 @@ namespace AssEmbly.Test
             [TestMethod]
             public void RFC_Register()
             {
-                using (MemoryStream fileStream = new(new byte[] { (byte)'e' }))
+                using (MemoryStream fileStream = new(new[] { (byte)'e' }))
                 {
                     Processor testProcessor = new(2046);
                     using BinaryReader fileInput = new(fileStream);
@@ -12986,7 +12986,7 @@ namespace AssEmbly.Test
                 testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x91, (int)Register.rg7 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(BitConverter.DoubleToUInt64Bits((double)1.2345f), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(1.2345f), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.FileEnd, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
 
                 testProcessor = new(2046);
@@ -13002,7 +13002,7 @@ namespace AssEmbly.Test
                 testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x91, (int)Register.rg7 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(BitConverter.DoubleToUInt64Bits((double)-1.23456f), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(BitConverter.DoubleToUInt64Bits(-1.23456f), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
                 Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
 
                 testProcessor = new(2046);
