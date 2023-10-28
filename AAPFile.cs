@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
@@ -40,11 +41,11 @@ namespace AssEmbly
         {
             if (executable.Length < HeaderSize)
             {
-                throw new AAPFormatException("There are not enough bytes in the given array to be a valid AAP file");
+                throw new AAPFormatException(Strings.AAP_Error_Invalid_Not_Enough_Bytes);
             }
             if (!executable[..8].SequenceEqual(MagicBytes))
             {
-                throw new AAPFormatException("Given bytes do not start with the correct header");
+                throw new AAPFormatException(Strings.AAP_Error_Invalid_Bad_Header);
             }
             Span<byte> byteSpan = executable.AsSpan();
 

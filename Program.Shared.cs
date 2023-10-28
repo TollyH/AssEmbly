@@ -1,4 +1,6 @@
-﻿namespace AssEmbly
+﻿using AssEmbly.Resources.Localization;
+
+namespace AssEmbly
 {
     internal static partial class Program
     {
@@ -15,9 +17,7 @@
             catch
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The given executable file is invalid. " +
-                    "Make sure you're not attempting to load the source file instead of the executable. " +
-                    "To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.");
+                Console.WriteLine(Strings.CLI_Error_Invalid_AAP);
                 Console.ResetColor();
                 Environment.Exit(1);
                 return null;
@@ -25,7 +25,7 @@
             if ((file.Features & AAPFeatures.Incompatible) != 0)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("This program uses features incompatible with the current version of AssEmbly.");
+                Console.WriteLine(Strings.CLI_Error_AAP_Feature_Incompatible);
                 Console.ResetColor();
                 Environment.Exit(1);
                 return null;
@@ -33,15 +33,13 @@
             if (!ignoreNewerVersion && file.LanguageVersion > (version ?? new Version()))
             {
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine("Warning: This program was assembled for a newer version of AssEmbly. It was built for version " +
-                    $"{file.LanguageVersion.Major}.{file.LanguageVersion.Minor}.{file.LanguageVersion.Build} " +
-                    $"- you have version {version?.Major}.{version?.Minor}.{version?.Build}.");
+                Console.WriteLine(Strings.CLI_Warning_Newer_Build_Version,
+                    file.LanguageVersion.Major, file.LanguageVersion.Minor, file.LanguageVersion.Build, version?.Major, version?.Minor, version?.Build);
                 Console.ResetColor();
                 if (file.LanguageVersion.Major > version?.Major)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Because the major release number is higher ({file.LanguageVersion.Major} > {version.Major}), " +
-                        "this program will not be executed. Use the --ignore-newer-version parameter to override this.");
+                    Console.WriteLine(Strings.CLI_Error_Newer_Major_Build_Version, file.LanguageVersion.Major, version.Major);
                     Console.ResetColor();
                     Environment.Exit(1);
                     return null;
@@ -79,10 +77,11 @@
             }
             catch (Exception e)
             {
-                Console.WriteLine($"An unexpected error occurred while loading your program:\r\n    {e.GetType().Name}: {e.Message}");
+                Console.WriteLine(Strings.CLI_Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
             }
         }
 
+        [System.ComponentModel.Localizable(true)]
         public static bool CheckInputFileArg(string[] args, string missingMessage)
         {
             if (args.Length < 2)
@@ -96,7 +95,7 @@
             if (!File.Exists(args[1]))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("The specified file does not exist.");
+                Console.WriteLine(Strings.CLI_Error_File_Not_Exists);
                 Console.ResetColor();
                 Environment.Exit(1);
                 return false;
@@ -123,7 +122,7 @@
                     if (!ulong.TryParse(memSizeString, out ulong memSize))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine($"{memSizeString} is not a valid number of bytes for memory size.");
+                        Console.WriteLine(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
                         Console.ResetColor();
                         Environment.Exit(1);
                         return 0;
@@ -140,18 +139,18 @@
             if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException
                 or DivideByZeroException or FileNotFoundException or DirectoryNotFoundException)
             {
-                string message = e is RuntimeException runtimeException
-                    ? runtimeException.ConsoleMessage
-                    : e is DivideByZeroException
-                        ? "An instruction attempted to divide by zero."
-                    : e is FileNotFoundException or DirectoryNotFoundException
-                        ? e.Message
-                        : "An instruction tried to access an invalid memory address.";
-                Console.WriteLine($"\n\nAn error occurred executing your program:\n    {message}");
+                string message = e switch
+                {
+                    RuntimeException runtimeException => runtimeException.ConsoleMessage,
+                    DivideByZeroException => Strings.CLI_Error_Runtime_Zero_Divide,
+                    FileNotFoundException or DirectoryNotFoundException => e.Message,
+                    _ => Strings.CLI_Error_Runtime_Invalid_Address
+                };
+                Console.WriteLine(Strings.CLI_Error_Runtime_Known, message);
             }
             else
             {
-                Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
+                Console.WriteLine(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
             PrintRegisterStates(processor);
             Console.ResetColor();
@@ -178,42 +177,42 @@
             }
             else
             {
-                Console.WriteLine($"An unexpected error occurred:\r\n    {e.GetType().Name}: {e.Message}");
+                Console.WriteLine(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
             Console.ResetColor();
         }
 
         public static void PrintRegisterStates(Processor processor)
         {
-            Console.WriteLine("Register states:");
+            Console.WriteLine(Strings.Generic_Register_States_Header);
             foreach (int register in Enum.GetValues(typeof(Register)))
             {
                 ulong value = processor.Registers[register];
-                Console.Write($"    {Enum.GetName((Register)register)}: {value}");
+                Console.Write(Strings.Generic_Indented_Key_Value, Enum.GetName((Register)register), value);
                 if (value != 0)
                 {
                     double floatingValue = BitConverter.UInt64BitsToDouble(value);
                     // Don't print extreme values as floating point
                     if (Math.Abs(floatingValue) is >= 0.0000000000000001 and <= ulong.MaxValue)
                     {
-                        Console.Write($" ({floatingValue:0.0###############})");
+                        Console.Write(Strings.Generic_Register_Floating_Value, floatingValue);
                     }
                     if (value >= 10)
                     {
-                        Console.Write($" (0x{value:X})");
+                        Console.Write(Strings.Generic_Register_Hex_Value, value);
                     }
                     if ((value & Processor.SignBit) != 0)
                     {
-                        Console.Write($" ({(long)value})");
+                        Console.Write(Strings.Generic_Register_Denary_Value, (long)value);
                     }
                     else
                     {
-                        Console.Write($" (0b{Convert.ToString((long)value, 2)})");
+                        Console.Write(Strings.Generic_Register_Binary_Value, Convert.ToString((long)value, 2));
                     }
                     // >= ' ' and <= '~'
                     if (value is >= 32 and <= 126)
                     {
-                        Console.Write($" ('{(char)value}')");
+                        Console.Write(Strings.Generic_Register_Char_Value, (char)value);
                     }
                 }
                 Console.WriteLine();

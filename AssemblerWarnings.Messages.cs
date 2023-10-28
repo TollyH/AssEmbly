@@ -1,59 +1,65 @@
-﻿namespace AssEmbly
+﻿using System.ComponentModel;
+using AssEmbly.Resources.Localization;
+
+namespace AssEmbly
 {
     public partial class AssemblerWarnings
     {
+        [Localizable(true)]
         public static readonly Dictionary<int, string> NonFatalErrorMessages = new()
         {
-            { 0001, "Instruction writes to the rpo register." },
-            { 0002, "Division by constant 0." },
-            { 0003, "File has an entry point explicitly defined, but the program is being assembled into v1 format which doesn't support them." },
+            { 0001, Strings.AssemblerWarnings_NonFatal_0001 },
+            { 0002, Strings.AssemblerWarnings_NonFatal_0002 },
+            { 0003, Strings.AssemblerWarnings_NonFatal_0003 },
         };
 
+        [Localizable(true)]
         public static readonly Dictionary<int, string> WarningMessages = new()
         {
-            { 0001, "Data insertion is not directly preceded by an unconditional jump, return, or halt instruction." },
-            { 0002, "Jump/Call target label points to data, not executable code." },
-            { 0003, "Jump/Call target label points to end of file, not executable code." },
-            { 0004, "Instruction writes to a label pointing to executable code." },
-            { 0005, "Instruction reads from a label pointing to executable code in a context that likely expects data." },
-            { 0006, "String insertion is not immediately followed by a 0 (null) byte." },
-            { 0007, "Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime." },
-            { 0008, "Unreachable code detected." },
-            { 0009, "Program runs to end of file without being terminated by an unconditional jump, return, or halt instruction." },
-            { 0010, "File import is not directly preceded by an unconditional jump, return, or halt instruction." },
-            { 0011, "Instruction writes to the rsf register." },
-            { 0012, "Instruction writes to the rsb register." },
-            { 0013, "Jump/Call target label points to itself, resulting in an unbreakable infinite loop." },
-            { 0014, "Unlabelled executable code found after data insertion." },
-            { 0015, "Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction." },
-            { 0016, "Addresses are 64-bit values, however this move instruction moves less than 64 bits." },
-            { 0017, "Entry point points to data, not executable code." },
-            { 0018, "Entry point points to an import." },
-            { 0019, "Signed literal given to an instruction that expects an unsigned literal." },
-            { 0020, "Floating point literal given to an instruction that expects an integer literal." },
-            { 0021, "Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point." },
-            { 0022, "Value is too large for a signed instruction. This positive value will overflow into a negative one." },
-            { 0023, "Addresses are unsigned, however this operation is signed." },
-            { 0024, "Addresses are integers, however this operation is floating point." },
-            { 0025, "Use of an extension instruction when assembling to v1 format." },
+            { 0001, Strings.AssemblerWarnings_Warning_0001 },
+            { 0002, Strings.AssemblerWarnings_Warning_0002 },
+            { 0003, Strings.AssemblerWarnings_Warning_0003 },
+            { 0004, Strings.AssemblerWarnings_Warning_0004 },
+            { 0005, Strings.AssemblerWarnings_Warning_0005 },
+            { 0006, Strings.AssemblerWarnings_Warning_0006 },
+            { 0007, Strings.AssemblerWarnings_Warning_0007 },
+            { 0008, Strings.AssemblerWarnings_Warning_0008 },
+            { 0009, Strings.AssemblerWarnings_Warning_0009 },
+            { 0010, Strings.AssemblerWarnings_Warning_0010 },
+            { 0011, Strings.AssemblerWarnings_Warning_0011 },
+            { 0012, Strings.AssemblerWarnings_Warning_0012 },
+            { 0013, Strings.AssemblerWarnings_Warning_0013 },
+            { 0014, Strings.AssemblerWarnings_Warning_0014 },
+            { 0015, Strings.AssemblerWarnings_Warning_0015 },
+            { 0016, Strings.AssemblerWarnings_Warning_0016 },
+            { 0017, Strings.AssemblerWarnings_Warning_0017 },
+            { 0018, Strings.AssemblerWarnings_Warning_0018 },
+            { 0019, Strings.AssemblerWarnings_Warning_0019 },
+            { 0020, Strings.AssemblerWarnings_Warning_0020 },
+            { 0021, Strings.AssemblerWarnings_Warning_0021 },
+            { 0022, Strings.AssemblerWarnings_Warning_0022 },
+            { 0023, Strings.AssemblerWarnings_Warning_0023 },
+            { 0024, Strings.AssemblerWarnings_Warning_0024 },
+            { 0025, Strings.AssemblerWarnings_Warning_0025 },
         };
 
+        [Localizable(true)]
         public static readonly Dictionary<int, string> SuggestionMessages = new()
         {
-            { 0001, "Avoid use of NOP instruction." },
-            { 0002, "Use the `PAD` directive instead of chaining `DAT 0` directives." },
-            { 0003, "Put IMP directives at the end of the file, unless the position of the directive is important given the file's contents." },
-            { 0004, "Put data at the end of the file, unless the position of the data is important." },
-            { 0005, "Use `TST {1}, {1}` instead of `CMP {1}, 0`, as it results in less bytes." },
-            { 0006, "Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes." },
-            { 0007, "Use `ICR {1}` instead of `ADD {1}, 1`, as it results in less bytes." },
-            { 0008, "Use `DCR {1}` instead of `SUB {1}, 1`, as it results in less bytes." },
-            { 0009, "Operation has no effect." },
-            { 0010, "Shift operation shifts by 64 bits or more, which will always shift out all bits." },
-            { 0011, "Remove leading 0 digits from denary number." },
-            { 0012, "Remove useless `PAD 0` directive." },
-            { 0013, "Use `DCR {1}` instead of `ADD {1}, -1`, as it results in less bytes." },
-            { 0014, "Use `ICR {1}` instead of `SUB {1}, -1`, as it results in less bytes." },
+            { 0001, Strings.AssemblerWarnings_Suggestion_0001 },
+            { 0002, Strings.AssemblerWarnings_Suggestion_0002 },
+            { 0003, Strings.AssemblerWarnings_Suggestion_0003 },
+            { 0004, Strings.AssemblerWarnings_Suggestion_0004 },
+            { 0005, Strings.AssemblerWarnings_Suggestion_0005 },
+            { 0006, Strings.AssemblerWarnings_Suggestion_0006 },
+            { 0007, Strings.AssemblerWarnings_Suggestion_0007 },
+            { 0008, Strings.AssemblerWarnings_Suggestion_0008 },
+            { 0009, Strings.AssemblerWarnings_Suggestion_0009 },
+            { 0010, Strings.AssemblerWarnings_Suggestion_0010 },
+            { 0011, Strings.AssemblerWarnings_Suggestion_0011 },
+            { 0012, Strings.AssemblerWarnings_Suggestion_0012 },
+            { 0013, Strings.AssemblerWarnings_Suggestion_0013 },
+            { 0014, Strings.AssemblerWarnings_Suggestion_0014 },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)

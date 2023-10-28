@@ -8,6 +8,7 @@
     /// <remarks>
     /// This is a base class for more specific exception types, which should most often be used instead.
     /// </remarks>
+    [System.ComponentModel.Localizable(true)]
     public class AssEmblyException : Exception
     {
         private string? _consoleMessage;

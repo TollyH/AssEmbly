@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
+using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
@@ -132,12 +133,12 @@ namespace AssEmbly
                         _ = DetermineOperandType(mnemonic);
                         if (mnemonic[1] == '&')
                         {
-                            throw new SyntaxError($"Cannot convert a label definition to a literal address. Are you sure you meant to include the '&'?\n    {rawLine}\n     ^");
+                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Invalid_Literal_Label, rawLine));
                         }
                         string labelName = mnemonic[1..];
                         if (labels.ContainsKey(labelName))
                         {
-                            throw new LabelNameException($"Label \"{labelName}\" has already been defined. Label names must be unique.");
+                            throw new LabelNameException(string.Format(Strings.Assembler_Error_Label_Already_Defined, labelName));
                         }
                         if (labelName.ToUpperInvariant() == "ENTRY")
                         {
@@ -163,26 +164,26 @@ namespace AssEmbly
                         case "IMP":
                             if (operands.Length != 1)
                             {
-                                throw new OperandException($"The IMP mnemonic requires a single operand. {operands.Length} were given.");
+                                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Count, operands.Length));
                             }
                             OperandType operandType = DetermineOperandType(operands[0]);
                             if (operandType != OperandType.Literal)
                             {
-                                throw new OperandException($"The operand to the IMP mnemonic must be a literal. An operand of type {operandType} was provided.");
+                                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Type, operandType));
                             }
                             if (operands[0][0] != '"')
                             {
-                                throw new OperandException("The literal operand to the IMP mnemonic must be a string.");
+                                throw new OperandException(Strings.Assembler_Error_IMP_Operand_String);
                             }
                             byte[] parsedBytes = ParseLiteral(operands[0], true);
                             string filepath = Path.GetFullPath(Encoding.UTF8.GetString(parsedBytes));
                             if (!File.Exists(filepath))
                             {
-                                throw new ImportException($"The file \"{filepath}\" given to the IMP mnemonic could not be found.");
+                                throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, filepath));
                             }
-                            if (importStack.Any(x => x.ImportPath.ToLower() == filepath.ToLower()))
+                            if (importStack.Any(x => string.Equals(x.ImportPath, filepath, StringComparison.InvariantCultureIgnoreCase)))
                             {
-                                throw new ImportException($"Circular import detected: attempted import from \"{filepath}\" when it is already in import stack.");
+                                throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, filepath));
                             }
                             string[] linesToImport = File.ReadAllLines(filepath);
                             // Insert the contents of the imported file so they are assembled next
@@ -202,7 +203,7 @@ namespace AssEmbly
                         case "MAC":
                             if (operands.Length != 2)
                             {
-                                throw new OperandException($"The MAC mnemonic requires two operands. {operands.Length} were given.");
+                                throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
                             }
                             macros[operands[0]] = operands[1];
                             lineIsLabelled = false;
@@ -212,25 +213,25 @@ namespace AssEmbly
                         case "ANALYZER":
                             if (operands.Length != 3)
                             {
-                                throw new OperandException($"The ANALYZER directive requires 3 operands. {operands.Length} were given.");
+                                throw new OperandException(string.Format(Strings.Assembler_Error_ANALYZER_Operand_Count, operands.Length));
                             }
                             HashSet<int> disabledSet = operands[0].ToUpperInvariant() switch
                             {
                                 "ERROR" => warningGenerator.DisabledNonFatalErrors,
                                 "WARNING" => warningGenerator.DisabledWarnings,
                                 "SUGGESTION" => warningGenerator.DisabledSuggestions,
-                                _ => throw new OperandException("The first operand to the ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.")
+                                _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
                             };
                             IReadOnlySet<int> initialSet = operands[0].ToUpperInvariant() switch
                             {
                                 "ERROR" => disabledNonFatalErrors,
                                 "WARNING" => disabledWarnings,
                                 "SUGGESTION" => disabledSuggestions,
-                                _ => throw new OperandException("The first operand to the ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.")
+                                _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
                             };
                             if (!int.TryParse(operands[1], out int code))
                             {
-                                throw new OperandException("The second operand to the ANALYZER directive must be an integer.");
+                                throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_Second);
                             }
                             _ = operands[2].ToUpperInvariant() switch
                             {
@@ -241,7 +242,7 @@ namespace AssEmbly
                                 // Restore
                                 "R" => initialSet.Contains(code) ? disabledSet.Add(code) : disabledSet.Remove(code),
                                 _ => throw new OperandException(
-                                    "The third operand to the ANALYZER directive must be one of '0', '1', or 'r'.")
+                                    Strings.Assembler_Error_ANALYZER_Operand_Third)
                             };
                             continue;
                         default:
@@ -274,20 +275,20 @@ namespace AssEmbly
                 {
                     if (currentImport is null)
                     {
-                        e.ConsoleMessage = $"Error on line {baseFileLine} in base file\n    \"{rawLine}\"\n{e.Message}";
+                        e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), rawLine, e.Message);
                     }
                     else
                     {
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
                             currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), rawLine, e.Message);
-                        string newMessage = $"Error on line {currentImport.CurrentLine} in \"{currentImport.ImportPath}\"\n    \"{rawLine}\"";
+                        string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
                         _ = importStack.Pop();  // Remove already printed frame from stack
                         while (importStack.TryPop(out ImportStackFrame? nestedImport))
                         {
-                            newMessage += $"\nImported on line {nestedImport.CurrentLine} of \"{nestedImport.ImportPath}\"";
+                            newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Import, nestedImport.CurrentLine, nestedImport.ImportPath);
                         }
-                        newMessage += $"\nImported on line {baseFileLine} of base file\n\n{e.Message}";
+                        newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Base, baseFileLine, e.Message);
                         e.ConsoleMessage = newMessage;
                     }
                     throw;
@@ -301,9 +302,8 @@ namespace AssEmbly
                 if (!labels.TryGetValue(labelName, out ulong targetOffset))
                 {
                     LabelNameException exc = new(
-                        $"A label with the name \"{labelName}\" does not exist, but a reference was made to it. " +
-                        $"Have you missed a definition?", line, filePath ?? "");
-                    exc.ConsoleMessage = $"Error on line {line} in {filePath ?? "base file"}\n\n{exc.Message}";
+                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName), line, filePath ?? "");
+                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
                     throw exc;
                 }
                 // Write the now known address of the label to where it is required within the program
@@ -339,38 +339,38 @@ namespace AssEmbly
                 case "DAT":
                     if (operands.Length != 1)
                     {
-                        throw new OperandException($"The DAT mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Count, operands.Length));
                     }
                     OperandType operandType = DetermineOperandType(operands[0]);
                     if (operandType != OperandType.Literal)
                     {
-                        throw new OperandException($"The operand to the DAT mnemonic must be a literal. An operand of type {operandType} was provided.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Type, operandType));
                     }
                     if (operands[0][0] == ':')
                     {
-                        throw new OperandException("The literal operand to the DAT mnemonic cannot be a label reference.");
+                        throw new OperandException(Strings.Assembler_Error_DAT_Operand_Label_Reference);
                     }
                     byte[] parsedBytes = ParseLiteral(operands[0], true);
                     if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
                     {
                         throw new OperandException(
-                            $"Numeric literal too large for DAT, or is negative/floating point. 255 is the maximum value:\n    {operands[0]}");
+                            string.Format(Strings.Assembler_Error_DAT_Operand_Too_Large, operands[0]));
                     }
                     return (operands[0][0] != '"' ? parsedBytes[..1] : parsedBytes, new List<(string, ulong)>());
                 // 0-padding
                 case "PAD":
                     if (operands.Length != 1)
                     {
-                        throw new OperandException($"The PAD mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Count, operands.Length));
                     }
                     operandType = DetermineOperandType(operands[0]);
                     if (operandType != OperandType.Literal)
                     {
-                        throw new OperandException($"The operand to the PAD mnemonic must be a literal. An operand of type {operandType} was provided.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Type, operandType));
                     }
                     if (operands[0][0] == ':')
                     {
-                        throw new OperandException("The literal operand to the PAD mnemonic cannot be a label reference.");
+                        throw new OperandException(Strings.Assembler_Error_PAD_Operand_Label_Reference);
                     }
                     _ = ParseLiteral(operands[0], false, out ulong parsedNumber);
                     // Generate an array of 0-bytes with the specified length
@@ -379,16 +379,16 @@ namespace AssEmbly
                 case "NUM":
                     if (operands.Length != 1)
                     {
-                        throw new OperandException($"The NUM mnemonic requires a single operand. {operands.Length} were given.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Count, operands.Length));
                     }
                     operandType = DetermineOperandType(operands[0]);
                     if (operandType != OperandType.Literal)
                     {
-                        throw new OperandException($"The operand to the NUM mnemonic must be a literal. An operand of type {operandType} was provided.");
+                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Type, operandType));
                     }
                     if (operands[0][0] == ':')
                     {
-                        throw new OperandException("The literal operand to the NUM mnemonic cannot be a label reference.");
+                        throw new OperandException(Strings.Assembler_Error_NUM_Operand_Label_Reference);
                     }
                     parsedBytes = ParseLiteral(operands[0], false);
                     return (parsedBytes, new List<(string, ulong)>());
@@ -435,8 +435,7 @@ namespace AssEmbly
             }
             if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out Opcode opcode))
             {
-                throw new OpcodeException($"Unrecognised mnemonic and operand combination:\n    {mnemonic} {string.Join(", ", operandTypes)}" +
-                    $"\nConsult the language reference for a list of all valid mnemonic/operand combinations.");
+                throw new OpcodeException(string.Format(Strings.Assembler_Error_Invalid_Mnemonic_Combo, mnemonic, string.Join(Strings.Generic_CommaSeparate, operandTypes)));
             }
 
             uint opcodeSize = 1;
@@ -525,11 +524,11 @@ namespace AssEmbly
                     if (elements.Count == 0)
                     {
                         throw new SyntaxError(
-                            $"Mnemonics should be separated from operands with spaces, not commas:\n    {line}\n    {new string(' ', i)}^");
+                            string.Format(Strings.Assembler_Error_Mnemonic_Operand_Space, line, new string(' ', i)));
                     }
                     if (sb.Length == 0)
                     {
-                        throw new SyntaxError($"Operands cannot be empty:\n    {line}\n    {new string(' ', i)}^");
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Empty_Operand, line, new string(' ', i)));
                     }
                     // The replacement portion of macros can contain commas without it being considered a different operand
                     if (!isMacro || elements.Count < 2)
@@ -545,19 +544,19 @@ namespace AssEmbly
                 if (trailingWhitespace != -1 && !isMacro)
                 {
                     throw new SyntaxError(
-                        $"Operands cannot contain whitespace. Did you forget a comma?\n    {line}\n    {new string(' ', trailingWhitespace)}^");
+                        string.Format(Strings.Assembler_Error_Operand_Whitespace, line, new string(' ', trailingWhitespace)));
                 }
                 if (stringEnd != -1 && !isMacro)
                 {
                     throw new SyntaxError(
-                        $"Non-whitespace characters found after quoted literal. Did you forget a comma?\n    {line}\n    {new string(' ', i)}^");
+                        string.Format(Strings.Assembler_Error_Quoted_Literal_Followed, line, new string(' ', i)));
                 }
                 if (c is '"' or '\'' && !isMacro)
                 {
                     if (sb.Length != 0)
                     {
                         throw new SyntaxError(
-                            $"Quoted literal defined after non-whitespace characters. Did you forget a comma?:\n    {line}\n    {new string(' ', i)}^");
+                            string.Format(Strings.Assembler_Error_Quoted_Literal_Following, line, new string(' ', i)));
                     }
                     _ = sb.Append(PreParseStringLiteral(line, ref i));
                     stringEnd = i;
@@ -621,16 +620,14 @@ namespace AssEmbly
                 if (++i >= line.Length)
                 {
                     throw new SyntaxError(
-                        "End of line found while processing quoted literal. Did you forget a closing quote?" +
-                        $"\n    {line}\n    {new string(' ', i - 1)}^");
+                        string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
                 }
                 // If the character literal contains a high surrogate, we need to allow 2 UTF-16 chars to get the full pair.
                 // This will result in a single final represented character to convert to UTF-8.
                 if (singleCharacterLiteral && sb.Length > (containsHighSurrogate ? 2 : 1))
                 {
                     throw new SyntaxError(
-                        "Character literals may only contain a single character. Did you mean to use double quotes for a string literal?" +
-                        $"\n    {line}\n    {new string(' ', i - 1)}^");
+                        string.Format(Strings.Assembler_Error_Character_Literal_Too_Long, line, new string(' ', i - 1)));
                 }
                 char c = line[i];
                 if (char.IsHighSurrogate(c))
@@ -675,7 +672,7 @@ namespace AssEmbly
                         case 'u':
                             if (i + 4 >= line.Length)
                             {
-                                throw new SyntaxError($"End of line reached when processing unicode escape\n    {line}\n    {new string(' ', i)}^");
+                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
                             }
                             string rawCodePoint = line[(i + 1)..(i + 5)];
                             try
@@ -685,14 +682,14 @@ namespace AssEmbly
                             catch (FormatException)
                             {
                                 throw new SyntaxError(
-                                    $"Unicode escape must be immediately followed a 4 digit unicode codepoint\n    {line}\n    {new string(' ', i)}^");
+                                    string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
                             }
                             i += 4;
                             break;
                         case 'U':
                             if (i + 8 >= line.Length)
                             {
-                                throw new SyntaxError($"End of line reached when processing unicode escape\n    {line}\n    {new string(' ', i)}^");
+                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
                             }
                             rawCodePoint = line[(i + 1)..(i + 9)];
                             try
@@ -702,15 +699,13 @@ namespace AssEmbly
                             catch
                             {
                                 throw new SyntaxError(
-                                    $"Unicode escape must be immediately followed a valid 8 digit unicode codepoint " +
-                                    $"(0x00000000 - 0x0010ffff excluding 0x0000d800 - 0x0000dfff)\n    {line}\n    {new string(' ', i)}^");
+                                    string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
                             }
                             i += 8;
                             continue;
                         default:
                             throw new SyntaxError(
-                                $"Unrecognised escape character '{escape}'. Did you forget to escape the backslash?" +
-                                $"\n    {line}\n    {new string(' ', i)}^");
+                                string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
                     }
                     _ = sb.Append(escape);
                     continue;
@@ -726,8 +721,7 @@ namespace AssEmbly
             {
                 if (sb.Length == 0)
                 {
-                    throw new SyntaxError("Character literals must contain at least 1 character." +
-                        $"\n    {line}\n    {new string(' ', i)}^");
+                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Character_Literal_Empty, line, new string(' ', i)));
                 }
                 byte[] characterBytes = new byte[4];
                 _ = Encoding.UTF8.GetBytes(sb.ToString(), characterBytes);
@@ -754,8 +748,7 @@ namespace AssEmbly
                     Match invalidMatch = Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success
-                        ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
-                                                $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
+                        ? throw new SyntaxError(string.Format(Strings.Assembler_Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + offset)))
                         : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
                 }
                 case (>= '0' and <= '9') or '-' or '.':
@@ -766,17 +759,15 @@ namespace AssEmbly
                         : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
                     if (invalidMatch.Success)
                     {
-                        throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
-                                              $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?");
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Numeric_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
                     }
                     if (operand[0] == '.' && operand.Length == 1)
                     {
-                        throw new SyntaxError("Floating point numeric literals must contain a digit on at least one side of the decimal point.");
+                        throw new SyntaxError(Strings.Assembler_Error_Floating_Point_Decimal_Only);
                     }
                     if (operand.IndexOf('.') != operand.LastIndexOf('.'))
                     {
-                        throw new SyntaxError("Numeric literal contains more than one decimal point:" +
-                                              $"\n    {operand}\n    {new string(' ', operand.LastIndexOf('.'))}^");
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Numeric_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
                     }
                     return OperandType.Literal;
                 }
@@ -788,7 +779,7 @@ namespace AssEmbly
                     return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
                         ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
                         : throw new SyntaxError(
-                            $"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
+                            string.Format(Strings.Assembler_Error_Operand_Invalid, operand));
                 }
             }
         }
@@ -815,11 +806,11 @@ namespace AssEmbly
             {
                 if (!allowString)
                 {
-                    throw new SyntaxError("A string literal is not a valid operand in this context.");
+                    throw new SyntaxError(Strings.Assembler_Error_String_Not_Allowed);
                 }
                 if (operand[^1] != '"')
                 {
-                    throw new SyntaxError("String literal contains characters after closing quote mark.");
+                    throw new SyntaxError(Strings.Assembler_Error_String_Followed_Internal);
                 }
                 string str = operand[1..^1];
                 parsedNumber = (uint)str.Length;

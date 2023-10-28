@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
+using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
@@ -288,7 +289,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set control low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Control, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Addition
@@ -316,7 +317,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set addition low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Addition, opcodeLow));
                                 }
                                 result = initial + mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -384,7 +385,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set subtraction low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Subtraction, opcodeLow));
                                 }
                                 result = initial - mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -448,7 +449,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set multiplication low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Multiplication, opcodeLow));
                                 }
                                 result = initial * mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -547,7 +548,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set division low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Division, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -617,7 +618,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set shifting low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Shifting, opcodeLow));
                                 }
                                 // C# only counts the lower 6 bits of the amount to shift by, so values greater than or equal to 64 will not return 0 as
                                 // wanted for AssEmbly.
@@ -729,7 +730,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set bitwise low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Bitwise, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -791,7 +792,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set comparison low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Comparison, opcodeLow));
                                 }
 
                                 if (opcodeLow >= 0x4)
@@ -909,7 +910,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set small move low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_SmallMove, opcodeLow));
                                 }
                                 break;
                             case 0x90:  // Large Move
@@ -980,7 +981,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set large move low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_LargeMove, opcodeLow));
                                 }
                                 break;
                             case 0xA0:  // Stack
@@ -1012,7 +1013,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set stack low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Stack, opcodeLow));
                                 }
                                 break;
                             case 0xB0:  // Subroutines
@@ -1166,7 +1167,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rsb] = ReadMemoryQWord(Registers[(int)Register.rso] - 16);
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set subroutine low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Subroutine, opcodeLow));
                                 }
                                 break;
                             case 0xC0:  // Console Write
@@ -1205,19 +1206,19 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x8:  // WCX reg
-                                        Console.Write($"{0xFF & ReadMemoryRegister(operandStart):X}");
+                                        Console.Write(Strings.Generic_Hex_Value, 0xFF & ReadMemoryRegister(operandStart));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WCX lit
-                                        Console.Write($"{Memory[operandStart]:X}");
+                                        Console.Write(Strings.Generic_Hex_Value, Memory[operandStart]);
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WCX adr
-                                        Console.Write($"{ReadMemoryPointedByte(operandStart):X}");
+                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryPointedByte(operandStart));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WCX ptr
-                                        Console.Write($"{ReadMemoryRegisterPointedByte(operandStart):X}");
+                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
@@ -1246,13 +1247,13 @@ namespace AssEmbly
                                             break;
                                         }
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set console write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0xD0:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -1290,21 +1291,21 @@ namespace AssEmbly
                                         break;
                                     case 0x8:  // WFX reg
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(
-                                            $"{0xFF & ReadMemoryRegister(operandStart):X}"));
+                                            string.Format(Strings.Generic_Hex_Value, 0xFF & ReadMemoryRegister(operandStart))));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WFX lit
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes($"{Memory[operandStart]:X}"));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format(Strings.Generic_Hex_Value, Memory[operandStart])));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WFX adr
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(
-                                            $"{ReadMemoryPointedByte(operandStart):X}"));
+                                            string.Format(Strings.Generic_Hex_Value, ReadMemoryPointedByte(operandStart))));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WFX ptr
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(
-                                            $"{ReadMemoryRegisterPointedByte(operandStart):X}"));
+                                            string.Format(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart))));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0xC:  // WFC reg
@@ -1324,7 +1325,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set file write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0xE0:  // File Operations
@@ -1333,7 +1334,7 @@ namespace AssEmbly
                                     case 0x0:  // OFL adr
                                         if (openFile is not null)
                                         {
-                                            throw new FileOperationException("Cannot execute open file instruction if a file is already open");
+                                            throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
                                         }
                                         initial = ReadMemoryQWord(operandStart);
                                         mathend = 0;
@@ -1359,7 +1360,7 @@ namespace AssEmbly
                                     case 0x1:  // OFL ptr
                                         if (openFile is not null)
                                         {
-                                            throw new FileOperationException("Cannot execute open file instruction if a file is already open");
+                                            throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
                                         }
                                         initial = ReadMemoryRegister(operandStart);
                                         mathend = 0;
@@ -1385,7 +1386,7 @@ namespace AssEmbly
                                     case 0x2:  // CFL
                                         if (openFile is null)
                                         {
-                                            throw new FileOperationException("Cannot execute close file instruction if a file is not open");
+                                            throw new FileOperationException(Strings.Processor_Error_File_Close_None_Open);
                                         }
                                         fileWrite!.Close();
                                         fileWrite = null;
@@ -1462,7 +1463,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set file operation low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_FileOperation, opcodeLow));
                                 }
                                 break;
                             case 0xF0:  // Reading
@@ -1507,11 +1508,11 @@ namespace AssEmbly
                                     case 0x1:  // RFC reg
                                         if (fileRead is null)
                                         {
-                                            throw new FileOperationException("Cannot execute file read instruction if a file is not open");
+                                            throw new FileOperationException(Strings.Processor_Error_File_Read_No_Open);
                                         }
                                         if (fileRead.BaseStream.Position >= openFileSize)
                                         {
-                                            throw new FileOperationException("Cannot execute file read instruction. The end of the file has already been reached.");
+                                            throw new FileOperationException(Strings.Processor_Error_File_Read_End_Reached);
                                         }
                                         WriteMemoryRegister(operandStart, fileRead.ReadByte());
                                         if (fileRead.BaseStream.Position >= openFileSize)
@@ -1521,11 +1522,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised base instruction set reading low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Reading, opcodeLow));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the base instruction set");
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Base, opcodeHigh));
                         }
                         break;
                     case 0x01:  // Signed extension set
@@ -1707,7 +1708,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set jump low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Jump, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Division
@@ -1775,7 +1776,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set division low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Division, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -1825,7 +1826,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set shifting low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Shifting, opcodeLow));
                                 }
                                 initialSign = initial & SignBit;
                                 signedShiftAllBits = initialSign == 0 ? 0 : (~0UL);
@@ -1910,7 +1911,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set small move low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_SmallMove, opcodeLow));
                                 }
                                 break;
                             case 0x40:  // Large Sign-Preserving Move
@@ -1933,7 +1934,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set large move low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_LargeMove, opcodeLow));
                                 }
                                 break;
                             case 0x50:  // Console Write
@@ -1972,13 +1973,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set console write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0x60:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -2015,7 +2016,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set file write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0x70:  // Extend
@@ -2035,7 +2036,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set extend low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Extend, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2069,7 +2070,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Negate, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2095,7 +2096,7 @@ namespace AssEmbly
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the signed extension set");
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Signed, opcodeHigh));
                         }
                         break;
                     case 0x2:  // Floating point extension set
@@ -2122,7 +2123,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set addition low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Addition, opcodeLow));
                                 }
                                 floatingResult = floatingInitial + floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2178,7 +2179,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set subtraction low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Subtraction, opcodeLow));
                                 }
                                 floatingResult = floatingInitial - floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2234,7 +2235,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set multiplication low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Multiplication, opcodeLow));
                                 }
                                 floatingResult = floatingInitial * floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2334,7 +2335,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set division low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Division, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2405,7 +2406,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set trigonometry low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Trigonometry, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2452,7 +2453,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set exponentiation low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Exponentiation, opcodeLow));
                                 }
                                 floatingResult = Math.Pow(floatingInitial, floatingMathend);
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2508,7 +2509,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set logarithm low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Logarithm, opcodeLow));
                                 }
                                 floatingResult = Math.Log(floatingInitial, floatingMathend);
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2563,13 +2564,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set console write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0x80:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException("Cannot perform file operations if no file is open. Run OFL (0xE0) first");
+                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -2590,7 +2591,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set file write low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0x90:  // Float Size Conversions
@@ -2614,7 +2615,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set size conversion low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_SizeConversion, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2648,7 +2649,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised signed extension set negate low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Negate, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2687,7 +2688,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set int to float low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_IntToFloat, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2734,7 +2735,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set float to int low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_FloatToInt, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2780,7 +2781,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised floating point extension set comparison low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Comparison, opcodeLow));
                                 }
                                 floatingResult = floatingInitial - floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2815,7 +2816,7 @@ namespace AssEmbly
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the floating point extension set");
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FloatingPoint, opcodeHigh));
                         }
                         break;
                     case 0x3:  // Extended base set
@@ -2830,16 +2831,16 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException($"{opcodeLow:X} is not a recognised extended base set byte swap low opcode");
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_ByteSwap, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
                                 break;
                             default:
-                                throw new InvalidOpcodeException($"{opcodeHigh:X} is not a recognised high opcode for the extended base set");
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Extended, opcodeHigh));
                         }
                         break;
                     default:
-                        throw new InvalidOpcodeException($"{extensionSet:X} is not a recognised extension set");
+                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }
             } while (runUntilHalt && !halt);
             return halt;
@@ -2981,7 +2982,7 @@ namespace AssEmbly
             Register registerType = ReadMemoryRegisterType(offset);
             if (registerType == Register.rpo)
             {
-                throw new ReadOnlyRegisterException($"Cannot write to read-only register {registerType}");
+                throw new ReadOnlyRegisterException(string.Format(Strings.Processor_Error_Read_Only_Register, registerType));
             }
             Registers[(int)registerType] = value;
         }

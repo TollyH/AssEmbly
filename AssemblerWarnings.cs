@@ -555,13 +555,7 @@ namespace AssEmbly
             if (newBytes.Length > 0 && !instructionIsData
                 && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
-                foreach (int operandIndex in writtenOperands)
-                {
-                    if (operands[operandIndex].ToLower() == "rsf")
-                    {
-                        return true;
-                    }
-                }
+                return writtenOperands.Any(operandIndex => operands[operandIndex].ToLower() == "rsf");
             }
             return false;
         }
@@ -572,13 +566,7 @@ namespace AssEmbly
             if (newBytes.Length > 0 && !instructionIsData
                 && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
-                foreach (int operandIndex in writtenOperands)
-                {
-                    if (operands[operandIndex].ToLower() == "rsb")
-                    {
-                        return true;
-                    }
-                }
+                return writtenOperands.Any(operandIndex => operands[operandIndex].ToLower() == "rsb");
             }
             return false;
         }

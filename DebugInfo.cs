@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
@@ -90,11 +91,11 @@ Total Program Size: .*
             Match fileMatch = DebugFileRegex.Match(fileText);
             if (!fileMatch.Success)
             {
-                throw new DebugFileException("The provided debug information file was in an invalid format");
+                throw new DebugFileException(Strings.DebugInfo_Error_Invalid_Format);
             }
             if (fileMatch.Groups["Version"].Value != FormatVersion)
             {
-                throw new DebugFileException("The provided debug information file was created for a different version of AssEmbly");
+                throw new DebugFileException(Strings.DebugInfo_Error_Wrong_Version);
             }
 
             List<(ulong Address, string Line)> assembledInstructions = new();
