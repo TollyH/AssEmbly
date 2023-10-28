@@ -44,8 +44,6 @@ Total Program Size: .*
         /// <summary>
         /// Generates the contents of a debug information file based on the provided parameters.
         /// </summary>
-        /// <param name="sourcePath">The path to the AssEmbly file that was assembled</param>
-        /// <param name="destinationPath">The path to the generated executable file</param>
         /// <param name="totalProgramSize">The total size in bytes of the generated file</param>
         /// <param name="assembledInstructions">An array of addresses and the corresponding line of AssEmbly that generated them</param>
         /// <param name="addressLabels">An array of addresses combined with an array of label names pointing to that address</param>
@@ -54,8 +52,8 @@ Total Program Size: .*
         /// </param>
         /// <returns>A completely formatted debug info file string ready to be saved.</returns>
         public static string GenerateDebugInfoFile(ulong totalProgramSize,
-            IList<(ulong Address, string Line)> assembledInstructions, IList<(ulong Address, List<string> LabelNames)> addressLabels,
-            IList<(string LocalPath, string FullPath, ulong Address)> resolvedImports)
+            IEnumerable<(ulong Address, string Line)> assembledInstructions, IEnumerable<(ulong Address, List<string> LabelNames)> addressLabels,
+            IEnumerable<(string LocalPath, string FullPath, ulong Address)> resolvedImports)
         {
             string fileText = string.Format(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
             

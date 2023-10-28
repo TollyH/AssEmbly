@@ -45,10 +45,10 @@
         SignAndOverflow = Sign | Overflow,
     }
 
-    public struct Opcode : IEquatable<Opcode>
+    public readonly struct Opcode : IEquatable<Opcode>
     {
-        public byte ExtensionSet;
-        public byte InstructionCode;
+        public readonly byte ExtensionSet;
+        public readonly byte InstructionCode;
 
         public Opcode(byte extensionSet, byte instructionCode)
         {
@@ -72,7 +72,7 @@
             return new Opcode(0x00, bytes[(int)offset]);
         }
 
-        public override readonly bool Equals(object? obj)
+        public readonly override bool Equals(object? obj)
         {
             return obj is Opcode opcode && Equals(opcode);
         }
@@ -83,7 +83,7 @@
                    InstructionCode == other.InstructionCode;
         }
 
-        public override readonly int GetHashCode()
+        public readonly override int GetHashCode()
         {
             return HashCode.Combine(ExtensionSet, InstructionCode);
         }

@@ -56,23 +56,23 @@ namespace AssEmbly
         private readonly Dictionary<int, FinalWarningAnalyzer> warningFinalAnalyzers;
         private readonly Dictionary<int, FinalWarningAnalyzer> suggestionFinalAnalyzers;
 
-        public HashSet<int> DisabledNonFatalErrors = new();
-        public HashSet<int> DisabledWarnings = new();
-        public HashSet<int> DisabledSuggestions = new();
+        public readonly HashSet<int> DisabledNonFatalErrors = new();
+        public readonly HashSet<int> DisabledWarnings = new();
+        public readonly HashSet<int> DisabledSuggestions = new();
 
         // Variables updated by parameters of the NextInstruction method
         private byte[] newBytes = Array.Empty<byte>();
         private string mnemonic = "";
         private string[] operands = Array.Empty<string>();
-        private int line = 0;
-        private int firstLine = 0;
+        private int line;
+        private int firstLine;
         private string file = "";
-        private bool labelled = false;
-        private bool isEntry = false;
-        private bool usingV1Format = false;
+        private bool labelled;
+        private bool isEntry;
+        private readonly bool usingV1Format;
         private Stack<Assembler.ImportStackFrame> importStack = new();
 
-        private Dictionary<(string File, int Line), string> lineText = new();
+        private readonly Dictionary<(string File, int Line), string> lineText = new();
 
         private byte[] finalProgram = Array.Empty<byte>();
 
@@ -200,13 +200,13 @@ namespace AssEmbly
         {
             this.usingV1Format = usingV1Format;
 
-            nonFatalErrorRollingAnalyzers = new()
+            nonFatalErrorRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
                 { 0001, Analyzer_Rolling_NonFatalError_0001 },
                 { 0002, Analyzer_Rolling_NonFatalError_0002 },
                 { 0003, Analyzer_Rolling_NonFatalError_0003 },
             };
-            warningRollingAnalyzers = new()
+            warningRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
                 { 0001, Analyzer_Rolling_Warning_0001 },
                 { 0007, Analyzer_Rolling_Warning_0007 },
@@ -227,7 +227,7 @@ namespace AssEmbly
                 { 0024, Analyzer_Rolling_Warning_0024 },
                 { 0025, Analyzer_Rolling_Warning_0025 },
             };
-            suggestionRollingAnalyzers = new()
+            suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
                 { 0001, Analyzer_Rolling_Suggestion_0001 },
                 { 0002, Analyzer_Rolling_Suggestion_0002 },
@@ -243,8 +243,8 @@ namespace AssEmbly
                 { 0014, Analyzer_Rolling_Suggestion_0014 },
             };
 
-            nonFatalErrorFinalAnalyzers = new();
-            warningFinalAnalyzers = new()
+            nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
+            warningFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>
             {
                 { 0002, Analyzer_Final_Warning_0002 },
                 { 0003, Analyzer_Final_Warning_0003 },
@@ -254,7 +254,7 @@ namespace AssEmbly
                 { 0009, Analyzer_Final_Warning_0009 },
                 { 0013, Analyzer_Final_Warning_0013 },
             };
-            suggestionFinalAnalyzers = new()
+            suggestionFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>
             {
                 { 0003, Analyzer_Final_Suggestion_0003 },
                 { 0004, Analyzer_Final_Suggestion_0004 },
@@ -263,32 +263,32 @@ namespace AssEmbly
 
         // Analyzer state variables
 
-        private Opcode instructionOpcode = new();
-        private ulong operandStart = 0;
-        private Dictionary<(string File, int Line), ulong> lineAddresses = new();
-        private Dictionary<(string File, int Line), string> lineMnemonics = new();
-        private Dictionary<(string File, int Line), string[]> lineOperands = new();
-        private bool instructionIsData = false;
-        private bool instructionIsImport = false;
-        private bool instructionIsString = false;
-        private List<(int Line, string File)> dataInsertionLines = new();
-        private HashSet<ulong> dataAddresses = new();
-        private List<(int Line, string File)> endingStringInsertionLines = new();
-        private List<(int Line, string File)> importLines = new();
-        private Dictionary<string, int> lastExecutableLine = new();
-        private Dictionary<(int Line, string File), ulong> jumpCallToLabels = new();
-        private Dictionary<(int Line, string File), ulong> writesToLabels = new();
-        private Dictionary<(int Line, string File), ulong> readsFromLabels = new();
-        private Dictionary<(int Line, string File), ulong> jumpsCalls = new();
+        private Opcode instructionOpcode;
+        private ulong operandStart;
+        private readonly Dictionary<(string File, int Line), ulong> lineAddresses = new();
+        private readonly Dictionary<(string File, int Line), string> lineMnemonics = new();
+        private readonly Dictionary<(string File, int Line), string[]> lineOperands = new();
+        private bool instructionIsData;
+        private bool instructionIsImport;
+        private bool instructionIsString;
+        private readonly List<(int Line, string File)> dataInsertionLines = new();
+        private readonly HashSet<ulong> dataAddresses = new();
+        private readonly List<(int Line, string File)> endingStringInsertionLines = new();
+        private readonly List<(int Line, string File)> importLines = new();
+        private readonly Dictionary<string, int> lastExecutableLine = new();
+        private readonly Dictionary<(int Line, string File), ulong> jumpCallToLabels = new();
+        private readonly Dictionary<(int Line, string File), ulong> writesToLabels = new();
+        private readonly Dictionary<(int Line, string File), ulong> readsFromLabels = new();
+        private readonly Dictionary<(int Line, string File), ulong> jumpsCalls = new();
 
-        private ulong currentAddress = 0;
-        private bool lastInstructionWasTerminator = false;
-        private bool lastInstructionWasData = false;
-        private bool lastInstructionWasString = false;
+        private ulong currentAddress;
+        private bool lastInstructionWasTerminator;
+        private bool lastInstructionWasData;
+        private bool lastInstructionWasString;
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
-        private bool insertedAnyExecutable = false;
+        private bool insertedAnyExecutable;
 
         private void PreAnalyzeStateUpdate()
         {
@@ -537,7 +537,7 @@ namespace AssEmbly
             {
                 return new List<Warning>
                 {
-                    new Warning(WarningSeverity.Warning, 0009, file, line, mnemonic, operands, lineText[(file, line)])
+                    new(WarningSeverity.Warning, 0009, file, line, mnemonic, operands, lineText[(file, line)])
                 };
             }
             return new List<Warning>();

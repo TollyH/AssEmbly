@@ -10,7 +10,7 @@
     /// </remarks>
     public class AssEmblyException : Exception
     {
-        private string? _consoleMessage = null;
+        private string? _consoleMessage;
         [System.Diagnostics.CodeAnalysis.AllowNull]
         public string ConsoleMessage {
             get => _consoleMessage ?? Message;

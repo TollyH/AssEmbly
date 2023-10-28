@@ -11,9 +11,9 @@ namespace AssEmbly
     {
         public class ImportStackFrame
         {
-            public string ImportPath { get; set; }
+            public string ImportPath { get; }
             public int CurrentLine { get; set; }
-            public int TotalLines { get; set; }
+            public int TotalLines { get; }
 
             public ImportStackFrame(string importPath, int currentLine, int totalLines)
             {
@@ -48,7 +48,7 @@ namespace AssEmbly
         /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
         /// </exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static byte[] AssembleLines(string[] lines, bool usingV1Format,
+        public static byte[] AssembleLines(IEnumerable<string> lines, bool usingV1Format,
             IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions,
             out string debugInfo, out List<Warning> warnings, out ulong entryPoint, out AAPFeatures usedExtensions)
         {
@@ -191,7 +191,7 @@ namespace AssEmbly
 
                             warnings.AddRange(warningGenerator.NextInstruction(
                                 Array.Empty<byte>(), mnemonic, operands,
-                                currentImport is null ? baseFileLine : currentImport.CurrentLine,
+                                currentImport?.CurrentLine ?? baseFileLine,
                                 currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
                             lineIsLabelled = false;
                             lineIsEntry = false;
@@ -244,14 +244,7 @@ namespace AssEmbly
                                     break;
                                 // Restore
                                 case "R":
-                                    if (initialSet.Contains(code))
-                                    {
-                                        _ = disabledSet.Add(code);
-                                    }
-                                    else
-                                    {
-                                        _ = disabledSet.Remove(code);
-                                    }
+                                    _ = initialSet.Contains(code) ? disabledSet.Add(code) : disabledSet.Remove(code);
                                     break;
                                 default:
                                     throw new OperandException("The third operand to the ANALYZER directive must be one of '0', '1', or 'r'.");
@@ -269,7 +262,7 @@ namespace AssEmbly
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count, currentImport?.ImportPath,
-                            currentImport is null ? baseFileLine : currentImport.CurrentLine));
+                            currentImport?.CurrentLine ?? baseFileLine));
                     }
 
                     assembledLines.Add(((uint)program.Count, rawLine));
@@ -277,7 +270,7 @@ namespace AssEmbly
 
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
-                        currentImport is null ? baseFileLine : currentImport.CurrentLine,
+                        currentImport?.CurrentLine ?? baseFileLine,
                         currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
                     lineIsLabelled = false;
 
@@ -479,7 +472,6 @@ namespace AssEmbly
         /// <summary>
         /// Assemble a single line of AssEmbly to bytecode.
         /// </summary>
-        /// <param name="features">The variable to store any current and any new extension set feature flags in.</param>
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
@@ -762,49 +754,50 @@ namespace AssEmbly
         /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
         public static OperandType DetermineOperandType(string operand)
         {
-            if (operand[0] == ':')
+            switch (operand[0])
             {
-                int offset = operand[1] == '&' ? 2 : 1;
-                Match invalidMatch = Regex.Match(operand[offset..], @"^[0-9]|[^A-Za-z0-9_]");
-                // Operand is a label reference - will assemble down to address
-                return invalidMatch.Success
-                    ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
-                        $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
-                    : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
-            }
-            else if (operand[0] is (>= '0' and <= '9') or '-' or '.')
-            {
-                operand = operand.ToLowerInvariant();
-                Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
-                    ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
-                    : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
-                if (invalidMatch.Success)
+                case ':':
                 {
-                    throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
-                        $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?");
+                    int offset = operand[1] == '&' ? 2 : 1;
+                    Match invalidMatch = Regex.Match(operand[offset..], @"^[0-9]|[^A-Za-z0-9_]");
+                    // Operand is a label reference - will assemble down to address
+                    return invalidMatch.Success
+                        ? throw new SyntaxError($"Invalid character in label:\n    {operand}\n    {new string(' ', invalidMatch.Index + offset)}^" +
+                                                $"\nLabel names may not contain symbols other than underscores, and cannot start with a numeral.")
+                        : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
                 }
-                if (operand[0] == '.' && operand.Length == 1)
+                case (>= '0' and <= '9') or '-' or '.':
                 {
-                    throw new SyntaxError($"Floating point numeric literals must contain a digit on at least one side of the decimal point.");
+                    operand = operand.ToLowerInvariant();
+                    Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
+                        ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
+                        : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
+                    if (invalidMatch.Success)
+                    {
+                        throw new SyntaxError($"Invalid character in numeric literal:\n    {operand}\n    {new string(' ', invalidMatch.Index)}^" +
+                                              $"\nDid you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?");
+                    }
+                    if (operand[0] == '.' && operand.Length == 1)
+                    {
+                        throw new SyntaxError($"Floating point numeric literals must contain a digit on at least one side of the decimal point.");
+                    }
+                    if (operand.IndexOf('.') != operand.LastIndexOf('.'))
+                    {
+                        throw new SyntaxError("Numeric literal contains more than one decimal point:" +
+                                              $"\n    {operand}\n    {new string(' ', operand.LastIndexOf('.'))}^");
+                    }
+                    return OperandType.Literal;
                 }
-                if (operand.IndexOf('.') != operand.LastIndexOf('.'))
+                case '"':
+                    return OperandType.Literal;
+                default:
                 {
-                    throw new SyntaxError("Numeric literal contains more than one decimal point:" +
-                        $"\n    {operand}\n    {new string(' ', operand.LastIndexOf('.'))}^");
+                    int offset = operand[0] == '*' ? 1 : 0;
+                    return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
+                        ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
+                        : throw new SyntaxError(
+                            $"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
                 }
-                return OperandType.Literal;
-            }
-            else if (operand[0] == '"')
-            {
-                return OperandType.Literal;
-            }
-            else
-            {
-                int offset = operand[0] == '*' ? 1 : 0;
-                return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
-                    ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
-                    : throw new SyntaxError(
-                        $"Type of operand \"{operand}\" could not be determined. Did you forget a colon before a label name or misspell a register name?");
             }
         }
 

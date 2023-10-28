@@ -5,12 +5,12 @@
         public static readonly ulong DefaultMemorySize = 2046;
 
         // Shared methods that are used by multiple commands
-        public static AAPFile? LoadAAPFile(string appPath, bool ignoreNewerVersion)
+        public static AAPFile LoadAAPFile(string appPath, bool ignoreNewerVersion)
         {
             AAPFile file;
             try
             {
-                file = new(File.ReadAllBytes(appPath));
+                file = new AAPFile(File.ReadAllBytes(appPath));
             }
             catch
             {
@@ -40,7 +40,7 @@
                 if (file.LanguageVersion.Major > version?.Major)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Because the major release number is higher ({file.LanguageVersion.Major} > {version?.Major}), " +
+                    Console.WriteLine($"Because the major release number is higher ({file.LanguageVersion.Major} > {version.Major}), " +
                         "this program will not be executed. Use the --ignore-newer-version parameter to override this.");
                     Console.ResetColor();
                     Environment.Exit(1);
@@ -50,7 +50,7 @@
             return file;
         }
 
-        public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize,
+        public static Processor LoadExecutableToProcessor(string appPath, ulong memSize,
             bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion)
         {
             byte[] program;
@@ -58,16 +58,12 @@
             if (useV1Format)
             {
                 program = File.ReadAllBytes(appPath);
-                processor = new(memSize, entryPoint: 0, useV1CallStack: true);
+                processor = new Processor(memSize, entryPoint: 0, useV1CallStack: true);
             }
             else
             {
-                AAPFile? file = LoadAAPFile(appPath, ignoreNewerVersion);
-                if (file is null)
-                {
-                    return null;
-                }
-                processor = new(memSize, entryPoint: file.EntryPoint,
+                AAPFile file = LoadAAPFile(appPath, ignoreNewerVersion);
+                processor = new Processor(memSize, entryPoint: file.EntryPoint,
                     useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack));
                 program = file.Program;
             }

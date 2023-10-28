@@ -25,7 +25,7 @@ namespace AssEmbly
             // Insert label definitions
             references.Sort((a, b) => a.Address.CompareTo(b.Address));
             List<int> inserted = new();
-            foreach ((ulong address, int sourceLineIndex) in references.DistinctBy(a => a.Address))
+            foreach ((ulong address, int _) in references.DistinctBy(a => a.Address))
             {
                 if (offsetToLine.TryGetValue(address, out int destLineIndex))
                 {
@@ -105,12 +105,8 @@ namespace AssEmbly
             ulong totalBytes = 0;
             Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
             totalBytes++;
-            IEnumerable<KeyValuePair<(string, OperandType[]), Opcode>> matching = Data.Mnemonics.Where(x => x.Value == opcode);
-            if (!matching.Any())
-            {
-                fallbackToDat = true;
-            }
-            else
+            KeyValuePair<(string, OperandType[]), Opcode>[] matching = Data.Mnemonics.Where(x => x.Value == opcode).ToArray();
+            if (matching.Length != 0)
             {
                 (string mnemonic, OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
@@ -180,7 +176,7 @@ namespace AssEmbly
                 }
             }
 
-            return ($"DAT {instruction[0]}", 1, new());
+            return ($"DAT {instruction[0]}", 1, new List<ulong>());
         }
     }
 }

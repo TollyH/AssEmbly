@@ -19,7 +19,7 @@ namespace AssEmbly
         private Stream? openFile;
         private BinaryReader? fileRead;
         private BinaryWriter? fileWrite;
-        private long openFileSize = 0;
+        private long openFileSize;
 
         private readonly Random rng = new();
 
@@ -1204,19 +1204,19 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x8:  // WCX reg
-                                        Console.Write(string.Format("{0:X}", 0xFF & ReadMemoryRegister(operandStart)));
+                                        Console.Write($"{0xFF & ReadMemoryRegister(operandStart):X}");
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WCX lit
-                                        Console.Write(string.Format("{0:X}", Memory[operandStart]));
+                                        Console.Write($"{Memory[operandStart]:X}");
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WCX adr
-                                        Console.Write(string.Format("{0:X}", ReadMemoryPointedByte(operandStart)));
+                                        Console.Write($"{ReadMemoryPointedByte(operandStart):X}");
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WCX ptr
-                                        Console.Write(string.Format("{0:X}", ReadMemoryRegisterPointedByte(operandStart)));
+                                        Console.Write($"{ReadMemoryRegisterPointedByte(operandStart):X}");
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
@@ -1288,19 +1288,22 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x8:  // WFX reg
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", 0xFF & ReadMemoryRegister(operandStart))));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(
+                                            $"{0xFF & ReadMemoryRegister(operandStart):X}"));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WFX lit
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", Memory[operandStart])));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes($"{Memory[operandStart]:X}"));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WFX adr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", ReadMemoryPointedByte(operandStart))));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(
+                                            $"{ReadMemoryPointedByte(operandStart):X}"));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WFX ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(string.Format("{0:X}", ReadMemoryRegisterPointedByte(operandStart))));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(
+                                            $"{ReadMemoryRegisterPointedByte(operandStart):X}"));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0xC:  // WFC reg
@@ -2598,7 +2601,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // FLPT_EXS reg
-                                        result = BitConverter.DoubleToUInt64Bits((double)BitConverter.UInt32BitsToSingle((uint)initial));
+                                        result = BitConverter.DoubleToUInt64Bits(BitConverter.UInt32BitsToSingle((uint)initial));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x2:  // FLPT_SHS reg

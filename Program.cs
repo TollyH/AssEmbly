@@ -5,7 +5,7 @@ namespace AssEmbly
 {
     internal static partial class Program
     {
-        internal static Version? version = typeof(Program).Assembly.GetName().Version;
+        internal static readonly Version? version = typeof(Program).Assembly.GetName().Version;
 
         private static void Main(string[] args)
         {
@@ -212,12 +212,8 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
+            Processor processor = LoadExecutableToProcessor(appPath, memSize,
                 args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
-            if (processor is null)
-            {
-                return;
-            }
 
             ExecuteProcessor(processor);
         }
@@ -267,12 +263,8 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
+            Processor processor = LoadExecutableToProcessor(appPath, memSize,
                 args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
-            if (processor is null)
-            {
-                return;
-            }
 
             Debugger debugger = new(false, processor);
             if (args.Length >= 3 && !args[2].StartsWith('-'))
@@ -300,11 +292,7 @@ namespace AssEmbly
             }
             else
             {
-                AAPFile? file = LoadAAPFile(sourcePath, args.Contains("--ignore-newer-version"));
-                if (file is null)
-                {
-                    return;
-                }
+                AAPFile file = LoadAAPFile(sourcePath, args.Contains("--ignore-newer-version"));
                 program = file.Program;
             }
 

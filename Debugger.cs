@@ -1,20 +1,21 @@
 ﻿using System.Buffers.Binary;
 using System.Numerics;
+using System.Text;
 
 namespace AssEmbly
 {
     public class Debugger
     {
-        public Processor DebuggingProcessor { get; set; }
+        public Processor DebuggingProcessor { get; }
         public DebugInfo.DebugInfoFile? LoadedDebugInfoFile { get; set; }
 
-        public bool InReplMode { get; private set; }
+        public bool InReplMode { get; }
 
         public bool StepInstructions { get; set; } = true;
-        public bool RunToReturn { get; set; } = false;
-        public ulong? StepOverStackBase { get; set; } = null;
+        public bool RunToReturn { get; set; }
+        public ulong? StepOverStackBase { get; set; }
 
-        public List<(Register Register, ulong Value)> Breakpoints { get; set; } = new();
+        public List<(Register Register, ulong Value)> Breakpoints { get; } = new();
 
         public bool UseV1CallStack => DebuggingProcessor.UseV1CallStack;
         private ulong stackCallSize => UseV1CallStack ? 24UL : 16UL;
@@ -22,21 +23,21 @@ namespace AssEmbly
             ? new Register[3] { Register.rso, Register.rsb, Register.rpo }
             : new Register[2] { Register.rsb, Register.rpo };
 
-        private ulong[] replPreviousRegisters = new ulong[Enum.GetNames(typeof(Register)).Length];
-        Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
-        private ulong nextFreeRpoAddress = 0;
+        private readonly ulong[] replPreviousRegisters = new ulong[Enum.GetNames(typeof(Register)).Length];
+        private readonly Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
+        private ulong nextFreeRpoAddress;
 
         public Debugger(bool inReplMode, ulong entryPoint = 0, bool useV1CallStack = false)
         {
             InReplMode = inReplMode;
-            DebuggingProcessor = new(2046, entryPoint, useV1CallStack);
+            DebuggingProcessor = new Processor(2046, entryPoint, useV1CallStack);
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
         public Debugger(bool inReplMode, ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
         {
             InReplMode = inReplMode;
-            DebuggingProcessor = new(memorySize, entryPoint, useV1CallStack);
+            DebuggingProcessor = new Processor(memorySize, entryPoint, useV1CallStack);
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
@@ -74,7 +75,7 @@ namespace AssEmbly
                         ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..]).Line
                         : inst;
 
-                Console.Write($"\n\nAbout to execute instruction:\n    ");
+                Console.Write("\n\nAbout to execute instruction:\n    ");
                 Console.WriteLine(lineDisassembly);
                 Console.WriteLine();
                 if (LoadedDebugInfoFile is not null)
@@ -165,7 +166,7 @@ namespace AssEmbly
             if (InReplMode)
             {
                 // AssEmbly expects UTF-8 encoding for special characters, make sure REPL input complies
-                Console.InputEncoding = System.Text.Encoding.UTF8;
+                Console.InputEncoding = Encoding.UTF8;
                 DisplayReplHeader();
             }
             while (true)
@@ -230,7 +231,6 @@ namespace AssEmbly
                             }
                             else
                             {
-                                continue;
                             }
                         }
                         else
@@ -316,9 +316,9 @@ namespace AssEmbly
             }
         }
 
-        private void CommandReadMemory(string[] command)
+        private void CommandReadMemory(IReadOnlyList<string> command)
         {
-            if (command.Length == 3)
+            if (command.Count == 3)
             {
                 ulong bytesToRead = command[1] == "byte" ? 1 : command[1] == "word"
                     ? 2 : command[1] == "dword" ? 4 : command[1] == "qword" ? 8 : 0U;
@@ -336,7 +336,7 @@ namespace AssEmbly
                     Console.ResetColor();
                     return;
                 }
-                if (address + bytesToRead > (ulong)DebuggingProcessor.Memory.LongLength || address < 0)
+                if (address + bytesToRead > (ulong)DebuggingProcessor.Memory.LongLength)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"\"{command[2]}\" is outside the range of allowed memory addresses.");
@@ -358,9 +358,9 @@ namespace AssEmbly
             }
         }
 
-        private void CommandWriteMemReg(string[] command)
+        private void CommandWriteMemReg(IReadOnlyList<string> command)
         {
-            if (command.Length == 4)
+            if (command.Count == 4)
             {
                 if (command[1] == "mem")
                 {
@@ -371,7 +371,7 @@ namespace AssEmbly
                         Console.ResetColor();
                         return;
                     }
-                    if (address >= (ulong)DebuggingProcessor.Memory.LongLength || address < 0)
+                    if (address >= (ulong)DebuggingProcessor.Memory.LongLength)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine($"\"{command[2]}\" is outside the range of allowed memory addresses.");
@@ -642,7 +642,6 @@ namespace AssEmbly
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\"{command[1]}\" is not a valid value to convert.");
                 Console.ResetColor();
-                return;
             }
         }
 
@@ -712,7 +711,6 @@ namespace AssEmbly
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("This command requires either 3 arguments to add or remove a breakpoint, or none to list them. Run 'help' for more info.");
                 Console.ResetColor();
-                return;
             }
         }
 

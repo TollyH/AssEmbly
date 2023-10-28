@@ -22,11 +22,11 @@ namespace AssEmbly
         public static readonly byte[] MagicBytes = { 65, 115, 115, 69, 109, 98, 108, 121 };
 
         // Header
-        public Version LanguageVersion { get; set; }
-        public AAPFeatures Features { get; set; }
-        public ulong EntryPoint { get; set; }
+        public Version LanguageVersion { get; }
+        public AAPFeatures Features { get; }
+        public ulong EntryPoint { get; }
 
-        public byte[] Program { get; set; }
+        public byte[] Program { get; }
 
         public AAPFile(Version languageVersion, AAPFeatures features, ulong entryPoint, byte[] program)
         {
