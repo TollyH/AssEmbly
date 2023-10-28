@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Globalization;
 using System.Text;
 
 namespace AssEmbly
@@ -2573,19 +2574,19 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FLPT_WFN reg
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString()));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // FLPT_WFN lit
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString()));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // FLPT_WFN adr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString()));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FLPT_WFN ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString()));
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
