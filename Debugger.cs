@@ -575,7 +575,12 @@ namespace AssEmbly
                 }
                 Console.WriteLine("└──────────────────┴───────────────────────────────┴────────────┘");
 
-                ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8);
+                ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + (UseV1CallStack ? 8UL : 0UL));
+                if (currentStackBase + stackCallSize >= parentStackBase)
+                {
+                    // Parent stack is empty
+                    return;
+                }
                 if (parentStackBase - (currentStackBase + stackCallSize + 7) > limit)
                 {
                     parentStackBase = currentStackBase + stackCallSize + limit - 7;
