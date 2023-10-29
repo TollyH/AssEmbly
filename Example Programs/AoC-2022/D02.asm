@@ -11,8 +11,8 @@ RFC rg1  ; Will be a space
 RFC rg1
 RFC rg9  ; Will be a newline (rg9 is unused)
 ; Convert letters to indices for calculation
-SUB rg0, 65
-SUB rg1, 88
+SUB rg0, 'A'
+SUB rg1, 'X'
 ; rg4 - temp storage for their index manipulation
 ; rg5 - temp storage for our index manipulation
 ; rg6 - temp storage for part two (ourIndex * 3)
@@ -51,9 +51,9 @@ TST rsf, _ffe
 JZO :READ_LOOP
 CFL
 WCN rg2
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 WCN rg3
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH

@@ -6,7 +6,7 @@ OFL :FILE_PATH
 MVQ rg1, :&MESSAGE
 :READ_LOOP
 RFC rg0
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JEQ :PROCESS
 MVB *rg1, rg0
 ICR rg1
@@ -69,9 +69,9 @@ JMP :INNER_LOOP
 
 :END
 WCN rg6
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 WCN rg7
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH

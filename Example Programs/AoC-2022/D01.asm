@@ -13,7 +13,7 @@ MVQ rg4, :&TOTALS
 RFC rg0
 TST rsf, 0b100  ; End of file?
 JNZ :RESET_INTERS
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JNE :CHAR_PROCESS
 TST rg1, rg1  ; Did we already have newline?
 JNE :RESET_INTERS
@@ -35,7 +35,7 @@ TST rsf, _ffe  ; End of file?
 JNZ :NEW_ELF
 JMP :CHAR_READ_LOOP
 :CHAR_PROCESS
-SUB rg0, 48  ; Convert ASCII digit to number
+SUB rg0, '0'  ; Convert ASCII digit to number
 MUL rg1, 10
 ADD rg1, rg0
 JMP :CHAR_READ_LOOP
@@ -67,7 +67,7 @@ MVQ rg1, rg3
 JMP :MAX_LOOP
 :NEXT_PART
 WCN rg1
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 
 ; rg6 - Second highest
 MVQ rg4, :&TOTALS
@@ -118,7 +118,7 @@ JMP :MAX_LOOP_3
 ADD rg1, rg6
 ADD rg1, rg7
 WCN rg1
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH

@@ -10,34 +10,34 @@ MAC _ffe, 0b100  ; Create a macro for the file end flag
 OFL :FILE_PATH
 :RANGE_1_1ST
 RFC rg6
-CMP rg6, 45  ; '-'?
+CMP rg6, '-'
 JEQ :RANGE_1_2ND
 MUL rg0, 10
-SUB rg6, 48  ; Convert ASCII digit to number
+SUB rg6, '0'  ; Convert ASCII digit to number
 ADD rg0, rg6
 JMP :RANGE_1_1ST
 :RANGE_1_2ND
 RFC rg6
-CMP rg6, 44  ; ','?
+CMP rg6, ','
 JEQ :RANGE_2_1ST
 MUL rg1, 10
-SUB rg6, 48  ; Convert ASCII digit to number
+SUB rg6, '0'  ; Convert ASCII digit to number
 ADD rg1, rg6
 JMP :RANGE_1_2ND
 :RANGE_2_1ST
 RFC rg6
-CMP rg6, 45  ; '-'?
+CMP rg6, '-'
 JEQ :RANGE_2_2ND
 MUL rg2, 10
-SUB rg6, 48  ; Convert ASCII digit to number
+SUB rg6, '0'  ; Convert ASCII digit to number
 ADD rg2, rg6
 JMP :RANGE_2_1ST
 :RANGE_2_2ND
 RFC rg6
-CMP rg6, 10  ; Newline?
+CMP rg6, '\n'  ; Newline?
 JEQ :TEST_COMPLETE_OVERLAP_1
 MUL rg3, 10
-SUB rg6, 48  ; Convert ASCII digit to number
+SUB rg6, '0'  ; Convert ASCII digit to number
 ADD rg3, rg6
 JMP :RANGE_2_2ND
 
@@ -72,9 +72,9 @@ JMP :RANGE_1_1ST
 :END
 CFL
 WCN rg4
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 WCN rg5
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH

@@ -14,13 +14,13 @@ MVQ rg2, :&INPUT_BUFFER_1
 MVB rg3, *rg2
 TST rg3, rg3  ; Check for 0-byte terminator
 JZO :NUM_1_READ_LOOP_END
-CMP rg3, 45  ; Check for '-' sign
+CMP rg3, '-'  ; Check for negative sign
 JNE :NUM_1_PARSE
 NOT rg6
 ICR rg2
 JMP :NUM_1_READ_LOOP
 :NUM_1_PARSE
-SUB rg3, 48  ; Convert ASCII digit to number
+SUB rg3, '0'  ; Convert ASCII digit to number
 MUL rg0, 10
 ADD rg0, rg3
 ICR rg2
@@ -41,13 +41,13 @@ MVQ rg2, :&INPUT_BUFFER_2
 MVB rg3, *rg2
 TST rg3, rg3  ; Check for 0-byte terminator
 JZO :NUM_2_READ_LOOP_END
-CMP rg3, 45  ; Check for '-' sign
+CMP rg3, '-'  ; Check for negative sign
 JNE :NUM_2_PARSE
 NOT rg6
 ICR rg2
 JMP :NUM_2_READ_LOOP
 :NUM_2_PARSE
-SUB rg3, 48  ; Convert ASCII digit to number
+SUB rg3, '0'  ; Convert ASCII digit to number
 MUL rg1, 10
 ADD rg1, rg3
 ICR rg2
@@ -60,15 +60,15 @@ SIGN_NEG rg1
 :NUM_2_NO_NEGATE
 CAL :FUNC_PRINT, :&STR_OPERATOR_PROMPT
 RCC rg4
-WCC 10  ; Write newline after input
+WCC '\n'  ; Write newline after input
 
-CMP rg4, 43  ; '+'
+CMP rg4, '+'
 JEQ :ADDITION
-CMP rg4, 45  ; '-'
+CMP rg4, '-'
 JEQ :SUBTRACTION
-CMP rg4, 42  ; '*'
+CMP rg4, '*'
 JEQ :MULTIPLICATION
-CMP rg4, 47  ; '/'
+CMP rg4, '/'
 JEQ :DIVISION
 JMP :INVALID_OPERATOR
 

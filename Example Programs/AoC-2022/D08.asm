@@ -11,9 +11,9 @@ OFL :FILE_PATH
 MVQ rg1, :&TREES
 :READ_LOOP
 RFC rg0
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JEQ :NEWLINE
-SUB rg0, 48  ; Convert ASCII digit to number
+SUB rg0, '0'  ; Convert ASCII digit to number
 MVQ *rg1, rg0
 ADD rg1, 8
 JMP :READ_LOOP
@@ -168,9 +168,9 @@ MVQ rg0, rsb
 SUB rg0, rso
 DIV rg0, 8
 WCN rg0
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 WCN rg9
-WCC 10
+WCC '\n'
 HLT
 
 :FUNC_VALUE_IN_STACK

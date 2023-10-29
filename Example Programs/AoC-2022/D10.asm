@@ -16,7 +16,7 @@ RFC rg0
 RFC rg9  ; Skip 3 characters (only first character in mnemonic matters)
 RFC rg9
 RFC rg9
-CMP rg0, 110  ; 'n' (noop)
+CMP rg0, 'n'  ; (noop)
 JEQ :NOOP
 CAL :FUNC_INCREMENT_CYCLE, 2
 XOR rg5, rg5
@@ -24,11 +24,11 @@ XOR rg6, rg6
 RFC rg9  ; Discard space
 :INT_PARSE_LOOP
 RFC rg0
-CMP rg0, 45  ; '-'
+CMP rg0, '-'
 JEQ :SET_NEGATIVE
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JEQ :INT_PARSE_END
-SUB rg0, 48  ; Convert ASCII digit to number
+SUB rg0, '0'  ; Convert ASCII digit to number
 MUL rg5, 10
 ADD rg5, rg0
 JMP :INT_PARSE_LOOP
@@ -51,7 +51,7 @@ TST rsf, _ffe  ; End of file?
 JZO :READ_LOOP
 CFL
 WCN rg3
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 ; rg7 - part two print pointer
 MVQ rg7, :&PART_TWO_RESULT
 :PART_TWO_PRINT_LOOP
@@ -86,16 +86,16 @@ CMP rg7, 2
 SIGN_JGE :PIXEL_OFF
 CMP rg7, -2
 SIGN_JLE :PIXEL_OFF
-MVB *rg4, 35  ; '#'
+MVB *rg4, '#'
 ADD rg4, 3
 JMP :NEWLINE_INSERTION_CHECK
 :PIXEL_OFF
-MVB *rg4, 32  ; ' '
+MVB *rg4, ' '
 ICR rg4
 :NEWLINE_INSERTION_CHECK
 CMP rg8, 39
 JNE :SKIP_NEWLINE_INSERTION
-MVB *rg4, 10  ; Newline
+MVB *rg4, '\n'  ; Newline
 ICR rg4
 :SKIP_NEWLINE_INSERTION
 ICR rg2

@@ -6,7 +6,7 @@ OFL :FILE_PATH
 MVQ rg1, :&LINE_STORE
 :READ_LOOP
 RFC rg0
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JEQ :PROCESS_LINE
 MVB *rg1, rg0
 ICR rg1
@@ -49,7 +49,7 @@ MVQ rg3, rg1
 MVB rg7, *rg3
 JMP :COMPARE_LOOP
 :COMPARISON_EQUAL
-CMP rg6, 97  ; Is letter lowercase?
+CMP rg6, 'a'  ; Is letter lowercase?
 JGE :LETTER_LOWERCASE
 SUB rg6, 38
 ADD rg5, rg6
@@ -66,7 +66,7 @@ JMP :READ_LOOP
 :PART_ONE_END
 CFL
 WCN rg5
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 
 ; Part Two
 OFL :FILE_PATH
@@ -83,7 +83,7 @@ MVQ rg4, 1
 :READ_LOOP_TWO
 MVQ rg1, :&LINE_STORE
 RFC rg0
-CMP rg0, 10  ; Newline?
+CMP rg0, '\n'  ; Newline?
 JEQ :NEWLINE
 :FIND_LOOP
 ; Search for character in counter table
@@ -131,7 +131,7 @@ MVB rg6, *rg1
 ICR rg1
 CMP rg6, 3
 JLT :FIND_THREE_LOOP
-CMP rg5, 97  ; Is letter lowercase?
+CMP rg5, 'a'  ; Is letter lowercase?
 JGE :LETTER_LOWERCASE_TWO
 SUB rg5, 38
 ADD rg3, rg5
@@ -150,7 +150,7 @@ JMP :READ_LOOP_TWO
 :END
 CFL
 WCN rg3
-WCC 10  ; Newline
+WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH

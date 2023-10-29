@@ -5,7 +5,7 @@
 PSH rg0  ; Store value of rg0 so it isn't overwritten permanently
 :FUNC_INPUT_READ
 RCC rg0  ; Read a single character from the console into rg0
-CMP rg0, 0x0A  ; Check if rg0 is a newline
+CMP rg0, '\n'  ; Check if rg0 is a newline
 JEQ :FUNC_INPUT_RETURN  ; If it is, return from subroutine
 MVB *rfp, rg0  ; Otherwise, move the inputted character (rg0), to the destination address (*rfp)
 ICR rfp  ; Increment the destination address by 1
