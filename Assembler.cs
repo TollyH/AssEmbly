@@ -640,7 +640,12 @@ namespace AssEmbly
                 }
                 if (c == '\\')
                 {
-                    char escape = line[++i];
+                    if (++i >= line.Length)
+                    {
+                        throw new SyntaxError(
+                            string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
+                    }
+                    char escape = line[i];
                     switch (escape)
                     {
                         // Escapes that keep the same character
