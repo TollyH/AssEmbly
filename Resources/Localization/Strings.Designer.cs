@@ -302,6 +302,17 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Label names cannot contain spaces.
+        ///    {0} {1}
+        ///    {2}^.
+        /// </summary>
+        internal static string Assembler_Error_Label_Spaces_Contained {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Label_Spaces_Contained", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The MAC mnemonic requires two operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_MAC_Operand_Count {
@@ -506,7 +517,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to An opening quote mark cannot be the only character on a line..
         /// </summary>
         internal static string Assembler_Error_Quoted_Literal_Line_Length_One {
             get {

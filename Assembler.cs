@@ -129,6 +129,11 @@ namespace AssEmbly
                     // Lines starting with ':' are label definitions
                     if (mnemonic.StartsWith(':'))
                     {
+                        if (line.Length > 1)
+                        {
+                            throw new SyntaxError(string.Format(
+                                Strings.Assembler_Error_Label_Spaces_Contained, mnemonic, line[1], new string(' ', mnemonic.Length)));
+                        }
                         // Will throw an error if label is not valid
                         _ = DetermineOperandType(mnemonic);
                         if (mnemonic[1] == '&')
