@@ -506,6 +506,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_Quoted_Literal_Line_Length_One {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Quoted_Literal_Line_Length_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to String literal contains characters after closing quote mark..
         /// </summary>
         internal static string Assembler_Error_String_Followed_Internal {

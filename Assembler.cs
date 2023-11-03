@@ -558,6 +558,10 @@ namespace AssEmbly
                         throw new SyntaxError(
                             string.Format(Strings.Assembler_Error_Quoted_Literal_Following, line, new string(' ', i)));
                     }
+                    if (line.Length < 2)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Quoted_Literal_Line_Length_One);
+                    }
                     _ = sb.Append(PreParseStringLiteral(line, ref i));
                     stringEnd = i;
                     continue;
