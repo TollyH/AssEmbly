@@ -708,7 +708,12 @@ namespace AssEmbly
                             rawCodePoint = line[(i + 1)..(i + 9)];
                             try
                             {
-                                _ = sb.Append(char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16)));
+                                string encodedChar = char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16));
+                                if (char.IsHighSurrogate(encodedChar[0]))
+                                {
+                                    containsHighSurrogate = true;
+                                }
+                                _ = sb.Append(encodedChar);
                             }
                             catch
                             {
