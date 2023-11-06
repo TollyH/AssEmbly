@@ -194,15 +194,6 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Floating point numeric literals must contain a digit on at least one side of the decimal point..
-        /// </summary>
-        internal static string Assembler_Error_Floating_Point_Decimal_Only {
-            get {
-                return ResourceManager.GetString("Assembler_Error_Floating_Point_Decimal_Only", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IMP mnemonic could not be found..
         /// </summary>
         internal static string Assembler_Error_IMP_File_Not_Exists {
@@ -281,7 +272,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Label names cannot be empty. Did you mean to include a colon here?.
         /// </summary>
         internal static string Assembler_Error_Label_Empty_Name {
             get {
@@ -318,6 +309,56 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Label_Spaces_Contained {
             get {
                 return ResourceManager.GetString("Assembler_Error_Label_Spaces_Contained", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix..
+        /// </summary>
+        internal static string Assembler_Error_Literal_Base_Prefix_Only {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Base_Prefix_Only", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Floating point numeric literals must contain a digit on at least one side of the decimal point..
+        /// </summary>
+        internal static string Assembler_Error_Literal_Floating_Point_Decimal_Only {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Floating_Point_Decimal_Only", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid character in numeric literal:
+        ///    {0}
+        ///    {1}^
+        ///Did you forget a &apos;0x&apos; prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?.
+        /// </summary>
+        internal static string Assembler_Error_Literal_Invalid_Character {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Invalid_Character", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Negative numeric literals must contain at least one digit..
+        /// </summary>
+        internal static string Assembler_Error_Literal_Negative_Dash_Only {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Negative_Dash_Only", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Numeric literal contains more than one decimal point:
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Assembler_Error_Literal_Too_Many_Points {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Too_Many_Points", resourceCulture);
             }
         }
         
@@ -408,29 +449,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_NUM_Operand_Type {
             get {
                 return ResourceManager.GetString("Assembler_Error_NUM_Operand_Type", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid character in numeric literal:
-        ///    {0}
-        ///    {1}^
-        ///Did you forget a &apos;0x&apos; prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?.
-        /// </summary>
-        internal static string Assembler_Error_Numeric_Invalid_Character {
-            get {
-                return ResourceManager.GetString("Assembler_Error_Numeric_Invalid_Character", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Numeric literal contains more than one decimal point:
-        ///    {0}
-        ///    {1}^.
-        /// </summary>
-        internal static string Assembler_Error_Numeric_Too_Many_Points {
-            get {
-                return ResourceManager.GetString("Assembler_Error_Numeric_Too_Many_Points", resourceCulture);
             }
         }
         

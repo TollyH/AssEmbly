@@ -786,15 +786,24 @@ namespace AssEmbly
                         : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
                     if (invalidMatch.Success)
                     {
-                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Numeric_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
                     }
-                    if (operand[0] == '.' && operand.Length == 1)
+                    // Edge-case syntax errors not detected by invalid character regular expressions
+                    if ((operand[0] == '.' && operand.Length == 1) || operand == "-.")
                     {
-                        throw new SyntaxError(Strings.Assembler_Error_Floating_Point_Decimal_Only);
+                        throw new SyntaxError(Strings.Assembler_Error_Literal_Floating_Point_Decimal_Only);
+                    }
+                    if (operand[0] == '-' && operand.Length == 1)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Literal_Negative_Dash_Only);
                     }
                     if (operand.IndexOf('.') != operand.LastIndexOf('.'))
                     {
-                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Numeric_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
+                    }
+                    if (operand is "0x" or "0b")
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
                     }
                     return OperandType.Literal;
                 }

@@ -820,16 +820,16 @@ Consult the language reference for a list of all valid mnemonic/operand combinat
     {1}^
 Label names may not contain symbols other than underscores, and cannot start with a numeral.</value>
 	</data>
-	<data name="Assembler_Error_Numeric_Invalid_Character" xml:space="preserve">
+	<data name="Assembler_Error_Literal_Invalid_Character" xml:space="preserve">
 		<value>Invalid character in numeric literal:
     {0}
     {1}^
 Did you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?</value>
 	</data>
-	<data name="Assembler_Error_Floating_Point_Decimal_Only" xml:space="preserve">
+	<data name="Assembler_Error_Literal_Floating_Point_Decimal_Only" xml:space="preserve">
 		<value>Floating point numeric literals must contain a digit on at least one side of the decimal point.</value>
 	</data>
-	<data name="Assembler_Error_Numeric_Too_Many_Points" xml:space="preserve">
+	<data name="Assembler_Error_Literal_Too_Many_Points" xml:space="preserve">
 		<value>Numeric literal contains more than one decimal point:
     {0}
     {1}^</value>
@@ -1017,5 +1017,11 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	</data>
 	<data name="Assembler_Error_Label_Empty_Name" xml:space="preserve">
 		<value>Label names cannot be empty. Did you mean to include a colon here?</value>
+	</data>
+	<data name="Assembler_Error_Literal_Negative_Dash_Only" xml:space="preserve">
+		<value>Negative numeric literals must contain at least one digit.</value>
+	</data>
+	<data name="Assembler_Error_Literal_Base_Prefix_Only" xml:space="preserve">
+		<value>Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix.</value>
 	</data>
 </root>
