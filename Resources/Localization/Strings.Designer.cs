@@ -281,6 +281,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_Label_Empty_Name {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Label_Empty_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid character in label:
         ///    {0}
         ///    {1}^

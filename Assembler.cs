@@ -758,7 +758,15 @@ namespace AssEmbly
             {
                 case ':':
                 {
+                    if (operand.Length < 2)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
+                    }
                     int offset = operand[1] == '&' ? 2 : 1;
+                    if (operand.Length <= offset)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
+                    }
                     Match invalidMatch = Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success

@@ -1015,4 +1015,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
     {0} {1}
     {2}^</value>
 	</data>
+	<data name="Assembler_Error_Label_Empty_Name" xml:space="preserve">
+		<value>Label names cannot be empty. Did you mean to include a colon here?</value>
+	</data>
 </root>
