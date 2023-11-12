@@ -31,7 +31,7 @@ namespace AssEmbly
         public Debugger(bool inReplMode, ulong entryPoint = 0, bool useV1CallStack = false)
         {
             InReplMode = inReplMode;
-            DebuggingProcessor = new Processor(2046, entryPoint, useV1CallStack);
+            DebuggingProcessor = new Processor(Program.DefaultMemorySize, entryPoint, useV1CallStack);
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 

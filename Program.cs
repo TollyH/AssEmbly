@@ -370,7 +370,7 @@ namespace AssEmbly
 
         private static void DisplayHelp()
         {
-            Console.WriteLine(Strings.CLI_Help_Body);
+            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize);
         }
     }
 }

@@ -148,19 +148,19 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
 
 execute - Execute an already assembled executable file
     Usage: 'AssEmbly execute &lt;file-path&gt; [options]'
-    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.
+    --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
 
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
-    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.
+    --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
 
 debug - Step through an assembled executable file, pausing before each instruction begins execution.
     Usage: 'AssEmbly debug &lt;file-path&gt; [debug-info-file-path] [options]'
-    --mem-size=2046 - Sets the total size of memory available to the program in bytes. Memory size will be 2046 bytes if parameter is not given.
+    --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
@@ -175,7 +175,7 @@ disassemble - Generate an AssEmbly program listing from an already assembled exe
 
 repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions.
     Usage: 'AssEmbly repl [options]'
-    --mem-size=2046 - Sets the total size of memory available to the REPL in bytes. Memory size will be 2046 bytes if parameter is not given.
+    --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
 </value>
 	</data>
