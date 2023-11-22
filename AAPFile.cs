@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.IO.Compression;
 using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
@@ -11,8 +12,9 @@ namespace AssEmbly
         ExtensionSigned = 0b10,
         ExtensionFloat = 0b100,
         ExtensionExtendedBase = 0b1000,
+        GZipCompressed = 0b10000,
 
-        All = 0b1111,
+        All = 0b11111,
         Incompatible = ~All
     }
 
@@ -57,12 +59,38 @@ namespace AssEmbly
             Features = (AAPFeatures)BinaryPrimitives.ReadUInt64LittleEndian(byteSpan[20..]);
             EntryPoint = BinaryPrimitives.ReadUInt64LittleEndian(byteSpan[28..]);
 
-            Program = executable[36..];
+            if (Features.HasFlag(AAPFeatures.GZipCompressed))
+            {
+                using MemoryStream compressedProgram = new(executable[36..]);
+                using GZipStream decompressor = new(compressedProgram, CompressionMode.Decompress);
+                using MemoryStream decompressedProgram = new();
+                decompressor.CopyTo(decompressedProgram);
+                Program = decompressedProgram.ToArray();
+            }
+            else
+            {
+                Program = executable[36..];
+            }
         }
 
         public byte[] GetBytes()
         {
-            byte[] bytes = new byte[HeaderSize + Program.Length];
+            byte[] programBytes;
+            if (Features.HasFlag(AAPFeatures.GZipCompressed))
+            {
+                using MemoryStream compressedProgram = new();
+                using (GZipStream compressor = new(compressedProgram, CompressionLevel.SmallestSize, true))
+                {
+                    compressor.Write(Program);
+                }
+                programBytes = compressedProgram.ToArray();
+            }
+            else
+            {
+                programBytes = Program;
+            }
+
+            byte[] bytes = new byte[HeaderSize + programBytes.Length];
             Span<byte> byteSpan = bytes.AsSpan();
 
             MagicBytes.CopyTo(bytes, 0);
@@ -74,7 +102,7 @@ namespace AssEmbly
             BinaryPrimitives.WriteUInt64LittleEndian(byteSpan[20..], (ulong)Features);
             BinaryPrimitives.WriteUInt64LittleEndian(byteSpan[28..], EntryPoint);
 
-            Program.CopyTo(bytes, HeaderSize);
+            programBytes.CopyTo(bytes, HeaderSize);
 
             return bytes;
         }

@@ -143,6 +143,7 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --no-debug-file - Do not generate a debug information file with the executable.
     --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
     --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.
+    --compress - Apply GZip compression to the resulting executable.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
     --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
 

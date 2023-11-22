@@ -189,6 +189,10 @@ namespace AssEmbly
                 {
                     features |= AAPFeatures.V1CallStack;
                 }
+                if (args.Contains("--compress"))
+                {
+                    features |= AAPFeatures.GZipCompressed;
+                }
                 AAPFile executable = new(version ?? new Version(), features, entryPoint, program);
                 File.WriteAllBytes(destination, executable.GetBytes());
             }
