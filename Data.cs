@@ -109,6 +109,7 @@
             { 0x01, AAPFeatures.ExtensionSigned },
             { 0x02, AAPFeatures.ExtensionFloat },
             { 0x03, AAPFeatures.ExtensionExtendedBase },
+            { 0x04, AAPFeatures.ExtensionExternalAssembly },
         };
 
         /// <summary>
@@ -629,6 +630,39 @@
 
             // EXTD_BSW (Reverse Byte Order)
             { ("EXTD_BSW", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x00) },
+
+            // EXTERNAL ASSEMBLY EXTENSION SET
+
+            // ASMX_LDA (Load Assembly)
+            { ("ASMX_LDA", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x00) },
+            { ("ASMX_LDA", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x01) },
+
+            // ASMX_LDF (Load Function)
+            { ("ASMX_LDF", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x02) },
+            { ("ASMX_LDF", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x03) },
+
+            // ASMX_CLA (Close Assembly)
+            { ("ASMX_CLA", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x10) },
+            { ("ASMX_CLA", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x11) },
+
+            // ASMX_CLF (Close Function)
+            { ("ASMX_CLF", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x12) },
+            { ("ASMX_CLF", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x13) },
+
+            // ASMX_AEX (Does Assembly Exist and Is Is Valid?)
+            { ("ASMX_AEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x04, 0x20) },
+            { ("ASMX_AEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x04, 0x21) },
+
+            // ASMX_FEX (Does Function Exist and Is Is Valid?)
+            { ("ASMX_FEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x04, 0x22) },
+            { ("ASMX_FEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x04, 0x23) },
+
+            // ASMX_CAL (Call Loaded External Function)
+            { ("ASMX_CAL", Array.Empty<OperandType>()), new Opcode(0x04, 0x30) },
+            { ("ASMX_CAL", new OperandType[1] { OperandType.Register }), new Opcode(0x04, 0x31) },
+            { ("ASMX_CAL", new OperandType[1] { OperandType.Literal }), new Opcode(0x04, 0x32) },
+            { ("ASMX_CAL", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x33) },
+            { ("ASMX_CAL", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x34) },
         };
     }
 }

@@ -13,8 +13,9 @@ namespace AssEmbly
         ExtensionFloat = 0b100,
         ExtensionExtendedBase = 0b1000,
         GZipCompressed = 0b10000,
+        ExtensionExternalAssembly = 0b100000,
 
-        All = 0b11111,
+        All = 0b111111,
         Incompatible = ~All
     }
 
