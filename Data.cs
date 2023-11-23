@@ -642,12 +642,10 @@
             { ("ASMX_LDF", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x03) },
 
             // ASMX_CLA (Close Assembly)
-            { ("ASMX_CLA", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x10) },
-            { ("ASMX_CLA", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x11) },
+            { ("ASMX_CLA", Array.Empty<OperandType>()), new Opcode(0x04, 0x10) },
 
             // ASMX_CLF (Close Function)
-            { ("ASMX_CLF", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x12) },
-            { ("ASMX_CLF", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x13) },
+            { ("ASMX_CLF", Array.Empty<OperandType>()), new Opcode(0x04, 0x11) },
 
             // ASMX_AEX (Does Assembly Exist and Is Is Valid?)
             { ("ASMX_AEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x04, 0x20) },
