@@ -172,6 +172,54 @@
         public FileOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
+    /// <summary>
+    /// The exception that is thrown when an external assembly is invalid or could not be found.
+    /// </summary>
+    public class InvalidAssemblyException : RuntimeException
+    {
+        public InvalidAssemblyException() : base() { }
+        public InvalidAssemblyException(string message) : base(message) { }
+        public InvalidAssemblyException(string message, Exception inner) : base(message, inner) { }
+        public InvalidAssemblyException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidAssemblyException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when an external function is invalid or could not be found.
+    /// </summary>
+    public class InvalidFunctionException : RuntimeException
+    {
+        public InvalidFunctionException() : base() { }
+        public InvalidFunctionException(string message) : base(message) { }
+        public InvalidFunctionException(string message, Exception inner) : base(message, inner) { }
+        public InvalidFunctionException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidFunctionException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when there is not enough free memory remaining to perform the requested allocation.
+    /// </summary>
+    public class MemoryAllocationException : RuntimeException
+    {
+        public MemoryAllocationException() : base() { }
+        public MemoryAllocationException(string message) : base(message) { }
+        public MemoryAllocationException(string message, Exception inner) : base(message, inner) { }
+        public MemoryAllocationException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public MemoryAllocationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when the stack grows to collide with already allocated heap memory.
+    /// </summary>
+    public class StackSizeException : RuntimeException
+    {
+        public StackSizeException() : base() { }
+        public StackSizeException(string message) : base(message) { }
+        public StackSizeException(string message, Exception inner) : base(message, inner) { }
+        public StackSizeException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public StackSizeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
     // AAP FORMAT EXCEPTIONS
     /// <summary>
     /// Represents errors that occur during loading or saving an AAP file.
