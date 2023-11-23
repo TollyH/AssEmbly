@@ -1,5 +1,7 @@
 ﻿using System.Buffers.Binary;
 using System.Globalization;
+using System.Reflection;
+using System.Runtime.Loader;
 using System.Text;
 using AssEmbly.Resources.Localization;
 
@@ -10,6 +12,9 @@ namespace AssEmbly
     /// </summary>
     public class Processor : IDisposable
     {
+        public static readonly Type[] ExternalMethodParamTypes =
+            new Type[3] { typeof(byte[]), typeof(byte[]), typeof(ulong?) };
+
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
         public readonly bool UseV1CallStack;
@@ -22,6 +27,10 @@ namespace AssEmbly
         private BinaryReader? fileRead;
         private BinaryWriter? fileWrite;
         private long openFileSize;
+
+        private AssemblyLoadContext? extLoadContext;
+        private Type? openExtAssembly;
+        private MethodInfo? openExtFunction;
 
         private readonly Random rng = new();
 
@@ -53,9 +62,12 @@ namespace AssEmbly
 
         public void Dispose()
         {
+            extLoadContext?.Unload();
+
             openFile?.Dispose();
             fileRead?.Dispose();
             fileWrite?.Dispose();
+
             GC.SuppressFinalize(this);
         }
 

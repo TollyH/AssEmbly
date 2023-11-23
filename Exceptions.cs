@@ -197,6 +197,18 @@
     }
 
     /// <summary>
+    /// The exception that is thrown when an instruction is used without an external assembly or function loaded when one is required.
+    /// </summary>
+    public class ExternalOperationException : RuntimeException
+    {
+        public ExternalOperationException() : base() { }
+        public ExternalOperationException(string message) : base(message) { }
+        public ExternalOperationException(string message, Exception inner) : base(message, inner) { }
+        public ExternalOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public ExternalOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
+    /// <summary>
     /// The exception that is thrown when there is not enough free memory remaining to perform the requested allocation.
     /// </summary>
     public class MemoryAllocationException : RuntimeException
