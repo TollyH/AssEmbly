@@ -113,10 +113,6 @@ namespace AssEmbly
         /// <exception cref="DivideByZeroException">Thrown if a division instruction is executed with a value of zero as the divisor.</exception>
         /// <exception cref="FileNotFoundException">Thrown if an operation that requires a file to exist could not find the target file.</exception>
         /// <exception cref="DirectoryNotFoundException">Thrown if an operation that requires a directory to exist could not find the target directory.</exception>
-        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("", "IL2026",
-            Justification = "Reflection is only performed on external types loaded specifically by the user at runtime.")]
-        [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("", "IL2080",
-            Justification = "Reflection is only performed on external types loaded specifically by the user at runtime.")]
         public bool Execute(bool runUntilHalt, Stream? stdoutOverride = null)
         {
             if (!ProgramLoaded)
