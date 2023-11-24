@@ -1972,6 +1972,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot execute open assembly instruction if an assembly is already open.
+        /// </summary>
+        internal static string Processor_Error_Assembly_Already_Open {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_Already_Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified external assembly file is invalid.
+        /// </summary>
+        internal static string Processor_Error_Assembly_Invalid {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified external assembly file could not be found.
+        /// </summary>
+        internal static string Processor_Error_Assembly_Not_Found {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_Not_Found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred trying to load the external assembly.
+        /// </summary>
+        internal static string Processor_Error_Assembly_Unknown {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot execute open file instruction if a file is already open.
         /// </summary>
         internal static string Processor_Error_File_Already_Open {
@@ -2040,6 +2076,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_High_Extended {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_High_Extended", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised high opcode for the external assembly extension set.
+        /// </summary>
+        internal static string Processor_Error_Opcode_High_External {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_High_External", resourceCulture);
             }
         }
         
@@ -2211,6 +2256,42 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_Low_Extended_ByteSwap {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Low_Extended_ByteSwap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised external assembly extension set calling low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_External_Call {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_External_Call", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised external assembly extension set closing low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_External_Close {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_External_Close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised external assembly extension set existence low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_External_Existence {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_External_Existence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised external assembly extension set loading low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_External_Load {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_External_Load", resourceCulture);
             }
         }
         

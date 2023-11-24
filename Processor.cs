@@ -2851,6 +2851,107 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Extended, opcodeHigh));
                         }
                         break;
+                    case 0x4:  // External Assembly Extension Set
+                        switch (opcodeHigh)
+                        {
+                            case 0x00:  // Load
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // ASMX_LDA adr
+                                        if (extLoadContext is not null || openExtAssembly is not null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
+                                        }
+                                        initial = ReadMemoryQWord(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 8;
+                                        try
+                                        {
+                                            extLoadContext = new AssemblyLoadContext("AssEmblyExternal", true);
+                                            openExtAssembly = extLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            throw e switch
+                                            {
+                                                BadImageFormatException => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Invalid),
+                                                FileNotFoundException => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Not_Found),
+                                                _ => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Unknown)
+                                            };
+                                        }
+                                        break;
+                                    case 0x1:  // ASMX_LDA ptr
+                                        if (openFile is not null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
+                                        }
+                                        initial = ReadMemoryRegister(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo]++;
+                                        try
+                                        {
+                                            extLoadContext = new AssemblyLoadContext("AssEmblyExternal", true);
+                                            openExtAssembly = extLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            throw e switch
+                                            {
+                                                BadImageFormatException => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Invalid),
+                                                FileNotFoundException => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Not_Found),
+                                                _ => new InvalidAssemblyException(
+                                                    Strings.Processor_Error_Assembly_Unknown)
+                                            };
+                                        }
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Load, opcodeLow));
+                                }
+                                break;
+                            case 0x10:  // Close
+                                switch (opcodeLow)
+                                {
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Close, opcodeLow));
+                                }
+                                break;
+                            case 0x20:  // Exists
+                                switch (opcodeLow)
+                                {
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Existence, opcodeLow));
+                                }
+                                break;
+                            case 0x30:  // Call
+                                switch (opcodeLow)
+                                {
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Call, opcodeLow));
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_External, opcodeHigh));
+                        }
+                        break;
                     default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }

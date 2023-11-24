@@ -1025,4 +1025,31 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	<data name="Assembler_Error_Literal_Base_Prefix_Only" xml:space="preserve">
 		<value>Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix.</value>
 	</data>
+	<data name="Processor_Error_Opcode_High_External" xml:space="preserve">
+		<value>{0:X} is not a recognised high opcode for the external assembly extension set</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_External_Load" xml:space="preserve">
+		<value>{0:X} is not a recognised external assembly extension set loading low opcode</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_External_Close" xml:space="preserve">
+		<value>{0:X} is not a recognised external assembly extension set closing low opcode</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_External_Existence" xml:space="preserve">
+		<value>{0:X} is not a recognised external assembly extension set existence low opcode</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_External_Call" xml:space="preserve">
+		<value>{0:X} is not a recognised external assembly extension set calling low opcode</value>
+	</data>
+	<data name="Processor_Error_Assembly_Already_Open" xml:space="preserve">
+		<value>Cannot execute open assembly instruction if an assembly is already open</value>
+	</data>
+	<data name="Processor_Error_Assembly_Unknown" xml:space="preserve">
+		<value>An unexpected error occurred trying to load the external assembly</value>
+	</data>
+	<data name="Processor_Error_Assembly_Not_Found" xml:space="preserve">
+		<value>The specified external assembly file could not be found</value>
+	</data>
+	<data name="Processor_Error_Assembly_Invalid" xml:space="preserve">
+		<value>The specified external assembly file is invalid</value>
+	</data>
 </root>
