@@ -13775,7 +13775,7 @@ namespace AssEmbly.Test
                     });
                     Encoding.UTF8.GetBytes("TestMethod\0").CopyTo(testProcessor.Memory, 1234);
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.IsNotNull(typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not open function");
                     Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
@@ -13841,7 +13841,7 @@ namespace AssEmbly.Test
                     });
                     Encoding.UTF8.GetBytes("TestMethod\0").CopyTo(testProcessor.Memory, 1234);
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.IsNotNull(typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not open function");
                     Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
@@ -13904,14 +13904,14 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.LoadProgram(new byte[]
                     {
                         0xFF, 0x04, 0x10
                     });
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.IsNull(typeof(Processor).GetField("extLoadContext", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not remove load context");
                     Assert.IsNull(typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not remove open assembly");
                     Assert.IsNull(typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not remove open function");
@@ -13942,14 +13942,14 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.LoadProgram(new byte[]
                     {
                         0xFF, 0x04, 0x11
                     });
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.IsNotNull(typeof(Processor).GetField("extLoadContext", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction removed load context");
                     Assert.IsNotNull(typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction removed open assembly");
                     Assert.IsNull(typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(testProcessor), "Instruction did not remove open function");
@@ -14188,14 +14188,14 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.LoadProgram(new byte[]
                     {
                         0xFF, 0x04, 0x30
                     });
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
@@ -14234,7 +14234,7 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.Registers[(int)Register.rg3] = 0x123456789ABCDEF0;
                     testProcessor.LoadProgram(new byte[]
@@ -14242,7 +14242,7 @@ namespace AssEmbly.Test
                         0xFF, 0x04, 0x31, (int)Register.rg3
                     });
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0x123456789ABCDEF0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
@@ -14281,14 +14281,14 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.LoadProgram(new byte[]
                     {
                         0xFF, 0x04, 0x32, 0xF0, 0xDE, 0xBC, 0x9A, 0x78, 0x56, 0x34, 0x12
                     });
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0x123456789ABCDEF0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
@@ -14327,7 +14327,7 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.LoadProgram(new byte[]
                     {
@@ -14335,7 +14335,7 @@ namespace AssEmbly.Test
                     });
                     testProcessor.WriteMemoryQWord(552, 0x123456789ABCDEF0);
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0x123456789ABCDEF0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
@@ -14374,7 +14374,7 @@ namespace AssEmbly.Test
                     typeof(Processor).GetField("openExtAssembly", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
                         testProcessor, loadedAssembly);
                     typeof(Processor).GetField("openExtFunction", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(
-                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Default, Processor.ExternalMethodParamTypes));
+                        testProcessor, loadedAssembly?.GetMethod("TestMethod", BindingFlags.Public | BindingFlags.Static, Processor.ExternalMethodParamTypes));
                     testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                     testProcessor.Registers[(int)Register.rg3] = 552;
                     testProcessor.LoadProgram(new byte[]
@@ -14383,7 +14383,7 @@ namespace AssEmbly.Test
                     });
                     testProcessor.WriteMemoryQWord(552, 0x123456789ABCDEF0);
                     // Test that no exception is thrown
-                    _ = testProcessor.Execute(true);
+                    _ = testProcessor.Execute(false);
                     Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0x123456789ABCDEF0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
