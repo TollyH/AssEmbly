@@ -1972,7 +1972,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot execute open assembly instruction if an assembly is already open.
+        ///   Looks up a localized string similar to Cannot execute load external assembly instruction if an assembly is already loaded.
         /// </summary>
         internal static string Processor_Error_Assembly_Already_Open {
             get {
@@ -1995,6 +1995,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Assembly_Not_Found {
             get {
                 return ResourceManager.GetString("Processor_Error_Assembly_Not_Found", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot execute load external function instruction if an external assembly is not loaded.
+        /// </summary>
+        internal static string Processor_Error_Assembly_Not_Open {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_Not_Open", resourceCulture);
             }
         }
         
@@ -2049,6 +2058,33 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_File_Read_No_Open {
             get {
                 return ResourceManager.GetString("Processor_Error_File_Read_No_Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot execute open external function instruction if a function is already loaded.
+        /// </summary>
+        internal static string Processor_Error_Function_Already_Open {
+            get {
+                return ResourceManager.GetString("Processor_Error_Function_Already_Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Processor_Error_Function_Invalid {
+            get {
+                return ResourceManager.GetString("Processor_Error_Function_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unexpected error occurred trying to load the external function.
+        /// </summary>
+        internal static string Processor_Error_Function_Unknown {
+            get {
+                return ResourceManager.GetString("Processor_Error_Function_Unknown", resourceCulture);
             }
         }
         

@@ -2889,7 +2889,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x1:  // ASMX_LDA ptr
-                                        if (openFile is not null)
+                                        if (extLoadContext is not null || openExtAssembly is not null)
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
                                         }
@@ -2917,6 +2917,66 @@ namespace AssEmbly
                                                 _ => new InvalidAssemblyException(
                                                     Strings.Processor_Error_Assembly_Unknown)
                                             };
+                                        }
+                                        break;
+                                    case 0x2:  // ASMX_LDF adr
+                                        if (extLoadContext is null || openExtAssembly is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                        }
+                                        if (openExtFunction is not null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
+                                        }
+                                        initial = ReadMemoryQWord(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 8;
+                                        try
+                                        {
+                                            openExtFunction = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
+                                        }
+                                        catch
+                                        {
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Unknown);
+                                        }
+                                        if (openExtFunction is null)
+                                        {
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Invalid);
+                                        }
+                                        break;
+                                    case 0x3:  // ASMX_LDF ptr
+                                        if (extLoadContext is null || openExtAssembly is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                        }
+                                        if (openExtFunction is not null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
+                                        }
+                                        initial = ReadMemoryRegister(operandStart);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo]++;
+                                        try
+                                        {
+                                            openExtFunction = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
+                                        }
+                                        catch
+                                        {
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Unknown);
+                                        }
+                                        if (openExtFunction is null)
+                                        {
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Invalid);
                                         }
                                         break;
                                     default:
