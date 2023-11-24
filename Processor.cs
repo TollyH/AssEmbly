@@ -3112,8 +3112,40 @@ namespace AssEmbly
                                 }
                                 break;
                             case 0x30:  // Call
+                                if (extLoadContext is null || openExtAssembly is null)
+                                {
+                                    throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                }
+                                if (openExtFunction is null)
+                                {
+                                    throw new ExternalOperationException(Strings.Processor_Error_Function_Not_Open);
+                                }
                                 switch (opcodeLow)
                                 {
+                                    case 0x0:  // ASMX_CAL
+                                        // null is used as obj parameter as method is static
+                                        _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, null });
+                                        break;
+                                    case 0x1:  // ASMX_CAL reg
+                                        // null is used as obj parameter as method is static
+                                        _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryRegister(operandStart) });
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // ASMX_CAL lit
+                                        // null is used as obj parameter as method is static
+                                        _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryQWord(operandStart) });
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // ASMX_CAL adr
+                                        // null is used as obj parameter as method is static
+                                        _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryPointedQWord(operandStart) });
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x4:  // ASMX_CAL ptr
+                                        // null is used as obj parameter as method is static
+                                        _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryRegisterPointedQWord(operandStart) });
+                                        Registers[(int)Register.rpo]++;
+                                        break;
                                     default:
                                         throw new InvalidOpcodeException(
                                             string.Format(Strings.Processor_Error_Opcode_Low_External_Call, opcodeLow));
