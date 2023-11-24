@@ -2881,6 +2881,8 @@ namespace AssEmbly
                                         }
                                         catch (Exception e)
                                         {
+                                            extLoadContext?.Unload();
+                                            extLoadContext = null;
                                             throw e switch
                                             {
                                                 BadImageFormatException => new InvalidAssemblyException(
@@ -2912,6 +2914,8 @@ namespace AssEmbly
                                         }
                                         catch (Exception e)
                                         {
+                                            extLoadContext?.Unload();
+                                            extLoadContext = null;
                                             throw e switch
                                             {
                                                 BadImageFormatException => new InvalidAssemblyException(
