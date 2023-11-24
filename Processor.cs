@@ -13,7 +13,7 @@ namespace AssEmbly
     public class Processor : IDisposable
     {
         public static readonly Type[] ExternalMethodParamTypes =
-            new Type[3] { typeof(byte[]), typeof(byte[]), typeof(ulong?) };
+            new Type[3] { typeof(byte[]), typeof(ulong[]), typeof(ulong?) };
 
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
@@ -3012,6 +3012,100 @@ namespace AssEmbly
                             case 0x20:  // Exists
                                 switch (opcodeLow)
                                 {
+                                    case 0x0:  // ASMX_AEX adr
+                                        initial = ReadMemoryQWord(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 9;
+                                        AssemblyLoadContext testLoadContext = new("AssEmblyExternalTest", true);
+                                        try
+                                        {
+                                            _ = testLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
+                                            WriteMemoryRegister(operandStart, 1);
+                                        }
+                                        catch
+                                        {
+                                            WriteMemoryRegister(operandStart, 0);
+                                        }
+                                        finally
+                                        {
+                                            testLoadContext.Unload();
+                                        }
+                                        break;
+                                    case 0x1:  // ASMX_AEX ptr
+                                        initial = ReadMemoryRegister(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 2;
+                                        testLoadContext = new AssemblyLoadContext("AssEmblyExternalTest", true);
+                                        try
+                                        {
+                                            _ = testLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
+                                            WriteMemoryRegister(operandStart, 1);
+                                        }
+                                        catch
+                                        {
+                                            WriteMemoryRegister(operandStart, 0);
+                                        }
+                                        finally
+                                        {
+                                            testLoadContext.Unload();
+                                        }
+                                        break;
+                                    case 0x2:  // ASMX_FEX adr
+                                        if (extLoadContext is null || openExtAssembly is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                        }
+                                        initial = ReadMemoryQWord(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 9;
+                                        try
+                                        {
+                                            MethodInfo? method = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
+                                            WriteMemoryRegister(operandStart, method is null ? 0UL : 1UL);
+                                        }
+                                        catch
+                                        {
+                                            WriteMemoryRegister(operandStart, 0);
+                                        }
+                                        break;
+                                    case 0x3:  // ASMX_FEX ptr
+                                        if (extLoadContext is null || openExtAssembly is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                        }
+                                        initial = ReadMemoryRegister(operandStart + 1);
+                                        mathend = 0;
+                                        while (Memory[initial + mathend] != 0x0)
+                                        {
+                                            mathend++;
+                                        }
+                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        Registers[(int)Register.rpo] += 2;
+                                        try
+                                        {
+                                            MethodInfo? method = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
+                                            WriteMemoryRegister(operandStart, method is null ? 0UL : 1UL);
+                                        }
+                                        catch
+                                        {
+                                            WriteMemoryRegister(operandStart, 0);
+                                        }
+                                        break;
                                     default:
                                         throw new InvalidOpcodeException(
                                             string.Format(Strings.Processor_Error_Opcode_Low_External_Existence, opcodeLow));
