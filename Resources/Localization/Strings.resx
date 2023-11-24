@@ -1053,7 +1053,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 		<value>The specified external assembly file is invalid</value>
 	</data>
 	<data name="Processor_Error_Assembly_Not_Open" xml:space="preserve">
-		<value>Cannot execute load external function instruction if an external assembly is not loaded</value>
+		<value>Cannot execute instruction if an external assembly is not loaded</value>
 	</data>
 	<data name="Processor_Error_Function_Already_Open" xml:space="preserve">
 		<value>Cannot execute open external function instruction if a function is already loaded</value>
@@ -1063,5 +1063,8 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	</data>
 	<data name="Processor_Error_Function_Invalid" xml:space="preserve">
 		<value>The specified external function is invalid or does not exist in the loaded external assembly</value>
+	</data>
+	<data name="Processor_Error_Function_Not_Open" xml:space="preserve">
+		<value>Cannot execute instruction if an external function is not loaded</value>
 	</data>
 </root>

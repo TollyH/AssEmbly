@@ -2987,6 +2987,23 @@ namespace AssEmbly
                             case 0x10:  // Close
                                 switch (opcodeLow)
                                 {
+                                    case 0x0:  // ASMX_CLA
+                                        if (extLoadContext is null && openExtAssembly is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                        }
+                                        extLoadContext?.Unload();
+                                        extLoadContext = null;
+                                        openExtAssembly = null;
+                                        openExtFunction = null;
+                                        break;
+                                    case 0x1:  // ASMX_CLF
+                                        if (openExtFunction is null)
+                                        {
+                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Not_Open);
+                                        }
+                                        openExtFunction = null;
+                                        break;
                                     default:
                                         throw new InvalidOpcodeException(
                                             string.Format(Strings.Processor_Error_Opcode_Low_External_Close, opcodeLow));

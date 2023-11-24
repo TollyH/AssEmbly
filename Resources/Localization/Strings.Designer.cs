@@ -1999,7 +1999,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cannot execute load external function instruction if an external assembly is not loaded.
+        ///   Looks up a localized string similar to Cannot execute instruction if an external assembly is not loaded.
         /// </summary>
         internal static string Processor_Error_Assembly_Not_Open {
             get {
@@ -2071,11 +2071,20 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The specified external function is invalid or does not exist in the loaded external assembly.
         /// </summary>
         internal static string Processor_Error_Function_Invalid {
             get {
                 return ResourceManager.GetString("Processor_Error_Function_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Processor_Error_Function_Not_Open {
+            get {
+                return ResourceManager.GetString("Processor_Error_Function_Not_Open", resourceCulture);
             }
         }
         
