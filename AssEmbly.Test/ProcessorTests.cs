@@ -14243,7 +14243,7 @@ namespace AssEmbly.Test
                     });
                     // Test that no exception is thrown
                     _ = testProcessor.Execute(false);
-                    Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                    Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                     Assert.AreEqual(0xABUL, testProcessor.Memory[1234], "Instruction did not produce correct result");
                     Assert.AreEqual(0x123456789ABCDEF0UL, testProcessor.Registers[(int)Register.rg8], "Instruction did not produce correct result");
                     Assert.AreEqual(0xCDUL, testProcessor.Registers[(int)Register.rg9], "Instruction did not produce correct result");
