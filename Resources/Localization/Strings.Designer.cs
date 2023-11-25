@@ -1990,6 +1990,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Processor_Error_Assembly_No_Type {
+            get {
+                return ResourceManager.GetString("Processor_Error_Assembly_No_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified external assembly file could not be found.
         /// </summary>
         internal static string Processor_Error_Assembly_Not_Found {
@@ -2080,7 +2089,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Cannot execute instruction if an external function is not loaded.
         /// </summary>
         internal static string Processor_Error_Function_Not_Open {
             get {

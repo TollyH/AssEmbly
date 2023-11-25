@@ -1067,4 +1067,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	<data name="Processor_Error_Function_Not_Open" xml:space="preserve">
 		<value>Cannot execute instruction if an external function is not loaded</value>
 	</data>
+	<data name="Processor_Error_Assembly_No_Type" xml:space="preserve">
+		<value>The specified external assembly file does not contain a global public static class named 'AssEmblyInterop'</value>
+	</data>
 </root>

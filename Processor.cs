@@ -2889,6 +2889,12 @@ namespace AssEmbly
                                                     Strings.Processor_Error_Assembly_Unknown)
                                             };
                                         }
+                                        if (openExtAssembly is null)
+                                        {
+                                            extLoadContext?.Unload();
+                                            extLoadContext = null;
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Assembly_No_Type);
+                                        }
                                         break;
                                     case 0x1:  // ASMX_LDA ptr
                                         if (extLoadContext is not null || openExtAssembly is not null)
@@ -2921,6 +2927,12 @@ namespace AssEmbly
                                                 _ => new InvalidAssemblyException(
                                                     Strings.Processor_Error_Assembly_Unknown)
                                             };
+                                        }
+                                        if (openExtAssembly is null)
+                                        {
+                                            extLoadContext?.Unload();
+                                            extLoadContext = null;
+                                            throw new InvalidFunctionException(Strings.Processor_Error_Assembly_No_Type);
                                         }
                                         break;
                                     case 0x2:  // ASMX_LDF adr
