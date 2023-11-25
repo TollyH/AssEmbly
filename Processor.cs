@@ -2873,6 +2873,7 @@ namespace AssEmbly
                                         try
                                         {
                                             extLoadContext = new AssemblyLoadContext("AssEmblyExternal", true);
+                                            extLoadContext.Resolving += ExtLoadContext_Resolving;
                                             openExtAssembly = extLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
                                         }
                                         catch (Exception e)
@@ -2912,6 +2913,7 @@ namespace AssEmbly
                                         try
                                         {
                                             extLoadContext = new AssemblyLoadContext("AssEmblyExternal", true);
+                                            extLoadContext.Resolving += ExtLoadContext_Resolving;
                                             openExtAssembly = extLoadContext.LoadFromAssemblyPath(Path.GetFullPath(filepath)).GetType("AssEmblyInterop");
                                         }
                                         catch (Exception e)
@@ -3176,6 +3178,22 @@ namespace AssEmbly
                 }
             } while (runUntilHalt && !halt);
             return halt;
+        }
+
+        private static Assembly? ExtLoadContext_Resolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
+        {
+            try
+            {
+                if (File.Exists(Path.GetFullPath(assemblyName.Name + ".dll")))
+                {
+                    return loadContext.LoadFromAssemblyPath(Path.GetFullPath(assemblyName.Name + ".dll"));
+                }
+                return Assembly.Load(assemblyName);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>
