@@ -14,8 +14,9 @@ namespace AssEmbly
         ExtensionExtendedBase = 0b1000,
         GZipCompressed = 0b10000,
         ExtensionExternalAssembly = 0b100000,
+        ExtensionMemoryAllocation = 0b1000000,
 
-        All = 0b111111,
+        All = 0b1111111,
         Incompatible = ~All
     }
 

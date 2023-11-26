@@ -110,6 +110,7 @@
             { 0x02, AAPFeatures.ExtensionFloat },
             { 0x03, AAPFeatures.ExtensionExtendedBase },
             { 0x04, AAPFeatures.ExtensionExternalAssembly },
+            { 0x05, AAPFeatures.ExtensionMemoryAllocation },
         };
 
         /// <summary>
