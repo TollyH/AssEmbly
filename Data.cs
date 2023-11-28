@@ -624,28 +624,19 @@
             { ("HEAP_TRY", new OperandType[1] { OperandType.Pointer }), new Opcode(0x05, 0x07) },
 
             // HEAP_REA (Re-allocate Heap Memory - Error if Fail)
-            { ("HEAP_REA", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x05, 0x10) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x05, 0x11) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Address, OperandType.Address }), new Opcode(0x05, 0x12) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x05, 0x13) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x05, 0x14) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x05, 0x15) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x05, 0x16) },
-            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x05, 0x17) },
+            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x05, 0x10) },
+            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x05, 0x11) },
+            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x05, 0x12) },
+            { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x05, 0x13) },
 
             // HEAP_TRE (Re-allocate Heap Memory - Return -1 if Fail)
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x05, 0x18) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x05, 0x19) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Address, OperandType.Address }), new Opcode(0x05, 0x1A) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x05, 0x1B) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x05, 0x1C) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x05, 0x1D) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x05, 0x1E) },
-            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x05, 0x1F) },
+            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x05, 0x14) },
+            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x05, 0x15) },
+            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x05, 0x16) },
+            { ("HEAP_TRE", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x05, 0x17) },
 
             // HEAP_FRE (Free Allocated Heap Memory)
-            { ("HEAP_FRE", new OperandType[1] { OperandType.Address }), new Opcode(0x05, 0x20) },
-            { ("HEAP_FRE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x05, 0x21) },
+            { ("HEAP_FRE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x05, 0x20) },
         };
     }
 }
