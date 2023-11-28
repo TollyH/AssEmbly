@@ -371,7 +371,7 @@ Halt instruction reached. You should not continue unless this instruction was pl
 {0:X16} │</value>
 	</data>
 	<data name="Debugger_MemoryMap_Cell" xml:space="preserve">
-		<value> {0:X2}</value>
+		<value>{0:X2}</value>
 	</data>
 	<data name="Generic_Register_rpo" xml:space="preserve">
 		<value>rpo</value>

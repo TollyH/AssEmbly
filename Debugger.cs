@@ -471,6 +471,9 @@ namespace AssEmbly
                 {
                     Console.Write(Strings.Debugger_MemoryMap_FirstCol, i);
                 }
+                Console.Write(' ');
+                string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+                // Write both characters separately so that if multiple registers point to the same address, the cell becomes multi-coloured
                 if (i == DebuggingProcessor.Registers[(int)Register.rso])
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -483,7 +486,21 @@ namespace AssEmbly
                 {
                     Console.ForegroundColor = ConsoleColor.Blue;
                 }
-                Console.Write(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+                Console.Write(valueStr[0]);
+                // Reversed colour priority for second character
+                if (i == DebuggingProcessor.Registers[(int)Register.rpo])
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                if (i == DebuggingProcessor.Registers[(int)Register.rsb])
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                if (i == DebuggingProcessor.Registers[(int)Register.rso])
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                Console.Write(valueStr[1]);
                 Console.ResetColor();
             }
             Console.WriteLine();
