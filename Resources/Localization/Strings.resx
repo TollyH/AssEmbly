@@ -1070,4 +1070,13 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	<data name="Processor_Error_Assembly_No_Type" xml:space="preserve">
 		<value>The specified external assembly file does not contain a global public static class named 'AssEmblyInterop'</value>
 	</data>
+	<data name="Generic_Unmapped" xml:space="preserve">
+		<value>unmapped</value>
+	</data>
+	<data name="Processor_Error_Stack_Collide" xml:space="preserve">
+		<value>The stack has collided with already allocated memory</value>
+	</data>
+	<data name="Processor_Error_Stack_Out_Of_Range" xml:space="preserve">
+		<value>The rso register is outside the range of available memory</value>
+	</data>
 </root>

@@ -66,6 +66,7 @@
         public readonly long End;
 
         public long LastIndex => End - 1;
+        public long Length => End - Start;
 
         /// <param name="start">Inclusive start point of the range</param>
         /// <param name="end">Exclusive end point of the range</param>

@@ -1505,7 +1505,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  {0:X2}.
+        ///   Looks up a localized string similar to {0:X2}.
         /// </summary>
         internal static string Debugger_MemoryMap_Cell {
             get {
@@ -1972,6 +1972,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to unmapped.
+        /// </summary>
+        internal static string Generic_Unmapped {
+            get {
+                return ResourceManager.GetString("Generic_Unmapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot execute load external assembly instruction if an assembly is already loaded.
         /// </summary>
         internal static string Processor_Error_Assembly_Already_Open {
@@ -1990,7 +1999,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The specified external assembly file does not contain a global public static class named &apos;AssEmblyInterop&apos;.
         /// </summary>
         internal static string Processor_Error_Assembly_No_Type {
             get {
@@ -2562,6 +2571,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Read_Only_Register {
             get {
                 return ResourceManager.GetString("Processor_Error_Read_Only_Register", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The stack has collided with already allocated memory.
+        /// </summary>
+        internal static string Processor_Error_Stack_Collide {
+            get {
+                return ResourceManager.GetString("Processor_Error_Stack_Collide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The rso register is outside the range of available memory.
+        /// </summary>
+        internal static string Processor_Error_Stack_Out_Of_Range {
+            get {
+                return ResourceManager.GetString("Processor_Error_Stack_Out_Of_Range", resourceCulture);
             }
         }
         

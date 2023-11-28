@@ -21,6 +21,9 @@ namespace AssEmbly
 
         private readonly ulong stackCallSize;
 
+        private readonly List<Range> _mappedMemoryRanges = new();
+        public IReadOnlyList<Range> MappedMemoryRanges => _mappedMemoryRanges.AsReadOnly();
+
         public bool ProgramLoaded { get; private set; }
 
         private Stream? openFile;
@@ -48,6 +51,7 @@ namespace AssEmbly
             Registers[(int)Register.rpo] = entryPoint;
             Registers[(int)Register.rso] = memorySize;
             Registers[(int)Register.rsb] = memorySize;
+            _mappedMemoryRanges.Add(new Range((long)memorySize, (long)memorySize));
             ProgramLoaded = false;
             // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
             Console.OutputEncoding = Encoding.UTF8;
@@ -90,6 +94,7 @@ namespace AssEmbly
                 throw new InvalidOperationException($"Program too large to fit in allocated memory. {Memory.LongLength} bytes available, {programData.LongLength} given.");
             }
             Array.Copy(programData, Memory, programData.LongLength);
+            _mappedMemoryRanges.Insert(0, new Range(0, programData.LongLength));
             ProgramLoaded = true;
         }
 
@@ -3175,6 +3180,16 @@ namespace AssEmbly
                         break;
                     default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
+                }
+                // Update the mapped memory occupied by the stack, and throw an error if the stack has collided with allocated memory
+                if (Registers[(int)Register.rso] > (ulong)Memory.LongLength)
+                {
+                    throw new StackSizeException(Strings.Processor_Error_Stack_Out_Of_Range);
+                }
+                _mappedMemoryRanges[^1] = new Range((long)Registers[(int)Register.rso], Memory.LongLength);
+                if (_mappedMemoryRanges.Count >= 2 && _mappedMemoryRanges[^2].Overlaps(_mappedMemoryRanges[^1]))
+                {
+                    throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
                 }
             } while (runUntilHalt && !halt);
             return halt;
