@@ -461,6 +461,10 @@ namespace AssEmbly
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(Strings.Generic_Register_rso);
             Console.ResetColor();
+            Console.Write(Strings.Generic_CommaSeparate);
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(Strings.Generic_Unmapped);
+            Console.ResetColor();
             Console.WriteLine();
             Console.Write(Strings.Debugger_MemoryMap_Header);
             ulong start = offset - (offset % 16);  // Ensure offset is a multiple of 16
@@ -473,6 +477,11 @@ namespace AssEmbly
                 }
                 Console.Write(' ');
                 string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+                // Being unmapped is the lowest priority colour, and should be completely replaced by any register colours
+                if (DebuggingProcessor.MappedMemoryRanges.All(mappedRange => !mappedRange.Contains((long)i)))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
                 // Write both characters separately so that if multiple registers point to the same address, the cell becomes multi-coloured
                 if (i == DebuggingProcessor.Registers[(int)Register.rso])
                 {
@@ -514,6 +523,10 @@ namespace AssEmbly
             Console.Write(Strings.Generic_CommaSeparate);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write(Strings.Generic_Register_rso);
+            Console.ResetColor();
+            Console.Write(Strings.Generic_CommaSeparate);
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(Strings.Generic_Unmapped);
             Console.ResetColor();
             Console.WriteLine();
         }
