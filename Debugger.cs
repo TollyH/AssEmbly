@@ -450,6 +450,18 @@ namespace AssEmbly
                 Console.ResetColor();
                 return;
             }
+            Console.ForegroundColor = ConsoleColor.Blue;
+            Console.Write(Strings.Generic_Register_rpo);
+            Console.ResetColor();
+            Console.Write(Strings.Generic_CommaSeparate);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write(Strings.Generic_Register_rsb);
+            Console.ResetColor();
+            Console.Write(Strings.Generic_CommaSeparate);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(Strings.Generic_Register_rso);
+            Console.ResetColor();
+            Console.WriteLine();
             Console.Write(Strings.Debugger_MemoryMap_Header);
             ulong start = offset - (offset % 16);  // Ensure offset is a multiple of 16
             ulong end = (ulong)DebuggingProcessor.Memory.LongLength < (limit + start) ? (ulong)DebuggingProcessor.Memory.LongLength : (limit + start);
