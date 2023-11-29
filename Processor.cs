@@ -3212,6 +3212,30 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Allocate a block of memory with a given size into the processor memory map.
+        /// </summary>
+        /// <returns>The address of the first byte in the allocated block, or <see cref="ulong.MaxValue"/> if the allocation failed.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if called before a program is loaded into this processor</exception>
+        public ulong AllocateMemory(ulong size)
+        {
+            if (!ProgramLoaded)
+            {
+                throw new InvalidOperationException("A program has not been loaded in this processor.");
+            }
+            for (int i = 0; i < _mappedMemoryRanges.Count - 1; i++)
+            {
+                long lastIndex = _mappedMemoryRanges[i].End;
+                Range testRange = new(lastIndex, lastIndex + (long)size);
+                if (!testRange.Overlaps(_mappedMemoryRanges[i + 1]))
+                {
+                    _mappedMemoryRanges.Insert(i + 1, testRange);
+                    return (ulong)testRange.Start;
+                }
+            }
+            return ulong.MaxValue;
+        }
+
+        /// <summary>
         /// Read a word (16 bit, 2 byte, unsigned, integer) from the given memory offset.
         /// </summary>
         public ushort ReadMemoryWord(ulong offset)
