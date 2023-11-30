@@ -92,7 +92,7 @@
 
         public bool Overlaps(Range range)
         {
-            return Start <= range.End && range.Start <= End;
+            return Start < range.End && range.Start < End;
         }
 
         public IEnumerator<long> GetEnumerator()
