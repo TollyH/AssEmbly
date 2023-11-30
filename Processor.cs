@@ -3222,6 +3222,10 @@ namespace AssEmbly
             {
                 throw new InvalidOperationException("A program has not been loaded in this processor.");
             }
+            if (size == 0)
+            {
+                return ulong.MaxValue;
+            }
             for (int i = 0; i < _mappedMemoryRanges.Count - 1; i++)
             {
                 long lastIndex = _mappedMemoryRanges[i].End;
@@ -3233,6 +3237,90 @@ namespace AssEmbly
                 }
             }
             return ulong.MaxValue;
+        }
+
+        /// <summary>
+        /// Re-allocate the block of memory starting at the given address with a newly given size in the processor memory map.
+        /// </summary>
+        /// <returns>
+        /// The address of the first byte in the re-allocated block (it may be unchanged),
+        /// or <see cref="ulong.MaxValue"/> if the re-allocation failed because there is not enough free contiguous memory,
+        /// or <see cref="ulong.MaxValue"/> - 1 if the re-allocation failed because the given address does not correspond to the start of an allocated memory block.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Thrown if called before a program is loaded into this processor</exception>
+        public ulong ReallocateMemory(ulong address, ulong size)
+        {
+            if (!ProgramLoaded)
+            {
+                throw new InvalidOperationException("A program has not been loaded in this processor.");
+            }
+            if (size == 0)
+            {
+                return ulong.MaxValue;
+            }
+            // Find referenced block
+            int blockIndex = -1;
+            Range thisRange = new(0, 0);
+            for (int i = 0; i < _mappedMemoryRanges.Count - 1; i++)
+            {
+                Range range = _mappedMemoryRanges[i];
+                if (range.Start == (long)address)
+                {
+                    blockIndex = i;
+                    thisRange = range;
+                    break;
+                }
+            }
+            if (blockIndex == -1 || thisRange.Start == 0)
+            {
+                // Allocated memory block doesn't exist
+                return ulong.MaxValue - 1;
+            }
+            // If after resizing the block it still fits in its current position, there's no need to copy data
+            Range resizedRange = new(thisRange.Start, thisRange.Start + (long)size);
+            if (!resizedRange.Overlaps(_mappedMemoryRanges[blockIndex + 1]))
+            {
+                _mappedMemoryRanges[blockIndex] = resizedRange;
+                return (ulong)thisRange.Start;
+            }
+
+            // Hold temporary copy of contained data while the block is being re-allocated
+            byte[] bytesCopy = new byte[thisRange.Length];
+            Array.Copy(Memory, thisRange.Start, bytesCopy, 0, bytesCopy.LongLength);
+
+            _mappedMemoryRanges.RemoveAt(blockIndex);
+            ulong newAddress = AllocateMemory(size);
+            if (newAddress == ulong.MaxValue)
+            {
+                // Not enough free contiguous memory to re-allocate, keep the state of mapped memory before method was called.
+                _mappedMemoryRanges.Insert(blockIndex, thisRange);
+                return ulong.MaxValue;
+            }
+            // Copy data to new location
+            bytesCopy.CopyTo(Memory, (long)newAddress);
+            return newAddress;
+        }
+
+        /// <summary>
+        /// Remove a block of memory with starting at the given address from the processor memory map.
+        /// </summary>
+        /// <returns>Whether or not the free operation was successful.</returns>
+        /// <exception cref="InvalidOperationException">Thrown if called before a program is loaded into this processor</exception>
+        public bool FreeMemory(ulong address)
+        {
+            if (!ProgramLoaded)
+            {
+                throw new InvalidOperationException("A program has not been loaded in this processor.");
+            }
+            for (int i = 1; i < _mappedMemoryRanges.Count - 1; i++)
+            {
+                if (_mappedMemoryRanges[i].Start == (long)address)
+                {
+                    _mappedMemoryRanges.RemoveAt(i);
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>
