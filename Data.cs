@@ -612,16 +612,16 @@
             // MEMORY ALLOCATION EXTENSION SET
 
             // HEAP_ALC (Allocate Heap Memory - Error if Fail)
-            { ("HEAP_ALC", new OperandType[1] { OperandType.Register }), new Opcode(0x05, 0x00) },
-            { ("HEAP_ALC", new OperandType[1] { OperandType.Literal }), new Opcode(0x05, 0x01) },
-            { ("HEAP_ALC", new OperandType[1] { OperandType.Address }), new Opcode(0x05, 0x02) },
-            { ("HEAP_ALC", new OperandType[1] { OperandType.Pointer }), new Opcode(0x05, 0x03) },
+            { ("HEAP_ALC", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x05, 0x00) },
+            { ("HEAP_ALC", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x05, 0x01) },
+            { ("HEAP_ALC", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x05, 0x02) },
+            { ("HEAP_ALC", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x05, 0x03) },
 
             // HEAP_TRY (Allocate Heap Memory - Return -1 if Fail)
-            { ("HEAP_TRY", new OperandType[1] { OperandType.Register }), new Opcode(0x05, 0x04) },
-            { ("HEAP_TRY", new OperandType[1] { OperandType.Literal }), new Opcode(0x05, 0x05) },
-            { ("HEAP_TRY", new OperandType[1] { OperandType.Address }), new Opcode(0x05, 0x06) },
-            { ("HEAP_TRY", new OperandType[1] { OperandType.Pointer }), new Opcode(0x05, 0x07) },
+            { ("HEAP_TRY", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x05, 0x04) },
+            { ("HEAP_TRY", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x05, 0x05) },
+            { ("HEAP_TRY", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x05, 0x06) },
+            { ("HEAP_TRY", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x05, 0x07) },
 
             // HEAP_REA (Re-allocate Heap Memory - Error if Fail)
             { ("HEAP_REA", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x05, 0x10) },
