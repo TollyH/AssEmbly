@@ -232,6 +232,18 @@
         public StackSizeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
+    /// <summary>
+    /// The exception that is thrown when a given address does not correspond to the start of a block of memory.
+    /// </summary>
+    public class InvalidMemoryBlockException : RuntimeException
+    {
+        public InvalidMemoryBlockException() : base() { }
+        public InvalidMemoryBlockException(string message) : base(message) { }
+        public InvalidMemoryBlockException(string message, Exception inner) : base(message, inner) { }
+        public InvalidMemoryBlockException(string message, string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidMemoryBlockException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+    }
+
     // AAP FORMAT EXCEPTIONS
     /// <summary>
     /// Represents errors that occur during loading or saving an AAP file.

@@ -14640,55 +14640,371 @@ namespace AssEmbly.Test
             [TestMethod]
             public void HEAP_REA_Pointer_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.Registers[(int)Register.rg3] = 8;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x10, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.Registers[(int)Register.rg3] = 1024;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x10, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when allocating more memory than available");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.Registers[(int)Register.rg3] = 8;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x10, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }
 
             [TestMethod]
             public void HEAP_REA_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x11, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
+                });
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x11, (int)Register.rg2, 0, 4, 0, 0, 0, 0, 0, 0
+                });
+                _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when allocating more memory than available");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x11, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
+                });
+                _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }
 
             [TestMethod]
             public void HEAP_REA_Pointer_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x12, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x12, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 1024);
+                _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when allocating more memory than available");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x12, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }
 
             [TestMethod]
             public void HEAP_REA_Pointer_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x13, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x13, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 1024);
+                _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when allocating more memory than available");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x13, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }
 
             [TestMethod]
             public void HEAP_TRE_Pointer_Register()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.Registers[(int)Register.rg3] = 8;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x14, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.Registers[(int)Register.rg3] = 1024;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x14, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.Registers[(int)Register.rg3] = 8;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x14, (int)Register.rg2, (int)Register.rg3
+                });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void HEAP_TRE_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x15, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
+                });
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x15, (int)Register.rg2, 0, 4, 0, 0, 0, 0, 0, 0
+                });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x15, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
+                });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void HEAP_TRE_Pointer_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x16, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x16, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 1024);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x16, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void HEAP_TRE_Pointer_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                _ = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                ulong initial = testProcessor.Registers[(int)Register.rg2];
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x17, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(true);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x17, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 1024);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                        
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg2] = 0;
+                testProcessor.Registers[(int)Register.rg3] = 48;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x17, (int)Register.rg2, (int)Register.rg3
+                });
+                testProcessor.WriteMemoryQWord(48, 8);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void HEAP_FRE_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(64);
+                testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+                testProcessor.Registers[(int)Register.rg3] = testProcessor.AllocateMemory(16);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x20, (int)Register.rg3
+                });
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(2, testProcessor.MappedMemoryRanges.Count, "Instruction did not produce correct result");
+                Assert.AreEqual(16UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the operand");
+                Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                testProcessor = new Processor(64);
+                testProcessor.Registers[(int)Register.rg3] = testProcessor.AllocateMemory(16) + 6;
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x05, 0x20, (int)Register.rg3
+                });
+                _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
+                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }
         }
 
