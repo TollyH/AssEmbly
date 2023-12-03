@@ -15,9 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="AssEmbly.Test\**" />
-    <EmbeddedResource Remove="AssEmbly.Test\**" />
-    <None Remove="AssEmbly.Test\**" />
+    <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Test\**" />
+    <None Remove="Test\**" />
   </ItemGroup>
 
   <ItemGroup>
