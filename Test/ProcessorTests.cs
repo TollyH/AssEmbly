@@ -15002,15 +15002,15 @@ namespace AssEmbly.Test
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(2, testProcessor.MappedMemoryRanges.Count, "Instruction did not produce correct result");
-                Assert.AreEqual(16UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the operand");
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the operand");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 testProcessor = new Processor(64);
-                testProcessor.Registers[(int)Register.rg3] = testProcessor.AllocateMemory(16) + 6;
                 testProcessor.LoadProgram(new byte[]
                 {
                     0xFF, 0x05, 0x20, (int)Register.rg3
                 });
+                testProcessor.Registers[(int)Register.rg3] = testProcessor.AllocateMemory(16) + 6;
                 _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
                         "Instruction did not throw an exception when trying to free invalid/non-existent block");
             }

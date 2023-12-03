@@ -2116,6 +2116,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given memory address does not correspond to the start of an allocated memory block..
+        /// </summary>
+        internal static string Processor_Error_Invalid_Memory_Block {
+            get {
+                return ResourceManager.GetString("Processor_Error_Invalid_Memory_Block", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Memory allocation failed. There may not be enough free contiguous memory remaining..
         /// </summary>
         internal static string Processor_Error_Memory_Allocation {
@@ -2193,6 +2202,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_Low_Allocation_Allocation {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Low_Allocation_Allocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Allocation_Free {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Allocation_Free", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised memory allocation extension set re-allocation low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Allocation_Reallocation {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Allocation_Reallocation", resourceCulture);
             }
         }
         

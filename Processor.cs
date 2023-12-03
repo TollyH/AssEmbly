@@ -3245,6 +3245,101 @@ namespace AssEmbly
                                             string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Allocation, opcodeLow));
                                 }
                                 break;
+                            case 0x10:  // Re-allocation
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // HEAP_REA ptr, reg
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        if (result == ulong.MaxValue - 1)
+                                        {
+                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // HEAP_REA ptr, lit
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        if (result == ulong.MaxValue - 1)
+                                        {
+                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // HEAP_REA ptr, adr
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryPointedQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        if (result == ulong.MaxValue - 1)
+                                        {
+                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // HEAP_REA ptr, ptr
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        if (result == ulong.MaxValue - 1)
+                                        {
+                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // HEAP_TRE ptr, reg
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x5:  // HEAP_TRE ptr, lit
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x6:  // HEAP_TRE ptr, adr
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryPointedQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x7:  // HEAP_TRE ptr, ptr
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Reallocation, opcodeLow));
+                                }
+                                break;
+                            case 0x20:  // Free
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // HEAP_FRE ptr
+                                        if (!FreeMemory(ReadMemoryRegister(operandStart)))
+                                        {
+                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                        }
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Free, opcodeLow));
+                                }
+                                break;
                             default:
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
                         }

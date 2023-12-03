@@ -1088,4 +1088,13 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	<data name="Processor_Error_Memory_Allocation" xml:space="preserve">
 		<value>Memory allocation failed. There may not be enough free contiguous memory remaining.</value>
 	</data>
+	<data name="Processor_Error_Opcode_Low_Allocation_Reallocation" xml:space="preserve">
+		<value>{0:X} is not a recognised memory allocation extension set re-allocation low opcode</value>
+	</data>
+	<data name="Processor_Error_Invalid_Memory_Block" xml:space="preserve">
+		<value>The given memory address does not correspond to the start of an allocated memory block.</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_Allocation_Free" xml:space="preserve">
+		<value>{0:X} is not a recognised memory allocation extension set free low opcode</value>
+	</data>
 </root>
