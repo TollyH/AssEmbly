@@ -2116,11 +2116,29 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Memory allocation failed. There may not be enough free contiguous memory remaining..
+        /// </summary>
+        internal static string Processor_Error_Memory_Allocation {
+            get {
+                return ResourceManager.GetString("Processor_Error_Memory_Allocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:X} is not a recognised extension set.
         /// </summary>
         internal static string Processor_Error_Opcode_Extension_Set {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Extension_Set", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised high opcode for the memory allocation extension set.
+        /// </summary>
+        internal static string Processor_Error_Opcode_High_Allocation {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_High_Allocation", resourceCulture);
             }
         }
         
@@ -2166,6 +2184,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_High_Signed {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_High_Signed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised memory allocation extension set allocation low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Allocation_Allocation {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Allocation_Allocation", resourceCulture);
             }
         }
         

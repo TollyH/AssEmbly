@@ -3178,6 +3178,77 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_External, opcodeHigh));
                         }
                         break;
+                    case 0x5:  // Memory Allocation Extension Set
+                        switch (opcodeHigh)
+                        {
+                            case 0x00:  // Allocation
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // HEAP_ALC reg, reg
+                                        result = AllocateMemory(ReadMemoryRegister(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x1:  // HEAP_ALC reg, lit
+                                        result = AllocateMemory(ReadMemoryQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // HEAP_ALC reg, adr
+                                        result = AllocateMemory(ReadMemoryPointedQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // HEAP_ALC reg, ptr
+                                        result = AllocateMemory(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        if (result == ulong.MaxValue)
+                                        {
+                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                        }
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // HEAP_TRY reg, reg
+                                        result = AllocateMemory(ReadMemoryRegister(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x5:  // HEAP_TRY reg, lit
+                                        result = AllocateMemory(ReadMemoryQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x6:  // HEAP_TRY reg, adr
+                                        result = AllocateMemory(ReadMemoryPointedQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x7:  // HEAP_TRY reg, ptr
+                                        result = AllocateMemory(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        WriteMemoryRegister(operandStart, result);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(
+                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Allocation, opcodeLow));
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
+                        }
+                        break;
                     default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }

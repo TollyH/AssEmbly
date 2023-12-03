@@ -1079,4 +1079,13 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	<data name="Processor_Error_Stack_Out_Of_Range" xml:space="preserve">
 		<value>The rso register is outside the range of available memory</value>
 	</data>
+	<data name="Processor_Error_Opcode_High_Allocation" xml:space="preserve">
+		<value>{0:X} is not a recognised high opcode for the memory allocation extension set</value>
+	</data>
+	<data name="Processor_Error_Opcode_Low_Allocation_Allocation" xml:space="preserve">
+		<value>{0:X} is not a recognised memory allocation extension set allocation low opcode</value>
+	</data>
+	<data name="Processor_Error_Memory_Allocation" xml:space="preserve">
+		<value>Memory allocation failed. There may not be enough free contiguous memory remaining.</value>
+	</data>
 </root>
