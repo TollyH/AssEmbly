@@ -14648,12 +14648,13 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x10, (int)Register.rg2, (int)Register.rg3
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -14675,7 +14676,7 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x10, (int)Register.rg2, (int)Register.rg3
                 });
                 _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
-                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
+                        "Instruction did not throw an exception when trying to re-allocate invalid/non-existent block");
             }
 
             [TestMethod]
@@ -14688,12 +14689,13 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x11, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 testProcessor = new Processor(64);
@@ -14712,7 +14714,7 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x11, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
-                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
+                        "Instruction did not throw an exception when trying to re-allocate invalid/non-existent block");
             }
 
             [TestMethod]
@@ -14725,13 +14727,14 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x12, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 testProcessor = new Processor(64);
@@ -14752,7 +14755,7 @@ namespace AssEmbly.Test
                 });
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
-                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
+                        "Instruction did not throw an exception when trying to re-allocate invalid/non-existent block");
             }
 
             [TestMethod]
@@ -14766,13 +14769,14 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x13, (int)Register.rg2, (int)Register.rg3
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -14796,7 +14800,7 @@ namespace AssEmbly.Test
                 });
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
-                        "Instruction did not throw an exception when trying to free invalid/non-existent block");
+                        "Instruction did not throw an exception when trying to re-allocate invalid/non-existent block");
             }
 
             [TestMethod]
@@ -14810,12 +14814,13 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x14, (int)Register.rg2, (int)Register.rg3
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -14829,7 +14834,7 @@ namespace AssEmbly.Test
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
-                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
+                Assert.AreEqual(1024UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                         
                 testProcessor = new Processor(64);
@@ -14856,12 +14861,13 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x15, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 testProcessor = new Processor(64);
@@ -14871,7 +14877,7 @@ namespace AssEmbly.Test
                 });
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                         
@@ -14882,7 +14888,7 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x15, (int)Register.rg2, 8, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
@@ -14897,13 +14903,14 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x16, (int)Register.rg2, 48, 0, 0, 0, 0, 0, 0, 0
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 testProcessor = new Processor(64);
@@ -14914,7 +14921,7 @@ namespace AssEmbly.Test
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
                 testProcessor.WriteMemoryQWord(48, 1024);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                         
@@ -14926,7 +14933,7 @@ namespace AssEmbly.Test
                 });
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(ulong.MaxValue - 1, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
@@ -14942,13 +14949,14 @@ namespace AssEmbly.Test
                     0xFF, 0x05, 0x17, (int)Register.rg2, (int)Register.rg3
                 });
                 _ = testProcessor.AllocateMemory(16);
-                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
+                _ = testProcessor.FreeMemory(testProcessor.AllocateMemory(16));
                 ulong initial = testProcessor.Registers[(int)Register.rg2];
                 testProcessor.WriteMemoryQWord(48, 8);
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(initial, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
+                Assert.AreEqual(8L, testProcessor.MappedMemoryRanges[2].Length, "Instruction did not produce correct result");
                 Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
                 Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
