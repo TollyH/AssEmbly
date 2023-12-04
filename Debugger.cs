@@ -763,7 +763,8 @@ namespace AssEmbly
             IReadOnlyList<Range> mappedRanges = DebuggingProcessor.MappedMemoryRanges;
             long programSize = mappedRanges[0].Length;
             long stackSize = mappedRanges[^1].Length;
-            long freeMemory = memorySize - programSize - stackSize - mappedRanges.Sum(r => r.Length);
+            long freeMemory =
+                memorySize - programSize - stackSize - mappedRanges.Skip(1).SkipLast(1).Sum(r => r.Length);
 
             List<Range> freeBlocks = new();
             long largestFree = -1;
