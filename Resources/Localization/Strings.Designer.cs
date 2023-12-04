@@ -2206,7 +2206,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to {0:X} is not a recognised memory allocation extension set free low opcode.
         /// </summary>
         internal static string Processor_Error_Opcode_Low_Allocation_Free {
             get {

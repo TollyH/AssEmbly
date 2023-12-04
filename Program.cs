@@ -217,7 +217,8 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
-                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
+                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
+                !args.Contains("--unmapped-stack"));
 
             ExecuteProcessor(processor);
         }
@@ -251,7 +252,8 @@ namespace AssEmbly
                 return;
             }
 
-            Processor processor = new(memSize, entryPoint, useV1CallStack: args.Contains("--v1-call-stack"));
+            Processor processor = new(
+                memSize, entryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"));
             LoadProgramIntoProcessor(processor, program);
             ExecuteProcessor(processor);
         }
@@ -268,7 +270,8 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
-                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"));
+                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
+                !args.Contains("--unmapped-stack"));
 
             Debugger debugger = new(false, processor);
             if (args.Length >= 3 && !args[2].StartsWith('-'))
@@ -320,7 +323,8 @@ namespace AssEmbly
         private static void RunRepl(string[] args)
         {
             ulong memSize = GetMemorySize(args);
-            Debugger debugger = new(true, memorySize: memSize, useV1CallStack: args.Contains("--v1-call-stack"));
+            Debugger debugger = new(true, memorySize: memSize, useV1CallStack: args.Contains("--v1-call-stack"),
+                mapStack: !args.Contains("--unmapped-stack"));
             // Some program needs to be loaded or the processor won't run
             debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
             debugger.StartDebugger();

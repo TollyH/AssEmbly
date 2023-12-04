@@ -18,6 +18,7 @@ namespace AssEmbly
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
         public readonly bool UseV1CallStack;
+        public readonly bool MapStack;
 
         private readonly ulong stackCallSize;
 
@@ -44,7 +45,7 @@ namespace AssEmbly
 
         public const ulong SignBit = unchecked((ulong)long.MinValue);
 
-        public Processor(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false)
+        public Processor(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false, bool mapStack = true)
         {
             Memory = new byte[memorySize];
             Registers = new ulong[Enum.GetNames(typeof(Register)).Length];
@@ -57,6 +58,7 @@ namespace AssEmbly
             Console.OutputEncoding = Encoding.UTF8;
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
+            MapStack = mapStack;
         }
 
         ~Processor()
@@ -3347,15 +3349,18 @@ namespace AssEmbly
                     default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }
-                // Update the mapped memory occupied by the stack, and throw an error if the stack has collided with allocated memory
-                if (Registers[(int)Register.rso] > (ulong)Memory.LongLength)
+                if (MapStack)
                 {
-                    throw new StackSizeException(Strings.Processor_Error_Stack_Out_Of_Range);
-                }
-                _mappedMemoryRanges[^1] = new Range((long)Registers[(int)Register.rso], Memory.LongLength);
-                if (_mappedMemoryRanges.Count >= 2 && _mappedMemoryRanges[^2].Overlaps(_mappedMemoryRanges[^1]))
-                {
-                    throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
+                    // Update the mapped memory occupied by the stack, and throw an error if the stack has collided with allocated memory
+                    if (Registers[(int)Register.rso] > (ulong)Memory.LongLength)
+                    {
+                        throw new StackSizeException(Strings.Processor_Error_Stack_Out_Of_Range);
+                    }
+                    _mappedMemoryRanges[^1] = new Range((long)Registers[(int)Register.rso], Memory.LongLength);
+                    if (_mappedMemoryRanges.Count >= 2 && _mappedMemoryRanges[^2].Overlaps(_mappedMemoryRanges[^1]))
+                    {
+                        throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
+                    }
                 }
             } while (runUntilHalt && !halt);
             return halt;

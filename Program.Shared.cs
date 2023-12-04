@@ -49,20 +49,20 @@ namespace AssEmbly
         }
 
         public static Processor LoadExecutableToProcessor(string appPath, ulong memSize,
-            bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion)
+            bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion, bool mapStack)
         {
             byte[] program;
             Processor processor;
             if (useV1Format)
             {
                 program = File.ReadAllBytes(appPath);
-                processor = new Processor(memSize, entryPoint: 0, useV1CallStack: true);
+                processor = new Processor(memSize, entryPoint: 0, useV1CallStack: true, mapStack: mapStack);
             }
             else
             {
                 AAPFile file = LoadAAPFile(appPath, ignoreNewerVersion);
                 processor = new Processor(memSize, entryPoint: file.EntryPoint,
-                    useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack));
+                    useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack), mapStack: mapStack);
                 program = file.Program;
             }
             LoadProgramIntoProcessor(processor, program);

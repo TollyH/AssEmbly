@@ -153,19 +153,22 @@ execute - Execute an already assembled executable file
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
 
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
 
 debug - Step through an assembled executable file, pausing before each instruction begins execution.
     Usage: 'AssEmbly debug &lt;file-path&gt; [debug-info-file-path] [options]'
+    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
-    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.
+    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
 
 disassemble - Generate an AssEmbly program listing from an already assembled executable.
     Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
@@ -178,6 +181,7 @@ repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly
     Usage: 'AssEmbly repl [options]'
     --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
 </value>
 	</data>
 	<data name="CLI_Error_Invalid_AAP" xml:space="preserve">
