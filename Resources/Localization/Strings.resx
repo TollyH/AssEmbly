@@ -479,6 +479,7 @@ read &lt;byte|word|dword|qword&gt; &lt;address&gt; - Read data at a memory addre
 write &lt;mem|reg&gt; &lt;address|register-name&gt; &lt;value&gt; - Modify the value of a memory address or register
 map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes
 stack [limit] - Visualise the state of the stack, optionally limited by the number of bytes away from the stack base
+heap - View statistics related to the current state of heap allocation
 breakpoint [&lt;add|remove&gt; &lt;register&gt; &lt;value&gt;] - Add or remove a breakpoint for when a register is equal to a value
 dec2hex &lt;dec-number&gt; - Convert a decimal number to hexadecimal
 hex2dec &lt;hex-number&gt; - Convert a hexadecimal number to decimal
@@ -1100,5 +1101,35 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 	</data>
 	<data name="Processor_Error_Opcode_Low_Allocation_Free" xml:space="preserve">
 		<value>{0:X} is not a recognised memory allocation extension set free low opcode</value>
+	</data>
+	<data name="Debugger_Heap_Stats_Main" xml:space="preserve">
+		<value>
+Current memory statistics:
+Total memory: {0:N0} bytes
+Total free memory: {1:N0} bytes
+
+Number of free blocks: {2:N0}
+Largest free contiguous block: {3:N0} bytes ({4:N2}% fragmentation)
+
+Number of allocated blocks: {5:N0}
+Total size of allocated blocks: {6:N0} bytes
+
+Stack size: {7:N0} bytes{8}
+Program size: {9:N0} bytes</value>
+	</data>
+	<data name="Debugger_Heap_Unmapped" xml:space="preserve">
+		<value> (unmapped)</value>
+	</data>
+	<data name="Debugger_Heap_Map_Header" xml:space="preserve">
+		<value>Memory map:</value>
+	</data>
+	<data name="Debugger_Heap_Map_Fully_Unmapped" xml:space="preserve">
+		<value> = Fully unmapped, </value>
+	</data>
+	<data name="Debugger_Heap_Map_Fully_Mapped" xml:space="preserve">
+		<value> = Fully mapped, </value>
+	</data>
+	<data name="Debugger_Heap_Map_Partially_Mapped" xml:space="preserve">
+		<value> = Partially mapped  (1 block = {0:N2} bytes)</value>
 	</data>
 </root>

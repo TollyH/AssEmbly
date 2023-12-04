@@ -1481,13 +1481,79 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to  = Fully mapped, .
+        /// </summary>
+        internal static string Debugger_Heap_Map_Fully_Mapped {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Map_Fully_Mapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  = Fully unmapped, .
+        /// </summary>
+        internal static string Debugger_Heap_Map_Fully_Unmapped {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Map_Fully_Unmapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Memory map:.
+        /// </summary>
+        internal static string Debugger_Heap_Map_Header {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Map_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  = Partially mapped  (1 block = {0:N2} bytes).
+        /// </summary>
+        internal static string Debugger_Heap_Map_Partially_Mapped {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Map_Partially_Mapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Current memory statistics:
+        ///Total memory: {0:N0} bytes
+        ///Total free memory: {1:N0} bytes
+        ///
+        ///Number of free blocks: {2:N0}
+        ///Largest free contiguous block: {3:N0} bytes ({4:N2}% fragmentation)
+        ///
+        ///Number of allocated blocks: {5:N0}
+        ///Total size of allocated blocks: {6:N0} bytes
+        ///
+        ///Stack size: {7:N0} bytes{8}
+        ///Program size: {9:N0} bytes.
+        /// </summary>
+        internal static string Debugger_Heap_Stats_Main {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Stats_Main", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to  (unmapped).
+        /// </summary>
+        internal static string Debugger_Heap_Unmapped {
+            get {
+                return ResourceManager.GetString("Debugger_Heap_Unmapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 
         ///read &lt;byte|word|dword|qword&gt; &lt;address&gt; - Read data at a memory address
         ///write &lt;mem|reg&gt; &lt;address|register-name&gt; &lt;value&gt; - Modify the value of a memory address or register
         ///map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes
         ///stack [limit] - Visualise the state of the stack, optionally limited by the number of bytes away from the stack base
-        ///breakpoint [&lt;add|remove&gt; &lt;register&gt; &lt;value&gt;] - Add or remove a breakpoint for when a register is equal to a value
-        ///dec2hex &lt;d [rest of string was truncated]&quot;;.
+        ///heap - View statistics related to the current state of heap allocation
+        ///breakpoint [&lt;add|remove&gt; &lt;register&gt; &lt;value&gt;] - Add or [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string Debugger_Help_Body {
             get {

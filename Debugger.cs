@@ -271,6 +271,9 @@ namespace AssEmbly
                                 case "breakpoint":
                                     CommandBreakpointManage(command);
                                     break;
+                                case "heap":
+                                    CommandHeapStats();
+                                    break;
                                 case "help":
                                     CommandDebugHelp();
                                     break;
@@ -752,6 +755,85 @@ namespace AssEmbly
                 Console.WriteLine(Strings.Debugger_Error_Args_Required_Breakpoint);
                 Console.ResetColor();
             }
+        }
+
+        private void CommandHeapStats()
+        {
+            long memorySize = DebuggingProcessor.Memory.LongLength;
+            IReadOnlyList<Range> mappedRanges = DebuggingProcessor.MappedMemoryRanges;
+            long programSize = mappedRanges[0].Length;
+            long stackSize = mappedRanges[^1].Length;
+            long freeMemory = memorySize - programSize - stackSize - mappedRanges.Sum(r => r.Length);
+
+            List<Range> freeBlocks = new();
+            long largestFree = -1;
+            for (int i = 0; i < mappedRanges.Count - 1; i++)
+            {
+                if (mappedRanges[i].End != mappedRanges[i + 1].Start)
+                {
+                    Range newRange = new(mappedRanges[i].End, mappedRanges[i + 1].Start);
+                    freeBlocks.Add(newRange);
+                    if (newRange.Length > largestFree)
+                    {
+                        largestFree = newRange.Length;
+                    }
+                }
+            }
+
+            Console.WriteLine(Strings.Debugger_Heap_Stats_Main,
+                memorySize,
+                freeMemory,
+                freeBlocks.Count,
+                largestFree,
+                100d - (double)largestFree / freeMemory * 100d,
+                mappedRanges.Count - 2,
+                mappedRanges.Skip(1).SkipLast(1).Sum(m => m.Length),
+                stackSize,
+                DebuggingProcessor.MapStack ? "" : Strings.Debugger_Heap_Unmapped,
+                programSize);
+
+            // Generate visual map of stack allocation
+            Console.WriteLine();
+            int padding = Console.WindowWidth / 12;
+            int numberOfBars = Console.WindowWidth - padding;
+            double bytesPerBar = (double)memorySize / numberOfBars;
+            Console.WriteLine(Strings.Debugger_Heap_Map_Header);
+            // Colour and block size key
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write('\u2588');
+            Console.ResetColor();
+            Console.Write(Strings.Debugger_Heap_Map_Fully_Unmapped);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write('\u2588');
+            Console.ResetColor();
+            Console.Write(Strings.Debugger_Heap_Map_Fully_Mapped);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write('\u2588');
+            Console.ResetColor();
+            Console.Write(Strings.Debugger_Heap_Map_Partially_Mapped, bytesPerBar);
+            Console.WriteLine('\n');
+            for (int i = 0; i < numberOfBars; i++)
+            {
+                Range representingRange = new((long)Math.Floor(i * bytesPerBar),
+                    Math.Min((long)Math.Ceiling((i + 1) * bytesPerBar), memorySize));
+                bool anyMapped = mappedRanges.Any(r => r.Overlaps(representingRange));
+                bool anyUnmapped = freeBlocks.Any(r => r.Overlaps(representingRange));
+                if (anyMapped && anyUnmapped)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                }
+                else if (anyMapped)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                }
+                Console.Write('\u2588');
+                Console.ResetColor();
+            }
+            Console.WriteLine();
         }
 
         private static void CommandDebugHelp()
