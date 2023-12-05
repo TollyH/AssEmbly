@@ -2101,6 +2101,16 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An error occurred inside an external method ({0}):
+        ///    {1}: {2}.
+        /// </summary>
+        internal static string Processor_Error_External_Method {
+            get {
+                return ResourceManager.GetString("Processor_Error_External_Method", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot execute open file instruction if a file is already open.
         /// </summary>
         internal static string Processor_Error_File_Already_Open {

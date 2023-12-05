@@ -1132,4 +1132,8 @@ Program size: {9:N0} bytes</value>
 	<data name="Debugger_Heap_Map_Partially_Mapped" xml:space="preserve">
 		<value> = Partially mapped  (1 block = {0:N2} bytes)</value>
 	</data>
+	<data name="Processor_Error_External_Method" xml:space="preserve">
+		<value>An error was thrown by an external method ({0} -&gt; {1}):
+        {2}: {3}</value>
+	</data>
 </root>

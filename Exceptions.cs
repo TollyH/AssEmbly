@@ -198,6 +198,7 @@
 
     /// <summary>
     /// The exception that is thrown when an instruction is used without an external assembly or function loaded when one is required.
+    /// Also used for if an exception occurs inside an external method.
     /// </summary>
     public class ExternalOperationException : RuntimeException
     {
