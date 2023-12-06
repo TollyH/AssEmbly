@@ -181,19 +181,20 @@ namespace AssEmbly
                                 throw new OperandException(Strings.Assembler_Error_IMP_Operand_String);
                             }
                             byte[] parsedBytes = ParseLiteral(operands[0], true);
-                            string filepath = Path.GetFullPath(Encoding.UTF8.GetString(parsedBytes));
-                            if (!File.Exists(filepath))
+                            string importPath = Encoding.UTF8.GetString(parsedBytes);
+                            string resolvedPath = Path.GetFullPath(importPath);
+                            if (!File.Exists(resolvedPath))
                             {
-                                throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, filepath));
+                                throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
                             }
-                            if (importStack.Any(x => string.Equals(x.ImportPath, filepath, StringComparison.InvariantCultureIgnoreCase)))
+                            if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.InvariantCultureIgnoreCase)))
                             {
-                                throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, filepath));
+                                throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
                             }
-                            string[] linesToImport = File.ReadAllLines(filepath);
+                            string[] linesToImport = File.ReadAllLines(resolvedPath);
                             // Insert the contents of the imported file so they are assembled next
                             dynamicLines.InsertRange(l + 1, linesToImport);
-                            resolvedImports.Add((filepath, filepath, (uint)program.Count));
+                            resolvedImports.Add((importPath, resolvedPath, (uint)program.Count));
 
                             warnings.AddRange(warningGenerator.NextInstruction(
                                 Array.Empty<byte>(), mnemonic, operands,
@@ -202,7 +203,7 @@ namespace AssEmbly
                             lineIsLabelled = false;
                             lineIsEntry = false;
 
-                            importStack.Push(new ImportStackFrame(filepath, 0, linesToImport.Length));
+                            importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
                             continue;
                         // Define macro
                         case "MAC":
