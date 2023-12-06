@@ -15,8 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Example Programs\C# Interop\**" />
     <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Example Programs\C# Interop\**" />
     <EmbeddedResource Remove="Test\**" />
+    <None Remove="Example Programs\C# Interop\**" />
     <None Remove="Test\**" />
   </ItemGroup>
 
