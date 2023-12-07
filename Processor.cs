@@ -3402,7 +3402,7 @@ namespace AssEmbly
             {
                 throw new InvalidOperationException("A program has not been loaded in this processor.");
             }
-            if (size == 0)
+            if (size is 0 or > long.MaxValue)
             {
                 return ulong.MaxValue;
             }
@@ -3434,7 +3434,7 @@ namespace AssEmbly
             {
                 throw new InvalidOperationException("A program has not been loaded in this processor.");
             }
-            if (size == 0)
+            if (size is 0 or > long.MaxValue)
             {
                 return ulong.MaxValue;
             }
