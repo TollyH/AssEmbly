@@ -11,6 +11,7 @@ namespace AssEmbly
             { 0001, Strings.AssemblerWarnings_NonFatal_0001 },
             { 0002, Strings.AssemblerWarnings_NonFatal_0002 },
             { 0003, Strings.AssemblerWarnings_NonFatal_0003 },
+            { 0004, Strings.AssemblerWarnings_NonFatal_0004 },
         };
 
         [Localizable(true)]

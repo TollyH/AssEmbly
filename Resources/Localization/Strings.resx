@@ -1136,4 +1136,7 @@ Program size: {9:N0} bytes</value>
 		<value>An error was thrown by an external method ({0} -&gt; {1}):
         {2}: {3}</value>
 	</data>
+	<data name="AssemblerWarnings_NonFatal_0004" xml:space="preserve">
+		<value>Allocating constant 0 bytes.</value>
+	</data>
 </root>

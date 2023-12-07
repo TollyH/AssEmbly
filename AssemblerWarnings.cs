@@ -205,6 +205,7 @@ namespace AssEmbly
                 { 0001, Analyzer_Rolling_NonFatalError_0001 },
                 { 0002, Analyzer_Rolling_NonFatalError_0002 },
                 { 0003, Analyzer_Rolling_NonFatalError_0003 },
+                { 0004, Analyzer_Rolling_NonFatalError_0004 },
             };
             warningRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -407,6 +408,17 @@ namespace AssEmbly
             // Non-Fatal Error 0003: File has an entry point explicitly defined,
             // but the program is being assembled into v1 format which doesn't support them.
             return isEntry && usingV1Format;
+        }
+
+        private bool Analyzer_Rolling_NonFatalError_0004()
+        {
+            // Non-Fatal Error 0004: Allocating constant 0 bytes.
+            if (allocationOfLiteral.Contains(instructionOpcode))
+            {
+                _ = Assembler.ParseLiteral(operands[1], false, out ulong number);
+                return number == 0;
+            }
+            return false;
         }
 
         private bool Analyzer_Rolling_Warning_0001()

@@ -217,6 +217,35 @@
             // Extended base set
 
             { new Opcode(0x03, 0x00), new[] { 0 } },  // EXTD_BSW reg
+
+            // External assembly extension set
+
+            { new Opcode(0x04, 0x20), new[] { 0 } },  // ASMX_AEX reg, adr
+            { new Opcode(0x04, 0x21), new[] { 0 } },  // ASMX_AEX reg, ptr
+            { new Opcode(0x04, 0x22), new[] { 0 } },  // ASMX_FEX reg, adr
+            { new Opcode(0x04, 0x23), new[] { 0 } },  // ASMX_FEX reg, ptr
+
+            // Memory allocation extension set
+
+            { new Opcode(0x05, 0x00), new[] { 0 } },  // HEAP_ALC reg, reg
+            { new Opcode(0x05, 0x01), new[] { 0 } },  // HEAP_ALC reg, lit
+            { new Opcode(0x05, 0x02), new[] { 0 } },  // HEAP_ALC reg, adr
+            { new Opcode(0x05, 0x03), new[] { 0 } },  // HEAP_ALC reg, ptr
+
+            { new Opcode(0x05, 0x04), new[] { 0 } },  // HEAP_TRY reg, reg
+            { new Opcode(0x05, 0x05), new[] { 0 } },  // HEAP_TRY reg, lit
+            { new Opcode(0x05, 0x06), new[] { 0 } },  // HEAP_TRY reg, adr
+            { new Opcode(0x05, 0x07), new[] { 0 } },  // HEAP_TRY reg, ptr
+
+            { new Opcode(0x05, 0x10), new[] { 0 } },  // HEAP_REA reg, reg
+            { new Opcode(0x05, 0x11), new[] { 0 } },  // HEAP_REA reg, lit
+            { new Opcode(0x05, 0x12), new[] { 0 } },  // HEAP_REA reg, adr
+            { new Opcode(0x05, 0x13), new[] { 0 } },  // HEAP_REA reg, ptr
+
+            { new Opcode(0x05, 0x14), new[] { 0 } },  // HEAP_TRE reg, reg
+            { new Opcode(0x05, 0x15), new[] { 0 } },  // HEAP_TRE reg, lit
+            { new Opcode(0x05, 0x16), new[] { 0 } },  // HEAP_TRE reg, adr
+            { new Opcode(0x05, 0x17), new[] { 0 } },  // HEAP_TRE reg, ptr
         };
         /// <summary>
         /// Every opcode that writes to a literal memory location.
@@ -297,6 +326,14 @@
             { new Opcode(0x02, 0x72), 0 },  // FLPT_WCN adr
             { new Opcode(0x02, 0x82), 0 },  // FLPT_WFN adr
             { new Opcode(0x02, 0xD2), 1 },  // FLPT_CMP reg, adr
+
+            { new Opcode(0x04, 0x20), 1 },  // ASMX_AEX reg, adr
+            { new Opcode(0x04, 0x22), 1 },  // ASMX_FEX reg, adr
+            
+            { new Opcode(0x05, 0x02), 1 },  // HEAP_ALC reg, adr
+            { new Opcode(0x05, 0x06), 1 },  // HEAP_TRY reg, adr
+            { new Opcode(0x05, 0x12), 1 },  // HEAP_REA reg, adr
+            { new Opcode(0x05, 0x16), 1 },  // HEAP_TRE reg, adr
         };
 
         /// <summary>
@@ -413,6 +450,16 @@
             { new Opcode(0x02, 0x35), 2 },
             { new Opcode(0x02, 0x39), 1 },
         };
+        /// <summary>
+        /// All opcodes that allocate a literal value of bytes in memory. The literal value is always the second operand.
+        /// </summary>
+        internal static readonly HashSet<Opcode> allocationOfLiteral = new()
+        {
+            new Opcode(0x05, 0x01),
+            new Opcode(0x05, 0x05),
+            new Opcode(0x05, 0x11),
+            new Opcode(0x05, 0x15),
+        };
 
         /// <summary>
         /// The upper and lower numeric limits of each move instruction before bits begin to be truncated.
@@ -518,6 +565,8 @@
             new Opcode(0x01, 0x55),  // SIGN_WCB lit
             new Opcode(0x01, 0x61),  // SIGN_WFN lit
             new Opcode(0x01, 0x65),  // SIGN_WFB lit
+
+            new Opcode(0x04, 0x32),  // ASMX_CAL lit
         };
         /// <summary>
         /// All opcodes that can only operate as intended when given literals within the range of a signed 64-bit integer as an operand
@@ -561,6 +610,8 @@
             new Opcode(0x02, 0x71),  // FLPT_WCN reg, lit
             new Opcode(0x02, 0x81),  // FLPT_WFN reg, lit
             new Opcode(0x02, 0xD1),  // FLPT_CMP reg, lit
+
+            new Opcode(0x04, 0x32),  // ASMX_CAL lit
         };
         /// <summary>
         /// All opcodes that can only operate as intended when given floating point literals as an operand

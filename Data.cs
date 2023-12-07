@@ -594,11 +594,11 @@
             // ASMX_CLF (Close Function)
             { ("ASMX_CLF", Array.Empty<OperandType>()), new Opcode(0x04, 0x11) },
 
-            // ASMX_AEX (Does Assembly Exist and Is Is Valid?)
+            // ASMX_AEX (Does Assembly Exist and Is It Valid?)
             { ("ASMX_AEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x04, 0x20) },
             { ("ASMX_AEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x04, 0x21) },
 
-            // ASMX_FEX (Does Function Exist and Is Is Valid?)
+            // ASMX_FEX (Does Function Exist and Is It Valid?)
             { ("ASMX_FEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x04, 0x22) },
             { ("ASMX_FEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x04, 0x23) },
 

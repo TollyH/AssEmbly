@@ -631,6 +631,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allocating constant 0 bytes..
+        /// </summary>
+        internal static string AssemblerWarnings_NonFatal_0004 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_NonFatal_0004", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Avoid use of NOP instruction..
         /// </summary>
         internal static string AssemblerWarnings_Suggestion_0001 {
@@ -2101,8 +2110,8 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An error occurred inside an external method ({0}):
-        ///    {1}: {2}.
+        ///   Looks up a localized string similar to An error was thrown by an external method ({0} -&gt; {1}):
+        ///        {2}: {3}.
         /// </summary>
         internal static string Processor_Error_External_Method {
             get {
