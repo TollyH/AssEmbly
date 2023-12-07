@@ -14638,7 +14638,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_REA_Pointer_Register()
+            public void HEAP_REA_Register_Register()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14680,7 +14680,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_REA_Pointer_Literal()
+            public void HEAP_REA_Register_Literal()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14718,7 +14718,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_REA_Pointer_Address()
+            public void HEAP_REA_Register_Address()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14759,7 +14759,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_REA_Pointer_Pointer()
+            public void HEAP_REA_Register_Pointer()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14804,7 +14804,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_TRE_Pointer_Register()
+            public void HEAP_TRE_Register_Register()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14852,7 +14852,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_TRE_Pointer_Literal()
+            public void HEAP_TRE_Register_Literal()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14894,7 +14894,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_TRE_Pointer_Address()
+            public void HEAP_TRE_Register_Address()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14939,7 +14939,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_TRE_Pointer_Pointer()
+            public void HEAP_TRE_Register_Pointer()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
@@ -14990,7 +14990,7 @@ namespace AssEmbly.Test
             }
 
             [TestMethod]
-            public void HEAP_FRE_Pointer()
+            public void HEAP_FRE_Register()
             {
                 Processor testProcessor = new(64);
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;

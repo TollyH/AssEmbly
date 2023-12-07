@@ -3259,7 +3259,7 @@ namespace AssEmbly
                             case 0x10:  // Re-allocation
                                 switch (opcodeLow)
                                 {
-                                    case 0x0:  // HEAP_REA ptr, reg
+                                    case 0x0:  // HEAP_REA reg, reg
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
@@ -3272,7 +3272,7 @@ namespace AssEmbly
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
-                                    case 0x1:  // HEAP_REA ptr, lit
+                                    case 0x1:  // HEAP_REA reg, lit
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
@@ -3285,7 +3285,7 @@ namespace AssEmbly
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x2:  // HEAP_REA ptr, adr
+                                    case 0x2:  // HEAP_REA reg, adr
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
@@ -3298,7 +3298,7 @@ namespace AssEmbly
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x3:  // HEAP_REA ptr, ptr
+                                    case 0x3:  // HEAP_REA reg, ptr
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
@@ -3311,22 +3311,22 @@ namespace AssEmbly
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
-                                    case 0x4:  // HEAP_TRE ptr, reg
+                                    case 0x4:  // HEAP_TRE reg, reg
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
-                                    case 0x5:  // HEAP_TRE ptr, lit
+                                    case 0x5:  // HEAP_TRE reg, lit
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryQWord(operandStart + 1));
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x6:  // HEAP_TRE ptr, adr
+                                    case 0x6:  // HEAP_TRE reg, adr
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryPointedQWord(operandStart + 1));
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
-                                    case 0x7:  // HEAP_TRE ptr, ptr
+                                    case 0x7:  // HEAP_TRE reg, ptr
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
@@ -3339,7 +3339,7 @@ namespace AssEmbly
                             case 0x20:  // Free
                                 switch (opcodeLow)
                                 {
-                                    case 0x0:  // HEAP_FRE ptr
+                                    case 0x0:  // HEAP_FRE reg
                                         if (!FreeMemory(ReadMemoryRegister(operandStart)))
                                         {
                                             throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
