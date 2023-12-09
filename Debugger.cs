@@ -75,8 +75,7 @@ namespace AssEmbly
                         ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..]).Line
                         : inst;
 
-                Console.Write(Strings.Debugger_Execution_Preface_Header);
-                Console.WriteLine(lineDisassembly);
+                Console.WriteLine();
                 Console.WriteLine();
                 if (LoadedDebugInfoFile is not null)
                 {
@@ -93,6 +92,9 @@ namespace AssEmbly
                         Console.WriteLine();
                     }
                 }
+                Console.Write(Strings.Debugger_Execution_Preface_Header);
+                Console.WriteLine(lineDisassembly);
+                Console.WriteLine();
             }
             else
             {

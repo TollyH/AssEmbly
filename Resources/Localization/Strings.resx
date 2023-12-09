@@ -252,9 +252,7 @@ An error occurred executing your program:
 Label names and original source lines will not be available.</value>
 	</data>
 	<data name="Debugger_Execution_Preface_Header" xml:space="preserve">
-		<value>
-
-About to execute instruction:
+		<value>About to execute instruction:
     </value>
 	</data>
 	<data name="Debugger_Execution_Preface_Labels" xml:space="preserve">
