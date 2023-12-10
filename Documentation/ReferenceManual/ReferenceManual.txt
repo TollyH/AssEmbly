@@ -1,8 +1,8 @@
 AssEmbly Reference Manual
 
-Applies to versions: 2.1.0
+Applies to versions: 3.0.0
 
-Last revised: 2023-10-27
+Last revised: 2023-12-10
 
 Introduction
 
@@ -125,7 +125,7 @@ Technical Information
   Instruction Size      1 byte – 17 bytes (current) / unlimited
                         (theoretical)
 
-  Instruction Count     297 opcodes (102 unique operations)
+  Instruction Count     329 opcodes (114 unique operations)
 
   Text Encoding         UTF-8
   --------------------- -------------------------------------------------
