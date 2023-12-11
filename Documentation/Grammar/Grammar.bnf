@@ -30,7 +30,12 @@
 <stringBackslash> ::= "\\" <stringEscapeChar>
 <stringEscapeChar> ::= "\\" | "\"" | "'" | "0" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | <stringUnicodeEscapeFour> | <stringUnicodeEscapeEight>
 <stringUnicodeEscapeFour> ::= "u" <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar>
-<stringUnicodeEscapeEight> ::= "U" <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar>
+<stringUnicodeEscapeEight> ::= "U0000" <hexadecimalZeroToC> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> | "U0000" <hexadecimalEToF> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> | "U0000d" <hexadecimalZeroToSeven> <hexadecimalChar> <hexadecimalChar> | "U000" <hexadecimalNonZero> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> | "U0010" <hexadecimalChar> <hexadecimalChar> <hexadecimalChar> <hexadecimalChar>
+
+<hexadecimalNonZero> ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "a" | "b" | "c" | "d" | "e" | "f" | "A" | "B" | "C" | "D" | "E" | "F"
+<hexadecimalZeroToSeven> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7"
+<hexadecimalZeroToC> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "a" | "b" | "c" | "A" | "B" | "C"
+<hexadecimalEToF> ::= "e" | "f" | "E" | "F"
 
 <hexadecimalNumber> ::= "0x" <hexadecimalNumberDigits>
 <hexadecimalNumberDigits> ::= <hexadecimalDigit> | <hexadecimalNumberDigits> <hexadecimalDigit>
