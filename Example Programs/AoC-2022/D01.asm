@@ -44,7 +44,6 @@ JMP :CHAR_READ_LOOP
 CFL
 ; rg1 - max number
 ; rg2 - current elf
-; rg3 - read elf
 ; rg4 - elf memory offset
 ; rg5 - number of elves
 MVQ rg4, :&TOTALS
@@ -58,12 +57,11 @@ ADD rg4, 8  ; Move onto next elf
 ICR rg2
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :NEXT_PART
-MVQ rg3, *rg4
-CMP rg1, rg3  ; Is the value we're checking greater than the current maximum?
+CMP rg1, *rg4  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX  ; (i.e. the current maximum is less than)
 JMP :MAX_LOOP
 :UPDATE_MAX
-MVQ rg1, rg3
+MVQ rg1, *rg4
 JMP :MAX_LOOP
 :NEXT_PART
 WCN rg1
@@ -80,14 +78,13 @@ ADD rg4, 8  ; Move onto next elf
 ICR rg2
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :THIRD_HIGHEST
-MVQ rg3, *rg4
-CMP rg6, rg3  ; Is the value we're checking greater than the current maximum?
+CMP rg6, *rg4  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX_2  ; (i.e. the current maximum is less than)
 JMP :MAX_LOOP_2
 :UPDATE_MAX_2
-CMP rg1, rg3  ; If we've found the highest - don't update - we want the second highest
+CMP rg1, *rg4  ; If we've found the highest - don't update - we want the second highest
 JEQ :MAX_LOOP_2
-MVQ rg6, rg3
+MVQ rg6, *rg4
 JMP :MAX_LOOP_2
 
 :THIRD_HIGHEST
@@ -102,16 +99,15 @@ ADD rg4, 8  ; Move onto next elf
 ICR rg2
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :END
-MVQ rg3, *rg4
-CMP rg7, rg3  ; Is the value we're checking greater than the current maximum?
+CMP rg7, *rg4  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX_3  ; (i.e. the current maximum is less than)
 JMP :MAX_LOOP_3
 :UPDATE_MAX_3
-CMP rg1, rg3  ; If we've found the highest - don't update - we want the third highest
+CMP rg1, *rg4  ; If we've found the highest - don't update - we want the third highest
 JEQ :MAX_LOOP_3
-CMP rg6, rg3  ; If we've found the second highest - don't update - we want the third highest
+CMP rg6, *rg4  ; If we've found the second highest - don't update - we want the third highest
 JEQ :MAX_LOOP_3
-MVQ rg7, rg3
+MVQ rg7, *rg4
 JMP :MAX_LOOP_3
 
 :END
