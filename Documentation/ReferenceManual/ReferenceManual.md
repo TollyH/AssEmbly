@@ -467,14 +467,14 @@ Stores the memory address of the highest non-popped item on the stack (note that
 
 More information can be found in the dedicated sections on the stack and subroutines.
 
-A simple example, assuming memory is 2046 bytes in size (making 2045 the highest address):
+A simple example, assuming memory is 8192 bytes in size (making 8191 the highest address):
 
 ```text
-WCN rso  ; Outputs "2046"
+WCN rso  ; Outputs "8192"
 PSH 5  ; Push the literal 5 to the stack
-WCN rso  ; Outputs "2038" (stack values are 8 bytes)
+WCN rso  ; Outputs "8184" (stack values are 8 bytes)
 POP rg0  ; Pop the just-pushed 5 into rg0
-WCN rso  ; Outputs "2046"
+WCN rso  ; Outputs "8192"
 ```
 
 ### `rsb` — Stack Base
@@ -575,7 +575,7 @@ MVQ rg0, *rg1
 MVQ *rg2, rg0
 ```
 
-When using any move instruction larger than `MVB`, be careful to ensure that not only the starting point is within the bounds of available memory, but also all of the subsequent bytes. For example, if you have `2046` bytes of available memory (making `2045` the maximum address), you cannot use `MVQ` on the starting address `2043`, as that requires at least 8 bytes.
+When using any move instruction larger than `MVB`, be careful to ensure that not only the starting point is within the bounds of available memory, but also all of the subsequent bytes. For example, if you have `8192` bytes of available memory (making `8191` the maximum address), you cannot use `MVQ` on the starting address `8189`, as that requires at least 8 bytes.
 
 ## Maths and Bitwise Operations
 
@@ -1929,42 +1929,42 @@ Once items have been pushed to the stack, they can be removed (**popped**), star
 
 The `rso` register contains the address of the first byte of the top item in the stack. Its value will get **lower** as items are **pushed**, and **greater** as items are **popped**. More info on the `rso` register's behaviour can be found in the registers section.
 
-Take this visual example, assuming memory is 2046 bytes in size (making 2045 the maximum address):
+Take this visual example, assuming memory is 8192 bytes in size (making 8191 the maximum address):
 
 ```text
-; rso = 2046
-; | Addresses |    2022..2029    |    2030..2037    |    2038..2045    ||
+; rso = 8192
+; | Addresses |    8168..8175    |    8176..8183    |    8184..8191    ||
 ; |   Value   | ???????????????? | ???????????????? | ???????????????? ||
 
 PSH 0xDEADBEEF  ; Push 0xDEADBEEF (3735928559) to the stack
 
-; rso = 2038
-; | Addresses |    2022..2029    |    2030..2037    ||    2038..2045    |
+; rso = 8184
+; | Addresses |    8168..8175    |    8176..8183    ||    8184..8191    |
 ; |   Value   | ???????????????? | ???????????????? || 00000000EFBEADDE |
 
 PSH 0xCAFEB0BA  ; Push 0xCAFEB0BA (3405689018) to the stack
 
-; rso = 2030
-; | Addresses |    2022..2029    ||    2030..2037    |    2038..2045    |
+; rso = 8176
+; | Addresses |    8168..8175    ||    8176..8183    |    8184..8191    |
 ; |   Value   | ???????????????? || 00000000BAB0FECA | 00000000EFBEADDE |
 
 PSH 0xD00D2BAD  ; Push 0xD00D2BAD (3490524077) to the stack
 
-; rso = 2022
-; | Addresses ||    2022..2029    |    2030..2037    |    2038..2045    |
+; rso = 8168
+; | Addresses ||    8168..8175    |    8176..8183    |    8184..8191    |
 ; |   Value   || 00000000AD2B0DD0 | 00000000BAB0FECA | 00000000EFBEADDE |
 
 POP rg0  ; Pop the most recent non-popped item from the stack into rg0
 
-; rso = 2030
-; | Addresses |    2022..2029    ||    2030..2037    |    2038..2045    |
+; rso = 8176
+; | Addresses |    8168..8175    ||    8176..8183    |    8184..8191    |
 ; |   Value   | ???????????????? || 00000000BAB0FECA | 00000000EFBEADDE |
 ; rg0 = 0xD00D2BAD
 
 POP rg0  ; Pop the most recent non-popped item from the stack into rg0
 
-; rso = 2038
-; | Addresses |    2022..2029    |    2030..2037    ||    2038..2045    |
+; rso = 8184
+; | Addresses |    8168..8175    |    8176..8183    ||    8184..8191    |
 ; |   Value   | ???????????????? | ???????????????? || 00000000EFBEADDE |
 ; rg0 = 0xCAFEB0BA
 ```

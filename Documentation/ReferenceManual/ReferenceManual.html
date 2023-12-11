@@ -896,13 +896,13 @@ the highest possible address in memory (so will result in an error if
 that address is read from).</p>
 <p>More information can be found in the dedicated sections on the stack
 and subroutines.</p>
-<p>A simple example, assuming memory is 2046 bytes in size (making 2045
+<p>A simple example, assuming memory is 8192 bytes in size (making 8191
 the highest address):</p>
-<pre class="text"><code>WCN rso  ; Outputs &quot;2046&quot;
+<pre class="text"><code>WCN rso  ; Outputs &quot;8192&quot;
 PSH 5  ; Push the literal 5 to the stack
-WCN rso  ; Outputs &quot;2038&quot; (stack values are 8 bytes)
+WCN rso  ; Outputs &quot;8184&quot; (stack values are 8 bytes)
 POP rg0  ; Pop the just-pushed 5 into rg0
-WCN rso  ; Outputs &quot;2046&quot;</code></pre>
+WCN rso  ; Outputs &quot;8192&quot;</code></pre>
 <h3 id="rsb-stack-base"><code>rsb</code> — Stack Base</h3>
 <p>Stores the memory address of the bottom of the current stack frame.
 <code>rsb</code> will only ever change when subroutines are being
@@ -1023,9 +1023,9 @@ MVQ *rg2, rg0</code></pre>
 <p>When using any move instruction larger than <code>MVB</code>, be
 careful to ensure that not only the starting point is within the bounds
 of available memory, but also all of the subsequent bytes. For example,
-if you have <code>2046</code> bytes of available memory (making
-<code>2045</code> the maximum address), you cannot use <code>MVQ</code>
-on the starting address <code>2043</code>, as that requires at least 8
+if you have <code>8192</code> bytes of available memory (making
+<code>8191</code> the maximum address), you cannot use <code>MVQ</code>
+on the starting address <code>8189</code>, as that requires at least 8
 bytes.</p>
 <h2 id="maths-and-bitwise-operations">Maths and Bitwise Operations</h2>
 <p>Math and bitwise instructions operate <strong>in-place</strong> in
@@ -2438,41 +2438,41 @@ of the top item in the stack. Its value will get <strong>lower</strong>
 as items are <strong>pushed</strong>, and <strong>greater</strong> as
 items are <strong>popped</strong>. More info on the <code>rso</code>
 register’s behaviour can be found in the registers section.</p>
-<p>Take this visual example, assuming memory is 2046 bytes in size
-(making 2045 the maximum address):</p>
-<pre class="text"><code>; rso = 2046
-; | Addresses |    2022..2029    |    2030..2037    |    2038..2045    ||
+<p>Take this visual example, assuming memory is 8192 bytes in size
+(making 8191 the maximum address):</p>
+<pre class="text"><code>; rso = 8192
+; | Addresses |    8168..8175    |    8176..8183    |    8184..8191    ||
 ; |   Value   | ???????????????? | ???????????????? | ???????????????? ||
 
 PSH 0xDEADBEEF  ; Push 0xDEADBEEF (3735928559) to the stack
 
-; rso = 2038
-; | Addresses |    2022..2029    |    2030..2037    ||    2038..2045    |
+; rso = 8184
+; | Addresses |    8168..8175    |    8176..8183    ||    8184..8191    |
 ; |   Value   | ???????????????? | ???????????????? || 00000000EFBEADDE |
 
 PSH 0xCAFEB0BA  ; Push 0xCAFEB0BA (3405689018) to the stack
 
-; rso = 2030
-; | Addresses |    2022..2029    ||    2030..2037    |    2038..2045    |
+; rso = 8176
+; | Addresses |    8168..8175    ||    8176..8183    |    8184..8191    |
 ; |   Value   | ???????????????? || 00000000BAB0FECA | 00000000EFBEADDE |
 
 PSH 0xD00D2BAD  ; Push 0xD00D2BAD (3490524077) to the stack
 
-; rso = 2022
-; | Addresses ||    2022..2029    |    2030..2037    |    2038..2045    |
+; rso = 8168
+; | Addresses ||    8168..8175    |    8176..8183    |    8184..8191    |
 ; |   Value   || 00000000AD2B0DD0 | 00000000BAB0FECA | 00000000EFBEADDE |
 
 POP rg0  ; Pop the most recent non-popped item from the stack into rg0
 
-; rso = 2030
-; | Addresses |    2022..2029    ||    2030..2037    |    2038..2045    |
+; rso = 8176
+; | Addresses |    8168..8175    ||    8176..8183    |    8184..8191    |
 ; |   Value   | ???????????????? || 00000000BAB0FECA | 00000000EFBEADDE |
 ; rg0 = 0xD00D2BAD
 
 POP rg0  ; Pop the most recent non-popped item from the stack into rg0
 
-; rso = 2038
-; | Addresses |    2022..2029    |    2030..2037    ||    2038..2045    |
+; rso = 8184
+; | Addresses |    8168..8175    |    8176..8183    ||    8184..8191    |
 ; |   Value   | ???????????????? | ???????????????? || 00000000EFBEADDE |
 ; rg0 = 0xCAFEB0BA</code></pre>
 <h3 id="using-the-stack-to-preserve-registers">Using the Stack to
