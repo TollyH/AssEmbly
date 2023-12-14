@@ -1,5 +1,3 @@
-; Program needs to run with more than the default memory size for full input file!
-; Include the parameter --mem-size=5000 with the execute command!
 OFL :FILE_PATH
 ; rg0 - read character
 ; rg1 - pointer to message location

@@ -1,5 +1,3 @@
-; Program needs to run with more than the default memory size for full input file!
-; Include the parameter --mem-size=5000 with the execute command!
 MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
