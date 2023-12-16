@@ -1137,4 +1137,13 @@ Program size: {9:N0} bytes</value>
 	<data name="AssemblerWarnings_NonFatal_0004" xml:space="preserve">
 		<value>Allocating constant 0 bytes.</value>
 	</data>
+	<data name="AssemblerWarnings_Suggestion_0015" xml:space="preserve">
+		<value>Use `MVB {1}, {1}` instead of `AND {1}, 0xFF`, as it results in less bytes.</value>
+	</data>
+	<data name="AssemblerWarnings_Suggestion_0016" xml:space="preserve">
+		<value>Use `MVW {1}, {1}` instead of `AND {1}, 0xFFFF`, as it results in less bytes.</value>
+	</data>
+	<data name="AssemblerWarnings_Suggestion_0017" xml:space="preserve">
+		<value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
+	</data>
 </root>

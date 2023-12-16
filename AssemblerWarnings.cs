@@ -242,6 +242,9 @@ namespace AssEmbly
                 { 0012, Analyzer_Rolling_Suggestion_0012 },
                 { 0013, Analyzer_Rolling_Suggestion_0013 },
                 { 0014, Analyzer_Rolling_Suggestion_0014 },
+                { 0015, Analyzer_Rolling_Suggestion_0015 },
+                { 0016, Analyzer_Rolling_Suggestion_0016 },
+                { 0017, Analyzer_Rolling_Suggestion_0017 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -876,6 +879,27 @@ namespace AssEmbly
             // Suggestion 0014: Use `ICR {reg}` instead of `SUB {reg}, -1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
                 && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0015()
+        {
+            // Suggestion 0015: Use `MVB {reg}, {reg}` instead of `AND {reg}, 0xFF`, as it results in less bytes.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
+                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFF;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0016()
+        {
+            // Suggestion 0016: Use `MVW {reg}, {reg}` instead of `AND {reg}, 0xFFFF`, as it results in less bytes.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
+                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFF;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0017()
+        {
+            // Suggestion 0017: Use `MVD {reg}, {reg}` instead of `AND {reg}, 0xFFFFFFFF`, as it results in less bytes.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
+                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFFFFFF;
         }
     }
 }

@@ -766,6 +766,33 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use `MVB {1}, {1}` instead of `AND {1}, 0xFF`, as it results in less bytes..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0015 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0015", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use `MVW {1}, {1}` instead of `AND {1}, 0xFFFF`, as it results in less bytes..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0016 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0016", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0017 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0017", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Data insertion is not directly preceded by an unconditional jump, return, or halt instruction..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0001 {
@@ -1458,9 +1485,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 
-        ///
-        ///About to execute instruction:
+        ///   Looks up a localized string similar to About to execute instruction:
         ///    .
         /// </summary>
         internal static string Debugger_Execution_Preface_Header {
