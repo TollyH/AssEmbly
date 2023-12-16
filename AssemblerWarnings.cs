@@ -815,6 +815,15 @@ namespace AssEmbly
                             return true;
                         }
                         break;
+                    // Move, Or, or And a register by itself
+                    case 0x60:
+                    case 0x64:
+                    case 0x98:
+                        if (newBytes[(int)operandStart] == newBytes[(int)operandStart + 1])
+                        {
+                            return true;
+                        }
+                        break;
                 }
             }
             if (divisionByLiteral.TryGetValue(instructionOpcode, out int literalOperandIndex))
