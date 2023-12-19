@@ -28,13 +28,13 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Pointer](#pointer)
   - [Registers](#registers)
     - [Register Table](#register-table)
-    - [`rpo` — Program Offset](#rpo--program-offset)
-    - [`rsf` — Status Flags](#rsf--status-flags)
-    - [`rrv` — Return Value](#rrv--return-value)
-    - [`rfp` — Fast Pass Parameter](#rfp--fast-pass-parameter)
-    - [`rso` — Stack Offset](#rso--stack-offset)
-    - [`rsb` — Stack Base](#rsb--stack-base)
-    - [`rg0` - `rg9` — General Purpose](#rg0---rg9--general-purpose)
+    - [rpo — Program Offset](#rpo--program-offset)
+    - [rsf — Status Flags](#rsf--status-flags)
+    - [rrv — Return Value](#rrv--return-value)
+    - [rfp — Fast Pass Parameter](#rfp--fast-pass-parameter)
+    - [rso — Stack Offset](#rso--stack-offset)
+    - [rsb — Stack Base](#rsb--stack-base)
+    - [rg0 - rg9 — General Purpose](#rg0---rg9--general-purpose)
   - [Moving Data](#moving-data)
     - [Moving with Literals](#moving-with-literals)
     - [Moving with Registers](#moving-with-registers)
@@ -62,12 +62,12 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Testing Bits](#testing-bits)
     - [Checking the Carry, Overflow, Zero, and Sign Flags](#checking-the-carry-overflow-zero-and-sign-flags)
   - [Assembler Directives](#assembler-directives)
-    - [`PAD` — Byte Padding](#pad--byte-padding)
-    - [`DAT` — Byte Insertion](#dat--byte-insertion)
-    - [`NUM` — Number Insertion](#num--number-insertion)
-    - [`MAC` — Macro Definition](#mac--macro-definition)
-    - [`IMP` — File Importing](#imp--file-importing)
-    - [`ANALYZER` — Toggling Assembler Warnings](#analyzer--toggling-assembler-warnings)
+    - [PAD — Byte Padding](#pad--byte-padding)
+    - [DAT — Byte Insertion](#dat--byte-insertion)
+    - [NUM — Number Insertion](#num--number-insertion)
+    - [MAC — Macro Definition](#mac--macro-definition)
+    - [IMP — File Importing](#imp--file-importing)
+    - [ANALYZER — Toggling Assembler Warnings](#analyzer--toggling-assembler-warnings)
   - [Console Input and Output](#console-input-and-output)
   - [File Handling](#file-handling)
     - [Opening and Closing](#opening-and-closing)
@@ -359,7 +359,7 @@ Please be aware that to understand the full operation and purpose for some regis
 | 0x0E | rg8    | Yes       | General 8           | *General purpose*                                                          |
 | 0x0F | rg9    | Yes       | General 9           | *General purpose*                                                          |
 
-### `rpo` — Program Offset
+### rpo — Program Offset
 
 Stores the memory address of the current location in memory being executed. For safety, it cannot be directly written to. To change where you are in a program, use a **jump instruction** (explained later on).
 
@@ -382,7 +382,7 @@ MVQ rg0, rpo
 
 Before execution of the instruction begins, `rpo` will point to the opcode corresponding to `MVQ` with a register and literal. Once the processor reads this, it increments `rpo` by `1`. `rpo` now points to the first operand: `rg0`. This value will be retained until after the instruction has completed, when `rpo` will be increased by `2` (`1` for each register operand). This means there was an increase of `3` overall when including the initial increment by `1` for the opcode.
 
-### `rsf` — Status Flags
+### rsf — Status Flags
 
 The status flags register is used to mark some information about previously executed instructions. While it stores a 64-bit number just like every other register, its value should instead be treated bit-by-bit rather than as one number.
 
@@ -407,7 +407,7 @@ More information on using these flags can be found in the section on comparison 
 
 A full table of how each instruction modifies the status flag register can be found toward the end of the document.
 
-### `rrv` — Return Value
+### rrv — Return Value
 
 Stores the return value of the last executed subroutine. Note that if a subroutine doesn't return a value, `rrv` will remain unaffected.
 
@@ -434,7 +434,7 @@ CAL :SUBROUTINE_TWO
 
 More information can be found in the section on subroutines.
 
-### `rfp` — Fast Pass Parameter
+### rfp — Fast Pass Parameter
 
 Stores a single parameter passed to a subroutine. If such a parameter is not provided, `rfp` remains unaffected.
 
@@ -463,7 +463,7 @@ Note that in practice, if a subroutine is designed to take a fast pass parameter
 
 More information can be found in the section on subroutines.
 
-### `rso` — Stack Offset
+### rso — Stack Offset
 
 Stores the memory address of the highest non-popped item on the stack (note that the stack fills from the end of memory backwards). If nothing is left on the stack in the current subroutine, it will be equal to `rsb`, and if nothing is left on the stack at all, it will still be equal to `rsb`, with both being equal to one over the highest possible address in memory (so will result in an error if that address is read from).
 
@@ -479,13 +479,13 @@ POP rg0  ; Pop the just-pushed 5 into rg0
 WCN rso  ; Outputs "8192"
 ```
 
-### `rsb` — Stack Base
+### rsb — Stack Base
 
 Stores the memory address of the bottom of the current stack frame. `rsb` will only ever change when subroutines are being utilised — see the dedicated sections on the stack and subroutines for more info.
 
 Note that `rsb` does not contain the address of the first item pushed to the stack, rather the address that all pushed items will be on top of.
 
-### `rg0` - `rg9` — General Purpose
+### rg0 - rg9 — General Purpose
 
 These 10 registers have no special purpose. They will never be changed unless you explicitly change them with either a move operation, or another operation that stores to registers. These will be used most of the time to store and operate on values, as using memory or the stack to do so is inefficient (and in many cases impossible without copying to a register first), so should only be done when you run out of free registers.
 
@@ -1473,7 +1473,7 @@ WCN 20
 
 Assembler directives follow the same format as standard instructions, however, instead of being assembled to an opcode for the processor to execute, they tell the assembler itself to do something to modify either the final binary file or the lines of the source file as its being assembled.
 
-### `PAD` — Byte Padding
+### PAD — Byte Padding
 
 The `PAD` directive tells the assembler to insert a certain number of `0` bytes wherever the directive is placed in the file. This is most often used just after a label definition to allocate a certain amount of guaranteed free and available memory to store data.
 
@@ -1520,7 +1520,7 @@ Address | Bytes
 
 Note that usually, to reduce the number of jumps required, `PAD`s would be placed after all program instructions. It was put in the middle of the program here for demonstration purposes.
 
-### `DAT` — Byte Insertion
+### DAT — Byte Insertion
 
 The `DAT` directive inserts either a single byte, or a string of UTF-8 character bytes, into a program wherever the directive is located. As with `PAD`, it can be directly preceded by a label definition to point to the byte or string of bytes. If not being used with a string, `DAT` can only insert single bytes at once, meaning the maximum value is 255. It is also not suitable for inserting numbers to be used in 64-bit expecting operations (such as maths and bitwise), see the following section on the `NUM` directive for inserting 64-bit numbers.
 
@@ -1617,7 +1617,7 @@ Address | Bytes
         | DAT "Hello!\0"
 ```
 
-### `NUM` — Number Insertion
+### NUM — Number Insertion
 
 The `NUM` directive is similar to `DAT`, except it always inserts 8 bytes exactly, so can be used to represent 64-bit numbers for use in instructions which always work on 64-bit values, like maths and bitwise operations. `NUM` cannot be used to insert strings, only single 64-bit numerical values (including unsigned, signed, and floating point).
 
@@ -1659,7 +1659,7 @@ Address | Bytes
 
 As with other operations in AssEmbly, `NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works.
 
-### `MAC` — Macro Definition
+### MAC — Macro Definition
 
 The `MAC` directive defines a **macro**, a piece of text that the assembler will replace with another on every line where the text is present. The directive takes the text to replace as the first operand, then the text for it to be replaced with as the second. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Unlike other instructions, the operands to the `MAC` directive don't have to be a standard valid format of operand, both will automatically be interpreted as literal text.
 
@@ -1689,7 +1689,7 @@ The first line here results in an error, as a macro with a name of `Number` hasn
 
 Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
 
-### `IMP` — File Importing
+### IMP — File Importing
 
 The `IMP` directive inserts the contents of another file wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
 
@@ -1760,7 +1760,7 @@ IMP "file_one.asm"
 
 Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
 
-### `ANALYZER` — Toggling Assembler Warnings
+### ANALYZER — Toggling Assembler Warnings
 
 The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
 
