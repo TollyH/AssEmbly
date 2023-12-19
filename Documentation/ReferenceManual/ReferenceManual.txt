@@ -92,6 +92,8 @@ Table of Contents
         -   Signed Extension Set
         -   Floating Point Extension Set
         -   Extended Base Set
+        -   External Assembly Extension Set
+        -   Memory Allocation Extension Set
     -   ASCII Table
 
 Technical Information
@@ -2777,6 +2779,11 @@ have been omitted.
   FLPT_FFS      X                  X                O
   FLPT_FNS      X                  X                O
   FLPT_CMP      X                  X                O
+  EXTD_BSW      (4)                (4)              (4)
+  HEAP_ALC      O                  X                X
+  HEAP_TRY      O                  X                X
+  HEAP_REA      O                  X                X
+  HEAP_TRE      O                  X                X
 
 1.  Signed integers can still be used with SHR, though it will perform a
     logical shift, not an arithmetic one, which may or may not be what
@@ -2790,6 +2797,11 @@ have been omitted.
     to use the signed versions to automatically extend the smaller
     integer to a signed 64-bit one so it is correctly interpreted by
     other instructions.
+4.  Reversing the byte order of a register can work on any data type,
+    however, registers must be in little endian order after reversing to
+    have their value correctly interpreted by other instructions (this
+    does not apply to instructions where the format of the register’s
+    value is unimportant, such as with MVQ).
 
 Status Flag Behaviour
 
@@ -3041,13 +3053,39 @@ Status Flag Behaviour
                        less than second)                                
 
   EXTD_BSW      X      X                          X              X      X
+
+  ASMX_LDA      X      X                          X              X      X
+
+  ASMX_LDF      X      X                          X              X      X
+
+  ASMX_CLA      X      X                          X              X      X
+
+  ASMX_CLF      X      X                          X              X      X
+
+  ASMX_AEX      X      X                          X              X      X
+
+  ASMX_FEX      X      X                          X              X      X
+
+  ASMX_CAL      X      X                          X              X      X
+
+  HEAP_ALC      X      X                          X              X      X
+
+  HEAP_TRY      X      X                          X              X      X
+
+  HEAP_REA      X      X                          X              X      X
+
+  HEAP_TRE      X      X                          X              X      X
+
+  HEAP_FRE      X      X                          X              X      X
   ---------------------------------------------------------------------------------------
 
 Full Instruction Reference
 
 Base Instruction Set
 
-Extension set number 0x00, opcodes start with 0xFF, 0x00.
+Extension set number 0x00, opcodes start with 0xFF, 0x00. Contains the
+core features of the architecture, remaining mostly unchanged by
+updates.
 
 Note that for the base instruction set (number 0x00) only, the leading
 0xFF, 0x00 to specify the extension set can be omitted, as the processor
@@ -4214,7 +4252,9 @@ instruction set opcodes.
 
 Signed Extension Set
 
-Extension set number 0x01, opcodes start with 0xFF, 0x01.
+Extension set number 0x01, opcodes start with 0xFF, 0x01. Contains
+instructions required for interacting with two’s complement
+signed/negative values.
 
   ----------------------------------------------------------------------------------
   Mnemonic         Full Name     Operands     Function         Instruction Code
@@ -4782,7 +4822,9 @@ Extension set number 0x01, opcodes start with 0xFF, 0x01.
 
 Floating Point Extension Set
 
-Extension set number 0x02, opcodes start with 0xFF, 0x02.
+Extension set number 0x02, opcodes start with 0xFF, 0x02. Contains
+instructions required for interacting with IEEE 754 floating point
+values.
 
   ------------------------------------------------------------------------------------
   Mnemonic      Full Name        Operands     Function           Instruction Code
@@ -5251,7 +5293,9 @@ Extension set number 0x02, opcodes start with 0xFF, 0x02.
 
 Extended Base Set
 
-Extension set number 0x03, opcodes start with 0xFF, 0x03.
+Extension set number 0x03, opcodes start with 0xFF, 0x03. Contains
+additional instructions that complement the base instruction set, but do
+not provide any major additional functionality.
 
   --------------------------------------------------------------------------
   Mnemonic     Full Name     Operands     Function     Instruction Code
@@ -5271,6 +5315,542 @@ Extension set number 0x03, opcodes start with 0xFF, 0x03.
                                           and vice     
                                           versa        
   --------------------------------------------------------------------------
+
+External Assembly Extension Set
+
+Extension set number 0x04, opcodes start with 0xFF, 0x04. Contains
+instructions that enable interoperation with external C#/.NET programs.
+
+  --------------------------------------------------------------------------
+  Mnemonic     Full Name     Operands     Function     Instruction Code
+  ------------ ------------- ------------ ------------ ---------------------
+  Loading                                              
+
+  ASMX_LDA     Load Assembly Address      Open the     0x00
+                                          .NET         
+                                          Assembly at  
+                                          the path     
+                                          specified by 
+                                          a 0x00       
+                                          terminated   
+                                          string in    
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a label   
+
+  ASMX_LDA     Load Assembly Pointer      Open the     0x01
+                                          .NET         
+                                          Assembly at  
+                                          the path     
+                                          specified by 
+                                          a 0x00       
+                                          terminated   
+                                          string in    
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a         
+                                          register     
+
+  ASMX_LDF     Load Function Address      Open the     0x02
+                                          function in  
+                                          the open     
+                                          .NET         
+                                          assembly     
+                                          with the     
+                                          name         
+                                          specified by 
+                                          a 0x00       
+                                          terminated   
+                                          string in    
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a label   
+
+  ASMX_LDF     Load Function Pointer      Open the     0x03
+                                          function in  
+                                          the open     
+                                          .NET         
+                                          assembly     
+                                          with the     
+                                          name         
+                                          specified by 
+                                          a 0x00       
+                                          terminated   
+                                          string in    
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a         
+                                          register     
+
+  Closing                                              
+
+  ASMX_CLA     Close         -            Close the    0x10
+               Assembly                   currently    
+                                          open .NET    
+                                          Assembly, as 
+                                          well as any  
+                                          open         
+                                          function     
+
+  ASMX_CLF     Close         -            Close the    0x11
+               Function                   currently    
+                                          open         
+                                          function,    
+                                          the assembly 
+                                          stays open   
+
+  Validity                                             
+  Check                                                
+
+  ASMX_AEX     Assembly      Address      Store 1 in a 0x20
+               Valid                      register if  
+                                          the .NET     
+                                          Assembly at  
+                                          the path     
+                                          specified in 
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a label   
+                                          exists and   
+                                          is valid,    
+                                          else 0       
+
+  ASMX_AEX     Assembly      Pointer      Store 1 in a 0x21
+               Valid                      register if  
+                                          the .NET     
+                                          Assembly at  
+                                          the path     
+                                          specified in 
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a         
+                                          register     
+                                          exists and   
+                                          is valid,    
+                                          else 0       
+
+  ASMX_FEX     Function      Address      Store 1 in a 0x22
+               Valid                      register if  
+                                          the function 
+                                          with the     
+                                          name         
+                                          specified in 
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a label   
+                                          exists in    
+                                          the open     
+                                          .NET         
+                                          Assembly and 
+                                          is valid,    
+                                          else 0       
+
+  ASMX_FEX     Function      Pointer      Store 1 in a 0x23
+               Valid                      register if  
+                                          the function 
+                                          with the     
+                                          name         
+                                          specified in 
+                                          memory       
+                                          starting at  
+                                          an address   
+                                          in a         
+                                          register     
+                                          exists in    
+                                          the open     
+                                          .NET         
+                                          Assembly and 
+                                          is valid,    
+                                          else 0       
+
+  Calling                                              
+
+  ASMX_CAL     Call External -            Call the     0x30
+               Function                   loaded       
+                                          external     
+                                          function,    
+                                          giving null  
+                                          as the       
+                                          passed value 
+
+  ASMX_CAL     Call External Register     Call the     0x31
+               Function                   loaded       
+                                          external     
+                                          function,    
+                                          giving the   
+                                          value of a   
+                                          register as  
+                                          the passed   
+                                          value        
+
+  ASMX_CAL     Call External Literal      Call the     0x32
+               Function                   loaded       
+                                          external     
+                                          function,    
+                                          giving a     
+                                          literal      
+                                          value as the 
+                                          passed value 
+
+  ASMX_CAL     Call External Address      Call the     0x33
+               Function                   loaded       
+                                          external     
+                                          function,    
+                                          giving the   
+                                          contents of  
+                                          memory at an 
+                                          address in a 
+                                          label as the 
+                                          passed value 
+
+  ASMX_CAL     Call External Pointer      Call the     0x34
+               Function                   loaded       
+                                          external     
+                                          function,    
+                                          giving the   
+                                          contents of  
+                                          memory at an 
+                                          address in a 
+                                          register as  
+                                          the passed   
+                                          value        
+  --------------------------------------------------------------------------
+
+Memory Allocation Extension Set
+
+Extension set number 0x05, opcodes start with 0xFF, 0x05. Contains
+instructions that provide runtime memory management, ensuring that
+memory regions are non-overlapping and that there is enough free memory
+available.
+
+  ------------------------------------------------------------------------------
+  Mnemonic        Full Name     Operands     Function      Instruction Code
+  --------------- ------------- ------------ ------------- ---------------------
+  Allocation                                               
+
+  HEAP_ALC        Allocate      Register,    Allocate a    0x00
+                  Memory        Register     block of      
+                                             memory with   
+                                             the value of  
+                                             a register as 
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_ALC        Allocate      Register,    Allocate a    0x01
+                  Memory        Literal      block of      
+                                             memory with a 
+                                             literal value 
+                                             as its size,  
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_ALC        Allocate      Register,    Allocate a    0x02
+                  Memory        Address      block of      
+                                             memory with   
+                                             the contents  
+                                             of memory at  
+                                             an address in 
+                                             a label as    
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_ALC        Allocate      Register,    Allocate a    0x03
+                  Memory        Pointer      block of      
+                                             memory with   
+                                             the contents  
+                                             of memory at  
+                                             an address in 
+                                             a register as 
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_TRY        Try Allocate  Register,    Allocate a    0x04
+                  Memory        Register     block of      
+                                             memory with   
+                                             the value of  
+                                             a register as 
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRY        Try Allocate  Register,    Allocate a    0x05
+                  Memory        Literal      block of      
+                                             memory with a 
+                                             literal value 
+                                             as its size,  
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRY        Try Allocate  Register,    Allocate a    0x06
+                  Memory        Address      block of      
+                                             memory with   
+                                             the contents  
+                                             of memory at  
+                                             an address in 
+                                             a label as    
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRY        Try Allocate  Register,    Allocate a    0x07
+                  Memory        Pointer      block of      
+                                             memory with   
+                                             the contents  
+                                             of memory at  
+                                             an address in 
+                                             a register as 
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  Re-allocation                                            
+
+  HEAP_REA        Re-allocate   Register,    Re-allocate a 0x10
+                  Memory        Register     block of      
+                                             memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             value of a    
+                                             register as   
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_REA        Re-allocate   Register,    Re-allocate a 0x11
+                  Memory        Literal      block of      
+                                             memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with a        
+                                             literal value 
+                                             as its size,  
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_REA        Re-allocate   Register,    Re-allocate a 0x12
+                  Memory        Address      block of      
+                                             memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             contents of   
+                                             memory at an  
+                                             address in a  
+                                             label as its  
+                                             size, storing 
+                                             the first     
+                                             address of    
+                                             the allocated 
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_REA        Re-allocate   Register,    Re-allocate a 0x13
+                  Memory        Pointer      block of      
+                                             memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             contents of   
+                                             memory at an  
+                                             address in a  
+                                             register as   
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register,     
+                                             throwing an   
+                                             error if the  
+                                             operation     
+                                             fails         
+
+  HEAP_TRE        Try           Register,    Re-allocate a 0x14
+                  Re-allocate   Register     block of      
+                  Memory                     memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             value of a    
+                                             register as   
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRE        Try           Register,    Re-allocate a 0x15
+                  Re-allocate   Literal      block of      
+                  Memory                     memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with a        
+                                             literal value 
+                                             as its size,  
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRE        Try           Register,    Re-allocate a 0x16
+                  Re-allocate   Address      block of      
+                  Memory                     memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             contents of   
+                                             memory at an  
+                                             address in a  
+                                             label as its  
+                                             size, storing 
+                                             the first     
+                                             address of    
+                                             the allocated 
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  HEAP_TRE        Try           Register,    Re-allocate a 0x17
+                  Re-allocate   Pointer      block of      
+                  Memory                     memory        
+                                             starting at   
+                                             the address   
+                                             in a register 
+                                             with the      
+                                             contents of   
+                                             memory at an  
+                                             address in a  
+                                             register as   
+                                             its size,     
+                                             storing the   
+                                             first address 
+                                             of the        
+                                             allocated     
+                                             block in a    
+                                             register, or  
+                                             storing -1 if 
+                                             the operation 
+                                             fails         
+
+  Freeing                                                  
+
+  HEAP_FRE        Free Memory   Register     Free a block  0x20
+                                             of memory     
+                                             starting at   
+                                             the address   
+                                             in a register 
+  ------------------------------------------------------------------------------
 
 ASCII Table
 

@@ -89,6 +89,8 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Signed Extension Set](#signed-extension-set)
     - [Floating Point Extension Set](#floating-point-extension-set)
     - [Extended Base Set](#extended-base-set)
+    - [External Assembly Extension Set](#external-assembly-extension-set)
+    - [Memory Allocation Extension Set](#memory-allocation-extension-set)
   - [ASCII Table](#ascii-table)
 
 ## Technical Information
@@ -2216,10 +2218,16 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `FLPT_FFS`    | X                | X              | O              |
 | `FLPT_FNS`    | X                | X              | O              |
 | `FLPT_CMP`    | X                | X              | O              |
+| `EXTD_BSW`    | (4)              | (4)            | (4)            |
+| `HEAP_ALC`    | O                | X              | X              |
+| `HEAP_TRY`    | O                | X              | X              |
+| `HEAP_REA`    | O                | X              | X              |
+| `HEAP_TRE`    | O                | X              | X              |
 
 1. Signed integers *can* still be used with `SHR`, though it will perform a logical shift, not an arithmetic one, which may or may not be what you desire. See the section on Arithmetic Right Shifting for the difference.
 2. Bitwise operations on signed integers will treat the sign bit like any other, there is no special logic involving it.
 3. Using smaller-than-64-bit move instructions on signed integers if the target is a label or pointer will work as expected, truncating the upper bits. If the target is a register, however, you may wish to use the signed versions to automatically extend the smaller integer to a signed 64-bit one so it is correctly interpreted by other instructions.
+4. Reversing the byte order of a register can work on any data type, however, registers **must** be in little endian order *after* reversing to have their value correctly interpreted by other instructions (this does not apply to instructions where the format of the register's value is unimportant, such as with `MVQ`).
 
 ## Status Flag Behaviour
 
@@ -2337,12 +2345,24 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `FLPT_FNS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
 | `FLPT_CMP`    | STD  | (Value of first operand is less than second)             | X                              | STD  | 0                                     |
 | `EXTD_BSW`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_LDA`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_LDF`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_CLA`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_CLF`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_AEX`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_FEX`    | X    | X                                                        | X                              | X    | X                                     |
+| `ASMX_CAL`    | X    | X                                                        | X                              | X    | X                                     |
+| `HEAP_ALC`    | X    | X                                                        | X                              | X    | X                                     |
+| `HEAP_TRY`    | X    | X                                                        | X                              | X    | X                                     |
+| `HEAP_REA`    | X    | X                                                        | X                              | X    | X                                     |
+| `HEAP_TRE`    | X    | X                                                        | X                              | X    | X                                     |
+| `HEAP_FRE`    | X    | X                                                        | X                              | X    | X                                     |
 
 ## Full Instruction Reference
 
 ### Base Instruction Set
 
-Extension set number `0x00`, opcodes start with `0xFF, 0x00`.
+Extension set number `0x00`, opcodes start with `0xFF, 0x00`. Contains the core features of the architecture, remaining mostly unchanged by updates.
 
 Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF, 0x00` to specify the extension set can be omitted, as the processor will automatically treat opcodes not starting with `0xFF` as base instruction set opcodes.
 
@@ -2530,7 +2550,7 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 
 ### Signed Extension Set
 
-Extension set number `0x01`, opcodes start with `0xFF, 0x01`.
+Extension set number `0x01`, opcodes start with `0xFF, 0x01`. Contains instructions required for interacting with two's complement signed/negative values.
 
 | Mnemonic | Full Name | Operands | Function | Instruction Code |
 |----------|-----------|----------|----------|------------------|
@@ -2608,7 +2628,7 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`.
 
 ### Floating Point Extension Set
 
-Extension set number `0x02`, opcodes start with `0xFF, 0x02`.
+Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructions required for interacting with IEEE 754 floating point values.
 
 | Mnemonic | Full Name | Operands | Function | Instruction Code |
 |----------|-----------|----------|----------|------------------|
@@ -2685,12 +2705,65 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`.
 
 ### Extended Base Set
 
-Extension set number `0x03`, opcodes start with `0xFF, 0x03`.
+Extension set number `0x03`, opcodes start with `0xFF, 0x03`. Contains additional instructions that complement the base instruction set, but do not provide any major additional functionality.
 
 | Mnemonic | Full Name | Operands | Function | Instruction Code |
 |----------|-----------|----------|----------|------------------|
 | **Byte Operations** |||||
 | `EXTD_BSW` | Reverse Byte Order | Register | Reverse the byte order of a register, thereby converting little endian to big endian and vice versa | `0x00` |
+
+### External Assembly Extension Set
+
+Extension set number `0x04`, opcodes start with `0xFF, 0x04`. Contains instructions that enable interoperation with external C#/.NET programs.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code |
+|----------|-----------|----------|----------|------------------|
+| **Loading** |||||
+| `ASMX_LDA` | Load Assembly | Address | Open the .NET Assembly at the path specified by a `0x00` terminated string in memory starting at an address in a label | `0x00` |
+| `ASMX_LDA` | Load Assembly | Pointer | Open the .NET Assembly at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x01` |
+| `ASMX_LDF` | Load Function | Address | Open the function in the open .NET assembly with the name specified by a `0x00` terminated string in memory starting at an address in a label | `0x02` |
+| `ASMX_LDF` | Load Function | Pointer | Open the function in the open .NET assembly with the name specified by a `0x00` terminated string in memory starting at an address in a register | `0x03` |
+| **Closing** |||||
+| `ASMX_CLA` | Close Assembly | - | Close the currently open .NET Assembly, as well as any open function | `0x10` |
+| `ASMX_CLF` | Close Function | - | Close the currently open function, the assembly stays open | `0x11` |
+| **Validity Check** |||||
+| `ASMX_AEX` | Assembly Valid | Address | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a label exists and is valid, else `0` | `0x20` |
+| `ASMX_AEX` | Assembly Valid | Pointer | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a register exists and is valid, else `0` | `0x21` |
+| `ASMX_FEX` | Function Valid | Address | Store `1` in a register if the function with the name specified in memory starting at an address in a label exists in the open .NET Assembly and is valid, else `0` | `0x22` |
+| `ASMX_FEX` | Function Valid | Pointer | Store `1` in a register if the function with the name specified in memory starting at an address in a register exists in the open .NET Assembly and is valid, else `0` | `0x23` |
+| **Calling** |||||
+| `ASMX_CAL` | Call External Function | - | Call the loaded external function, giving `null` as the passed value | `0x30` |
+| `ASMX_CAL` | Call External Function | Register | Call the loaded external function, giving the value of a register as the passed value | `0x31` |
+| `ASMX_CAL` | Call External Function | Literal | Call the loaded external function, giving a literal value as the passed value | `0x32` |
+| `ASMX_CAL` | Call External Function | Address | Call the loaded external function, giving the contents of memory at an address in a label as the passed value | `0x33` |
+| `ASMX_CAL` | Call External Function | Pointer | Call the loaded external function, giving the contents of memory at an address in a register as the passed value | `0x34` |
+
+### Memory Allocation Extension Set
+
+Extension set number `0x05`, opcodes start with `0xFF, 0x05`. Contains instructions that provide runtime memory management, ensuring that memory regions are non-overlapping and that there is enough free memory available.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code |
+|----------|-----------|----------|----------|------------------|
+| **Allocation** |||||
+| `HEAP_ALC` | Allocate Memory | Register, Register | Allocate a block of memory with the value of a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x00` |
+| `HEAP_ALC` | Allocate Memory | Register, Literal | Allocate a block of memory with a literal value as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x01` |
+| `HEAP_ALC` | Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x02` |
+| `HEAP_ALC` | Allocate Memory | Register, Pointer | Allocate a block of memory with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x03` |
+| `HEAP_TRY` | Try Allocate Memory | Register, Register | Allocate a block of memory with the value of a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails  | `0x04` |
+| `HEAP_TRY` | Try Allocate Memory | Register, Literal | Allocate a block of memory with a literal value as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x05` |
+| `HEAP_TRY` | Try Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x06` |
+| `HEAP_TRY` | Try Allocate Memory | Register, Pointer | Allocate a block of memory with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x07` |
+| **Re-allocation** |||||
+| `HEAP_REA` | Re-allocate Memory | Register, Register | Re-allocate a block of memory starting at the address in a register with the value of a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x10` |
+| `HEAP_REA` | Re-allocate Memory | Register, Literal | Re-allocate a block of memory starting at the address in a register with a literal value as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x11` |
+| `HEAP_REA` | Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x12` |
+| `HEAP_REA` | Re-allocate Memory | Register, Pointer | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x13` |
+| `HEAP_TRE` | Try Re-allocate Memory | Register, Register | Re-allocate a block of memory starting at the address in a register with the value of a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails  | `0x14` |
+| `HEAP_TRE` | Try Re-allocate Memory | Register, Literal | Re-allocate a block of memory starting at the address in a register with a literal value as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x15` |
+| `HEAP_TRE` | Try Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x16` |
+| `HEAP_TRE` | Try Re-allocate Memory | Register, Pointer | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x17` |
+| **Freeing** |||||
+| `HEAP_FRE` | Free Memory | Register | Free a block of memory starting at the address in a register | `0x20` |
 
 ## ASCII Table
 

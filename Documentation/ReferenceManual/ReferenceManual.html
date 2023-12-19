@@ -322,6 +322,10 @@ Acceptance</a></li>
 <li><a href="#floating-point-extension-set">Floating Point Extension
 Set</a></li>
 <li><a href="#extended-base-set">Extended Base Set</a></li>
+<li><a href="#external-assembly-extension-set">External Assembly
+Extension Set</a></li>
+<li><a href="#memory-allocation-extension-set">Memory Allocation
+Extension Set</a></li>
 </ul></li>
 <li><a href="#ascii-table">ASCII Table</a></li>
 </ul></li>
@@ -3235,6 +3239,36 @@ have been omitted.</p>
 <td>X</td>
 <td>O</td>
 </tr>
+<tr class="even">
+<td><code>EXTD_BSW</code></td>
+<td>(4)</td>
+<td>(4)</td>
+<td>(4)</td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_ALC</code></td>
+<td>O</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRY</code></td>
+<td>O</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_REA</code></td>
+<td>O</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRE</code></td>
+<td>O</td>
+<td>X</td>
+<td>X</td>
+</tr>
 </tbody>
 </table>
 <ol type="1">
@@ -3250,6 +3284,12 @@ upper bits. If the target is a register, however, you may wish to use
 the signed versions to automatically extend the smaller integer to a
 signed 64-bit one so it is correctly interpreted by other
 instructions.</li>
+<li>Reversing the byte order of a register can work on any data type,
+however, registers <strong>must</strong> be in little endian order
+<em>after</em> reversing to have their value correctly interpreted by
+other instructions (this does not apply to instructions where the format
+of the register’s value is unimportant, such as with
+<code>MVQ</code>).</li>
 </ol>
 <h2 id="status-flag-behaviour">Status Flag Behaviour</h2>
 <ul>
@@ -4108,12 +4148,109 @@ otherwise unset</li>
 <td>X</td>
 <td>X</td>
 </tr>
+<tr class="odd">
+<td><code>ASMX_LDA</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>ASMX_LDF</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CLA</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>ASMX_CLF</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_AEX</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>ASMX_FEX</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CAL</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>HEAP_ALC</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRY</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>HEAP_REA</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRE</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr class="even">
+<td><code>HEAP_FRE</code></td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+<td>X</td>
+</tr>
 </tbody>
 </table>
 <h2 id="full-instruction-reference">Full Instruction Reference</h2>
 <h3 id="base-instruction-set">Base Instruction Set</h3>
 <p>Extension set number <code>0x00</code>, opcodes start with
-<code>0xFF, 0x00</code>.</p>
+<code>0xFF, 0x00</code>. Contains the core features of the architecture,
+remaining mostly unchanged by updates.</p>
 <p>Note that for the base instruction set (number <code>0x00</code>)
 <em>only</em>, the leading <code>0xFF, 0x00</code> to specify the
 extension set can be omitted, as the processor will automatically treat
@@ -5525,7 +5662,8 @@ register</td>
 </table>
 <h3 id="signed-extension-set">Signed Extension Set</h3>
 <p>Extension set number <code>0x01</code>, opcodes start with
-<code>0xFF, 0x01</code>.</p>
+<code>0xFF, 0x01</code>. Contains instructions required for interacting
+with two’s complement signed/negative values.</p>
 <table>
 <colgroup>
 <col style="width: 16%" />
@@ -6114,7 +6252,8 @@ flipping the sign of the value.</td>
 </table>
 <h3 id="floating-point-extension-set">Floating Point Extension Set</h3>
 <p>Extension set number <code>0x02</code>, opcodes start with
-<code>0xFF, 0x02</code>.</p>
+<code>0xFF, 0x02</code>. Contains instructions required for interacting
+with IEEE 754 floating point values.</p>
 <table>
 <colgroup>
 <col style="width: 16%" />
@@ -6687,7 +6826,9 @@ register, discarding the result whilst still updating status flags</td>
 </table>
 <h3 id="extended-base-set">Extended Base Set</h3>
 <p>Extension set number <code>0x03</code>, opcodes start with
-<code>0xFF, 0x03</code>.</p>
+<code>0xFF, 0x03</code>. Contains additional instructions that
+complement the base instruction set, but do not provide any major
+additional functionality.</p>
 <table>
 <colgroup>
 <col style="width: 16%" />
@@ -6720,6 +6861,391 @@ register, discarding the result whilst still updating status flags</td>
 <td>Reverse the byte order of a register, thereby converting little
 endian to big endian and vice versa</td>
 <td><code>0x00</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="external-assembly-extension-set">External Assembly Extension
+Set</h3>
+<p>Extension set number <code>0x04</code>, opcodes start with
+<code>0xFF, 0x04</code>. Contains instructions that enable
+interoperation with external C#/.NET programs.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mnemonic</th>
+<th>Full Name</th>
+<th>Operands</th>
+<th>Function</th>
+<th>Instruction Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Loading</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_LDA</code></td>
+<td>Load Assembly</td>
+<td>Address</td>
+<td>Open the .NET Assembly at the path specified by a <code>0x00</code>
+terminated string in memory starting at an address in a label</td>
+<td><code>0x00</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_LDA</code></td>
+<td>Load Assembly</td>
+<td>Pointer</td>
+<td>Open the .NET Assembly at the path specified by a <code>0x00</code>
+terminated string in memory starting at an address in a register</td>
+<td><code>0x01</code></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_LDF</code></td>
+<td>Load Function</td>
+<td>Address</td>
+<td>Open the function in the open .NET assembly with the name specified
+by a <code>0x00</code> terminated string in memory starting at an
+address in a label</td>
+<td><code>0x02</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_LDF</code></td>
+<td>Load Function</td>
+<td>Pointer</td>
+<td>Open the function in the open .NET assembly with the name specified
+by a <code>0x00</code> terminated string in memory starting at an
+address in a register</td>
+<td><code>0x03</code></td>
+</tr>
+<tr class="even">
+<td><strong>Closing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CLA</code></td>
+<td>Close Assembly</td>
+<td>-</td>
+<td>Close the currently open .NET Assembly, as well as any open
+function</td>
+<td><code>0x10</code></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_CLF</code></td>
+<td>Close Function</td>
+<td>-</td>
+<td>Close the currently open function, the assembly stays open</td>
+<td><code>0x11</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Validity Check</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_AEX</code></td>
+<td>Assembly Valid</td>
+<td>Address</td>
+<td>Store <code>1</code> in a register if the .NET Assembly at the path
+specified in memory starting at an address in a label exists and is
+valid, else <code>0</code></td>
+<td><code>0x20</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_AEX</code></td>
+<td>Assembly Valid</td>
+<td>Pointer</td>
+<td>Store <code>1</code> in a register if the .NET Assembly at the path
+specified in memory starting at an address in a register exists and is
+valid, else <code>0</code></td>
+<td><code>0x21</code></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_FEX</code></td>
+<td>Function Valid</td>
+<td>Address</td>
+<td>Store <code>1</code> in a register if the function with the name
+specified in memory starting at an address in a label exists in the open
+.NET Assembly and is valid, else <code>0</code></td>
+<td><code>0x22</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_FEX</code></td>
+<td>Function Valid</td>
+<td>Pointer</td>
+<td>Store <code>1</code> in a register if the function with the name
+specified in memory starting at an address in a register exists in the
+open .NET Assembly and is valid, else <code>0</code></td>
+<td><code>0x23</code></td>
+</tr>
+<tr class="even">
+<td><strong>Calling</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CAL</code></td>
+<td>Call External Function</td>
+<td>-</td>
+<td>Call the loaded external function, giving <code>null</code> as the
+passed value</td>
+<td><code>0x30</code></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_CAL</code></td>
+<td>Call External Function</td>
+<td>Register</td>
+<td>Call the loaded external function, giving the value of a register as
+the passed value</td>
+<td><code>0x31</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CAL</code></td>
+<td>Call External Function</td>
+<td>Literal</td>
+<td>Call the loaded external function, giving a literal value as the
+passed value</td>
+<td><code>0x32</code></td>
+</tr>
+<tr class="even">
+<td><code>ASMX_CAL</code></td>
+<td>Call External Function</td>
+<td>Address</td>
+<td>Call the loaded external function, giving the contents of memory at
+an address in a label as the passed value</td>
+<td><code>0x33</code></td>
+</tr>
+<tr class="odd">
+<td><code>ASMX_CAL</code></td>
+<td>Call External Function</td>
+<td>Pointer</td>
+<td>Call the loaded external function, giving the contents of memory at
+an address in a register as the passed value</td>
+<td><code>0x34</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="memory-allocation-extension-set">Memory Allocation Extension
+Set</h3>
+<p>Extension set number <code>0x05</code>, opcodes start with
+<code>0xFF, 0x05</code>. Contains instructions that provide runtime
+memory management, ensuring that memory regions are non-overlapping and
+that there is enough free memory available.</p>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 18%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Mnemonic</th>
+<th>Full Name</th>
+<th>Operands</th>
+<th>Function</th>
+<th>Instruction Code</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Allocation</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_ALC</code></td>
+<td>Allocate Memory</td>
+<td>Register, Register</td>
+<td>Allocate a block of memory with the value of a register as its size,
+storing the first address of the allocated block in a register, throwing
+an error if the operation fails</td>
+<td><code>0x00</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_ALC</code></td>
+<td>Allocate Memory</td>
+<td>Register, Literal</td>
+<td>Allocate a block of memory with a literal value as its size, storing
+the first address of the allocated block in a register, throwing an
+error if the operation fails</td>
+<td><code>0x01</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_ALC</code></td>
+<td>Allocate Memory</td>
+<td>Register, Address</td>
+<td>Allocate a block of memory with the contents of memory at an address
+in a label as its size, storing the first address of the allocated block
+in a register, throwing an error if the operation fails</td>
+<td><code>0x02</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_ALC</code></td>
+<td>Allocate Memory</td>
+<td>Register, Pointer</td>
+<td>Allocate a block of memory with the contents of memory at an address
+in a register as its size, storing the first address of the allocated
+block in a register, throwing an error if the operation fails</td>
+<td><code>0x03</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRY</code></td>
+<td>Try Allocate Memory</td>
+<td>Register, Register</td>
+<td>Allocate a block of memory with the value of a register as its size,
+storing the first address of the allocated block in a register, or
+storing <code>-1</code> if the operation fails</td>
+<td><code>0x04</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRY</code></td>
+<td>Try Allocate Memory</td>
+<td>Register, Literal</td>
+<td>Allocate a block of memory with a literal value as its size, storing
+the first address of the allocated block in a register, or storing
+<code>-1</code> if the operation fails</td>
+<td><code>0x05</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRY</code></td>
+<td>Try Allocate Memory</td>
+<td>Register, Address</td>
+<td>Allocate a block of memory with the contents of memory at an address
+in a label as its size, storing the first address of the allocated block
+in a register, or storing <code>-1</code> if the operation fails</td>
+<td><code>0x06</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRY</code></td>
+<td>Try Allocate Memory</td>
+<td>Register, Pointer</td>
+<td>Allocate a block of memory with the contents of memory at an address
+in a register as its size, storing the first address of the allocated
+block in a register, or storing <code>-1</code> if the operation
+fails</td>
+<td><code>0x07</code></td>
+</tr>
+<tr class="even">
+<td><strong>Re-allocation</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_REA</code></td>
+<td>Re-allocate Memory</td>
+<td>Register, Register</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the value of a register as its size, storing the first address of
+the allocated block in a register, throwing an error if the operation
+fails</td>
+<td><code>0x10</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_REA</code></td>
+<td>Re-allocate Memory</td>
+<td>Register, Literal</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with a literal value as its size, storing the first address of the
+allocated block in a register, throwing an error if the operation
+fails</td>
+<td><code>0x11</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_REA</code></td>
+<td>Re-allocate Memory</td>
+<td>Register, Address</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the contents of memory at an address in a label as its size,
+storing the first address of the allocated block in a register, throwing
+an error if the operation fails</td>
+<td><code>0x12</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_REA</code></td>
+<td>Re-allocate Memory</td>
+<td>Register, Pointer</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the contents of memory at an address in a register as its size,
+storing the first address of the allocated block in a register, throwing
+an error if the operation fails</td>
+<td><code>0x13</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRE</code></td>
+<td>Try Re-allocate Memory</td>
+<td>Register, Register</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the value of a register as its size, storing the first address of
+the allocated block in a register, or storing <code>-1</code> if the
+operation fails</td>
+<td><code>0x14</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRE</code></td>
+<td>Try Re-allocate Memory</td>
+<td>Register, Literal</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with a literal value as its size, storing the first address of the
+allocated block in a register, or storing <code>-1</code> if the
+operation fails</td>
+<td><code>0x15</code></td>
+</tr>
+<tr class="odd">
+<td><code>HEAP_TRE</code></td>
+<td>Try Re-allocate Memory</td>
+<td>Register, Address</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the contents of memory at an address in a label as its size,
+storing the first address of the allocated block in a register, or
+storing <code>-1</code> if the operation fails</td>
+<td><code>0x16</code></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_TRE</code></td>
+<td>Try Re-allocate Memory</td>
+<td>Register, Pointer</td>
+<td>Re-allocate a block of memory starting at the address in a register
+with the contents of memory at an address in a register as its size,
+storing the first address of the allocated block in a register, or
+storing <code>-1</code> if the operation fails</td>
+<td><code>0x17</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Freeing</strong></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td><code>HEAP_FRE</code></td>
+<td>Free Memory</td>
+<td>Register</td>
+<td>Free a block of memory starting at the address in a register</td>
+<td><code>0x20</code></td>
 </tr>
 </tbody>
 </table>
