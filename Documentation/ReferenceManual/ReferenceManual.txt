@@ -31,13 +31,13 @@ Table of Contents
         -   Pointer
     -   Registers
         -   Register Table
-        -   rpo — Program Offset
-        -   rsf — Status Flags
-        -   rrv — Return Value
-        -   rfp — Fast Pass Parameter
-        -   rso — Stack Offset
-        -   rsb — Stack Base
-        -   rg0 - rg9 — General Purpose
+        -   rpo - Program Offset
+        -   rsf - Status Flags
+        -   rrv - Return Value
+        -   rfp - Fast Pass Parameter
+        -   rso - Stack Offset
+        -   rsb - Stack Base
+        -   rg0 - rg9 - General Purpose
     -   Moving Data
         -   Moving with Literals
         -   Moving with Registers
@@ -65,12 +65,12 @@ Table of Contents
         -   Testing Bits
         -   Checking the Carry, Overflow, Zero, and Sign Flags
     -   Assembler Directives
-        -   PAD — Byte Padding
-        -   DAT — Byte Insertion
-        -   NUM — Number Insertion
-        -   MAC — Macro Definition
-        -   IMP — File Importing
-        -   ANALYZER — Toggling Assembler Warnings
+        -   PAD - Byte Padding
+        -   DAT - Byte Insertion
+        -   NUM - Number Insertion
+        -   MAC - Macro Definition
+        -   IMP - File Importing
+        -   ANALYZER - Toggling Assembler Warnings
     -   Console Input and Output
     -   File Handling
         -   Opening and Closing
@@ -479,7 +479,7 @@ Register Table
   0x0F   rg9      Yes         General 9    General purpose
   -------------------------------------------------------------------------------------
 
-rpo — Program Offset
+rpo - Program Offset
 
 Stores the memory address of the current location in memory being
 executed. For safety, it cannot be directly written to. To change where
@@ -515,7 +515,7 @@ completed, when rpo will be increased by 2 (1 for each register
 operand). This means there was an increase of 3 overall when including
 the initial increment by 1 for the opcode.
 
-rsf — Status Flags
+rsf - Status Flags
 
 The status flags register is used to mark some information about
 previously executed instructions. While it stores a 64-bit number just
@@ -547,7 +547,7 @@ comparison and testing.
 A full table of how each instruction modifies the status flag register
 can be found toward the end of the document.
 
-rrv — Return Value
+rrv - Return Value
 
 Stores the return value of the last executed subroutine. Note that if a
 subroutine doesn’t return a value, rrv will remain unaffected.
@@ -573,7 +573,7 @@ For example:
 
 More information can be found in the section on subroutines.
 
-rfp — Fast Pass Parameter
+rfp - Fast Pass Parameter
 
 Stores a single parameter passed to a subroutine. If such a parameter is
 not provided, rfp remains unaffected.
@@ -605,7 +605,7 @@ rfp in a subroutine if it has not been explicitly set in its calls.
 
 More information can be found in the section on subroutines.
 
-rso — Stack Offset
+rso - Stack Offset
 
 Stores the memory address of the highest non-popped item on the stack
 (note that the stack fills from the end of memory backwards). If nothing
@@ -626,7 +626,7 @@ highest address):
     POP rg0  ; Pop the just-pushed 5 into rg0
     WCN rso  ; Outputs "8192"
 
-rsb — Stack Base
+rsb - Stack Base
 
 Stores the memory address of the bottom of the current stack frame. rsb
 will only ever change when subroutines are being utilised — see the
@@ -635,7 +635,7 @@ dedicated sections on the stack and subroutines for more info.
 Note that rsb does not contain the address of the first item pushed to
 the stack, rather the address that all pushed items will be on top of.
 
-rg0 - rg9 — General Purpose
+rg0 - rg9 - General Purpose
 
 These 10 registers have no special purpose. They will never be changed
 unless you explicitly change them with either a move operation, or
@@ -1814,7 +1814,7 @@ execute, they tell the assembler itself to do something to modify either
 the final binary file or the lines of the source file as its being
 assembled.
 
-PAD — Byte Padding
+PAD - Byte Padding
 
 The PAD directive tells the assembler to insert a certain number of 0
 bytes wherever the directive is placed in the file. This is most often
@@ -1860,7 +1860,7 @@ Note that usually, to reduce the number of jumps required, PADs would be
 placed after all program instructions. It was put in the middle of the
 program here for demonstration purposes.
 
-DAT — Byte Insertion
+DAT - Byte Insertion
 
 The DAT directive inserts either a single byte, or a string of UTF-8
 character bytes, into a program wherever the directive is located. As
@@ -1964,7 +1964,7 @@ Which can be broken down to:
      0x2E   | 48 65 6C 6C 6F 21 00
             | DAT "Hello!\0"
 
-NUM — Number Insertion
+NUM - Number Insertion
 
 The NUM directive is similar to DAT, except it always inserts 8 bytes
 exactly, so can be used to represent 64-bit numbers for use in
@@ -2006,7 +2006,7 @@ As with other operations in AssEmbly, NUM stores numbers in memory using
 little endian encoding. See the section on moving with memory for more
 info on how this encoding works.
 
-MAC — Macro Definition
+MAC - Macro Definition
 
 The MAC directive defines a macro, a piece of text that the assembler
 will replace with another on every line where the text is present. The
@@ -2059,7 +2059,7 @@ immediately parsed as a string within the macro. If the quotation marks
 are placed into a line as replacement text, they will be parsed normally
 as a part of the line.
 
-IMP — File Importing
+IMP - File Importing
 
 The IMP directive inserts the contents of another file wherever the
 directive is placed. It allows a program to be split across multiple
@@ -2143,7 +2143,7 @@ Attempting to assemble any of these three files would result in the
 assembler throwing an error, as each file ends up depending on itself as
 it resolves its import.
 
-ANALYZER — Toggling Assembler Warnings
+ANALYZER - Toggling Assembler Warnings
 
 The AssEmbly assembler checks for common issues with your source code
 when you assemble it in order to alert you of potential issues and
@@ -2685,7 +2685,7 @@ The following is a table of which types of numeric data can be given to
 each instruction and have them function as expected. AssEmbly does not
 keep track of data types, it is your responsibility to do so. If you use
 the wrong instruction for the type of data you have, it is unlikely you
-will receive an error - you will most likely simply get an unexpected
+will receive an error — you will most likely simply get an unexpected
 answer, as the processor is interpreting the data as a valid, but
 different, numeric value in a different format.
 

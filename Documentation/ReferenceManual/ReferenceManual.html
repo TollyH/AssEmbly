@@ -209,14 +209,14 @@ href="https://github.com/TollyH">Tolly Hill</a>.</p>
 <li><a href="#registers">Registers</a>
 <ul>
 <li><a href="#register-table">Register Table</a></li>
-<li><a href="#rpo--program-offset">rpo — Program Offset</a></li>
-<li><a href="#rsf--status-flags">rsf — Status Flags</a></li>
-<li><a href="#rrv--return-value">rrv — Return Value</a></li>
-<li><a href="#rfp--fast-pass-parameter">rfp — Fast Pass
+<li><a href="#rpo---program-offset">rpo - Program Offset</a></li>
+<li><a href="#rsf---status-flags">rsf - Status Flags</a></li>
+<li><a href="#rrv---return-value">rrv - Return Value</a></li>
+<li><a href="#rfp---fast-pass-parameter">rfp - Fast Pass
 Parameter</a></li>
-<li><a href="#rso--stack-offset">rso — Stack Offset</a></li>
-<li><a href="#rsb--stack-base">rsb — Stack Base</a></li>
-<li><a href="#rg0---rg9--general-purpose">rg0 - rg9 — General
+<li><a href="#rso---stack-offset">rso - Stack Offset</a></li>
+<li><a href="#rsb---stack-base">rsb - Stack Base</a></li>
+<li><a href="#rg0---rg9---general-purpose">rg0 - rg9 - General
 Purpose</a></li>
 </ul></li>
 <li><a href="#moving-data">Moving Data</a>
@@ -270,13 +270,13 @@ the Carry, Overflow, Zero, and Sign Flags</a></li>
 </ul></li>
 <li><a href="#assembler-directives">Assembler Directives</a>
 <ul>
-<li><a href="#pad--byte-padding">PAD — Byte Padding</a></li>
-<li><a href="#dat--byte-insertion">DAT — Byte Insertion</a></li>
-<li><a href="#num--number-insertion">NUM — Number Insertion</a></li>
-<li><a href="#mac--macro-definition">MAC — Macro Definition</a></li>
-<li><a href="#imp--file-importing">IMP — File Importing</a></li>
-<li><a href="#analyzer--toggling-assembler-warnings">ANALYZER — Toggling
-Assembler Warnings</a></li>
+<li><a href="#pad---byte-padding">PAD - Byte Padding</a></li>
+<li><a href="#dat---byte-insertion">DAT - Byte Insertion</a></li>
+<li><a href="#num---number-insertion">NUM - Number Insertion</a></li>
+<li><a href="#mac---macro-definition">MAC - Macro Definition</a></li>
+<li><a href="#imp---file-importing">IMP - File Importing</a></li>
+<li><a href="#analyzer---toggling-assembler-warnings">ANALYZER -
+Toggling Assembler Warnings</a></li>
 </ul></li>
 <li><a href="#console-input-and-output">Console Input and
 Output</a></li>
@@ -771,7 +771,7 @@ frame</td>
 </tr>
 </tbody>
 </table>
-<h3 id="rpo-program-offset">rpo — Program Offset</h3>
+<h3 id="rpo---program-offset">rpo - Program Offset</h3>
 <p>Stores the memory address of the current location in memory being
 executed. For safety, it cannot be directly written to. To change where
 you are in a program, use a <strong>jump instruction</strong> (explained
@@ -805,7 +805,7 @@ the instruction has completed, when <code>rpo</code> will be increased
 by <code>2</code> (<code>1</code> for each register operand). This means
 there was an increase of <code>3</code> overall when including the
 initial increment by <code>1</code> for the opcode.</p>
-<h3 id="rsf-status-flags">rsf — Status Flags</h3>
+<h3 id="rsf---status-flags">rsf - Status Flags</h3>
 <p>The status flags register is used to mark some information about
 previously executed instructions. While it stores a 64-bit number just
 like every other register, its value should instead be treated
@@ -830,7 +830,7 @@ whether the flag is “set” or not.</p>
 comparison and testing.</p>
 <p>A full table of how each instruction modifies the status flag
 register can be found toward the end of the document.</p>
-<h3 id="rrv-return-value">rrv — Return Value</h3>
+<h3 id="rrv---return-value">rrv - Return Value</h3>
 <p>Stores the return value of the last executed subroutine. Note that if
 a subroutine doesn’t return a value, <code>rrv</code> will remain
 unaffected.</p>
@@ -852,7 +852,7 @@ CAL :SUBROUTINE_ONE
 CAL :SUBROUTINE_TWO
 ; rrv is still 4</code></pre>
 <p>More information can be found in the section on subroutines.</p>
-<h3 id="rfp-fast-pass-parameter">rfp — Fast Pass Parameter</h3>
+<h3 id="rfp---fast-pass-parameter">rfp - Fast Pass Parameter</h3>
 <p>Stores a single parameter passed to a subroutine. If such a parameter
 is not provided, <code>rfp</code> remains unaffected.</p>
 <p>For example:</p>
@@ -879,7 +879,7 @@ it, even if you think <code>rfp</code> will already have the value you
 want. Similarly, you should not use <code>rfp</code> in a subroutine if
 it has not been explicitly set in its calls.</p>
 <p>More information can be found in the section on subroutines.</p>
-<h3 id="rso-stack-offset">rso — Stack Offset</h3>
+<h3 id="rso---stack-offset">rso - Stack Offset</h3>
 <p>Stores the memory address of the highest non-popped item on the stack
 (note that the stack fills from the end of memory backwards). If nothing
 is left on the stack in the current subroutine, it will be equal to
@@ -896,7 +896,7 @@ PSH 5  ; Push the literal 5 to the stack
 WCN rso  ; Outputs &quot;8184&quot; (stack values are 8 bytes)
 POP rg0  ; Pop the just-pushed 5 into rg0
 WCN rso  ; Outputs &quot;8192&quot;</code></pre>
-<h3 id="rsb-stack-base">rsb — Stack Base</h3>
+<h3 id="rsb---stack-base">rsb - Stack Base</h3>
 <p>Stores the memory address of the bottom of the current stack frame.
 <code>rsb</code> will only ever change when subroutines are being
 utilised — see the dedicated sections on the stack and subroutines for
@@ -904,7 +904,7 @@ more info.</p>
 <p>Note that <code>rsb</code> does not contain the address of the first
 item pushed to the stack, rather the address that all pushed items will
 be on top of.</p>
-<h3 id="rg0---rg9-general-purpose">rg0 - rg9 — General Purpose</h3>
+<h3 id="rg0---rg9---general-purpose">rg0 - rg9 - General Purpose</h3>
 <p>These 10 registers have no special purpose. They will never be
 changed unless you explicitly change them with either a move operation,
 or another operation that stores to registers. These will be used most
@@ -1929,7 +1929,7 @@ however, instead of being assembled to an opcode for the processor to
 execute, they tell the assembler itself to do something to modify either
 the final binary file or the lines of the source file as its being
 assembled.</p>
-<h3 id="pad-byte-padding">PAD — Byte Padding</h3>
+<h3 id="pad---byte-padding">PAD - Byte Padding</h3>
 <p>The <code>PAD</code> directive tells the assembler to insert a
 certain number of <code>0</code> bytes wherever the directive is placed
 in the file. This is most often used just after a label definition to
@@ -1967,7 +1967,7 @@ ADD rg0, 8  ; Add 8 to rg0, it now points to the next number</code></pre>
 <p>Note that usually, to reduce the number of jumps required,
 <code>PAD</code>s would be placed after all program instructions. It was
 put in the middle of the program here for demonstration purposes.</p>
-<h3 id="dat-byte-insertion">DAT — Byte Insertion</h3>
+<h3 id="dat---byte-insertion">DAT - Byte Insertion</h3>
 <p>The <code>DAT</code> directive inserts either a single byte, or a
 string of UTF-8 character bytes, into a program wherever the directive
 is located. As with <code>PAD</code>, it can be directly preceded by a
@@ -2057,7 +2057,7 @@ a table listing all of the possible sequences.</p>
 --------+----------------------------------------------------
  0x2E   | 48 65 6C 6C 6F 21 00
         | DAT &quot;Hello!\0&quot;</code></pre>
-<h3 id="num-number-insertion">NUM — Number Insertion</h3>
+<h3 id="num---number-insertion">NUM - Number Insertion</h3>
 <p>The <code>NUM</code> directive is similar to <code>DAT</code>, except
 it always inserts 8 bytes exactly, so can be used to represent 64-bit
 numbers for use in instructions which always work on 64-bit values, like
@@ -2091,7 +2091,7 @@ NUM 100_015  ; Insert the number 100015 with 8 bytes</code></pre>
 <p>As with other operations in AssEmbly, <code>NUM</code> stores numbers
 in memory using little endian encoding. See the section on moving with
 memory for more info on how this encoding works.</p>
-<h3 id="mac-macro-definition">MAC — Macro Definition</h3>
+<h3 id="mac---macro-definition">MAC - Macro Definition</h3>
 <p>The <code>MAC</code> directive defines a <strong>macro</strong>, a
 piece of text that the assembler will replace with another on every line
 where the text is present. The directive takes the text to replace as
@@ -2144,7 +2144,7 @@ marks (<code>"</code>), which will not be immediately parsed as a string
 within the macro. If the quotation marks are placed into a line as
 replacement text, they will be parsed normally as a part of the
 line.</p>
-<h3 id="imp-file-importing">IMP — File Importing</h3>
+<h3 id="imp---file-importing">IMP - File Importing</h3>
 <p>The <code>IMP</code> directive inserts the contents of another file
 wherever the directive is placed. It allows a program to be split across
 multiple files, as well as allowing code to be reused across multiple
@@ -2211,7 +2211,7 @@ occur.</p>
 <p>Attempting to assemble any of these three files would result in the
 assembler throwing an error, as each file ends up depending on itself as
 it resolves its import.</p>
-<h3 id="analyzer-toggling-assembler-warnings">ANALYZER — Toggling
+<h3 id="analyzer---toggling-assembler-warnings">ANALYZER - Toggling
 Assembler Warnings</h3>
 <p>The AssEmbly assembler checks for common issues with your source code
 when you assemble it in order to alert you of potential issues and
@@ -2749,7 +2749,7 @@ Acceptance</h2>
 to each instruction and have them function as expected. AssEmbly
 <strong>does not</strong> keep track of data types, it is your
 responsibility to do so. If you use the wrong instruction for the type
-of data you have, it is unlikely you will receive an error - you will
+of data you have, it is unlikely you will receive an error — you will
 most likely simply get an unexpected answer, as the processor is
 interpreting the data as a valid, but different, numeric value in a
 different format.</p>
