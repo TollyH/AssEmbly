@@ -1,0 +1,33 @@
+CAL :FUNC_PRINT, :&PROGRAM_HEADER
+
+ASMX_LDA :ASSEMBLY_NAME
+
+:CLOCK_LOOP
+ASMX_LDF :CLOCK_METHOD_NAME
+ASMX_CAL :&DATETIME_FORMAT
+ASMX_CLF
+
+ASMX_LDF :SLEEP_METHOD_NAME
+ASMX_CAL 500  ; 500ms/0.5s
+ASMX_CLF
+
+WCC '\r'  ; Return to start of line
+
+JMP :CLOCK_LOOP
+
+:ASSEMBLY_NAME
+DAT "Clock.dll\0"
+
+:CLOCK_METHOD_NAME
+DAT "PrintFormattedDateTime\0"
+
+:SLEEP_METHOD_NAME
+DAT "Sleep\0"
+
+:DATETIME_FORMAT
+DAT "yyyy-MM-dd HH:mm:ss\0"
+
+:PROGRAM_HEADER
+DAT "AssEmbly Clock Example\nPress CTRL+C to exit\n\n\0"
+
+IMP "../print.ext.asm"
