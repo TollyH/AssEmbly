@@ -379,10 +379,12 @@ RET
 ; rg0 - temp storage
 ; rg1 - data pointer
 ; rg2 - length of source data
-; rg4 - stack array pointer
+; rg3 - start of file data in memory
+; rg4 - file data pointer
 PSH rg0
 PSH rg1
 PSH rg2
+PSH rg3
 PSH rg4
 
 ; Get stack parameters
@@ -390,13 +392,13 @@ MVQ rg1, rsb
 ADD rg1, 16
 MVQ rg1, *rg1
 
-; Allocate space in stack for file to be read to
+; Allocate space in memory for file to be read to
 FSZ rg2, *rfp
-SUB rso, rg2
+HEAP_ALC rg3, rg2
 
 ; Read entire input file
 OFL *rfp
-MVQ rg4, rso
+MVQ rg4, rg3
 :FUNC_QOI_DECODE_FILE_READ_LOOP
 TST rsf, _ffe
 JNZ :FUNC_QOI_DECODE_FILE_READ_LOOP_END
@@ -407,14 +409,14 @@ JMP :FUNC_QOI_DECODE_FILE_READ_LOOP
 :FUNC_QOI_DECODE_FILE_READ_LOOP_END
 CFL
 
-MVQ rfp, rso
 PSH rg1
 PSH rg2
-CAL :FUNC_QOI_DECODE
+CAL :FUNC_QOI_DECODE, rg3
 ADD rso, 16  ; Remove pushed parameters from stack
 
-ADD rso, rg2  ; Quickly remove entire read file from stack
+HEAP_FRE rg3
 POP rg4
+POP rg3
 POP rg2
 POP rg1
 POP rg0
