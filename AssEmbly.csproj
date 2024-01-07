@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Company>Tolly Hill</Company>
-    <Copyright>Copyright © 2022-2023  Ptolemy Hill</Copyright>
+    <Copyright>Copyright © 2022-2024  Ptolemy Hill</Copyright>
     <Description>A custom processor architecture and assembly language implemented in .NET</Description>
     <PackageProjectUrl>https://github.com/TollyH/AssEmbly</PackageProjectUrl>
     <RepositoryUrl>https://github.com/TollyH/AssEmbly</RepositoryUrl>

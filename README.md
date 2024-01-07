@@ -8,4 +8,4 @@ See the VSCode extension for AssEmbly here: <https://github.com/TollyH/AssEmbly-
 
 ---
 
-**Copyright © 2022–2023  Ptolemy Hill**
+**Copyright © 2022–2024  Ptolemy Hill**
