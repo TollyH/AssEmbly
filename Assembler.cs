@@ -394,7 +394,10 @@ namespace AssEmbly
                     }
                     if (operands[0][0] == ':')
                     {
-                        throw new OperandException(Strings.Assembler_Error_NUM_Operand_Label_Reference);
+                        // Label reference used as NUM operand
+                        labels.Add((operands[0][2..], 0));
+                        // Label location will be resolved later, pad with 0s for now
+                        return (Enumerable.Repeat((byte)0, 8).ToArray(), labels);
                     }
                     parsedBytes = ParseLiteral(operands[0], false);
                     return (parsedBytes, new List<(string, ulong)>());

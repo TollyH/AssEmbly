@@ -750,9 +750,6 @@ Imported on line {0} of base file
 	<data name="Assembler_Error_NUM_Operand_Type" xml:space="preserve">
 		<value>The operand to the NUM mnemonic must be a literal. An operand of type {0} was provided.</value>
 	</data>
-	<data name="Assembler_Error_NUM_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the NUM mnemonic cannot be a label reference.</value>
-	</data>
 	<data name="Assembler_Error_Invalid_Mnemonic_Combo" xml:space="preserve">
 		<value>Unrecognised mnemonic and operand combination:
     {0} {1}

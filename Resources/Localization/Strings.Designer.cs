@@ -435,15 +435,6 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The literal operand to the NUM mnemonic cannot be a label reference..
-        /// </summary>
-        internal static string Assembler_Error_NUM_Operand_Label_Reference {
-            get {
-                return ResourceManager.GetString("Assembler_Error_NUM_Operand_Label_Reference", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The operand to the NUM mnemonic must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_NUM_Operand_Type {
