@@ -152,6 +152,8 @@ namespace AssEmbly
                 byte opcodeLow = (byte)(0x0F & opcode);
                 ulong operandStart = ++Registers[(int)Register.rpo];
 
+                ulong oldSO = Registers[(int)Register.rso];
+
                 // Local variables used to hold additional state information while executing instructions
                 ulong initial;
                 ulong mathend;
@@ -3358,14 +3360,15 @@ namespace AssEmbly
                     default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }
-                if (MapStack)
+                ulong newSO = Registers[(int)Register.rso];
+                if (MapStack && newSO != oldSO)
                 {
                     // Update the mapped memory occupied by the stack, and throw an error if the stack has collided with allocated memory
-                    if (Registers[(int)Register.rso] > (ulong)Memory.LongLength)
+                    if (newSO > (ulong)Memory.LongLength)
                     {
                         throw new StackSizeException(Strings.Processor_Error_Stack_Out_Of_Range);
                     }
-                    _mappedMemoryRanges[^1] = new Range((long)Registers[(int)Register.rso], Memory.LongLength);
+                    _mappedMemoryRanges[^1] = new Range((long)newSO, Memory.LongLength);
                     if (_mappedMemoryRanges.Count >= 2 && _mappedMemoryRanges[^2].Overlaps(_mappedMemoryRanges[^1]))
                     {
                         throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
