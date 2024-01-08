@@ -166,15 +166,79 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        background-color: #232629;
+        color: #7a7c7d;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #7a7c7d;  padding-left: 4px; }
+    div.sourceCode
+      { color: #cfcfc2; background-color: #232629; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #cfcfc2; } /* Normal */
+    code span.al { color: #95da4c; background-color: #4d1f24; font-weight: bold; } /* Alert */
+    code span.an { color: #3f8058; } /* Annotation */
+    code span.at { color: #2980b9; } /* Attribute */
+    code span.bn { color: #f67400; } /* BaseN */
+    code span.bu { color: #7f8c8d; } /* BuiltIn */
+    code span.cf { color: #fdbc4b; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #3daee9; } /* Char */
+    code span.cn { color: #27aeae; font-weight: bold; } /* Constant */
+    code span.co { color: #7a7c7d; } /* Comment */
+    code span.cv { color: #7f8c8d; } /* CommentVar */
+    code span.do { color: #a43340; } /* Documentation */
+    code span.dt { color: #2980b9; } /* DataType */
+    code span.dv { color: #f67400; } /* DecVal */
+    code span.er { color: #da4453; text-decoration: underline; } /* Error */
+    code span.ex { color: #0099ff; font-weight: bold; } /* Extension */
+    code span.fl { color: #f67400; } /* Float */
+    code span.fu { color: #8e44ad; } /* Function */
+    code span.im { color: #27ae60; } /* Import */
+    code span.in { color: #c45b00; } /* Information */
+    code span.kw { color: #cfcfc2; font-weight: bold; } /* Keyword */
+    code span.op { color: #cfcfc2; } /* Operator */
+    code span.ot { color: #27ae60; } /* Other */
+    code span.pp { color: #27ae60; } /* Preprocessor */
+    code span.re { color: #2980b9; background-color: #153042; } /* RegionMarker */
+    code span.sc { color: #3daee9; } /* SpecialChar */
+    code span.ss { color: #da4453; } /* SpecialString */
+    code span.st { color: #f44f4f; } /* String */
+    code span.va { color: #27aeae; } /* Variable */
+    code span.vs { color: #da4453; } /* VerbatimString */
+    code span.wa { color: #da4453; } /* Warning */
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <h1 id="assembly-reference-manual">AssEmbly Reference Manual</h1>
 <p>Applies to versions: <code>3.0.0</code></p>
-<p>Last revised: 2023-12-10</p>
+<p>Last revised: 2024-01-08</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -299,6 +363,25 @@ Preserve Registers</a></li>
 Stack</a></li>
 <li><a href="#passing-multiple-parameters">Passing Multiple
 Parameters</a></li>
+</ul></li>
+<li><a href="#allocating-memory-regions">Allocating Memory Regions</a>
+<ul>
+<li><a href="#allocating-a-new-region">Allocating a New Region</a></li>
+<li><a href="#re-allocating-an-existing-region">Re-allocating an
+Existing Region</a></li>
+<li><a href="#freeing-an-allocated-region">Freeing an Allocated
+Region</a></li>
+<li><a href="#memory-fragmentation">Memory Fragmentation</a></li>
+</ul></li>
+<li><a href="#interoperating-with-c-code">Interoperating with C#
+Code</a>
+<ul>
+<li><a href="#writing-and-compiling-a-compatible-c-program">Writing and
+Compiling a Compatible C# Program</a></li>
+<li><a href="#accessing-methods-from-an-assembly-program">Accessing
+Methods from an AssEmbly Program</a></li>
+<li><a href="#testing-if-an-assembly-or-function-exists">Testing if an
+Assembly or Function Exists</a></li>
 </ul></li>
 <li><a href="#text-encoding">Text Encoding</a></li>
 <li><a href="#escape-sequences">Escape Sequences</a></li>
@@ -2090,7 +2173,10 @@ NUM 100_015  ; Insert the number 100015 with 8 bytes</code></pre>
         | NUM 100_015 (0x186AF)</code></pre>
 <p>As with other operations in AssEmbly, <code>NUM</code> stores numbers
 in memory using little endian encoding. See the section on moving with
-memory for more info on how this encoding works.</p>
+memory for more info on how this encoding works. You can also use
+<code>NUM</code> to insert the resolved address of a label as an 8-byte
+value in memory. The label must use the ampersand prefix syntax
+(i.e. <code>:&amp;LABEL_NAME</code>).</p>
 <h3 id="mac---macro-definition">MAC - Macro Definition</h3>
 <p>The <code>MAC</code> directive defines a <strong>macro</strong>, a
 piece of text that the assembler will replace with another on every line
@@ -2631,6 +2717,273 @@ ADD rfp, *rg0
 
 POP rg0  ; Restore rg0 to its original value
 RET rfp</code></pre>
+<h2 id="allocating-memory-regions">Allocating Memory Regions</h2>
+<p>AssEmbly has support for dynamically allocating regions of memory
+with a given size. This is optional, as memory does not have to be
+allocated for you to be able to read and write to it. Utilising dynamic
+memory allocation, however, can help you ensure that you have enough
+unused memory for the operation you wish to perform, and that you have a
+region of memory separated from any other. It also allows you to have
+many different memory regions without having to calculate the start
+addresses and region placement yourself. Instructions related to memory
+allocation are all found in the Memory Allocation Extension Set, and
+have mnemonics prefixed with <code>HEAP_</code>.</p>
+<p>Memory regions can be allocated, re-allocated, and freed. All
+allocated regions should be freed once you are finished working with
+them to prevent memory leaks, which can lead to a situation where you
+may run out of memory by continually allocating memory without freeing
+it, as memory regions <strong>cannot</strong> overlap.</p>
+<p>The regions of memory occupied by the loaded program bytes and the
+stack are also considered allocated regions, and will never be
+overlapped by user allocated regions. The size of the stack region will
+dynamically update as the stack is pushed to and popped from.</p>
+<h3 id="allocating-a-new-region">Allocating a New Region</h3>
+<p>There are two instructions that can be used to allocate a new region
+of memory: <code>HEAP_ALC</code> and <code>HEAP_TRY</code>. Both
+allocate an exact number of bytes given in the second operand as either
+a value in a register, a literal value, or a value in memory given by a
+label or pointer. After allocating, the instructions store the memory
+address of the first byte in the newly allocated block in a register
+given as the first operand. If an error occurs while allocating memory
+(for example if there is not enough free memory remaining),
+<code>HEAP_ALC</code> will throw an error, stopping execution of the
+program immediately, whereas <code>HEAP_TRY</code> will set the value of
+the destination register to <code>-1</code>
+(<code>0xFFFFFFFFFFFFFFFF</code>) and execution will continue.</p>
+<p>For example, assuming memory is 8192 bytes in size:</p>
+<pre class="text"><code>HEAP_TRY rg0, 20
+; rg0 now stores the memory address to the first byte in a 20 byte long region
+
+MVQ rg1, 10_000  ; The value of a register can also be used as the amount of bytes to allocate
+HEAP_TRY rg2, rg1
+; rg2 is now -1, as the allocation failed. No further memory has been allocated
+
+HEAP_ALC rg3, 10_000
+; An error is thrown, execution stops</code></pre>
+<p>Allocated blocks of memory are always <strong>contiguous</strong>,
+meaning each byte of a region will follow one after the other - a region
+will never be split into multiple parts. The first address of a memory
+region is the only address that can be used to identify it with
+re-allocation/free instructions, so it is important you keep track of it
+until the region has been freed.</p>
+<p>Allocated regions also do <strong>not</strong> automatically have
+their contents set to <code>0</code> or any other value. The contents of
+memory in the region will remain unchanged from before it was
+allocated.</p>
+<h3 id="re-allocating-an-existing-region">Re-allocating an Existing
+Region</h3>
+<p>You can change the size of a memory region after it has been
+allocated by <em>re-allocating</em> it - there are specific
+re-allocation instructions to do this. They take a register as the first
+operand, which is used both as the source for the starting address of
+the memory region to re-allocate, as well as the destination to store
+the starting address of the re-allocated region. The second operand is
+the number of bytes to use as the new size for the region, the same as
+with the allocation instructions.</p>
+<p>Regions can either be expanded or shrunk. As with allocation, neither
+will modify any values in memory. When a region shrinks, or when a
+region is expanded and has enough free contiguous memory following it to
+do so without being moved, the starting address of the region will
+remain unchanged. If there is not enough free contiguous memory
+following a region to expand it without moving it, then the starting
+address of the region will change, and all of the bytes in the old
+region will be copied to the new region. Bytes beyond the length of the
+old region but still within the new region will remain unchanged. The
+new region may overlap the old region. If the start address of a region
+does change after re-allocation, the old start address will no longer be
+a valid pointer corresponding to the region. You do not need to free the
+old address, only the newly allocated region needs freeing.</p>
+<p>Similarly to allocation, there are two instructions for performing a
+re-allocation: <code>HEAP_REA</code> and <code>HEAP_TRE</code>.
+<code>HEAP_REA</code> will throw an error if the re-allocation fails,
+stopping execution, whereas <code>HEAP_TRE</code> will set the value of
+the destination register to either <code>-1</code>
+(<code>0xFFFFFFFFFFFFFFFF</code>) or <code>-2</code>
+(<code>0xFFFFFFFFFFFFFFFE</code>) if the re-allocation fails.
+<code>-1</code> means that there was not enough free memory to perform
+the re-allocation, <code>-2</code> means that the address in the first
+operand did not correspond to the start of an already mapped memory
+region. If a re-allocation does fail after using the
+<code>HEAP_TRE</code> instruction, the old region <strong>will still be
+allocated</strong> with its original size. The register holding the
+address will have been overwritten with the error code, however, so it
+is important to have the original address stored elsewhere as a backup
+when using the <code>HEAP_TRE</code> instruction.</p>
+<h3 id="freeing-an-allocated-region">Freeing an Allocated Region</h3>
+<p>Once you have finished working with a region of memory, you must
+explicitly free it. Failing to do so will result in the region remaining
+allocated, leaving its bytes unavailable for any future allocations.
+This is called a <strong>memory leak</strong> (or <strong>leaking
+memory</strong>), and if it is done repeatedly, you may end up in a
+situation where you completely run out of available memory and are
+unable to make any more allocations.</p>
+<p>To free a region, give the starting address of the region to free in
+a register as the first and only operand to the <code>HEAP_FRE</code>
+instruction. The region will be immediately freed for use in future
+allocations and the first address of the region will no longer be
+considered a valid region pointer. Freeing a region does not in and of
+itself affect the contents of memory in said region, however it does
+erase the guarantee that no other regions will be present there, so you
+should not rely on memory values staying the same at any point after a
+region has been freed.</p>
+<p>Attempting to free a region with an invalid region pointer will
+result in an error, stopping execution. There is no instruction to “try”
+freeing a pointer like there is with re-allocation. You cannot free the
+memory regions used by the loaded program or the stack.</p>
+<h3 id="memory-fragmentation">Memory Fragmentation</h3>
+<p>As a consequence of memory regions being contiguous, the maximum
+number of bytes you can allocate at once may be less than the total
+number of unallocated bytes in memory.</p>
+<p>Consider the following situation, assuming we’re starting with 32
+bytes of free memory:</p>
+<pre class="text"><code>HEAP_ALC rg0, 4  ; Region &quot;A&quot;
+HEAP_ALC rg1, 4  ; Region &quot;B&quot;
+HEAP_ALC rg2, 4  ; Region &quot;C&quot;
+HEAP_ALC rg3, 4  ; Region &quot;D&quot;</code></pre>
+<p>Our mapped memory currently looks like this (<code>.</code>
+corresponds to free memory):</p>
+<pre class="text"><code>AAAABBBBCCCCDDDD................</code></pre>
+<p>Now what if we free Region B?</p>
+<pre class="text"><code>HEAP_FRE rg1</code></pre>
+<p>Our memory now looks like this:</p>
+<pre class="text"><code>AAAA....CCCCDDDD................</code></pre>
+<p>Freeing a region does not cause the other regions to move, so even
+though we now have 20 free bytes in memory, we cannot allocate any more
+than 16 into a single region, as it would require the region to be split
+across multiple ranges, which is not valid. This ultimately means that
+the most memory you can allocate in a single region is the number of
+bytes in the <strong>largest contiguous region of unallocated
+memory</strong>. Attempting to allocate 17+ bytes in this situation
+would produce the same result as attempting to allocate without enough
+free total memory.</p>
+<h2 id="interoperating-with-c-code">Interoperating with C# Code</h2>
+<p>It is possible to execute external code from .NET assembly files in
+AssEmbly. These external methods have the ability to both read from and
+write to the AssEmbly processor’s memory and registers. An optional
+value can also be passed to the external method upon calling to prevent
+needing to go through registers or memory for a single parameter.</p>
+<h3 id="writing-and-compiling-a-compatible-c-program">Writing and
+Compiling a Compatible C# Program</h3>
+<p>In order for AssEmbly to detect an external method within a .NET DLL,
+it must be located immediately within a class named
+<code>AssEmblyInterop</code> that is not located within any defined
+namespace (i.e. it is in the <code>global</code> namespace alias). The
+method itself <em>must</em> be <code>public</code> and
+<code>static</code>, and <em>must</em> have three parameters with the
+following types <strong>in order</strong>: <code>byte[]</code>,
+<code>ulong[]</code>, and <code>ulong?</code>. These correspond to
+memory, registers, and the passed value respectively, though the
+parameters’ names, along with the name of the method itself, can be
+anything you wish. The method’s return type should be <code>void</code>,
+as any returned value will be ignored by AssEmbly. The passed value
+parameter will be <code>null</code> if no value is given from
+AssEmbly.</p>
+<p>An example C# program may look like this:</p>
+<div class="sourceCode" id="cb122"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">;</span></span>
+<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Note the class is not in a namespace</span></span>
+<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> AssEmblyInterop</span>
+<span id="cb122-5"><a href="#cb122-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb122-6"><a href="#cb122-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
+<span id="cb122-7"><a href="#cb122-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb122-8"><a href="#cb122-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Methods can read memory...</span></span>
+<span id="cb122-9"><a href="#cb122-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">byte</span> value <span class="op">=</span> memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">];</span></span>
+<span id="cb122-10"><a href="#cb122-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to it...</span></span>
+<span id="cb122-11"><a href="#cb122-11" aria-hidden="true" tabindex="-1"></a>        memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">]</span> <span class="op">=</span> <span class="dv">12</span><span class="op">;</span></span>
+<span id="cb122-12"><a href="#cb122-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-13"><a href="#cb122-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// They can read registers...</span></span>
+<span id="cb122-14"><a href="#cb122-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">ulong</span> rg0 <span class="op">=</span> registers<span class="op">[</span><span class="dv">6</span><span class="op">];</span>  <span class="co">// 6 = rg0, see the registers table for the byte values of each register</span></span>
+<span id="cb122-15"><a href="#cb122-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to them...</span></span>
+<span id="cb122-16"><a href="#cb122-16" aria-hidden="true" tabindex="-1"></a>        registers<span class="op">[</span><span class="dv">6</span><span class="op">]</span> <span class="op">=</span> <span class="dv">9000</span><span class="op">;</span></span>
+<span id="cb122-17"><a href="#cb122-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb122-18"><a href="#cb122-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or do anything else that a normal C# program can do</span></span>
+<span id="cb122-19"><a href="#cb122-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>passedValue <span class="op">==</span> <span class="kw">null</span><span class="op">)</span></span>
+<span id="cb122-20"><a href="#cb122-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb122-21"><a href="#cb122-21" aria-hidden="true" tabindex="-1"></a>            Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span><span class="st">&quot;You need to pass a value!&quot;</span><span class="op">);</span></span>
+<span id="cb122-22"><a href="#cb122-22" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span><span class="op">;</span></span>
+<span id="cb122-23"><a href="#cb122-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb122-24"><a href="#cb122-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-25"><a href="#cb122-25" aria-hidden="true" tabindex="-1"></a>        Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>$<span class="st">&quot;Your value: {passedValue}&quot;</span><span class="op">);</span></span>
+<span id="cb122-26"><a href="#cb122-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb122-27"><a href="#cb122-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb122-28"><a href="#cb122-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourOtherMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
+<span id="cb122-29"><a href="#cb122-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb122-30"><a href="#cb122-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Your code here...</span></span>
+<span id="cb122-31"><a href="#cb122-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb122-32"><a href="#cb122-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>In order to compile a single C# source file into a .NET DLL, you can
+use the <code>csc</code> tool included with Visual Studio. The command
+<code>csc /t:library &lt;file_name&gt;.cs</code> will compile the given
+C# script into a .NET Framework assembly with the name
+<code>&lt;file_name&gt;.dll</code>. While AssEmbly is capable of loading
+.NET Core DLLs, .NET Framework is recommended to prevent potential
+dependency issues. More complex C# projects using a <code>.csproj</code>
+file can also be used, as long as there is a resulting assembly with the
+<code>AssEmblyInterop</code> class in its global namespace.</p>
+<h3 id="accessing-methods-from-an-assembly-program">Accessing Methods
+from an AssEmbly Program</h3>
+<p>For AssEmbly to load a DLL and methods within it, their names need to
+be defined as null-terminated strings in memory, similarly to when
+performing file operations. DLL paths can either be relative
+(i.e. <code>MyAsm.dll</code> or <code>Folder/MyAsm.dll</code>), or
+absolute (i.e. <code>Drive:/Folder/Folder/MyAsm.dll</code>). Method
+names should not include the <code>AssEmblyInterop</code> class name.
+Only a single assembly can be loaded at once, and only a single method
+from that assembly can be loaded at a time.</p>
+<p>To load an assembly, use the <code>ASMX_LDA</code> instruction with
+either a label or a pointer to the null-terminated file path. Once an
+assembly is loaded, you can load a function from it with
+<code>ASMX_LDF</code>, with a label or pointer to the null-terminated
+method name. Once an assembly is loaded, you can load and unload methods
+from it as many times as you like. The current function must be closed
+with <code>ASMX_CLF</code> before you can load another, and the current
+assembly must be closed with <code>ASMX_CLA</code> before another can be
+opened. <code>ASMX_CLA</code> will automatically close the open function
+as well if one is still loaded when it is used.</p>
+<p>Once both an assembly and function are loaded, you can use the
+<code>ASMX_CAL</code> instruction with an optional operand to use as the
+passed value in order to call it.</p>
+<p>Here is an example program that utilises a method from the C# example
+above:</p>
+<pre class="text"><code>ASMX_LDA :DLL_PATH  ; Load the assembly
+ASMX_LDF :FUNC_PATH  ; Load the function from the assembly
+
+ASMX_CAL  ; Call the loaded function with null as the passed value
+ASMX_CAL 20  ; Call the loaded function with the literal value of 20 as the passed value
+ASMX_CAL rg0  ; Call the loaded function with the value in rg0 as the passed value
+
+ASMX_CLF  ; Close the function
+ASMX_CLA  ; Close the assembly
+
+HLT  ; Halt the processor before it reaches data
+
+:DLL_PATH
+DAT &quot;MyAsm.dll\0&quot;
+
+:FUNC_PATH
+DAT &quot;YourMethod\0&quot;</code></pre>
+<p>Executing this program results in the following console output:</p>
+<pre class="text"><code>You need to pass a value!
+Your value: 20
+Your value: 9000</code></pre>
+<p><code>9000</code> is printed on the final line as <code>rg0</code>
+was set to <code>9000</code> in both of the prior external function
+calls.</p>
+<h3 id="testing-if-an-assembly-or-function-exists">Testing if an
+Assembly or Function Exists</h3>
+<p>The <code>ASMX_LDA</code> and <code>ASMX_LDF</code> instructions will
+throw an error, stopping execution, if the path/name they are given does
+not correspond to a valid target to load. If you wish to test whether or
+not this will happen without crashing the program, you can use the
+<code>ASMX_AEX</code> and <code>ASMX_FEX</code> instructions. They both
+take a register as their first operand, then the label or pointer to the
+null-terminated target string as their second. If the target
+assembly/function exists and is valid, the value of the first operand
+register will be set to <code>1</code>, otherwise it will be set to
+<code>0</code>. An assembly must already be loaded in order to check the
+validity of a function, as only the currently open assembly will be
+searched.</p>
 <h2 id="text-encoding">Text Encoding</h2>
 <p>All text in AssEmbly (input from/output to the console; strings
 inserted by <code>DAT</code>; strings given to <code>OFL</code>,
@@ -7737,6 +8090,6 @@ byte value in decimal.</p>
 </tbody>
 </table>
 <hr />
-<p><strong>Copyright © 2022–2023 Ptolemy Hill</strong></p>
+<p><strong>Copyright © 2022–2024 Ptolemy Hill</strong></p>
 </body>
 </html>

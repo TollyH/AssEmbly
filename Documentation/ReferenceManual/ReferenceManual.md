@@ -2,7 +2,7 @@
 
 Applies to versions: `3.0.0`
 
-Last revised: 2023-12-10
+Last revised: 2024-01-08
 
 ## Introduction
 
@@ -80,6 +80,15 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Return Values](#return-values)
     - [Subroutines and the Stack](#subroutines-and-the-stack)
     - [Passing Multiple Parameters](#passing-multiple-parameters)
+  - [Allocating Memory Regions](#allocating-memory-regions)
+    - [Allocating a New Region](#allocating-a-new-region)
+    - [Re-allocating an Existing Region](#re-allocating-an-existing-region)
+    - [Freeing an Allocated Region](#freeing-an-allocated-region)
+    - [Memory Fragmentation](#memory-fragmentation)
+  - [Interoperating with C# Code](#interoperating-with-c-code)
+    - [Writing and Compiling a Compatible C# Program](#writing-and-compiling-a-compatible-c-program)
+    - [Accessing Methods from an AssEmbly Program](#accessing-methods-from-an-assembly-program)
+    - [Testing if an Assembly or Function Exists](#testing-if-an-assembly-or-function-exists)
   - [Text Encoding](#text-encoding)
   - [Escape Sequences](#escape-sequences)
   - [Instruction Data Type Acceptance](#instruction-data-type-acceptance)
@@ -1657,7 +1666,7 @@ Address | Bytes
         | NUM 100_015 (0x186AF)
 ```
 
-As with other operations in AssEmbly, `NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works.
+As with other operations in AssEmbly, `NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works. You can also use `NUM` to insert the resolved address of a label as an 8-byte value in memory. The label must use the ampersand prefix syntax (i.e. `:&LABEL_NAME`).
 
 ### MAC - Macro Definition
 
@@ -2100,6 +2109,176 @@ ADD rfp, *rg0
 POP rg0  ; Restore rg0 to its original value
 RET rfp
 ```
+
+## Allocating Memory Regions
+
+AssEmbly has support for dynamically allocating regions of memory with a given size. This is optional, as memory does not have to be allocated for you to be able to read and write to it. Utilising dynamic memory allocation, however, can help you ensure that you have enough unused memory for the operation you wish to perform, and that you have a region of memory separated from any other. It also allows you to have many different memory regions without having to calculate the start addresses and region placement yourself. Instructions related to memory allocation are all found in the Memory Allocation Extension Set, and have mnemonics prefixed with `HEAP_`.
+
+Memory regions can be allocated, re-allocated, and freed. All allocated regions should be freed once you are finished working with them to prevent memory leaks, which can lead to a situation where you may run out of memory by continually allocating memory without freeing it, as memory regions **cannot** overlap.
+
+The regions of memory occupied by the loaded program bytes and the stack are also considered allocated regions, and will never be overlapped by user allocated regions. The size of the stack region will dynamically update as the stack is pushed to and popped from.
+
+### Allocating a New Region
+
+There are two instructions that can be used to allocate a new region of memory: `HEAP_ALC` and `HEAP_TRY`. Both allocate an exact number of bytes given in the second operand as either a value in a register, a literal value, or a value in memory given by a label or pointer. After allocating, the instructions store the memory address of the first byte in the newly allocated block in a register given as the first operand. If an error occurs while allocating memory (for example if there is not enough free memory remaining), `HEAP_ALC` will throw an error, stopping execution of the program immediately, whereas `HEAP_TRY` will set the value of the destination register to `-1` (`0xFFFFFFFFFFFFFFFF`) and execution will continue.
+
+For example, assuming memory is 8192 bytes in size:
+
+```text
+HEAP_TRY rg0, 20
+; rg0 now stores the memory address to the first byte in a 20 byte long region
+
+MVQ rg1, 10_000  ; The value of a register can also be used as the amount of bytes to allocate
+HEAP_TRY rg2, rg1
+; rg2 is now -1, as the allocation failed. No further memory has been allocated
+
+HEAP_ALC rg3, 10_000
+; An error is thrown, execution stops
+```
+
+Allocated blocks of memory are always **contiguous**, meaning each byte of a region will follow one after the other - a region will never be split into multiple parts. The first address of a memory region is the only address that can be used to identify it with re-allocation/free instructions, so it is important you keep track of it until the region has been freed.
+
+Allocated regions also do **not** automatically have their contents set to `0` or any other value. The contents of memory in the region will remain unchanged from before it was allocated.
+
+### Re-allocating an Existing Region
+
+You can change the size of a memory region after it has been allocated by *re-allocating* it - there are specific re-allocation instructions to do this. They take a register as the first operand, which is used both as the source for the starting address of the memory region to re-allocate, as well as the destination to store the starting address of the re-allocated region. The second operand is the number of bytes to use as the new size for the region, the same as with the allocation instructions.
+
+Regions can either be expanded or shrunk. As with allocation, neither will modify any values in memory. When a region shrinks, or when a region is expanded and has enough free contiguous memory following it to do so without being moved, the starting address of the region will remain unchanged. If there is not enough free contiguous memory following a region to expand it without moving it, then the starting address of the region will change, and all of the bytes in the old region will be copied to the new region. Bytes beyond the length of the old region but still within the new region will remain unchanged. The new region may overlap the old region. If the start address of a region does change after re-allocation, the old start address will no longer be a valid pointer corresponding to the region. You do not need to free the old address, only the newly allocated region needs freeing.
+
+Similarly to allocation, there are two instructions for performing a re-allocation: `HEAP_REA` and `HEAP_TRE`. `HEAP_REA` will throw an error if the re-allocation fails, stopping execution, whereas `HEAP_TRE` will set the value of the destination register to either `-1` (`0xFFFFFFFFFFFFFFFF`) or `-2` (`0xFFFFFFFFFFFFFFFE`) if the re-allocation fails. `-1` means that there was not enough free memory to perform the re-allocation, `-2` means that the address in the first operand did not correspond to the start of an already mapped memory region. If a re-allocation does fail after using the `HEAP_TRE` instruction, the old region **will still be allocated** with its original size. The register holding the address will have been overwritten with the error code, however, so it is important to have the original address stored elsewhere as a backup when using the `HEAP_TRE` instruction.
+
+### Freeing an Allocated Region
+
+Once you have finished working with a region of memory, you must explicitly free it. Failing to do so will result in the region remaining allocated, leaving its bytes unavailable for any future allocations. This is called a **memory leak** (or **leaking memory**), and if it is done repeatedly, you may end up in a situation where you completely run out of available memory and are unable to make any more allocations.
+
+To free a region, give the starting address of the region to free in a register as the first and only operand to the `HEAP_FRE` instruction. The region will be immediately freed for use in future allocations and the first address of the region will no longer be considered a valid region pointer. Freeing a region does not in and of itself affect the contents of memory in said region, however it does erase the guarantee that no other regions will be present there, so you should not rely on memory values staying the same at any point after a region has been freed.
+
+Attempting to free a region with an invalid region pointer will result in an error, stopping execution. There is no instruction to "try" freeing a pointer like there is with re-allocation. You cannot free the memory regions used by the loaded program or the stack.
+
+### Memory Fragmentation
+
+As a consequence of memory regions being contiguous, the maximum number of bytes you can allocate at once may be less than the total number of unallocated bytes in memory.
+
+Consider the following situation, assuming we're starting with 32 bytes of free memory:
+
+```text
+HEAP_ALC rg0, 4  ; Region "A"
+HEAP_ALC rg1, 4  ; Region "B"
+HEAP_ALC rg2, 4  ; Region "C"
+HEAP_ALC rg3, 4  ; Region "D"
+```
+
+Our mapped memory currently looks like this (`.` corresponds to free memory):
+
+```text
+AAAABBBBCCCCDDDD................
+```
+
+Now what if we free Region B?
+
+```text
+HEAP_FRE rg1
+```
+
+Our memory now looks like this:
+
+```text
+AAAA....CCCCDDDD................
+```
+
+Freeing a region does not cause the other regions to move, so even though we now have 20 free bytes in memory, we cannot allocate any more than 16 into a single region, as it would require the region to be split across multiple ranges, which is not valid. This ultimately means that the most memory you can allocate in a single region is the number of bytes in the **largest contiguous region of unallocated memory**. Attempting to allocate 17+ bytes in this situation would produce the same result as attempting to allocate without enough free total memory.
+
+## Interoperating with C# Code
+
+It is possible to execute external code from .NET assembly files in AssEmbly. These external methods have the ability to both read from and write to the AssEmbly processor's memory and registers. An optional value can also be passed to the external method upon calling to prevent needing to go through registers or memory for a single parameter.
+
+### Writing and Compiling a Compatible C# Program
+
+In order for AssEmbly to detect an external method within a .NET DLL, it must be located immediately within a class named `AssEmblyInterop` that is not located within any defined namespace (i.e. it is in the `global` namespace alias). The method itself *must* be `public` and `static`, and *must* have three parameters with the following types **in order**: `byte[]`, `ulong[]`, and `ulong?`. These correspond to memory, registers, and the passed value respectively, though the parameters' names, along with the name of the method itself, can be anything you wish. The method's return type should be `void`, as any returned value will be ignored by AssEmbly. The passed value parameter will be `null` if no value is given from AssEmbly.
+
+An example C# program may look like this:
+
+```csharp
+using System;
+
+// Note the class is not in a namespace
+public static class AssEmblyInterop
+{
+    public static void YourMethod(byte[] memory, ulong[] registers, ulong? passedValue)
+    {
+        // Methods can read memory...
+        byte value = memory[0xFF];
+        // Or write to it...
+        memory[0xFF] = 12;
+
+        // They can read registers...
+        ulong rg0 = registers[6];  // 6 = rg0, see the registers table for the byte values of each register
+        // Or write to them...
+        registers[6] = 9000;
+        
+        // Or do anything else that a normal C# program can do
+        if (passedValue == null)
+        {
+            Console.WriteLine("You need to pass a value!");
+            return;
+        }
+
+        Console.WriteLine($"Your value: {passedValue}");
+    }
+
+    public static void YourOtherMethod(byte[] memory, ulong[] registers, ulong? passedValue)
+    {
+        // Your code here...
+    }
+}
+```
+
+In order to compile a single C# source file into a .NET DLL, you can use the `csc` tool included with Visual Studio. The command `csc /t:library <file_name>.cs` will compile the given C# script into a .NET Framework assembly with the name `<file_name>.dll`. While AssEmbly is capable of loading .NET Core DLLs, .NET Framework is recommended to prevent potential dependency issues. More complex C# projects using a `.csproj` file can also be used, as long as there is a resulting assembly with the `AssEmblyInterop` class in its global namespace.
+
+### Accessing Methods from an AssEmbly Program
+
+For AssEmbly to load a DLL and methods within it, their names need to be defined as null-terminated strings in memory, similarly to when performing file operations. DLL paths can either be relative (i.e. `MyAsm.dll` or `Folder/MyAsm.dll`), or absolute (i.e. `Drive:/Folder/Folder/MyAsm.dll`). Method names should not include the `AssEmblyInterop` class name. Only a single assembly can be loaded at once, and only a single method from that assembly can be loaded at a time.
+
+To load an assembly, use the `ASMX_LDA` instruction with either a label or a pointer to the null-terminated file path. Once an assembly is loaded, you can load a function from it with `ASMX_LDF`, with a label or pointer to the null-terminated method name. Once an assembly is loaded, you can load and unload methods from it as many times as you like. The current function must be closed with `ASMX_CLF` before you can load another, and the current assembly must be closed with `ASMX_CLA` before another can be opened. `ASMX_CLA` will automatically close the open function as well if one is still loaded when it is used.
+
+Once both an assembly and function are loaded, you can use the `ASMX_CAL` instruction with an optional operand to use as the passed value in order to call it.
+
+Here is an example program that utilises a method from the C# example above:
+
+```text
+ASMX_LDA :DLL_PATH  ; Load the assembly
+ASMX_LDF :FUNC_PATH  ; Load the function from the assembly
+
+ASMX_CAL  ; Call the loaded function with null as the passed value
+ASMX_CAL 20  ; Call the loaded function with the literal value of 20 as the passed value
+ASMX_CAL rg0  ; Call the loaded function with the value in rg0 as the passed value
+
+ASMX_CLF  ; Close the function
+ASMX_CLA  ; Close the assembly
+
+HLT  ; Halt the processor before it reaches data
+
+:DLL_PATH
+DAT "MyAsm.dll\0"
+
+:FUNC_PATH
+DAT "YourMethod\0"
+```
+
+Executing this program results in the following console output:
+
+```text
+You need to pass a value!
+Your value: 20
+Your value: 9000
+```
+
+`9000` is printed on the final line as `rg0` was set to `9000` in both of the prior external function calls.
+
+### Testing if an Assembly or Function Exists
+
+The `ASMX_LDA` and `ASMX_LDF` instructions will throw an error, stopping execution, if the path/name they are given does not correspond to a valid target to load. If you wish to test whether or not this will happen without crashing the program, you can use the `ASMX_AEX` and `ASMX_FEX` instructions. They both take a register as their first operand, then the label or pointer to the null-terminated target string as their second. If the target assembly/function exists and is valid, the value of the first operand register will be set to `1`, otherwise it will be set to `0`. An assembly must already be loaded in order to check the validity of a function, as only the currently open assembly will be searched.
 
 ## Text Encoding
 
@@ -2871,4 +3050,4 @@ The following is a list of common characters and their corresponding byte value 
 
 ---
 
-**Copyright © 2022–2023  Ptolemy Hill**
+**Copyright © 2022–2024  Ptolemy Hill**
