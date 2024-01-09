@@ -186,6 +186,12 @@ namespace AssEmbly
             catch (Exception e)
             {
                 OnAssemblerException(e);
+
+                Console.Write(Strings.CLI_Assemble_Result_Header_Start);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(Strings.CLI_Assemble_Result_Header_Failed);
+                Console.ResetColor();
+
                 Environment.Exit(1);
                 return;
             }
