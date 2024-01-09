@@ -178,6 +178,7 @@ namespace AssEmbly
             }
 
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
+            long programSize = 0;
             if (useV1Format)
             {
                 File.WriteAllBytes(destination, program);
@@ -194,7 +195,9 @@ namespace AssEmbly
                     features |= AAPFeatures.GZipCompressed;
                 }
                 AAPFile executable = new(version ?? new Version(), features, entryPoint, program);
+                byte[] bytes = executable.GetBytes();
                 File.WriteAllBytes(destination, executable.GetBytes());
+                programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
             if (!args.Contains("--no-debug-file"))
@@ -202,7 +205,19 @@ namespace AssEmbly
                 File.WriteAllText(destination + ".adi", debugInfo);
             }
 
-            Console.WriteLine(Strings.CLI_Assemble_Success, program.LongLength, Path.GetFullPath(destination));
+            Console.ForegroundColor = ConsoleColor.Green;
+            if (args.Contains("--compress"))
+            {
+                Console.WriteLine(Strings.CLI_Assemble_Success_Compressed, program.LongLength, Path.GetFullPath(destination),
+                    useV1Format ? program.LongLength : programSize,
+                    useV1Format ? program.LongLength : programSize + AAPFile.HeaderSize);
+            }
+            else
+            {
+                Console.WriteLine(Strings.CLI_Assemble_Success, program.LongLength, Path.GetFullPath(destination),
+                    useV1Format ? program.LongLength : program.LongLength + AAPFile.HeaderSize);
+            }
+            Console.ResetColor();
         }
 
         private static void ExecuteProgram(string[] args)

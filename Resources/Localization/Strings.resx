@@ -123,7 +123,8 @@
 {5}</value>
 	</data>
 	<data name="CLI_Assemble_Success" xml:space="preserve">
-		<value>Program assembled into {0} bytes successfully. It can be found at: "{1}"</value>
+		<value>
+Assembly SUCCESS. Program size: {0} bytes ({2} inc. header). Path: "{1}".</value>
 	</data>
 	<data name="CLI_Disassemble_Error_Unexpected" xml:space="preserve">
 		<value>An unexpected error occurred during disassembly:
@@ -1142,5 +1143,9 @@ Program size: {9:N0} bytes</value>
 	</data>
 	<data name="AssemblerWarnings_Suggestion_0017" xml:space="preserve">
 		<value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
+	</data>
+	<data name="CLI_Assemble_Success_Compressed" xml:space="preserve">
+		<value>
+Assembly SUCCESS. Program size: {0} bytes ({2} compressed, {3} inc. header). Path: "{1}".</value>
 	</data>
 </root>

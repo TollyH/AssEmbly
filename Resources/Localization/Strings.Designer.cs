@@ -1048,11 +1048,20 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Program assembled into {0} bytes successfully. It can be found at: &quot;{1}&quot;.
+        ///   Looks up a localized string similar to Assembly SUCCESS. Program size: {0} bytes ({2} inc. header). Path: &quot;{1}&quot;..
         /// </summary>
         internal static string CLI_Assemble_Success {
             get {
                 return ResourceManager.GetString("CLI_Assemble_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string CLI_Assemble_Success_Compressed {
+            get {
+                return ResourceManager.GetString("CLI_Assemble_Success_Compressed", resourceCulture);
             }
         }
         
