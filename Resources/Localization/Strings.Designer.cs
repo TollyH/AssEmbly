@@ -1048,20 +1048,52 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assembly SUCCESS. Program size: {0} bytes ({2} inc. header). Path: &quot;{1}&quot;..
+        ///   Looks up a localized string similar to .
         /// </summary>
-        internal static string CLI_Assemble_Success {
+        internal static string CLI_Assemble_Result_Header_Failed {
             get {
-                return ResourceManager.GetString("CLI_Assemble_Success", resourceCulture);
+                return ResourceManager.GetString("CLI_Assemble_Result_Header_Failed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to 
+        ///Assembly .
         /// </summary>
-        internal static string CLI_Assemble_Success_Compressed {
+        internal static string CLI_Assemble_Result_Header_Start {
             get {
-                return ResourceManager.GetString("CLI_Assemble_Success_Compressed", resourceCulture);
+                return ResourceManager.GetString("CLI_Assemble_Result_Header_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SUCCESS.
+        /// </summary>
+        internal static string CLI_Assemble_Result_Header_Success {
+            get {
+                return ResourceManager.GetString("CLI_Assemble_Result_Header_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {3} error(s), {4} warning(s), {5} suggestion(s).
+        ///Program size: {0} bytes ({2} inc. header).
+        ///Path: &quot;{1}&quot;..
+        /// </summary>
+        internal static string CLI_Assemble_Result_Success {
+            get {
+                return ResourceManager.GetString("CLI_Assemble_Result_Success", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {5} error(s), {6} warning(s), {7} suggestion(s).
+        ///Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header).
+        ///Path: &quot;{1}&quot;..
+        /// </summary>
+        internal static string CLI_Assemble_Result_Success_Compressed {
+            get {
+                return ResourceManager.GetString("CLI_Assemble_Result_Success_Compressed", resourceCulture);
             }
         }
         

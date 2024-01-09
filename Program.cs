@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Diagnostics;
+using System.Text.Json;
 using System.Web;
 using AssEmbly.Resources.Localization;
 
@@ -69,6 +70,7 @@ namespace AssEmbly
 
         private static void AssembleSourceFile(string[] args)
         {
+            Stopwatch assemblyStopwatch = Stopwatch.StartNew();
             if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_Assemble))
             {
                 return;
@@ -137,18 +139,15 @@ namespace AssEmbly
                 }
             }
 
-            byte[] program;
-            string debugInfo;
-            ulong entryPoint;
-            AAPFeatures extensionFeatures;
+            Assembler.AssemblyResult assemblyResult;
+            int totalErrors = 0;
+            int totalWarnings = 0;
+            int totalSuggestions = 0;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
-                    useV1Format,
-                    disabledErrors, disabledWarnings, disabledSuggestions,
-                    out debugInfo, out List<Warning> warnings, out entryPoint,
-                    out extensionFeatures);
-                foreach (Warning warning in warnings)
+                assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
+                    useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                foreach (Warning warning in assemblyResult.Warnings)
                 {
                     Console.ForegroundColor = warning.Severity switch
                     {
@@ -164,6 +163,20 @@ namespace AssEmbly
                         WarningSeverity.Suggestion => Strings.Generic_Severity_Suggestion,
                         _ => Strings.Generic_Unknown
                     };
+                    switch (warning.Severity)
+                    {
+                        case WarningSeverity.FatalError:
+                        case WarningSeverity.NonFatalError:
+                            totalErrors++;
+                            break;
+                        case WarningSeverity.Warning:
+                            totalWarnings++;
+                            break;
+                        case WarningSeverity.Suggestion:
+                            totalSuggestions++;
+                            break;
+                        default: break;
+                    }
                     Console.WriteLine(Strings.CLI_Assemble_Error_Warning_Printout,
                         messageStart, warning.Code, warning.Line, warning.File == "" ? Strings.Generic_Base_File : warning.File,
                         warning.OriginalLine, warning.Message);
@@ -181,11 +194,11 @@ namespace AssEmbly
             long programSize = 0;
             if (useV1Format)
             {
-                File.WriteAllBytes(destination, program);
+                File.WriteAllBytes(destination, assemblyResult.Program);
             }
             else
             {
-                AAPFeatures features = extensionFeatures;
+                AAPFeatures features = assemblyResult.UsedExtensions;
                 if (args.Contains("--v1-call-stack"))
                 {
                     features |= AAPFeatures.V1CallStack;
@@ -194,7 +207,7 @@ namespace AssEmbly
                 {
                     features |= AAPFeatures.GZipCompressed;
                 }
-                AAPFile executable = new(version ?? new Version(), features, entryPoint, program);
+                AAPFile executable = new(version ?? new Version(), features, assemblyResult.EntryPoint, assemblyResult.Program);
                 byte[] bytes = executable.GetBytes();
                 File.WriteAllBytes(destination, executable.GetBytes());
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
@@ -202,23 +215,31 @@ namespace AssEmbly
 
             if (!args.Contains("--no-debug-file"))
             {
-                File.WriteAllText(destination + ".adi", debugInfo);
+                File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
 
+            assemblyStopwatch.Stop();
+
+            Console.Write(Strings.CLI_Assemble_Result_Header_Start);
             Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(Strings.CLI_Assemble_Result_Header_Success);
+            Console.ResetColor();
             if (args.Contains("--compress"))
             {
-                Console.WriteLine(Strings.CLI_Assemble_Success_Compressed, program.LongLength, Path.GetFullPath(destination),
-                    useV1Format ? program.LongLength : programSize,
-                    (double)(useV1Format ? program.LongLength : programSize) / program.LongLength,
-                    useV1Format ? program.LongLength : programSize + AAPFile.HeaderSize);
+                Console.WriteLine(Strings.CLI_Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
+                    useV1Format ? assemblyResult.Program.LongLength : programSize,
+                    (double)(useV1Format ? assemblyResult.Program.LongLength : programSize) / assemblyResult.Program.LongLength,
+                    useV1Format ? assemblyResult.Program.LongLength : programSize + AAPFile.HeaderSize,
+                    totalErrors, totalWarnings, totalSuggestions,
+                    assemblyResult.AssembledLines, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
             else
             {
-                Console.WriteLine(Strings.CLI_Assemble_Success, program.LongLength, Path.GetFullPath(destination),
-                    useV1Format ? program.LongLength : program.LongLength + AAPFile.HeaderSize);
+                Console.WriteLine(Strings.CLI_Assemble_Result_Success, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
+                    useV1Format ? assemblyResult.Program.LongLength : assemblyResult.Program.LongLength + AAPFile.HeaderSize,
+                    totalErrors, totalWarnings, totalSuggestions,
+                    assemblyResult.AssembledLines, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
-            Console.ResetColor();
         }
 
         private static void ExecuteProgram(string[] args)
@@ -250,16 +271,14 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            byte[] program;
-            ulong entryPoint;
+            Assembler.AssemblyResult assemblyResult;
             try
             {
-                program = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
+                assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
                     // Ignore all warnings when using 'run' command
                     AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
                     AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
-                    AssemblerWarnings.SuggestionMessages.Keys.ToHashSet(),
-                    out _, out _, out entryPoint, out _);
+                    AssemblerWarnings.SuggestionMessages.Keys.ToHashSet());
             }
             catch (Exception e)
             {
@@ -269,8 +288,8 @@ namespace AssEmbly
             }
 
             Processor processor = new(
-                memSize, entryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"));
-            LoadProgramIntoProcessor(processor, program);
+                memSize, assemblyResult.EntryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"));
+            LoadProgramIntoProcessor(processor, assemblyResult.Program);
             ExecuteProcessor(processor);
         }
 
@@ -368,11 +387,10 @@ namespace AssEmbly
 
             try
             {
-                _ = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
+                Assembler.AssemblyResult assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
                     // Never ignore warnings when using 'lint' command
-                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>(),
-                    out _, out List<Warning> warnings, out _, out _);
-                Console.WriteLine(JsonSerializer.Serialize(warnings, new JsonSerializerOptions { IncludeFields = true }));
+                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>());
+                Console.WriteLine(JsonSerializer.Serialize(assemblyResult.Warnings, new JsonSerializerOptions { IncludeFields = true }));
             }
             catch (Exception e)
             {

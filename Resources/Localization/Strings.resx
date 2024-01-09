@@ -122,9 +122,11 @@
     {4}
 {5}</value>
 	</data>
-	<data name="CLI_Assemble_Success" xml:space="preserve">
-		<value>
-Assembly SUCCESS. Program size: {0} bytes ({2} inc. header). Path: "{1}".</value>
+	<data name="CLI_Assemble_Result_Success" xml:space="preserve">
+		<value>Processed {6} line(s) from {7} file(s) in {8:N0} milliseconds.
+{3} error(s), {4} warning(s), {5} suggestion(s).
+Program size: {0} bytes ({2} inc. header).
+Path: "{1}".</value>
 	</data>
 	<data name="CLI_Disassemble_Error_Unexpected" xml:space="preserve">
 		<value>An unexpected error occurred during disassembly:
@@ -1144,8 +1146,20 @@ Program size: {9:N0} bytes</value>
 	<data name="AssemblerWarnings_Suggestion_0017" xml:space="preserve">
 		<value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
 	</data>
-	<data name="CLI_Assemble_Success_Compressed" xml:space="preserve">
+	<data name="CLI_Assemble_Result_Success_Compressed" xml:space="preserve">
+		<value>Processed {8} line(s) from {9} file(s) in {10:N0} milliseconds.
+{5} error(s), {6} warning(s), {7} suggestion(s).
+Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header).
+Path: "{1}".</value>
+	</data>
+	<data name="CLI_Assemble_Result_Header_Start" xml:space="preserve">
 		<value>
-Assembly SUCCESS. Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header). Path: "{1}".</value>
+Assembly </value>
+	</data>
+	<data name="CLI_Assemble_Result_Header_Success" xml:space="preserve">
+		<value>SUCCESS</value>
+	</data>
+	<data name="CLI_Assemble_Result_Header_Failed" xml:space="preserve">
+		<value>FAILED</value>
 	</data>
 </root>

@@ -24,6 +24,17 @@ namespace AssEmbly
             }
         }
 
+        public readonly record struct AssemblyResult
+        (
+            byte[] Program,
+            string DebugInfo,
+            List<Warning> Warnings,
+            ulong EntryPoint,
+            AAPFeatures UsedExtensions,
+            int AssembledLines,
+            int AssembledFiles
+        );
+
         /// <summary>
         /// Assemble multiple AssEmbly lines at once into executable bytecode.
         /// </summary>
@@ -35,11 +46,6 @@ namespace AssEmbly
         /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
         /// <param name="disabledWarnings">A set of warning codes to disable.</param>
         /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
-        /// <param name="debugInfo">A string to store generated debug information file text in.</param>
-        /// <param name="warnings">A list to store any generated warnings in.</param>
-        /// <param name="entryPoint">A ulong to store the entry point of the program in.</param>
-        /// <param name="usedExtensions">The feature flags for all extension sets used in the program.</param>
-        /// <returns>The fully assembled bytecode containing instructions and data.</returns>
         /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
         /// <exception cref="LabelNameException">
         /// Thrown when the same label name is defined multiple times, or when a reference is made to a non-existent label.
@@ -49,9 +55,8 @@ namespace AssEmbly
         /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
         /// </exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static byte[] AssembleLines(IEnumerable<string> lines, bool usingV1Format,
-            IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions,
-            out string debugInfo, out List<Warning> warnings, out ulong entryPoint, out AAPFeatures usedExtensions)
+        public static AssemblyResult AssembleLines(IEnumerable<string> lines, bool usingV1Format,
+            IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions)
         {
             // The lines to assemble may change during assembly, for example importing a file
             // will extend the list of lines to assemble as and when the import is reached.
@@ -65,7 +70,7 @@ namespace AssEmbly
             List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
             // string -> replacement
             Dictionary<string, string> macros = new();
-            usedExtensions = AAPFeatures.None;
+            AAPFeatures usedExtensions = AAPFeatures.None;
 
             // Used for debug files
             List<(ulong Address, string Line)> assembledLines = new();
@@ -82,9 +87,12 @@ namespace AssEmbly
             warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
             warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
             warningGenerator.DisabledSuggestions.UnionWith(disabledSuggestions);
-            warnings = new List<Warning>();
+            List<Warning> warnings = new();
 
-            entryPoint = 0;
+            ulong entryPoint = 0;
+
+            int processedLines = 0;
+            int visitedFiles = 1;
 
             for (int l = 0; l < dynamicLines.Count; l++)
             {
@@ -125,6 +133,7 @@ namespace AssEmbly
                     {
                         continue;
                     }
+                    processedLines++;
                     string mnemonic = line[0];
                     // Lines starting with ':' are label definitions
                     if (mnemonic.StartsWith(':'))
@@ -204,6 +213,7 @@ namespace AssEmbly
                             lineIsEntry = false;
 
                             importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
+                            visitedFiles++;
                             continue;
                         // Define macro
                         case "MAC":
@@ -317,12 +327,12 @@ namespace AssEmbly
             }
             warnings.AddRange(warningGenerator.Finalize(programBytes));
 
-            debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
+            string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports);
 
-            return programBytes;
+            return new AssemblyResult(programBytes, debugInfo, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
         }
 
         /// <summary>
