@@ -1146,6 +1146,6 @@ Program size: {9:N0} bytes</value>
 	</data>
 	<data name="CLI_Assemble_Success_Compressed" xml:space="preserve">
 		<value>
-Assembly SUCCESS. Program size: {0} bytes ({2} compressed, {3} inc. header). Path: "{1}".</value>
+Assembly SUCCESS. Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header). Path: "{1}".</value>
 	</data>
 </root>

@@ -210,6 +210,7 @@ namespace AssEmbly
             {
                 Console.WriteLine(Strings.CLI_Assemble_Success_Compressed, program.LongLength, Path.GetFullPath(destination),
                     useV1Format ? program.LongLength : programSize,
+                    (double)(useV1Format ? program.LongLength : programSize) / program.LongLength,
                     useV1Format ? program.LongLength : programSize + AAPFile.HeaderSize);
             }
             else
