@@ -1162,4 +1162,44 @@ Assembly </value>
 	<data name="CLI_Assemble_Result_Header_Failed" xml:space="preserve">
 		<value>FAILED</value>
 	</data>
+	<data name="Assembler_Debug_Directive_Header" xml:space="preserve">
+		<value>
+DEBUG directive on line {0} in {1}
+Program is currently {2:N0} bytes long.</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Label_Header" xml:space="preserve">
+		<value>
+{0} label(s) currently defined:</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Label_Line" xml:space="preserve">
+		<value>    {0} -&gt; {1:X16}</value>
+	</data>
+	<data name="Assembler_Debug_Directive_LabelRef_Header" xml:space="preserve">
+		<value>
+{0} label reference(s) pending fill:</value>
+	</data>
+	<data name="Assembler_Debug_Directive_LabelRef_Line" xml:space="preserve">
+		<value>    {0} -&gt; {1:X16} from {2} at line {3}</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Macro_Header" xml:space="preserve">
+		<value>
+{0} defined macro(s):</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Macro_Line" xml:space="preserve">
+		<value>    {0} -&gt; {1}</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Import_Stack_Header" xml:space="preserve">
+		<value>
+Current import stack (deepest file first):</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Import_Stack_Line" xml:space="preserve">
+		<value>    {0} at line {1}/{2}</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Import_Stack_Base" xml:space="preserve">
+		<value>    Base file at line {0}</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Current_Extensions" xml:space="preserve">
+		<value>
+Current extensions used: {0}</value>
+	</data>
 </root>

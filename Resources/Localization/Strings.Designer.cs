@@ -79,6 +79,112 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Current extensions used: {0}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Current_Extensions {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Current_Extensions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///DEBUG directive on line {0} in {1}
+        ///Program is currently {2:N0} bytes long..
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     Base file at line {0}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Import_Stack_Base {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Import_Stack_Base", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Current import stack (deepest file first):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Import_Stack_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Import_Stack_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {0} at line {1}/{2}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Import_Stack_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Import_Stack_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///{0} label(s) currently defined:.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Label_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Label_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {0} -&gt; {1:X16}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Label_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Label_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///{0} label reference(s) pending fill:.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_LabelRef_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_LabelRef_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {0} -&gt; {1:X16} from {2} at line {3}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_LabelRef_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_LabelRef_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///{0} defined macro(s):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Macro_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {0} -&gt; {1}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Macro_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The ANALYZER directive requires 3 operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_ANALYZER_Operand_Count {
@@ -1048,7 +1154,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to FAILED.
         /// </summary>
         internal static string CLI_Assemble_Result_Header_Failed {
             get {
@@ -1076,7 +1182,8 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {3} error(s), {4} warning(s), {5} suggestion(s).
+        ///   Looks up a localized string similar to Processed {6} line(s) from {7} file(s) in {8:N0} milliseconds.
+        ///{3} error(s), {4} warning(s), {5} suggestion(s).
         ///Program size: {0} bytes ({2} inc. header).
         ///Path: &quot;{1}&quot;..
         /// </summary>
@@ -1087,7 +1194,8 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {5} error(s), {6} warning(s), {7} suggestion(s).
+        ///   Looks up a localized string similar to Processed {8} line(s) from {9} file(s) in {10:N0} milliseconds.
+        ///{5} error(s), {6} warning(s), {7} suggestion(s).
         ///Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header).
         ///Path: &quot;{1}&quot;..
         /// </summary>
