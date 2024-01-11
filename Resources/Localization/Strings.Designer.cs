@@ -300,6 +300,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_IBF_File_Not_Exists {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IBF_File_Not_Exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_IBF_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IBF_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_IBF_Operand_String {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IBF_Operand_String", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_IBF_Operand_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IBF_Operand_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IMP mnemonic could not be found..
         /// </summary>
         internal static string Assembler_Error_IMP_File_Not_Exists {

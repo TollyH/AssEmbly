@@ -308,14 +308,14 @@ namespace AssEmbly
             lineOperands[(file, line)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
-            instructionIsImport = mnemonic.ToUpper() == "IMP";
+            instructionIsImport = mnemonic.Equals("IMP", StringComparison.CurrentCultureIgnoreCase);
             instructionIsString = false;
 
             if (instructionIsData)
             {
                 dataInsertionLines.Add((line, file));
                 _ = dataAddresses.Add(currentAddress);
-                if (operands[0][0] == '"')
+                if (operands[0][0] == '"' && mnemonic.Equals("DAT", StringComparison.CurrentCultureIgnoreCase))
                 {
                     instructionIsString = true;
                     if (lastInstructionWasString)
@@ -719,7 +719,7 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Suggestion_0003()
         {
-            // Suggestion 0003: Put IMP directives at the end of the file,
+            // Suggestion 0003: Put importing directives at the end of the file,
             // unless the position of the directive is important given the file's contents.
             List<Warning> warnings = new();
             foreach ((int impLine, string impFile) in importLines)

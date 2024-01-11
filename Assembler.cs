@@ -442,6 +442,29 @@ namespace AssEmbly
                     }
                     parsedBytes = ParseLiteral(operands[0], false);
                     return (parsedBytes, new List<(string, ulong)>());
+                // Raw file insertion
+                case "IBF":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] != '"')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_IBF_Operand_String);
+                    }
+                    parsedBytes = ParseLiteral(operands[0], true);
+                    string importPath = Encoding.UTF8.GetString(parsedBytes);
+                    string resolvedPath = Path.GetFullPath(importPath);
+                    if (!File.Exists(resolvedPath))
+                    {
+                        throw new ImportException(string.Format(Strings.Assembler_Error_IBF_File_Not_Exists, resolvedPath));
+                    }
+                    return (File.ReadAllBytes(resolvedPath), new List<(string, ulong)>());
                 default:
                     break;
             }

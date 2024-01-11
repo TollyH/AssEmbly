@@ -1202,4 +1202,16 @@ Current import stack (deepest file first):</value>
 		<value>
 Current extensions used: {0}</value>
 	</data>
+	<data name="Assembler_Error_IBF_Operand_Count" xml:space="preserve">
+		<value>The IBF mnemonic requires a single operand. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_IBF_Operand_Type" xml:space="preserve">
+		<value>The operand to the IBF mnemonic must be a literal. An operand of type {0} was provided.</value>
+	</data>
+	<data name="Assembler_Error_IBF_Operand_String" xml:space="preserve">
+		<value>The literal operand to the IBF mnemonic must be a string.</value>
+	</data>
+	<data name="Assembler_Error_IBF_File_Not_Exists" xml:space="preserve">
+		<value>The file "{0}" given to the IBF mnemonic could not be found.</value>
+	</data>
 </root>
