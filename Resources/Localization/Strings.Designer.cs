@@ -300,7 +300,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IBF mnemonic could not be found..
         /// </summary>
         internal static string Assembler_Error_IBF_File_Not_Exists {
             get {
@@ -309,7 +309,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The IBF mnemonic requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_Count {
             get {
@@ -318,7 +318,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The literal operand to the IBF mnemonic must be a string..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_String {
             get {
@@ -327,7 +327,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The operand to the IBF mnemonic must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_Type {
             get {
@@ -1790,8 +1790,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 
-        ///{0:X16} │.
+        ///   Looks up a localized string similar to {0:X16} │ .
         /// </summary>
         internal static string Debugger_MemoryMap_FirstCol {
             get {
@@ -1800,12 +1799,23 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
-        ///─────────────────┼────────────────────────────────────────────────.
+        ///   Looks up a localized string similar to 
+        ///Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F │ ASCII
+        ///─────────────────┼─────────────────────────────────────────────────┼─────────────────
+        ///.
         /// </summary>
         internal static string Debugger_MemoryMap_Header {
             get {
                 return ResourceManager.GetString("Debugger_MemoryMap_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to │ .
+        /// </summary>
+        internal static string Debugger_MemoryMap_VerticalSep {
+            get {
+                return ResourceManager.GetString("Debugger_MemoryMap_VerticalSep", resourceCulture);
             }
         }
         

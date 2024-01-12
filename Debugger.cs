@@ -474,48 +474,70 @@ namespace AssEmbly
             Console.Write(Strings.Debugger_MemoryMap_Header);
             ulong start = offset - (offset % 16);  // Ensure offset is a multiple of 16
             ulong end = (ulong)DebuggingProcessor.Memory.LongLength < (limit + start) ? (ulong)DebuggingProcessor.Memory.LongLength : (limit + start);
-            for (ulong i = start; i < end; i++)
+            bool writtenZeroFill = false;
+            for (ulong rowStartAdr = start; rowStartAdr < end; rowStartAdr += 16)
             {
-                if (i % 16 == 0)
+                byte[] nextBytes = DebuggingProcessor.Memory[(int)rowStartAdr..((int)rowStartAdr + 16)];
+
+                // Fill rows that are all 0 with a single asterisk
+                if (nextBytes.All(b => b == 0))
                 {
-                    Console.Write(Strings.Debugger_MemoryMap_FirstCol, i);
+                    if (!writtenZeroFill)
+                    {
+                        Console.WriteLine('*');
+                        writtenZeroFill = true;
+                    }
+                    continue;
                 }
-                Console.Write(' ');
-                string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
-                // Being unmapped is the lowest priority colour, and should be completely replaced by any register colours
-                if (DebuggingProcessor.MappedMemoryRanges.All(mappedRange => !mappedRange.Contains((long)i)))
+                writtenZeroFill = false;
+
+                Console.Write(Strings.Debugger_MemoryMap_FirstCol, rowStartAdr);
+                for (ulong i = rowStartAdr; i < rowStartAdr + 16; i++)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+                    // Being unmapped is the lowest priority colour, and should be completely replaced by any register colours
+                    if (DebuggingProcessor.MappedMemoryRanges.All(mappedRange => !mappedRange.Contains((long)i)))
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                    }
+                    // Write both characters separately so that if multiple registers point to the same address, the cell becomes multi-coloured
+                    if (i == DebuggingProcessor.Registers[(int)Register.rso])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    }
+                    if (i == DebuggingProcessor.Registers[(int)Register.rsb])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    if (i == DebuggingProcessor.Registers[(int)Register.rpo])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                    }
+                    Console.Write(valueStr[0]);
+                    // Reversed colour priority for second character
+                    if (i == DebuggingProcessor.Registers[(int)Register.rpo])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                    }
+                    if (i == DebuggingProcessor.Registers[(int)Register.rsb])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    if (i == DebuggingProcessor.Registers[(int)Register.rso])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    }
+                    Console.Write(valueStr[1]);
+                    Console.ResetColor();
+                    Console.Write(' ');
                 }
-                // Write both characters separately so that if multiple registers point to the same address, the cell becomes multi-coloured
-                if (i == DebuggingProcessor.Registers[(int)Register.rso])
+                Console.Write(Strings.Debugger_MemoryMap_VerticalSep);
+                for (ulong i = rowStartAdr; i < rowStartAdr + 16; i++)
                 {
-                    Console.ForegroundColor = ConsoleColor.Green;
+                    char value = (char)DebuggingProcessor.Memory[i];
+                    Console.Write(value is >= ' ' and <= '~' ? value : '.');
                 }
-                if (i == DebuggingProcessor.Registers[(int)Register.rsb])
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                }
-                if (i == DebuggingProcessor.Registers[(int)Register.rpo])
-                {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                }
-                Console.Write(valueStr[0]);
-                // Reversed colour priority for second character
-                if (i == DebuggingProcessor.Registers[(int)Register.rpo])
-                {
-                    Console.ForegroundColor = ConsoleColor.Blue;
-                }
-                if (i == DebuggingProcessor.Registers[(int)Register.rsb])
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                }
-                if (i == DebuggingProcessor.Registers[(int)Register.rso])
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                }
-                Console.Write(valueStr[1]);
-                Console.ResetColor();
+                Console.WriteLine();
             }
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Blue;

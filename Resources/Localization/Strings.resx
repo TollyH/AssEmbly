@@ -368,12 +368,13 @@ Halt instruction reached. You should not continue unless this instruction was pl
 		<value>This command requires 3 arguments. Run 'help' for more info.</value>
 	</data>
 	<data name="Debugger_MemoryMap_Header" xml:space="preserve">
-		<value>Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
-─────────────────┼────────────────────────────────────────────────</value>
+		<value>
+Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F │ ASCII
+─────────────────┼─────────────────────────────────────────────────┼─────────────────
+</value>
 	</data>
 	<data name="Debugger_MemoryMap_FirstCol" xml:space="preserve">
-		<value>
-{0:X16} │</value>
+		<value>{0:X16} │ </value>
 	</data>
 	<data name="Debugger_MemoryMap_Cell" xml:space="preserve">
 		<value>{0:X2}</value>
@@ -1213,5 +1214,8 @@ Current extensions used: {0}</value>
 	</data>
 	<data name="Assembler_Error_IBF_File_Not_Exists" xml:space="preserve">
 		<value>The file "{0}" given to the IBF mnemonic could not be found.</value>
+	</data>
+	<data name="Debugger_MemoryMap_VerticalSep" xml:space="preserve">
+		<value>│ </value>
 	</data>
 </root>
