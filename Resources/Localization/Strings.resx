@@ -409,8 +409,8 @@ Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F │ ASCII
 	<data name="Debugger_Stack_Box_Bottom" xml:space="preserve">
 		<value>└──────────────────┴───────────────────────────────┴────────────┘</value>
 	</data>
-	<data name="Debugger_Stack_Pointer_rsp" xml:space="preserve">
-		<value> &lt;- rsp</value>
+	<data name="Debugger_Stack_Pointer_rso" xml:space="preserve">
+		<value> &lt;- rso</value>
 	</data>
 	<data name="Debugger_Stack_ReturnInfo_Header" xml:space="preserve">
 		<value>Return information</value>

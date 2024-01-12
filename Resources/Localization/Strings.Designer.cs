@@ -1874,11 +1874,11 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to  &lt;- rsp.
+        ///   Looks up a localized string similar to  &lt;- rso.
         /// </summary>
-        internal static string Debugger_Stack_Pointer_rsp {
+        internal static string Debugger_Stack_Pointer_rso {
             get {
-                return ResourceManager.GetString("Debugger_Stack_Pointer_rsp", resourceCulture);
+                return ResourceManager.GetString("Debugger_Stack_Pointer_rso", resourceCulture);
             }
         }
         

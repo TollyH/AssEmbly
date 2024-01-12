@@ -610,9 +610,9 @@ namespace AssEmbly
                     Console.WriteLine(Strings.Debugger_Stack_Box_Top);
                 }
                 Console.Write(Strings.Debugger_Stack_CurrentFrame_Row, i, DebuggingProcessor.ReadMemoryQWord(i), currentStackBase - i);
-                if (i == currentStackOffset)
+                if (i == DebuggingProcessor.Registers[(int)Register.rso])
                 {
-                    Console.WriteLine(Strings.Debugger_Stack_Pointer_rsp);
+                    Console.WriteLine(Strings.Debugger_Stack_Pointer_rso);
                 }
                 else
                 {
