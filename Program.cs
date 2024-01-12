@@ -147,6 +147,20 @@ namespace AssEmbly
             {
                 assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
                     useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                // Sort warnings by severity, then file, then line
+                assemblyResult.Warnings.Sort((a, b) =>
+                {
+                    if (a.Severity == b.Severity)
+                    {
+                        if (a.File.Equals(b.File, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return a.Line.CompareTo(b.Line);
+                        }
+                        return string.Compare(b.File, a.File, StringComparison.OrdinalIgnoreCase);
+                    }
+                    // Sort severity in reverse as bottom will be most visible to user
+                    return b.Severity.CompareTo(a.Severity);
+                });
                 foreach (Warning warning in assemblyResult.Warnings)
                 {
                     Console.ForegroundColor = warning.Severity switch
