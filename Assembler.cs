@@ -261,6 +261,38 @@ namespace AssEmbly
                                     Strings.Assembler_Error_ANALYZER_Operand_Third)
                             };
                             continue;
+                        // Manually emit assembler warning
+                        case "MESSAGE":
+                            if (operands.Length is < 1 or > 2)
+                            {
+                                throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Count, operands.Length));
+                            }
+                            WarningSeverity severity = operands[0].ToUpperInvariant() switch
+                            {
+                                "ERROR" => WarningSeverity.NonFatalError,
+                                "WARNING" => WarningSeverity.Warning,
+                                "SUGGESTION" => WarningSeverity.Suggestion,
+                                _ => throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_First)
+                            };
+                            string? message = null;
+                            if (operands.Length == 2)
+                            {
+                                operandType = DetermineOperandType(operands[1]);
+                                if (operandType != OperandType.Literal)
+                                {
+                                    throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Second_Type, operandType));
+                                }
+                                if (operands[1][0] != '"')
+                                {
+                                    throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_Second_String);
+                                }
+                                parsedBytes = ParseLiteral(operands[1], true);
+                                message = Encoding.UTF8.GetString(parsedBytes);
+                            }
+                            warnings.Add(new Warning(
+                                severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
+                                mnemonic, operands, rawLine, message));
+                            continue;
                         // Print assembler state
                         case "DEBUG":
                             Console.ForegroundColor = ConsoleColor.Blue;

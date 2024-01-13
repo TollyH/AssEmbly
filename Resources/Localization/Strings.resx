@@ -670,22 +670,22 @@ return - Continue to the next return instruction in this subroutine or higher</v
 		<value>Label "{0}" has already been defined. Label names must be unique.</value>
 	</data>
 	<data name="Assembler_Error_IMP_Operand_Count" xml:space="preserve">
-		<value>The IMP mnemonic requires a single operand. {0} were given.</value>
+		<value>The IMP directive requires a single operand. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_IMP_Operand_Type" xml:space="preserve">
-		<value>The operand to the IMP mnemonic must be a literal. An operand of type {0} was provided.</value>
+		<value>The operand to the IMP directive must be a literal. An operand of type {0} was provided.</value>
 	</data>
 	<data name="Assembler_Error_IMP_Operand_String" xml:space="preserve">
-		<value>The literal operand to the IMP mnemonic must be a string.</value>
+		<value>The literal operand to the IMP directive must be a string.</value>
 	</data>
 	<data name="Assembler_Error_IMP_File_Not_Exists" xml:space="preserve">
-		<value>The file "{0}" given to the IMP mnemonic could not be found.</value>
+		<value>The file "{0}" given to the IMP directive could not be found.</value>
 	</data>
 	<data name="Assembler_Error_Circular_Import" xml:space="preserve">
 		<value>Circular import detected: attempted import from "{0}" when it is already in import stack.</value>
 	</data>
 	<data name="Assembler_Error_MAC_Operand_Count" xml:space="preserve">
-		<value>The MAC mnemonic requires two operands. {0} were given.</value>
+		<value>The MAC directive requires two operands. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_ANALYZER_Operand_Count" xml:space="preserve">
 		<value>The ANALYZER directive requires 3 operands. {0} were given.</value>
@@ -727,32 +727,32 @@ Imported on line {0} of base file
 {2}</value>
 	</data>
 	<data name="Assembler_Error_DAT_Operand_Count" xml:space="preserve">
-		<value>The DAT mnemonic requires a single operand. {0} were given.</value>
+		<value>The DAT directive requires a single operand. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_DAT_Operand_Type" xml:space="preserve">
-		<value>The operand to the DAT mnemonic must be a literal. An operand of type {0} was provided.</value>
+		<value>The operand to the DAT directive must be a literal. An operand of type {0} was provided.</value>
 	</data>
 	<data name="Assembler_Error_DAT_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the DAT mnemonic cannot be a label reference.</value>
+		<value>The literal operand to the DAT directive cannot be a label reference.</value>
 	</data>
 	<data name="Assembler_Error_DAT_Operand_Too_Large" xml:space="preserve">
 		<value>Numeric literal too large for DAT, or is negative/floating point. 255 is the maximum value:
     {0}</value>
 	</data>
 	<data name="Assembler_Error_PAD_Operand_Count" xml:space="preserve">
-		<value>The PAD mnemonic requires a single operand. {0} were given.</value>
+		<value>The PAD directive requires a single operand. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_PAD_Operand_Type" xml:space="preserve">
-		<value>The operand to the PAD mnemonic must be a literal. An operand of type {0} was provided.</value>
+		<value>The operand to the PAD directive must be a literal. An operand of type {0} was provided.</value>
 	</data>
 	<data name="Assembler_Error_PAD_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the PAD mnemonic cannot be a label reference.</value>
+		<value>The literal operand to the PAD directive cannot be a label reference.</value>
 	</data>
 	<data name="Assembler_Error_NUM_Operand_Count" xml:space="preserve">
-		<value>The NUM mnemonic requires a single operand. {0} were given.</value>
+		<value>The NUM directive requires a single operand. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_NUM_Operand_Type" xml:space="preserve">
-		<value>The operand to the NUM mnemonic must be a literal. An operand of type {0} was provided.</value>
+		<value>The operand to the NUM directive must be a literal. An operand of type {0} was provided.</value>
 	</data>
 	<data name="Assembler_Error_Invalid_Mnemonic_Combo" xml:space="preserve">
 		<value>Unrecognised mnemonic and operand combination:
@@ -1204,18 +1204,39 @@ Current import stack (deepest file first):</value>
 Current extensions used: {0}</value>
 	</data>
 	<data name="Assembler_Error_IBF_Operand_Count" xml:space="preserve">
-		<value>The IBF mnemonic requires a single operand. {0} were given.</value>
+		<value>The IBF directive requires a single operand. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_IBF_Operand_Type" xml:space="preserve">
-		<value>The operand to the IBF mnemonic must be a literal. An operand of type {0} was provided.</value>
+		<value>The operand to the IBF directive must be a literal. An operand of type {0} was provided.</value>
 	</data>
 	<data name="Assembler_Error_IBF_Operand_String" xml:space="preserve">
-		<value>The literal operand to the IBF mnemonic must be a string.</value>
+		<value>The literal operand to the IBF directive must be a string.</value>
 	</data>
 	<data name="Assembler_Error_IBF_File_Not_Exists" xml:space="preserve">
-		<value>The file "{0}" given to the IBF mnemonic could not be found.</value>
+		<value>The file "{0}" given to the IBF directive could not be found.</value>
 	</data>
 	<data name="Debugger_MemoryMap_VerticalSep" xml:space="preserve">
 		<value>│ </value>
+	</data>
+	<data name="AssemblerWarnings_NonFatal_0000" xml:space="preserve">
+		<value>Manually emitted error.</value>
+	</data>
+	<data name="AssemblerWarnings_Suggestion_0000" xml:space="preserve">
+		<value>Manually emitted suggestion.</value>
+	</data>
+	<data name="AssemblerWarnings_Warning_0000" xml:space="preserve">
+		<value>Manually emitted warning.</value>
+	</data>
+	<data name="Assembler_Error_MESSAGE_Operand_Count" xml:space="preserve">
+		<value>The MESSAGE directive requires either 1 or 2 operands. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_MESSAGE_Operand_First" xml:space="preserve">
+		<value>The first operand to the MESSAGE directive must be one of 'error', 'warning' or 'suggestion'.</value>
+	</data>
+	<data name="Assembler_Error_MESSAGE_Operand_Second_Type" xml:space="preserve">
+		<value>The second operand to the MESSAGE directive must be a literal. An operand of type {0} was provided.</value>
+	</data>
+	<data name="Assembler_Error_MESSAGE_Operand_Second_String" xml:space="preserve">
+		<value>The second operand to the MESSAGE directive must be a string.</value>
 	</data>
 </root>

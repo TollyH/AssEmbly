@@ -252,7 +252,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The DAT mnemonic requires a single operand. {0} were given..
+        ///   Looks up a localized string similar to The DAT directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_DAT_Operand_Count {
             get {
@@ -261,7 +261,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The literal operand to the DAT mnemonic cannot be a label reference..
+        ///   Looks up a localized string similar to The literal operand to the DAT directive cannot be a label reference..
         /// </summary>
         internal static string Assembler_Error_DAT_Operand_Label_Reference {
             get {
@@ -280,7 +280,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The operand to the DAT mnemonic must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The operand to the DAT directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_DAT_Operand_Type {
             get {
@@ -300,7 +300,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IBF mnemonic could not be found..
+        ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IBF directive could not be found..
         /// </summary>
         internal static string Assembler_Error_IBF_File_Not_Exists {
             get {
@@ -309,7 +309,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The IBF mnemonic requires a single operand. {0} were given..
+        ///   Looks up a localized string similar to The IBF directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_Count {
             get {
@@ -318,7 +318,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The literal operand to the IBF mnemonic must be a string..
+        ///   Looks up a localized string similar to The literal operand to the IBF directive must be a string..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_String {
             get {
@@ -327,7 +327,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The operand to the IBF mnemonic must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The operand to the IBF directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_IBF_Operand_Type {
             get {
@@ -336,7 +336,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IMP mnemonic could not be found..
+        ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IMP directive could not be found..
         /// </summary>
         internal static string Assembler_Error_IMP_File_Not_Exists {
             get {
@@ -345,7 +345,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The IMP mnemonic requires a single operand. {0} were given..
+        ///   Looks up a localized string similar to The IMP directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_IMP_Operand_Count {
             get {
@@ -354,7 +354,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The literal operand to the IMP mnemonic must be a string..
+        ///   Looks up a localized string similar to The literal operand to the IMP directive must be a string..
         /// </summary>
         internal static string Assembler_Error_IMP_Operand_String {
             get {
@@ -363,7 +363,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The operand to the IMP mnemonic must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The operand to the IMP directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_IMP_Operand_Type {
             get {
@@ -505,7 +505,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The MAC mnemonic requires two operands. {0} were given..
+        ///   Looks up a localized string similar to The MAC directive requires two operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_MAC_Operand_Count {
             get {
@@ -557,6 +557,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The MESSAGE directive requires either 1 or 2 operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_MESSAGE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_MESSAGE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The first operand to the MESSAGE directive must be one of &apos;error&apos;, &apos;warning&apos; or &apos;suggestion&apos;..
+        /// </summary>
+        internal static string Assembler_Error_MESSAGE_Operand_First {
+            get {
+                return ResourceManager.GetString("Assembler_Error_MESSAGE_Operand_First", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The second operand to the MESSAGE directive must be a string..
+        /// </summary>
+        internal static string Assembler_Error_MESSAGE_Operand_Second_String {
+            get {
+                return ResourceManager.GetString("Assembler_Error_MESSAGE_Operand_Second_String", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The second operand to the MESSAGE directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_MESSAGE_Operand_Second_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_MESSAGE_Operand_Second_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mnemonics should be separated from operands with spaces, not commas:
         ///    {0}
         ///    {1}^.
@@ -568,7 +604,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The NUM mnemonic requires a single operand. {0} were given..
+        ///   Looks up a localized string similar to The NUM directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_NUM_Operand_Count {
             get {
@@ -577,7 +613,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The operand to the NUM mnemonic must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The operand to the NUM directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_NUM_Operand_Type {
             get {
@@ -617,7 +653,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The PAD mnemonic requires a single operand. {0} were given..
+        ///   Looks up a localized string similar to The PAD directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_PAD_Operand_Count {
             get {
@@ -626,7 +662,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The literal operand to the PAD mnemonic cannot be a label reference..
+        ///   Looks up a localized string similar to The literal operand to the PAD directive cannot be a label reference..
         /// </summary>
         internal static string Assembler_Error_PAD_Operand_Label_Reference {
             get {
@@ -635,7 +671,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The operand to the PAD mnemonic must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The operand to the PAD directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_PAD_Operand_Type {
             get {
@@ -737,6 +773,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Manually emitted error..
+        /// </summary>
+        internal static string AssemblerWarnings_NonFatal_0000 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_NonFatal_0000", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Instruction writes to the rpo register..
         /// </summary>
         internal static string AssemblerWarnings_NonFatal_0001 {
@@ -769,6 +814,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string AssemblerWarnings_NonFatal_0004 {
             get {
                 return ResourceManager.GetString("AssemblerWarnings_NonFatal_0004", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manually emitted suggestion..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0000 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0000", resourceCulture);
             }
         }
         
@@ -922,6 +976,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string AssemblerWarnings_Suggestion_0017 {
             get {
                 return ResourceManager.GetString("AssemblerWarnings_Suggestion_0017", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manually emitted warning..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0000 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0000", resourceCulture);
             }
         }
         

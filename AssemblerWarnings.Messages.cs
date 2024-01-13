@@ -8,6 +8,7 @@ namespace AssEmbly
         [Localizable(true)]
         public static readonly Dictionary<int, string> NonFatalErrorMessages = new()
         {
+            { 0000, Strings.AssemblerWarnings_NonFatal_0000 },
             { 0001, Strings.AssemblerWarnings_NonFatal_0001 },
             { 0002, Strings.AssemblerWarnings_NonFatal_0002 },
             { 0003, Strings.AssemblerWarnings_NonFatal_0003 },
@@ -17,6 +18,7 @@ namespace AssEmbly
         [Localizable(true)]
         public static readonly Dictionary<int, string> WarningMessages = new()
         {
+            { 0000, Strings.AssemblerWarnings_Warning_0000 },
             { 0001, Strings.AssemblerWarnings_Warning_0001 },
             { 0002, Strings.AssemblerWarnings_Warning_0002 },
             { 0003, Strings.AssemblerWarnings_Warning_0003 },
@@ -47,6 +49,7 @@ namespace AssEmbly
         [Localizable(true)]
         public static readonly Dictionary<int, string> SuggestionMessages = new()
         {
+            { 0000, Strings.AssemblerWarnings_Suggestion_0000 },
             { 0001, Strings.AssemblerWarnings_Suggestion_0001 },
             { 0002, Strings.AssemblerWarnings_Suggestion_0002 },
             { 0003, Strings.AssemblerWarnings_Suggestion_0003 },
