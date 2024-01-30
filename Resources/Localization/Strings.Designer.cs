@@ -289,6 +289,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The DEBUG directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_DEBUG_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DEBUG_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operands cannot be empty:
         ///    {0}
         ///    {1}^.

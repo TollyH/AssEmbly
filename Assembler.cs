@@ -295,33 +295,37 @@ namespace AssEmbly
                             continue;
                         // Print assembler state
                         case "DEBUG":
+                            if (operands.Length != 0)
+                            {
+                                throw new OperandException(string.Format(Strings.Assembler_Error_DEBUG_Operand_Count, operands.Length));
+                            }
                             Console.ForegroundColor = ConsoleColor.Blue;
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Header,
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
                                 currentImport?.CurrentLine ?? baseFileLine,
                                 currentImport is null ? Strings.Generic_Base_File : currentImport.ImportPath, program.Count);
                             Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
                             foreach ((string labelName, ulong address) in labels)
                             {
-                                Console.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
+                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
                             }
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
                             foreach ((string labelName, ulong insertOffset, string? filePath, int lineNum) in labelReferences)
                             {
-                                Console.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
+                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
                             }
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Macro_Header, macros.Count);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Header, macros.Count);
                             foreach ((string macro, string replacement) in macros)
                             {
-                                Console.WriteLine(Strings.Assembler_Debug_Directive_Macro_Line, macro, replacement);
+                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Line, macro, replacement);
                             }
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
                             foreach (ImportStackFrame importFrame in importStack)
                             {
-                                Console.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
+                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
                             }
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
-                            Console.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
+                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
                             Console.ResetColor();
                             continue;
                         default:

@@ -1239,4 +1239,7 @@ Current extensions used: {0}</value>
 	<data name="Assembler_Error_MESSAGE_Operand_Second_String" xml:space="preserve">
 		<value>The second operand to the MESSAGE directive must be a string.</value>
 	</data>
+	<data name="Assembler_Error_DEBUG_Operand_Count" xml:space="preserve">
+		<value>The DEBUG directive takes no operands. {0} were given.</value>
+	</data>
 </root>
