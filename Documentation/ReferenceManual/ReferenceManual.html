@@ -237,8 +237,8 @@
 </head>
 <body>
 <h1 id="assembly-reference-manual">AssEmbly Reference Manual</h1>
-<p>Applies to versions: <code>3.0.0</code></p>
-<p>Last revised: 2024-01-08</p>
+<p>Applies to versions: <code>3.1.0</code></p>
+<p>Last revised: 2024-02-02</p>
 <h2 id="introduction">Introduction</h2>
 <p>AssEmbly is a custom processor architecture and assembly language
 implemented in .NET. It is designed to simplify the process of learning
@@ -338,9 +338,14 @@ the Carry, Overflow, Zero, and Sign Flags</a></li>
 <li><a href="#dat---byte-insertion">DAT - Byte Insertion</a></li>
 <li><a href="#num---number-insertion">NUM - Number Insertion</a></li>
 <li><a href="#mac---macro-definition">MAC - Macro Definition</a></li>
-<li><a href="#imp---file-importing">IMP - File Importing</a></li>
+<li><a href="#imp---import-assembly-source-file">IMP - Import AssEmbly
+Source File</a></li>
+<li><a href="#ibf---import-binary-file-contents">IBF - Import Binary
+File Contents</a></li>
 <li><a href="#analyzer---toggling-assembler-warnings">ANALYZER -
 Toggling Assembler Warnings</a></li>
+<li><a href="#message---manually-emit-assembler-warning">MESSAGE -
+Manually Emit Assembler Warning</a></li>
 </ul></li>
 <li><a href="#console-input-and-output">Console Input and
 Output</a></li>
@@ -2230,13 +2235,14 @@ marks (<code>"</code>), which will not be immediately parsed as a string
 within the macro. If the quotation marks are placed into a line as
 replacement text, they will be parsed normally as a part of the
 line.</p>
-<h3 id="imp---file-importing">IMP - File Importing</h3>
-<p>The <code>IMP</code> directive inserts the contents of another file
-wherever the directive is placed. It allows a program to be split across
-multiple files, as well as allowing code to be reused across multiple
-source files without having to copy the code into each file. The
-directive takes a single string operand (which must be enclosed in
-quotes), which can either be a full path
+<h3 id="imp---import-assembly-source-file">IMP - Import AssEmbly Source
+File</h3>
+<p>The <code>IMP</code> directive inserts lines of AssEmbly source code
+from another file into wherever the directive is placed. It allows a
+program to be split across multiple files, as well as allowing code to
+be reused across multiple source files without having to copy the code
+into each file. The directive takes a single string operand (which must
+be enclosed in quotes), which can either be a full path
 (i.e. <code>Drive:/Folder/Folder/file.asm</code>) or a path relative to
 the directory of the source file being assembled
 (i.e. <code>file.asm</code>, <code>Folder/file.asm</code>, or
@@ -2276,12 +2282,14 @@ file into the current file for assembly. This means that any label names
 in files being imported will be usable in the main file, though imposes
 the added restriction that label names must be unique across the main
 file and all its imported files.</p>
-<p>Files given to the <code>IMP</code> directive <strong>must</strong>
-be AssEmbly source files, not already assembled binaries. It is
-recommended, though not a strict requirement, that import statements are
-placed at the end of a file, as that will make it easier to ensure that
-the imported contents of a file aren’t executed by mistake as part of
-the main program.</p>
+<p>Files given to the <code>IMP</code> directive are assembled as
+AssEmbly source code, so <strong>must</strong> be AssEmbly source files,
+not already assembled binaries. To insert the raw binary contents of a
+file into the assembled program, use the <code>IBF</code> directive. It
+is recommended, though not a strict requirement, that import statements
+are placed at the end of a file, as that will make it easier to ensure
+that the imported contents of a file aren’t executed by mistake as part
+of the main program.</p>
 <p>Care should be taken to ensure that a file does not end up depending
 on itself, even if it is through other files, as this will result in an
 infinite loop of imports (also known as a circular dependency). The
@@ -2297,6 +2305,77 @@ occur.</p>
 <p>Attempting to assemble any of these three files would result in the
 assembler throwing an error, as each file ends up depending on itself as
 it resolves its import.</p>
+<h3 id="ibf---import-binary-file-contents">IBF - Import Binary File
+Contents</h3>
+<p>The <code>IBF</code> directive inserts the raw binary contents of a
+file into a program wherever the directive is located. It differs from
+the <code>IMP</code> directive in that the contents of the file is
+neither assembled nor otherwise manipulated in any way by the assembler,
+it is simply inserted as-is into the final assembled program. The
+directive takes a single string operand (which must be enclosed in
+quotes), which can either be a full path
+(i.e. <code>Drive:/Folder/Folder/file.bin</code>) or a path relative to
+the directory of the source file being assembled
+(i.e. <code>file.bin</code>, <code>Folder/file.bin</code>, or
+<code>../Folder/file.bin</code>).</p>
+<p>For example, suppose you had two files in the same folder, one called
+<code>program.asm</code>, and one called <code>string.txt</code>.</p>
+<p>Contents of <code>program.asm</code>:</p>
+<pre class="text"><code>MVQ rg0, :&amp;STRING
+:LOOP
+MVQ rg1, *rg0
+TST rg1, rg1
+JZO :END
+WCC rg1
+ICR rg0
+JMP :LOOP
+:END
+HLT  ; Prevent program executing into string data
+
+:STRING
+IBF &quot;string.txt&quot;
+DAT 0</code></pre>
+<p>Contents of <code>string.txt</code>:</p>
+<pre class="text"><code>Hello, world!</code></pre>
+<p>This program will print <code>Hello, world!</code> to the console
+when executed, with the string “Hello, world!” now being contained
+within the program itself.</p>
+<p>Assembling the program produces the following bytes:</p>
+<pre class="text"><code>99 06 27 00 00 00 00 00 00 00 9B 07 06 70 07 07 04 26 00 00 00 00 00 00 00 CC 07 14 06 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 00</code></pre>
+<p>Breaking down into:</p>
+<pre class="text"><code>Address | Bytes
+--------+----------------------------------------------------
+ 0x00   | 99             | 06  | 27 00 00 00 00 00 00 00
+        | MVQ (reg, lit) | rg0 | 39 (0x27)
+--------+----------------------------------------------------
+ 0x0A   | 9B             | 07  | 06
+        | MVQ (reg, ptr) | rg1 | rg0
+--------+----------------------------------------------------
+ 0x0D   | 70             | 07  | 07
+        | TST (reg, reg) | rg1 | rg1
+--------+----------------------------------------------------
+ 0x10   | 04             | 26 00 00 00 00 00 00 00
+        | JZO (adr)      | 38 (0x26)
+--------+----------------------------------------------------
+ 0x19   | CC             | 07
+        | WCC (reg)      | rg1
+--------+----------------------------------------------------
+ 0x1B   | 14             | 06
+        | ICR (reg)      | rg0
+--------+----------------------------------------------------
+ 0x1D   | 04             | 0A 00 00 00 00 00 00 00 00
+        | JMP (adr)      | 10 (0x0A)
+--------+----------------------------------------------------
+ 0x26   | 00
+        | HLT
+--------+----------------------------------------------------
+ 0x27   | 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
+        | H  e  l  l  o  ,     W  o  r  l  d  !
+--------+----------------------------------------------------
+ 0x34   | 00
+        | DAT 0</code></pre>
+<p>Note that the file given to the <code>IBF</code> directive does not
+need to contain plain text; any data can be inserted.</p>
 <h3 id="analyzer---toggling-assembler-warnings">ANALYZER - Toggling
 Assembler Warnings</h3>
 <p>The AssEmbly assembler checks for common issues with your source code
@@ -2328,6 +2407,22 @@ warning to re-appear. This can be overcome by placing the disabling
 <code>ANALYZER</code> directive at the end of the base file for any
 analyzers where this behaviour is an issue, or by simply not re-enabling
 the analyzer.</p>
+<h3 id="message---manually-emit-assembler-warning">MESSAGE - Manually
+Emit Assembler Warning</h3>
+<p>The <code>MESSAGE</code> directive can be used to cause a custom
+assembler message (i.e. an error, warning, or suggestion) to be given
+for the line that the directive is used on. One operand is required: the
+severity of the message to raise (either <code>error</code>,
+<code>warning</code>, or <code>suggestion</code>). A second, optional
+operand can also be given, which must be a quoted string literal to use
+as the content of the custom message.</p>
+<p>Two examples of the directive being used:</p>
+<pre class="text"><code>MESSAGE suggestion
+MESSAGE warning, &quot;This needs changing&quot;</code></pre>
+<p>Manually emitted messages always have the code <code>0000</code>,
+regardless of severity. Messages, even with the error severity, will not
+cause the assembly process to fail and have no effect on the final
+program output.</p>
 <h2 id="console-input-and-output">Console Input and Output</h2>
 <p>AssEmbly has native support for reading and writing from the console.
 There are four types of write that can be performed: 64-bit number in
@@ -2879,39 +2974,39 @@ as any returned value will be ignored by AssEmbly. The passed value
 parameter will be <code>null</code> if no value is given from
 AssEmbly.</p>
 <p>An example C# program may look like this:</p>
-<div class="sourceCode" id="cb122"><pre
-class="sourceCode csharp"><code class="sourceCode cs"><span id="cb122-1"><a href="#cb122-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">;</span></span>
-<span id="cb122-2"><a href="#cb122-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb122-3"><a href="#cb122-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Note the class is not in a namespace</span></span>
-<span id="cb122-4"><a href="#cb122-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> AssEmblyInterop</span>
-<span id="cb122-5"><a href="#cb122-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb122-6"><a href="#cb122-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
-<span id="cb122-7"><a href="#cb122-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb122-8"><a href="#cb122-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Methods can read memory...</span></span>
-<span id="cb122-9"><a href="#cb122-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">byte</span> value <span class="op">=</span> memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">];</span></span>
-<span id="cb122-10"><a href="#cb122-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to it...</span></span>
-<span id="cb122-11"><a href="#cb122-11" aria-hidden="true" tabindex="-1"></a>        memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">]</span> <span class="op">=</span> <span class="dv">12</span><span class="op">;</span></span>
-<span id="cb122-12"><a href="#cb122-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb122-13"><a href="#cb122-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// They can read registers...</span></span>
-<span id="cb122-14"><a href="#cb122-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">ulong</span> rg0 <span class="op">=</span> registers<span class="op">[</span><span class="dv">6</span><span class="op">];</span>  <span class="co">// 6 = rg0, see the registers table for the byte values of each register</span></span>
-<span id="cb122-15"><a href="#cb122-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to them...</span></span>
-<span id="cb122-16"><a href="#cb122-16" aria-hidden="true" tabindex="-1"></a>        registers<span class="op">[</span><span class="dv">6</span><span class="op">]</span> <span class="op">=</span> <span class="dv">9000</span><span class="op">;</span></span>
-<span id="cb122-17"><a href="#cb122-17" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb122-18"><a href="#cb122-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or do anything else that a normal C# program can do</span></span>
-<span id="cb122-19"><a href="#cb122-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>passedValue <span class="op">==</span> <span class="kw">null</span><span class="op">)</span></span>
-<span id="cb122-20"><a href="#cb122-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
-<span id="cb122-21"><a href="#cb122-21" aria-hidden="true" tabindex="-1"></a>            Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span><span class="st">&quot;You need to pass a value!&quot;</span><span class="op">);</span></span>
-<span id="cb122-22"><a href="#cb122-22" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span><span class="op">;</span></span>
-<span id="cb122-23"><a href="#cb122-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb122-24"><a href="#cb122-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb122-25"><a href="#cb122-25" aria-hidden="true" tabindex="-1"></a>        Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>$<span class="st">&quot;Your value: {passedValue}&quot;</span><span class="op">);</span></span>
-<span id="cb122-26"><a href="#cb122-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb122-27"><a href="#cb122-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb122-28"><a href="#cb122-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourOtherMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
-<span id="cb122-29"><a href="#cb122-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb122-30"><a href="#cb122-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Your code here...</span></span>
-<span id="cb122-31"><a href="#cb122-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb122-32"><a href="#cb122-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb127"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb127-1"><a href="#cb127-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> System<span class="op">;</span></span>
+<span id="cb127-2"><a href="#cb127-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb127-3"><a href="#cb127-3" aria-hidden="true" tabindex="-1"></a><span class="co">// Note the class is not in a namespace</span></span>
+<span id="cb127-4"><a href="#cb127-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">static</span> <span class="kw">class</span> AssEmblyInterop</span>
+<span id="cb127-5"><a href="#cb127-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb127-6"><a href="#cb127-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
+<span id="cb127-7"><a href="#cb127-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb127-8"><a href="#cb127-8" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Methods can read memory...</span></span>
+<span id="cb127-9"><a href="#cb127-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">byte</span> value <span class="op">=</span> memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">];</span></span>
+<span id="cb127-10"><a href="#cb127-10" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to it...</span></span>
+<span id="cb127-11"><a href="#cb127-11" aria-hidden="true" tabindex="-1"></a>        memory<span class="op">[</span><span class="bn">0xFF</span><span class="op">]</span> <span class="op">=</span> <span class="dv">12</span><span class="op">;</span></span>
+<span id="cb127-12"><a href="#cb127-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb127-13"><a href="#cb127-13" aria-hidden="true" tabindex="-1"></a>        <span class="co">// They can read registers...</span></span>
+<span id="cb127-14"><a href="#cb127-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">ulong</span> rg0 <span class="op">=</span> registers<span class="op">[</span><span class="dv">6</span><span class="op">];</span>  <span class="co">// 6 = rg0, see the registers table for the byte values of each register</span></span>
+<span id="cb127-15"><a href="#cb127-15" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or write to them...</span></span>
+<span id="cb127-16"><a href="#cb127-16" aria-hidden="true" tabindex="-1"></a>        registers<span class="op">[</span><span class="dv">6</span><span class="op">]</span> <span class="op">=</span> <span class="dv">9000</span><span class="op">;</span></span>
+<span id="cb127-17"><a href="#cb127-17" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb127-18"><a href="#cb127-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Or do anything else that a normal C# program can do</span></span>
+<span id="cb127-19"><a href="#cb127-19" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>passedValue <span class="op">==</span> <span class="kw">null</span><span class="op">)</span></span>
+<span id="cb127-20"><a href="#cb127-20" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
+<span id="cb127-21"><a href="#cb127-21" aria-hidden="true" tabindex="-1"></a>            Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span><span class="st">&quot;You need to pass a value!&quot;</span><span class="op">);</span></span>
+<span id="cb127-22"><a href="#cb127-22" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span><span class="op">;</span></span>
+<span id="cb127-23"><a href="#cb127-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb127-24"><a href="#cb127-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb127-25"><a href="#cb127-25" aria-hidden="true" tabindex="-1"></a>        Console<span class="op">.</span><span class="fu">WriteLine</span><span class="op">(</span>$<span class="st">&quot;Your value: {passedValue}&quot;</span><span class="op">);</span></span>
+<span id="cb127-26"><a href="#cb127-26" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb127-27"><a href="#cb127-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb127-28"><a href="#cb127-28" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="kw">static</span> <span class="dt">void</span> <span class="fu">YourOtherMethod</span><span class="op">(</span><span class="dt">byte</span><span class="op">[]</span> memory<span class="op">,</span> <span class="dt">ulong</span><span class="op">[]</span> registers<span class="op">,</span> <span class="dt">ulong</span><span class="op">?</span> passedValue<span class="op">)</span></span>
+<span id="cb127-29"><a href="#cb127-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb127-30"><a href="#cb127-30" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Your code here...</span></span>
+<span id="cb127-31"><a href="#cb127-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb127-32"><a href="#cb127-32" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>In order to compile a single C# source file into a .NET DLL, you can
 use the <code>csc</code> tool included with Visual Studio. The command
 <code>csc /t:library &lt;file_name&gt;.cs</code> will compile the given

@@ -1,8 +1,8 @@
 # AssEmbly Reference Manual
 
-Applies to versions: `3.0.0`
+Applies to versions: `3.1.0`
 
-Last revised: 2024-01-08
+Last revised: 2024-02-02
 
 ## Introduction
 
@@ -66,8 +66,10 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [DAT - Byte Insertion](#dat---byte-insertion)
     - [NUM - Number Insertion](#num---number-insertion)
     - [MAC - Macro Definition](#mac---macro-definition)
-    - [IMP - File Importing](#imp---file-importing)
+    - [IMP - Import AssEmbly Source File](#imp---import-assembly-source-file)
+    - [IBF - Import Binary File Contents](#ibf---import-binary-file-contents)
     - [ANALYZER - Toggling Assembler Warnings](#analyzer---toggling-assembler-warnings)
+    - [MESSAGE - Manually Emit Assembler Warning](#message---manually-emit-assembler-warning)
   - [Console Input and Output](#console-input-and-output)
   - [File Handling](#file-handling)
     - [Opening and Closing](#opening-and-closing)
@@ -1698,9 +1700,9 @@ The first line here results in an error, as a macro with a name of `Number` hasn
 
 Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
 
-### IMP - File Importing
+### IMP - Import AssEmbly Source File
 
-The `IMP` directive inserts the contents of another file wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
+The `IMP` directive inserts lines of AssEmbly source code from another file into wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
 
@@ -1743,7 +1745,7 @@ Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with
 
 The `IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
 
-Files given to the `IMP` directive **must** be AssEmbly source files, not already assembled binaries. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
+Files given to the `IMP` directive are assembled as AssEmbly source code, so **must** be AssEmbly source files, not already assembled binaries. To insert the raw binary contents of a file into the assembled program, use the `IBF` directive. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
 
 Care should be taken to ensure that a file does not end up depending on itself, even if it is through other files, as this will result in an infinite loop of imports (also known as a circular dependency). The AssEmbly assembler will detect these and throw an error should one occur.
 
@@ -1769,6 +1771,83 @@ IMP "file_one.asm"
 
 Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
 
+### IBF - Import Binary File Contents
+
+The `IBF` directive inserts the raw binary contents of a file into a program wherever the directive is located. It differs from the `IMP` directive in that the contents of the file is neither assembled nor otherwise manipulated in any way by the assembler, it is simply inserted as-is into the final assembled program. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.bin`) or a path relative to the directory of the source file being assembled (i.e. `file.bin`, `Folder/file.bin`, or `../Folder/file.bin`).
+
+For example, suppose you had two files in the same folder, one called `program.asm`, and one called `string.txt`.
+
+Contents of `program.asm`:
+
+```text
+MVQ rg0, :&STRING
+:LOOP
+MVQ rg1, *rg0
+TST rg1, rg1
+JZO :END
+WCC rg1
+ICR rg0
+JMP :LOOP
+:END
+HLT  ; Prevent program executing into string data
+
+:STRING
+IBF "string.txt"
+DAT 0
+```
+
+Contents of `string.txt`:
+
+```text
+Hello, world!
+```
+
+This program will print `Hello, world!` to the console when executed, with the string "Hello, world!" now being contained within the program itself.
+
+Assembling the program produces the following bytes:
+
+```text
+99 06 27 00 00 00 00 00 00 00 9B 07 06 70 07 07 04 26 00 00 00 00 00 00 00 CC 07 14 06 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 00
+```
+
+Breaking down into:
+
+```text
+Address | Bytes
+--------+----------------------------------------------------
+ 0x00   | 99             | 06  | 27 00 00 00 00 00 00 00
+        | MVQ (reg, lit) | rg0 | 39 (0x27)
+--------+----------------------------------------------------
+ 0x0A   | 9B             | 07  | 06
+        | MVQ (reg, ptr) | rg1 | rg0
+--------+----------------------------------------------------
+ 0x0D   | 70             | 07  | 07
+        | TST (reg, reg) | rg1 | rg1
+--------+----------------------------------------------------
+ 0x10   | 04             | 26 00 00 00 00 00 00 00
+        | JZO (adr)      | 38 (0x26)
+--------+----------------------------------------------------
+ 0x19   | CC             | 07
+        | WCC (reg)      | rg1
+--------+----------------------------------------------------
+ 0x1B   | 14             | 06
+        | ICR (reg)      | rg0
+--------+----------------------------------------------------
+ 0x1D   | 04             | 0A 00 00 00 00 00 00 00 00
+        | JMP (adr)      | 10 (0x0A)
+--------+----------------------------------------------------
+ 0x26   | 00
+        | HLT
+--------+----------------------------------------------------
+ 0x27   | 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
+        | H  e  l  l  o  ,     W  o  r  l  d  !
+--------+----------------------------------------------------
+ 0x34   | 00
+        | DAT 0
+```
+
+Note that the file given to the `IBF` directive does not need to contain plain text; any data can be inserted.
+
 ### ANALYZER - Toggling Assembler Warnings
 
 The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
@@ -1789,6 +1868,19 @@ CMP rg0, 0  ; generates suggestion 0005 again
 ```
 
 Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
+
+### MESSAGE - Manually Emit Assembler Warning
+
+The `MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
+
+Two examples of the directive being used:
+
+```text
+MESSAGE suggestion
+MESSAGE warning, "This needs changing"
+```
+
+Manually emitted messages always have the code `0000`, regardless of severity. Messages, even with the error severity, will not cause the assembly process to fail and have no effect on the final program output.
 
 ## Console Input and Output
 
