@@ -1242,4 +1242,7 @@ Current extensions used: {0}</value>
 	<data name="Assembler_Error_DEBUG_Operand_Count" xml:space="preserve">
 		<value>The DEBUG directive takes no operands. {0} were given.</value>
 	</data>
+	<data name="Assembler_Error_Finalized" xml:space="preserve">
+		<value>This assembler has already been finalized. No more lines can be assembled.</value>
+	</data>
 </root>

@@ -309,6 +309,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_Finalized {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Finalized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The file &quot;{0}&quot; given to the IBF directive could not be found..
         /// </summary>
         internal static string Assembler_Error_IBF_File_Not_Exists {

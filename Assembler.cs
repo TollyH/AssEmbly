@@ -1,44 +1,72 @@
 ﻿using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
+    public readonly record struct AssemblyResult
+    (
+        byte[] Program,
+        string DebugInfo,
+        List<Warning> Warnings,
+        ulong EntryPoint,
+        AAPFeatures UsedExtensions,
+        int AssembledLines,
+        int AssembledFiles
+    );
+
     /// <summary>
     /// Assembles text based AssEmbly programs to compiled AssEmbly bytes.
     /// </summary>
-    public static class Assembler
+    public class Assembler
     {
-        public class ImportStackFrame
+        public class ImportStackFrame(string importPath, int currentLine, int totalLines)
         {
-            public string ImportPath { get; }
-            public int CurrentLine { get; set; }
-            public int TotalLines { get; }
-
-            public ImportStackFrame(string importPath, int currentLine, int totalLines)
-            {
-                ImportPath = importPath;
-                CurrentLine = currentLine;
-                TotalLines = totalLines;
-            }
+            public string ImportPath { get; } = importPath;
+            public int CurrentLine { get; set; } = currentLine;
+            public int TotalLines { get; } = totalLines;
         }
 
-        public readonly record struct AssemblyResult
-        (
-            byte[] Program,
-            string DebugInfo,
-            List<Warning> Warnings,
-            ulong EntryPoint,
-            AAPFeatures UsedExtensions,
-            int AssembledLines,
-            int AssembledFiles
-        );
+        public bool Finalized { get; private set; }
 
-        /// <summary>
-        /// Assemble multiple AssEmbly lines at once into executable bytecode.
-        /// </summary>
-        /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
+        // Final compiled byte list
+        private readonly List<byte> program = new();
+        // Map of label names to final memory addresses
+        private readonly Dictionary<string, ulong> labels = new();
+        // List of references to labels by name along with the address to insert the relevant address in to.
+        // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
+        private readonly List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
+        // string -> replacement
+        private readonly Dictionary<string, string> macros = new();
+        private AAPFeatures usedExtensions = AAPFeatures.None;
+
+        // For detecting circular imports and tracking imported line numbers
+        private readonly Stack<ImportStackFrame> importStack = new();
+        private ImportStackFrame? currentImport = null;
+        private int baseFileLine = 0;
+
+        // Used for debug files
+        private readonly List<(ulong Address, string Line)> assembledLines = new();
+        private readonly Dictionary<ulong, List<string>> addressLabelNames = new();
+        private readonly List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
+
+        private readonly AssemblerWarnings warningGenerator;
+        private readonly List<Warning> warnings = new();
+
+        private readonly HashSet<int> initialDisabledNonFatalErrors;
+        private readonly HashSet<int> initialDisabledWarnings;
+        private readonly HashSet<int> initialDisabledSuggestions;
+
+        private bool lineIsLabelled = false;
+        private bool lineIsEntry = false;
+
+        private ulong entryPoint = 0;
+
+        private int processedLines = 0;
+        private int visitedFiles = 1;
+
         /// <param name="usingV1Format">
         /// Whether or not a v1 executable will be generated from this assembly.
         /// Used only for warning generation. Does not affect the resulting bytes.
@@ -46,6 +74,112 @@ namespace AssEmbly
         /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
         /// <param name="disabledWarnings">A set of warning codes to disable.</param>
         /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
+        public Assembler(bool usingV1Format, IEnumerable<int> disabledNonFatalErrors, IEnumerable<int> disabledWarnings, IEnumerable<int> disabledSuggestions)
+        {
+            warningGenerator = new AssemblerWarnings(usingV1Format);
+            warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
+            warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
+            warningGenerator.DisabledSuggestions.UnionWith(disabledSuggestions);
+
+            initialDisabledNonFatalErrors = warningGenerator.DisabledNonFatalErrors.ToHashSet();
+            initialDisabledWarnings = warningGenerator.DisabledWarnings.ToHashSet();
+            initialDisabledSuggestions = warningGenerator.DisabledSuggestions.ToHashSet();
+        }
+
+        public Assembler()
+        {
+            warningGenerator = new AssemblerWarnings(false);
+
+            initialDisabledNonFatalErrors = new HashSet<int>();
+            initialDisabledWarnings = new HashSet<int>();
+            initialDisabledSuggestions = new HashSet<int>();
+        }
+
+        /// <returns>
+        /// <see langword="false"/> if the warning with the given severity and code was already disabled, else <see langword="true"/>
+        /// </returns>
+        public bool DisableAssemblerWarning(WarningSeverity severity, int code)
+        {
+            return severity switch
+            {
+                WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Add(code),
+                WarningSeverity.Warning => warningGenerator.DisabledWarnings.Add(code),
+                WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Add(code),
+                _ => throw new ArgumentException("Given severity is not valid."),
+            };
+        }
+
+        /// <returns>
+        /// <see langword="false"/> if the warning with the given severity and code was already enabled, else <see langword="true"/>
+        /// </returns>
+        public bool EnableAssemblerWarning(WarningSeverity severity, int code)
+        {
+            return severity switch
+            {
+                WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Remove(code),
+                WarningSeverity.Warning => warningGenerator.DisabledWarnings.Remove(code),
+                WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Remove(code),
+                _ => throw new ArgumentException("Given severity is not valid."),
+            };
+        }
+
+        /// <summary>
+        /// Reset the enable/disable state of the given warning to its state when the Assembler was initialized.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> if the warning with the given severity and code was disabled, else <see langword="false"/>
+        /// </returns>
+        public bool ResetAssemblerWarning(WarningSeverity severity, int code)
+        {
+            switch (severity)
+            {
+                case WarningSeverity.NonFatalError:
+                    _ = initialDisabledNonFatalErrors.Contains(code) ? warningGenerator.DisabledNonFatalErrors.Add(code) : warningGenerator.DisabledNonFatalErrors.Remove(code);
+                    return warningGenerator.DisabledNonFatalErrors.Contains(code);
+                case WarningSeverity.Warning:
+                    _ = initialDisabledWarnings.Contains(code) ? warningGenerator.DisabledWarnings.Add(code) : warningGenerator.DisabledWarnings.Remove(code);
+                    return warningGenerator.DisabledWarnings.Contains(code);
+                case WarningSeverity.Suggestion:
+                    _ = initialDisabledSuggestions.Contains(code) ? warningGenerator.DisabledSuggestions.Add(code) : warningGenerator.DisabledSuggestions.Remove(code);
+                    return warningGenerator.DisabledSuggestions.Contains(code);
+                default:
+                    throw new ArgumentException("Given severity is not valid.");
+            }
+        }
+
+        /// <summary>
+        /// Get the result of the assembly, including the assembled program bytes.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="finalize"/> is <see langword="true"/>, label references will be resolved and final warning analyzers will be run.
+        /// The assembler will no longer be able to assemble additional lines.
+        /// If <see langword="false"/>, uses of labels will be filled with 00 bytes, and warnings that require final warning analyzers will be missing.
+        /// </remarks>
+        public AssemblyResult GetAssemblyResult(bool finalize)
+        {
+            byte[] programBytes;
+            if (finalize)
+            {
+                ResolveLabelReferences();
+                programBytes = program.ToArray();
+                warnings.AddRange(warningGenerator.Finalize(programBytes));
+                Finalized = true;
+            }
+            else
+            {
+                programBytes = program.ToArray();
+            }
+            string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
+                // Convert dictionary to sorted list
+                addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
+                resolvedImports);
+            return new AssemblyResult(programBytes, debugInfo, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
+        }
+
+        /// <summary>
+        /// Assemble multiple AssEmbly lines at once into executable bytecode.
+        /// </summary>
+        /// <param name="lines">Each line of the program to assemble. Newline characters should not be included.</param>
         /// <exception cref="SyntaxError">Thrown when there is an error with how a line of AssEmbly has been written.</exception>
         /// <exception cref="LabelNameException">
         /// Thrown when the same label name is defined multiple times, or when a reference is made to a non-existent label.
@@ -55,48 +189,23 @@ namespace AssEmbly
         /// Thrown when an error occurs whilst attempting to import the contents of another AssEmbly file.
         /// </exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static AssemblyResult AssembleLines(IEnumerable<string> lines, bool usingV1Format,
-            IReadOnlySet<int> disabledNonFatalErrors, IReadOnlySet<int> disabledWarnings, IReadOnlySet<int> disabledSuggestions)
+        public void AssembleLines(IEnumerable<string> lines)
         {
+            if (Finalized)
+            {
+                throw new InvalidOperationException(Strings.Assembler_Error_Finalized);
+            }
+
             // The lines to assemble may change during assembly, for example importing a file
             // will extend the list of lines to assemble as and when the import is reached.
             List<string> dynamicLines = lines.ToList();
-            // Final compiled byte list
-            List<byte> program = new();
-            // Map of label names to final memory addresses
-            Dictionary<string, ulong> labels = new();
-            // List of references to labels by name along with the address to insert the relevant address in to.
-            // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
-            List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
-            // string -> replacement
-            Dictionary<string, string> macros = new();
-            AAPFeatures usedExtensions = AAPFeatures.None;
 
-            // Used for debug files
-            List<(ulong Address, string Line)> assembledLines = new();
-            Dictionary<ulong, List<string>> addressLabelNames = new();
-            List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
+            importStack.Clear();
+            baseFileLine = 0;
 
-            // For detecting circular imports and tracking imported line numbers
-            Stack<ImportStackFrame> importStack = new();
-            int baseFileLine = 0;
-
-            bool lineIsLabelled = false;
-            bool lineIsEntry = false;
-            AssemblerWarnings warningGenerator = new(usingV1Format);
-            warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
-            warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
-            warningGenerator.DisabledSuggestions.UnionWith(disabledSuggestions);
-            List<Warning> warnings = new();
-
-            ulong entryPoint = 0;
-
-            int processedLines = 0;
-            int visitedFiles = 1;
-
-            for (int l = 0; l < dynamicLines.Count; l++)
+            for (int lineIndex = 0; lineIndex < dynamicLines.Count; lineIndex++)
             {
-                if (importStack.TryPeek(out ImportStackFrame? currentImport))
+                if (importStack.TryPeek(out currentImport))
                 {
                     // Currently inside an imported file
                     currentImport.CurrentLine++;
@@ -121,7 +230,7 @@ namespace AssEmbly
                 {
                     baseFileLine++;
                 }
-                string rawLine = dynamicLines[l];
+                string rawLine = dynamicLines[lineIndex];
                 foreach ((string macro, string replacement) in macros)
                 {
                     rawLine = rawLine.Replace(macro, replacement);
@@ -171,165 +280,11 @@ namespace AssEmbly
                         continue;
                     }
                     string[] operands = line[1..];
-                    // Check for line-modifying/state altering assembler directives
-                    switch (mnemonic.ToUpperInvariant())
+
+                    if (ProcessStateDirective(mnemonic, operands, rawLine, dynamicLines, ref lineIndex))
                     {
-                        // Import contents of another file
-                        case "IMP":
-                            if (operands.Length != 1)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Count, operands.Length));
-                            }
-                            OperandType operandType = DetermineOperandType(operands[0]);
-                            if (operandType != OperandType.Literal)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Type, operandType));
-                            }
-                            if (operands[0][0] != '"')
-                            {
-                                throw new OperandException(Strings.Assembler_Error_IMP_Operand_String);
-                            }
-                            byte[] parsedBytes = ParseLiteral(operands[0], true);
-                            string importPath = Encoding.UTF8.GetString(parsedBytes);
-                            string resolvedPath = Path.GetFullPath(importPath);
-                            if (!File.Exists(resolvedPath))
-                            {
-                                throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
-                            }
-                            if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.InvariantCultureIgnoreCase)))
-                            {
-                                throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
-                            }
-                            string[] linesToImport = File.ReadAllLines(resolvedPath);
-                            // Insert the contents of the imported file so they are assembled next
-                            dynamicLines.InsertRange(l + 1, linesToImport);
-                            resolvedImports.Add((importPath, resolvedPath, (uint)program.Count));
-
-                            warnings.AddRange(warningGenerator.NextInstruction(
-                                Array.Empty<byte>(), mnemonic, operands,
-                                currentImport?.CurrentLine ?? baseFileLine,
-                                currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
-                            lineIsLabelled = false;
-                            lineIsEntry = false;
-
-                            importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
-                            visitedFiles++;
-                            continue;
-                        // Define macro
-                        case "MAC":
-                            if (operands.Length != 2)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
-                            }
-                            macros[operands[0]] = operands[1];
-                            lineIsLabelled = false;
-                            lineIsEntry = false;
-                            continue;
-                        // Toggle warnings
-                        case "ANALYZER":
-                            if (operands.Length != 3)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_ANALYZER_Operand_Count, operands.Length));
-                            }
-                            HashSet<int> disabledSet = operands[0].ToUpperInvariant() switch
-                            {
-                                "ERROR" => warningGenerator.DisabledNonFatalErrors,
-                                "WARNING" => warningGenerator.DisabledWarnings,
-                                "SUGGESTION" => warningGenerator.DisabledSuggestions,
-                                _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
-                            };
-                            IReadOnlySet<int> initialSet = operands[0].ToUpperInvariant() switch
-                            {
-                                "ERROR" => disabledNonFatalErrors,
-                                "WARNING" => disabledWarnings,
-                                "SUGGESTION" => disabledSuggestions,
-                                _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
-                            };
-                            if (!int.TryParse(operands[1], out int code))
-                            {
-                                throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_Second);
-                            }
-                            _ = operands[2].ToUpperInvariant() switch
-                            {
-                                // Disable
-                                "0" => disabledSet.Add(code),
-                                // Enable
-                                "1" => disabledSet.Remove(code),
-                                // Restore
-                                "R" => initialSet.Contains(code) ? disabledSet.Add(code) : disabledSet.Remove(code),
-                                _ => throw new OperandException(
-                                    Strings.Assembler_Error_ANALYZER_Operand_Third)
-                            };
-                            continue;
-                        // Manually emit assembler warning
-                        case "MESSAGE":
-                            if (operands.Length is < 1 or > 2)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Count, operands.Length));
-                            }
-                            WarningSeverity severity = operands[0].ToUpperInvariant() switch
-                            {
-                                "ERROR" => WarningSeverity.NonFatalError,
-                                "WARNING" => WarningSeverity.Warning,
-                                "SUGGESTION" => WarningSeverity.Suggestion,
-                                _ => throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_First)
-                            };
-                            string? message = null;
-                            if (operands.Length == 2)
-                            {
-                                operandType = DetermineOperandType(operands[1]);
-                                if (operandType != OperandType.Literal)
-                                {
-                                    throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Second_Type, operandType));
-                                }
-                                if (operands[1][0] != '"')
-                                {
-                                    throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_Second_String);
-                                }
-                                parsedBytes = ParseLiteral(operands[1], true);
-                                message = Encoding.UTF8.GetString(parsedBytes);
-                            }
-                            warnings.Add(new Warning(
-                                severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
-                                mnemonic, operands, rawLine, message));
-                            continue;
-                        // Print assembler state
-                        case "DEBUG":
-                            if (operands.Length != 0)
-                            {
-                                throw new OperandException(string.Format(Strings.Assembler_Error_DEBUG_Operand_Count, operands.Length));
-                            }
-                            Console.ForegroundColor = ConsoleColor.Blue;
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
-                                currentImport?.CurrentLine ?? baseFileLine,
-                                currentImport is null ? Strings.Generic_Base_File : currentImport.ImportPath, program.Count);
-                            Console.ForegroundColor = ConsoleColor.Magenta;
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
-                            foreach ((string labelName, ulong address) in labels)
-                            {
-                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
-                            }
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
-                            foreach ((string labelName, ulong insertOffset, string? filePath, int lineNum) in labelReferences)
-                            {
-                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
-                            }
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Header, macros.Count);
-                            foreach ((string macro, string replacement) in macros)
-                            {
-                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Line, macro, replacement);
-                            }
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
-                            foreach (ImportStackFrame importFrame in importStack)
-                            {
-                                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
-                            }
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
-                            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
-                            Console.ResetColor();
-                            continue;
-                        default:
-                            break;
+                        // Directive found and processed, move onto next statement
+                        continue;
                     }
 
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
@@ -350,8 +305,8 @@ namespace AssEmbly
                         newBytes, mnemonic, operands,
                         currentImport?.CurrentLine ?? baseFileLine,
                         currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
-                    lineIsLabelled = false;
 
+                    lineIsLabelled = false;
                     lineIsEntry = false;
                 }
                 catch (AssemblerException e)
@@ -377,29 +332,6 @@ namespace AssEmbly
                     throw;
                 }
             }
-
-            byte[] programBytes = program.ToArray();
-
-            foreach ((string labelName, ulong insertOffset, string? filePath, int line) in labelReferences)
-            {
-                if (!labels.TryGetValue(labelName, out ulong targetOffset))
-                {
-                    LabelNameException exc = new(
-                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName), line, filePath ?? "");
-                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
-                    throw exc;
-                }
-                // Write the now known address of the label to where it is required within the program
-                BinaryPrimitives.WriteUInt64LittleEndian(programBytes.AsSpan()[(int)insertOffset..], targetOffset);
-            }
-            warnings.AddRange(warningGenerator.Finalize(programBytes));
-
-            string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
-                // Convert dictionary to sorted list
-                addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
-                resolvedImports);
-
-            return new AssemblyResult(programBytes, debugInfo, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
         }
 
         /// <summary>
@@ -695,8 +627,8 @@ namespace AssEmbly
         /// It will be incremented automatically by this method to the index of the closing quote.
         /// </param>
         /// <returns>
-        /// For double quoted (") string literals, the processed string literal, including opening and closing quotes.
-        /// For single quoted (') character literals, the 32-bit numeric value corresponding to the
+        /// For double-quoted (") string literals, the processed string literal, including opening and closing quotes.
+        /// For single-quoted (') character literals, the 32-bit numeric value corresponding to the
         /// UTF-8 representation as a base-10 string of the single contained character.
         /// </returns>
         /// <remarks>
@@ -858,7 +790,7 @@ namespace AssEmbly
         /// <summary>
         /// Determine the type for a single operand.
         /// </summary>
-        /// <param name="operand">A single operand with no comments or whitespace.</param>
+        /// <param name="operand">A single operand with no comments or surrounding whitespace.</param>
         /// <remarks>Operands will also be validated here.</remarks>
         /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
         public static OperandType DetermineOperandType(string operand)
@@ -925,7 +857,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Parse a operand of literal type to its representation as bytes. 
+        /// Parse an operand of literal type to its representation as bytes. 
         /// </summary>
         /// <remarks>
         /// Integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/>.
@@ -982,7 +914,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Parse a operand of literal type to its representation as bytes. 
+        /// Parse an operand of literal type to its representation as bytes. 
         /// </summary>
         /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
@@ -991,6 +923,184 @@ namespace AssEmbly
         public static byte[] ParseLiteral(string operand, bool allowString)
         {
             return ParseLiteral(operand, allowString, out _);
+        }
+
+        private void ResolveLabelReferences()
+        {
+            Span<byte> programSpan = CollectionsMarshal.AsSpan(program);
+            foreach ((string labelName, ulong insertOffset, string? filePath, int line) in labelReferences)
+            {
+                if (!labels.TryGetValue(labelName, out ulong targetOffset))
+                {
+                    LabelNameException exc = new(
+                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName), line, filePath ?? "");
+                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
+                    throw exc;
+                }
+                // Write the now known address of the label to where it is required within the program
+                BinaryPrimitives.WriteUInt64LittleEndian(programSpan[(int)insertOffset..], targetOffset);
+            }
+        }
+
+        /// <summary>
+        /// Determine if a given statement is a known state-modifying assembler directive and process it if it is.
+        /// </summary>
+        /// <returns>
+        /// <list type="bullet">
+        /// <item><see langword="true"/> - Directive was recognised and processed without error</item>
+        /// <item><see langword="false"/> - Directive was not recognised and assembly of the statement should continue</item>
+        /// </list>
+        /// </returns>
+        private bool ProcessStateDirective(string mnemonic, string[] operands, string rawLine, List<string> dynamicLines, ref int currentLineIndex)
+        {
+            switch (mnemonic.ToUpperInvariant())
+            {
+                // Import contents of another file
+                case "IMP":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Count, operands.Length));
+                    }
+                    OperandType operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] != '"')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_IMP_Operand_String);
+                    }
+                    byte[] parsedBytes = ParseLiteral(operands[0], true);
+                    string importPath = Encoding.UTF8.GetString(parsedBytes);
+                    string resolvedPath = Path.GetFullPath(importPath);
+                    if (!File.Exists(resolvedPath))
+                    {
+                        throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
+                    }
+                    if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
+                    }
+                    string[] linesToImport = File.ReadAllLines(resolvedPath);
+                    // Insert the contents of the imported file so they are assembled next
+                    dynamicLines.InsertRange(currentLineIndex + 1, linesToImport);
+                    resolvedImports.Add((importPath, resolvedPath, (uint)program.Count));
+
+                    warnings.AddRange(warningGenerator.NextInstruction(
+                        Array.Empty<byte>(), mnemonic, operands,
+                        currentImport?.CurrentLine ?? baseFileLine,
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
+
+                    importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
+                    visitedFiles++;
+                    return true;
+                // Define macro
+                case "MAC":
+                    if (operands.Length != 2)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
+                    }
+                    macros[operands[0]] = operands[1];
+                    return true;
+                // Toggle warnings
+                case "ANALYZER":
+                    if (operands.Length != 3)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_ANALYZER_Operand_Count, operands.Length));
+                    }
+                    WarningSeverity severity = operands[0].ToUpperInvariant() switch
+                    {
+                        "ERROR" => WarningSeverity.NonFatalError,
+                        "WARNING" => WarningSeverity.Warning,
+                        "SUGGESTION" => WarningSeverity.Suggestion,
+                        _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
+                    };
+                    if (!int.TryParse(operands[1], out int code))
+                    {
+                        throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_Second);
+                    }
+                    _ = operands[2].ToUpperInvariant() switch
+                    {
+                        // Disable
+                        "0" => DisableAssemblerWarning(severity, code),
+                        // Enable
+                        "1" => EnableAssemblerWarning(severity, code),
+                        // Restore
+                        "R" => ResetAssemblerWarning(severity, code),
+                        _ => throw new OperandException(
+                            Strings.Assembler_Error_ANALYZER_Operand_Third)
+                    };
+                    return true;
+                // Manually emit assembler warning
+                case "MESSAGE":
+                    if (operands.Length is < 1 or > 2)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Count, operands.Length));
+                    }
+                    severity = operands[0].ToUpperInvariant() switch
+                    {
+                        "ERROR" => WarningSeverity.NonFatalError,
+                        "WARNING" => WarningSeverity.Warning,
+                        "SUGGESTION" => WarningSeverity.Suggestion,
+                        _ => throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_First)
+                    };
+                    string? message = null;
+                    if (operands.Length == 2)
+                    {
+                        operandType = DetermineOperandType(operands[1]);
+                        if (operandType != OperandType.Literal)
+                        {
+                            throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Second_Type, operandType));
+                        }
+                        if (operands[1][0] != '"')
+                        {
+                            throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_Second_String);
+                        }
+                        parsedBytes = ParseLiteral(operands[1], true);
+                        message = Encoding.UTF8.GetString(parsedBytes);
+                    }
+                    warnings.Add(new Warning(
+                        severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
+                        mnemonic, operands, rawLine, message));
+                    return true;
+                // Print assembler state
+                case "DEBUG":
+                    if (operands.Length != 0)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DEBUG_Operand_Count, operands.Length));
+                    }
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
+                        currentImport?.CurrentLine ?? baseFileLine,
+                        currentImport is null ? Strings.Generic_Base_File : currentImport.ImportPath, program.Count);
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
+                    foreach ((string labelName, ulong address) in labels)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
+                    foreach ((string labelName, ulong insertOffset, string? filePath, int lineNum) in labelReferences)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Header, macros.Count);
+                    foreach ((string macro, string replacement) in macros)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Line, macro, replacement);
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
+                    foreach (ImportStackFrame importFrame in importStack)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
+                    Console.ResetColor();
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

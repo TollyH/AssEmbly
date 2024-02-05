@@ -139,14 +139,15 @@ namespace AssEmbly
                 }
             }
 
-            Assembler.AssemblyResult assemblyResult;
+            AssemblyResult assemblyResult;
             int totalErrors = 0;
             int totalWarnings = 0;
             int totalSuggestions = 0;
             try
             {
-                assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath),
-                    useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                Assembler assembler = new(useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                assembler.AssembleLines(File.ReadAllLines(sourcePath));
+                assemblyResult = assembler.GetAssemblyResult(true);
                 // Sort warnings by severity, then file, then line
                 assemblyResult.Warnings.Sort((a, b) =>
                 {
@@ -291,14 +292,12 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Assembler.AssemblyResult assemblyResult;
+            AssemblyResult assemblyResult;
             try
             {
-                assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
-                    // Ignore all warnings when using 'run' command
-                    AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet(),
-                    AssemblerWarnings.WarningMessages.Keys.ToHashSet(),
-                    AssemblerWarnings.SuggestionMessages.Keys.ToHashSet());
+                Assembler assembler = new();
+                assembler.AssembleLines(File.ReadAllLines(sourcePath));
+                assemblyResult = assembler.GetAssemblyResult(true);
             }
             catch (Exception e)
             {
@@ -407,9 +406,9 @@ namespace AssEmbly
 
             try
             {
-                Assembler.AssemblyResult assemblyResult = Assembler.AssembleLines(File.ReadAllLines(sourcePath), false,
-                    // Never ignore warnings when using 'lint' command
-                    new HashSet<int>(), new HashSet<int>(), new HashSet<int>());
+                Assembler assembler = new();
+                assembler.AssembleLines(File.ReadAllLines(sourcePath));
+                AssemblyResult assemblyResult = assembler.GetAssemblyResult(true);
                 Console.WriteLine(JsonSerializer.Serialize(assemblyResult.Warnings, new JsonSerializerOptions { IncludeFields = true }));
             }
             catch (Exception e)
