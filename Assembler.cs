@@ -105,7 +105,7 @@ namespace AssEmbly
                 WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Add(code),
                 WarningSeverity.Warning => warningGenerator.DisabledWarnings.Add(code),
                 WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Add(code),
-                _ => throw new ArgumentException("Given severity is not valid."),
+                _ => throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity),
             };
         }
 
@@ -119,7 +119,7 @@ namespace AssEmbly
                 WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Remove(code),
                 WarningSeverity.Warning => warningGenerator.DisabledWarnings.Remove(code),
                 WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Remove(code),
-                _ => throw new ArgumentException("Given severity is not valid."),
+                _ => throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity),
             };
         }
 
@@ -143,7 +143,7 @@ namespace AssEmbly
                     _ = initialDisabledSuggestions.Contains(code) ? warningGenerator.DisabledSuggestions.Add(code) : warningGenerator.DisabledSuggestions.Remove(code);
                     return warningGenerator.DisabledSuggestions.Contains(code);
                 default:
-                    throw new ArgumentException("Given severity is not valid.");
+                    throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity);
             }
         }
 
@@ -642,11 +642,11 @@ namespace AssEmbly
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
-                throw new IndexOutOfRangeException("String start index is outside the range of the given line.");
+                throw new IndexOutOfRangeException(Strings.Assembler_Error_String_Bad_StartIndex);
             }
             if (line.Length < 2)
             {
-                throw new ArgumentException("Given line is less than two characters long, which is invalid.");
+                throw new ArgumentException(Strings.Assembler_Error_String_Too_Short);
             }
             bool singleCharacterLiteral = false;
             bool containsHighSurrogate = false;  // Only used for character literals
@@ -654,7 +654,7 @@ namespace AssEmbly
             {
                 if (line[startIndex] != '\'')
                 {
-                    throw new ArgumentException("Given string start index does not point to a quote mark.");
+                    throw new ArgumentException(Strings.Assembler_Error_String_Bad_First_Char);
                 }
                 singleCharacterLiteral = true;
             }
@@ -905,8 +905,8 @@ namespace AssEmbly
             catch (OverflowException)
             {
                 throw new OperandException(operand.StartsWith('-')
-                    ? $"Numeric literal too small. {long.MinValue:N0} is the minimum value:\n    {operand}"
-                    : $"Numeric literal too large. {ulong.MaxValue:N0} is the maximum value:\n    {operand}");
+                    ? string.Format(Strings.Assembler_Error_Literal_Too_Small, long.MinValue, operand)
+                    : string.Format(Strings.Assembler_Error_Literal_Too_Large, ulong.MaxValue, operand));
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);

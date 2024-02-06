@@ -89,11 +89,11 @@ namespace AssEmbly
         {
             if (ProgramLoaded)
             {
-                throw new InvalidOperationException("A program is already loaded in this processor.");
+                throw new InvalidOperationException(Strings.Processor_Error_Already_Loaded);
             }
             if (programData.LongLength > Memory.LongLength)
             {
-                throw new InvalidOperationException($"Program too large to fit in allocated memory. {Memory.LongLength} bytes available, {programData.LongLength} given.");
+                throw new InvalidOperationException(string.Format(Strings.Processor_Error_Program_Too_Large, Memory.LongLength, programData.LongLength));
             }
             Array.Copy(programData, Memory, programData.LongLength);
             _mappedMemoryRanges.Insert(0, new Range(0, programData.LongLength));
@@ -124,7 +124,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException("A program has not been loaded in this processor.");
+                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
             }
             if (Registers[(int)Register.rpo] >= (ulong)Memory.LongLength)
             {
@@ -3403,7 +3403,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException("A program has not been loaded in this processor.");
+                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
             }
             if (size is 0 or > long.MaxValue)
             {
@@ -3435,7 +3435,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException("A program has not been loaded in this processor.");
+                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
             }
             if (size is 0 or > long.MaxValue)
             {
@@ -3493,7 +3493,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException("A program has not been loaded in this processor.");
+                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
             }
             for (int i = 1; i < _mappedMemoryRanges.Count - 1; i++)
             {

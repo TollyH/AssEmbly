@@ -1245,4 +1245,36 @@ Current extensions used: {0}</value>
 	<data name="Assembler_Error_Finalized" xml:space="preserve">
 		<value>This assembler has already been finalized. No more lines can be assembled.</value>
 	</data>
+	<data name="Assembler_Error_Literal_Too_Small" xml:space="preserve">
+		<value>Numeric literal too small. {0:N0} is the minimum value:
+    {1}</value>
+	</data>
+	<data name="Assembler_Error_Literal_Too_Large" xml:space="preserve">
+		<value>Numeric literal too large. {0:N0} is the maximum value:
+    {1}</value>
+	</data>
+	<data name="Generic_Copyright_Header" xml:space="preserve">
+		<value>Copyright © 2022-2024  Ptolemy Hill</value>
+	</data>
+	<data name="Assembler_Error_Invalid_Severity" xml:space="preserve">
+		<value>Given severity is not valid.</value>
+	</data>
+	<data name="Assembler_Error_String_Bad_StartIndex" xml:space="preserve">
+		<value>String start index is outside the range of the given line.</value>
+	</data>
+	<data name="Assembler_Error_String_Too_Short" xml:space="preserve">
+		<value>Given line is less than two characters long, which is invalid.</value>
+	</data>
+	<data name="Assembler_Error_String_Bad_First_Char" xml:space="preserve">
+		<value>Given string start index does not point to a quote mark.</value>
+	</data>
+	<data name="Processor_Error_Already_Loaded" xml:space="preserve">
+		<value>A program is already loaded in this processor.</value>
+	</data>
+	<data name="Processor_Error_Program_Too_Large" xml:space="preserve">
+		<value>Program too large to fit in allocated memory. {0} bytes available, {1} given.</value>
+	</data>
+	<data name="Processor_Error_No_Program" xml:space="preserve">
+		<value>A program has not been loaded in this processor.</value>
+	</data>
 </root>

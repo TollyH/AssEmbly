@@ -309,7 +309,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to This assembler has already been finalized. No more lines can be assembled..
         /// </summary>
         internal static string Assembler_Error_Finalized {
             get {
@@ -423,6 +423,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Given severity is not valid..
+        /// </summary>
+        internal static string Assembler_Error_Invalid_Severity {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Invalid_Severity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Label &quot;{0}&quot; has already been defined. Label names must be unique..
         /// </summary>
         internal static string Assembler_Error_Label_Already_Defined {
@@ -512,6 +521,16 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Numeric literal too large. {0:N0} is the maximum value:
+        ///    {1}.
+        /// </summary>
+        internal static string Assembler_Error_Literal_Too_Large {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Too_Large", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Numeric literal contains more than one decimal point:
         ///    {0}
         ///    {1}^.
@@ -519,6 +538,16 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Literal_Too_Many_Points {
             get {
                 return ResourceManager.GetString("Assembler_Error_Literal_Too_Many_Points", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Numeric literal too small. {0:N0} is the minimum value:
+        ///    {1}.
+        /// </summary>
+        internal static string Assembler_Error_Literal_Too_Small {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Too_Small", resourceCulture);
             }
         }
         
@@ -740,6 +769,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Given string start index does not point to a quote mark..
+        /// </summary>
+        internal static string Assembler_Error_String_Bad_First_Char {
+            get {
+                return ResourceManager.GetString("Assembler_Error_String_Bad_First_Char", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to String start index is outside the range of the given line..
+        /// </summary>
+        internal static string Assembler_Error_String_Bad_StartIndex {
+            get {
+                return ResourceManager.GetString("Assembler_Error_String_Bad_StartIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to String literal contains characters after closing quote mark..
         /// </summary>
         internal static string Assembler_Error_String_Followed_Internal {
@@ -754,6 +801,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_String_Not_Allowed {
             get {
                 return ResourceManager.GetString("Assembler_Error_String_Not_Allowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Given line is less than two characters long, which is invalid..
+        /// </summary>
+        internal static string Assembler_Error_String_Too_Short {
+            get {
+                return ResourceManager.GetString("Assembler_Error_String_Too_Short", resourceCulture);
             }
         }
         
@@ -2157,6 +2213,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Copyright © 2022-2024  Ptolemy Hill.
+        /// </summary>
+        internal static string Generic_Copyright_Header {
+            get {
+                return ResourceManager.GetString("Generic_Copyright_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 
         ///
         ///.
@@ -2348,6 +2413,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A program is already loaded in this processor..
+        /// </summary>
+        internal static string Processor_Error_Already_Loaded {
+            get {
+                return ResourceManager.GetString("Processor_Error_Already_Loaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot execute load external assembly instruction if an assembly is already loaded.
         /// </summary>
         internal static string Processor_Error_Assembly_Already_Open {
@@ -2507,6 +2581,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Memory_Allocation {
             get {
                 return ResourceManager.GetString("Processor_Error_Memory_Allocation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A program has not been loaded in this processor..
+        /// </summary>
+        internal static string Processor_Error_No_Program {
+            get {
+                return ResourceManager.GetString("Processor_Error_No_Program", resourceCulture);
             }
         }
         
@@ -2993,6 +3076,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_Low_Signed_SmallMove {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Low_Signed_SmallMove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Program too large to fit in allocated memory. {0} bytes available, {1} given..
+        /// </summary>
+        internal static string Processor_Error_Program_Too_Large {
+            get {
+                return ResourceManager.GetString("Processor_Error_Program_Too_Large", resourceCulture);
             }
         }
         
