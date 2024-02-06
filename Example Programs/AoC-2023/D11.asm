@@ -1,9 +1,9 @@
-MAC _ffe, 0b100
-MAC EXPANSION_FACTOR_PART_1, 2
-MAC EXPANSION_FACTOR_PART_2, 1000000
-MAC MAX_EXPANDED, 20  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
-MAC MAX_INPUT_LEN, 20000  ; Enough for all input tested, increase if necessary (note there needs to be room for a full line of null terminators)
-MAC MAX_GALAXIES, 500  ; Enough for all input tested, increase if necessary
+%MAC _ffe, 0b100
+%MAC EXPANSION_FACTOR_PART_1, 2
+%MAC EXPANSION_FACTOR_PART_2, 1000000
+%MAC MAX_EXPANDED, 20  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
+%MAC MAX_INPUT_LEN, 20000  ; Enough for all input tested, increase if necessary (note there needs to be room for a full line of null terminators)
+%MAC MAX_GALAXIES, 500  ; Enough for all input tested, increase if necessary
 
 ; rg0 - read character
 ; rg1 - image pointer
@@ -274,4 +274,4 @@ SIGN_NEG rfp
 RET rfp
 
 :FILE_PATH
-DAT "input11.txt\0"
+%DAT "input11.txt\0"

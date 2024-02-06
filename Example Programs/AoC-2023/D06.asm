@@ -1,4 +1,4 @@
-MAC MAX_LINE_LEN, 32  ; Enough for all input tested, increase if necessary (note there needs to be room for a null terminator)
+%MAC MAX_LINE_LEN, 32  ; Enough for all input tested, increase if necessary (note there needs to be room for a null terminator)
 
 ; Read contents of input file, putting both lines into separate buffers, cutting off line headers
 ; Trailing newline is required, as file end flag isn't checked due to there always being 2 lines
@@ -171,4 +171,4 @@ WCC '\n'
 HLT
 
 :FILE_PATH
-DAT "input06.txt\0"
+%DAT "input06.txt\0"

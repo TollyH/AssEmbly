@@ -1,4 +1,4 @@
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
 ; rg0 - read character
@@ -115,6 +115,6 @@ POP rg0
 RET
 
 :FILE_PATH
-DAT "input10.txt\0"
+%DAT "input10.txt\0"
 
 :PART_TWO_RESULT  ; Use remaining memory for storing part two result

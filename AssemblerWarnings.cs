@@ -308,14 +308,14 @@ namespace AssEmbly
             lineOperands[(file, line)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
-            instructionIsImport = mnemonic.Equals("IMP", StringComparison.CurrentCultureIgnoreCase);
+            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.CurrentCultureIgnoreCase);
             instructionIsString = false;
 
             if (instructionIsData)
             {
                 dataInsertionLines.Add((line, file));
                 _ = dataAddresses.Add(currentAddress);
-                if (operands[0][0] == '"' && mnemonic.Equals("DAT", StringComparison.CurrentCultureIgnoreCase))
+                if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.CurrentCultureIgnoreCase))
                 {
                     instructionIsString = true;
                     if (lastInstructionWasString)
@@ -703,8 +703,8 @@ namespace AssEmbly
 
         private bool Analyzer_Rolling_Suggestion_0002()
         {
-            // Suggestion 0002: Use the `PAD` directive instead of chaining `DAT 0` directives.
-            if (mnemonic.ToUpper() == "DAT" && lastMnemonic.ToUpper() == "DAT")
+            // Suggestion 0002: Use the `%PAD` directive instead of chaining `%DAT 0` directives.
+            if (mnemonic.ToUpper() == "%DAT" && lastMnemonic.ToUpper() == "%DAT")
             {
                 if (operands[0][0] is ':' or '"' || lastOperands[0][0] is ':' or '"')
                 {
@@ -863,8 +863,8 @@ namespace AssEmbly
 
         private bool Analyzer_Rolling_Suggestion_0012()
         {
-            // Suggestion 0012: Remove useless `PAD 0` directive.
-            if (mnemonic.ToUpper() == "PAD")
+            // Suggestion 0012: Remove useless `%PAD 0` directive.
+            if (mnemonic.ToUpper() == "%PAD")
             {
                 if (operands[0][0] == ':')
                 {

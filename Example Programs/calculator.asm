@@ -103,24 +103,24 @@ SIGN_WCN rg5
 HLT  ; Stop program to prevent execution of data as executable code
 
 :INPUT_BUFFER_1
-PAD 64
+%PAD 64
 :INPUT_BUFFER_2
-PAD 64
+%PAD 64
 
 :STR_NUM_1_PROMPT
-DAT "Enter first number > \0"
+%DAT "Enter first number > \0"
 
 :STR_NUM_2_PROMPT
-DAT "Enter second number > \0"
+%DAT "Enter second number > \0"
 
 :STR_OPERATOR_PROMPT
-DAT "Enter operator (+, -, *, /) > \0"
+%DAT "Enter operator (+, -, *, /) > \0"
 
 :STR_INVALID_OPERATOR
-DAT "The entered operator was invalid\n\0"
+%DAT "The entered operator was invalid\n\0"
 
 :STR_REMAINDER
-DAT " remainder \0"
+%DAT " remainder \0"
 
-IMP "input.ext.asm"  ; Import input function
-IMP "print.ext.asm"  ; Import print function
+%IMP "input.ext.asm"  ; Import input function
+%IMP "print.ext.asm"  ; Import print function

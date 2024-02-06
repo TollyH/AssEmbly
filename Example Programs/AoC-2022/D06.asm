@@ -73,6 +73,6 @@ WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input06.txt\0"
+%DAT "input06.txt\0"
 
 :MESSAGE  ; Store message in remaining memory

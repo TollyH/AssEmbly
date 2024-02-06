@@ -51,31 +51,31 @@ HEAP_FRE rg1
 HLT
 
 :EXT_ASSEMBLY_MSG_BOX
-DAT "ShowMessageBox.dll\0"
+%DAT "ShowMessageBox.dll\0"
 
 :EXT_FUNC_MSG_BOX_SET_TITLE
-DAT "SetMessageBoxTitle\0"
+%DAT "SetMessageBoxTitle\0"
 
 :EXT_FUNC_MSG_BOX_SET_CONTENT
-DAT "SetMessageBoxContent\0"
+%DAT "SetMessageBoxContent\0"
 
 :EXT_FUNC_MSG_BOX_SET_FLAGS
-DAT "SetMessageBoxFlags\0"
+%DAT "SetMessageBoxFlags\0"
 
 :EXT_FUNC_MSG_BOX_SHOW
-DAT "ShowMessageBox\0"
+%DAT "ShowMessageBox\0"
 
 :STR_TITLE_PROMPT
-DAT "Enter the desired message box title > \0"
+%DAT "Enter the desired message box title > \0"
 
 :STR_CONTENT_PROMPT
-DAT "Enter the desired message box content > \0"
+%DAT "Enter the desired message box content > \0"
 
 :STR_YES_CLICK
-DAT "You clicked Yes\0"
+%DAT "You clicked Yes\0"
 
 :STR_NO_CLICK
-DAT "You clicked No\0"
+%DAT "You clicked No\0"
 
-IMP "../input.ext.asm"
-IMP "../print.ext.asm"
+%IMP "../input.ext.asm"
+%IMP "../print.ext.asm"

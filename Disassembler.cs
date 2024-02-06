@@ -46,13 +46,13 @@ namespace AssEmbly
                 for (int start = 0; start < result.Count; start++)
                 {
                     // If an ASCII character is found, keep looping over any other contiguous ASCII characters
-                    if (detectStrings && result[start].StartsWith("DAT ") && result[start][4] != '"'
+                    if (detectStrings && result[start].StartsWith("%DAT ") && result[start][4] != '"'
                         && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
                     {
                         int end = result.Count;
                         for (int j = start + 1; j < result.Count; j++)
                         {
-                            if (!result[j].StartsWith("DAT ") || result[j][4] == '"'
+                            if (!result[j].StartsWith("%DAT ") || result[j][4] == '"'
                                 || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
                             {
                                 end = j;
@@ -61,7 +61,7 @@ namespace AssEmbly
                         }
                         if (start < end)
                         {
-                            string newLine = "DAT \"";
+                            string newLine = "%DAT \"";
                             newLine += Encoding.UTF8.GetString(result.GetRange(start, end - start)
                                 .Select(x => byte.Parse(x.Split(' ')[1])).ToArray()).Replace("\"", "\\\"");
                             newLine += '"';
@@ -69,7 +69,7 @@ namespace AssEmbly
                             result.Insert(start, newLine);
                         }
                     }
-                    // Replace large blocks of HLT (0x00) with PAD directives
+                    // Replace large blocks of HLT (0x00) with %PAD directives
                     if (detectPads && result[start] == "HLT")
                     {
                         if (start < result.Count - 1 && result[start + 1] == "HLT")
@@ -83,7 +83,7 @@ namespace AssEmbly
                                     break;
                                 }
                             }
-                            string newLine = $"PAD {end - start - 1}";
+                            string newLine = $"%PAD {end - start - 1}";
                             result.RemoveRange(start + 1, end - start - 1);
                             result.Insert(start + 1, newLine);
                         }
@@ -176,7 +176,7 @@ namespace AssEmbly
                 }
             }
 
-            return ($"DAT {instruction[0]}", 1, new List<ulong>());
+            return ($"%DAT {instruction[0]}", 1, new List<ulong>());
         }
     }
 }

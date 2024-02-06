@@ -1,4 +1,4 @@
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
 ; rg0 - sum of line values
@@ -120,6 +120,6 @@ WCC rg8
 JMP :PRINT_RESULT
 
 :FILE_PATH
-DAT "input25.txt\0"
+%DAT "input25.txt\0"
 
 :LINE_STORE  ; Use all of remaining memory for storing each line

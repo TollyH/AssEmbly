@@ -16,18 +16,18 @@ WCC '\r'  ; Return to start of line
 JMP :CLOCK_LOOP
 
 :ASSEMBLY_NAME
-DAT "Clock.dll\0"
+%DAT "Clock.dll\0"
 
 :CLOCK_METHOD_NAME
-DAT "PrintFormattedDateTime\0"
+%DAT "PrintFormattedDateTime\0"
 
 :SLEEP_METHOD_NAME
-DAT "Sleep\0"
+%DAT "Sleep\0"
 
 :DATETIME_FORMAT
-DAT "yyyy-MM-dd HH:mm:ss\0"
+%DAT "yyyy-MM-dd HH:mm:ss\0"
 
 :PROGRAM_HEADER
-DAT "AssEmbly Clock Example\nPress CTRL+C to exit\n\n\0"
+%DAT "AssEmbly Clock Example\nPress CTRL+C to exit\n\n\0"
 
-IMP "../print.ext.asm"
+%IMP "../print.ext.asm"

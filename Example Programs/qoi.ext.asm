@@ -3,8 +3,8 @@
 ; https://qoiformat.org/qoi-specification.pdf (Specification)
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
-MAC MagicBytes, 0x66696F71
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC MagicBytes, 0x66696F71
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Pixel {
 ;   uint8 Red

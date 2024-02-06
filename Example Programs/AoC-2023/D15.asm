@@ -26,4 +26,4 @@ WCN rg2
 HLT
 
 :FILE_PATH
-DAT "input15.txt\0"
+%DAT "input15.txt\0"

@@ -339,7 +339,7 @@
         /// <summary>
         /// Directives that result in data (non-code bytes) being inserted into the assembly.
         /// </summary>
-        internal static readonly HashSet<string> dataInsertionDirectives = new() { "DAT", "PAD", "NUM", "IBF" };
+        internal static readonly HashSet<string> dataInsertionDirectives = new() { "%DAT", "%PAD", "%NUM", "%IBF" };
         /// <summary>
         /// Every opcode that results in the location of execution being moved to the address of a label.
         /// As of current, the address to jump to is always the first operand to these opcodes.

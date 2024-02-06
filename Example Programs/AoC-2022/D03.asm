@@ -1,4 +1,4 @@
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
 ; rg0 - read character
@@ -154,6 +154,6 @@ WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input03.txt\0"
+%DAT "input03.txt\0"
 
 :LINE_STORE  ; Use all of remaining memory for storing each line

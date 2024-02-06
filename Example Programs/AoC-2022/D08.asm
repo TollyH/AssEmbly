@@ -1,7 +1,7 @@
 ; Only solves part one
 ; Program needs to run with more than the default memory size for full input file!
 ; Include the parameter --mem-size=100000 with the execute command!
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
 ; rg0 - read character
@@ -197,6 +197,6 @@ POP rg8
 RET 1
 
 :FILE_PATH
-DAT "input08.txt\0"
+%DAT "input08.txt\0"
 
 :TREES  ; Use remaining memory to store trees

@@ -1,4 +1,4 @@
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 OFL :FILE_PATH
 ; rg0 - character
@@ -116,7 +116,7 @@ WCC '\n'  ; Newline
 HLT
 
 :FILE_PATH
-DAT "input01.txt\0"
+%DAT "input01.txt\0"
 
 
 :TOTALS  ; Use all of remaining memory for elf storage

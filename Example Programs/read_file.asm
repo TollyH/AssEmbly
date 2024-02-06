@@ -1,4 +1,4 @@
-MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MAC _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Print input prompt
 CAL :FUNC_PRINT, :&PROMPT_STRING
@@ -22,13 +22,13 @@ CFL  ; Close the file
 HLT  ; Stop execution
 
 :FILE_PATH
-PAD 256  ; Create a continuous string of 0s, 256 bytes long - will be used to store file path
+%PAD 256  ; Create a continuous string of 0s, 256 bytes long - will be used to store file path
 
 :PROMPT_STRING
-DAT "Enter file path > \0"  ; Store string after program data.
+%DAT "Enter file path > \0"  ; Store string after program data.
 
 :ERROR_STRING
-DAT "ERROR: File does not exist\0"  ; Store string after program data.
+%DAT "ERROR: File does not exist\0"  ; Store string after program data.
 
-IMP "input.ext.asm"  ; Import input function
-IMP "print.ext.asm"  ; Import print function
+%IMP "input.ext.asm"  ; Import input function
+%IMP "print.ext.asm"  ; Import print function

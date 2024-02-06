@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -281,7 +282,7 @@ namespace AssEmbly
                     }
                     string[] operands = line[1..];
 
-                    if (ProcessStateDirective(mnemonic, operands, rawLine, dynamicLines, ref lineIndex))
+                    if (mnemonic[0] == '%' && ProcessStateDirective(mnemonic, operands, rawLine, dynamicLines, ref lineIndex))
                     {
                         // Directive found and processed, move onto next statement
                         continue;
@@ -345,97 +346,15 @@ namespace AssEmbly
         {
             OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
-            List<(string LabelName, ulong AddressOffset)> labels = new();
+            List<(string LabelName, ulong AddressOffset)> referencedLabels = new();
             usedExtensions = AAPFeatures.None;
-            // Check for byte-inserting assembler directives
-            switch (mnemonic.ToUpperInvariant())
+
+            if (mnemonic[0] == '%' && ProcessDataDirective(mnemonic, operands, referencedLabels, out byte[]? newBytes))
             {
-                // Single byte/string insertion
-                case "DAT":
-                    if (operands.Length != 1)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Count, operands.Length));
-                    }
-                    OperandType operandType = DetermineOperandType(operands[0]);
-                    if (operandType != OperandType.Literal)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Type, operandType));
-                    }
-                    if (operands[0][0] == ':')
-                    {
-                        throw new OperandException(Strings.Assembler_Error_DAT_Operand_Label_Reference);
-                    }
-                    byte[] parsedBytes = ParseLiteral(operands[0], true);
-                    if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
-                    {
-                        throw new OperandException(
-                            string.Format(Strings.Assembler_Error_DAT_Operand_Too_Large, operands[0]));
-                    }
-                    return (operands[0][0] != '"' ? parsedBytes[..1] : parsedBytes, new List<(string, ulong)>());
-                // 0-padding
-                case "PAD":
-                    if (operands.Length != 1)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Count, operands.Length));
-                    }
-                    operandType = DetermineOperandType(operands[0]);
-                    if (operandType != OperandType.Literal)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Type, operandType));
-                    }
-                    if (operands[0][0] == ':')
-                    {
-                        throw new OperandException(Strings.Assembler_Error_PAD_Operand_Label_Reference);
-                    }
-                    _ = ParseLiteral(operands[0], false, out ulong parsedNumber);
-                    // Generate an array of 0-bytes with the specified length
-                    return (Enumerable.Repeat((byte)0, (int)parsedNumber).ToArray(), new List<(string, ulong)>());
-                // 64-bit/floating point number insertion
-                case "NUM":
-                    if (operands.Length != 1)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Count, operands.Length));
-                    }
-                    operandType = DetermineOperandType(operands[0]);
-                    if (operandType != OperandType.Literal)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Type, operandType));
-                    }
-                    if (operands[0][0] == ':')
-                    {
-                        // Label reference used as NUM operand
-                        labels.Add((operands[0][2..], 0));
-                        // Label location will be resolved later, pad with 0s for now
-                        return (Enumerable.Repeat((byte)0, 8).ToArray(), labels);
-                    }
-                    parsedBytes = ParseLiteral(operands[0], false);
-                    return (parsedBytes, new List<(string, ulong)>());
-                // Raw file insertion
-                case "IBF":
-                    if (operands.Length != 1)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Count, operands.Length));
-                    }
-                    operandType = DetermineOperandType(operands[0]);
-                    if (operandType != OperandType.Literal)
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Type, operandType));
-                    }
-                    if (operands[0][0] != '"')
-                    {
-                        throw new OperandException(Strings.Assembler_Error_IBF_Operand_String);
-                    }
-                    parsedBytes = ParseLiteral(operands[0], true);
-                    string importPath = Encoding.UTF8.GetString(parsedBytes);
-                    string resolvedPath = Path.GetFullPath(importPath);
-                    if (!File.Exists(resolvedPath))
-                    {
-                        throw new ImportException(string.Format(Strings.Assembler_Error_IBF_File_Not_Exists, resolvedPath));
-                    }
-                    return (File.ReadAllBytes(resolvedPath), new List<(string, ulong)>());
-                default:
-                    break;
+                // Directive found and processed, move onto next statement
+                return (newBytes, referencedLabels);
             }
+
             for (int i = 0; i < operands.Length; i++)
             {
                 operandTypes[i] = DetermineOperandType(operands[i]);
@@ -447,7 +366,7 @@ namespace AssEmbly
                     case OperandType.Literal:
                         if (operands[i].StartsWith(":&"))
                         {
-                            labels.Add((operands[i][2..], (uint)operandBytes.Count));
+                            referencedLabels.Add((operands[i][2..], (uint)operandBytes.Count));
                             for (int j = 0; j < 8; j++)
                             {
                                 // Label location will be resolved later, pad with 0s for now
@@ -460,7 +379,7 @@ namespace AssEmbly
                         }
                         break;
                     case OperandType.Address:
-                        labels.Add((operands[i][1..], (uint)operandBytes.Count));
+                        referencedLabels.Add((operands[i][1..], (uint)operandBytes.Count));
                         for (int j = 0; j < 8; j++)
                         {
                             // Label location will be resolved later, pad with 0s for now
@@ -495,12 +414,12 @@ namespace AssEmbly
             }
 
             // Add length of opcode to all label address offsets
-            for (int i = 0; i < labels.Count; i++)
+            for (int i = 0; i < referencedLabels.Count; i++)
             {
-                labels[i] = (labels[i].LabelName, labels[i].AddressOffset + opcodeSize);
+                referencedLabels[i] = (referencedLabels[i].LabelName, referencedLabels[i].AddressOffset + opcodeSize);
             }
 
-            return (operandBytes.ToArray(), labels);
+            return (operandBytes.ToArray(), referencedLabels);
         }
 
         /// <summary>
@@ -549,7 +468,7 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.ToUpperInvariant() == "MAC";
+                        isMacro = mnemonic.ToUpperInvariant() == "%MAC";
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -945,6 +864,7 @@ namespace AssEmbly
         /// <summary>
         /// Determine if a given statement is a known state-modifying assembler directive and process it if it is.
         /// </summary>
+        /// <param name="mnemonic">The mnemonic for the directive, including the % prefix</param>
         /// <returns>
         /// <list type="bullet">
         /// <item><see langword="true"/> - Directive was recognised and processed without error</item>
@@ -956,7 +876,7 @@ namespace AssEmbly
             switch (mnemonic.ToUpperInvariant())
             {
                 // Import contents of another file
-                case "IMP":
+                case "%IMP":
                     if (operands.Length != 1)
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Count, operands.Length));
@@ -995,7 +915,7 @@ namespace AssEmbly
                     visitedFiles++;
                     return true;
                 // Define macro
-                case "MAC":
+                case "%MAC":
                     if (operands.Length != 2)
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
@@ -1003,7 +923,7 @@ namespace AssEmbly
                     macros[operands[0]] = operands[1];
                     return true;
                 // Toggle warnings
-                case "ANALYZER":
+                case "%ANALYZER":
                     if (operands.Length != 3)
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_ANALYZER_Operand_Count, operands.Length));
@@ -1032,7 +952,7 @@ namespace AssEmbly
                     };
                     return true;
                 // Manually emit assembler warning
-                case "MESSAGE":
+                case "%MESSAGE":
                     if (operands.Length is < 1 or > 2)
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Count, operands.Length));
@@ -1064,7 +984,7 @@ namespace AssEmbly
                         mnemonic, operands, rawLine, message));
                     return true;
                 // Print assembler state
-                case "DEBUG":
+                case "%DEBUG":
                     if (operands.Length != 0)
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_DEBUG_Operand_Count, operands.Length));
@@ -1099,6 +1019,115 @@ namespace AssEmbly
                     Console.ResetColor();
                     return true;
                 default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Determine if a given statement is a known data insertion assembler directive and process it if it is.
+        /// </summary>
+        /// <param name="mnemonic">The mnemonic for the directive, including the % prefix</param>
+        /// <param name="referencedLabels">A list to add any new label references to. Will be modified in-place</param>
+        /// <param name="newBytes">The bytes to insert into the program. Will be null if the function returns false</param>
+        /// <returns>
+        /// <list type="bullet">
+        /// <item><see langword="true"/> - Directive was recognised and processed without error</item>
+        /// <item><see langword="false"/> - Directive was not recognised and assembly of the statement should continue</item>
+        /// </list>
+        /// </returns>
+        private static bool ProcessDataDirective(string mnemonic, string[] operands, List<(string, ulong)> referencedLabels, [MaybeNullWhen(false)] out byte[] newBytes)
+        {
+            switch (mnemonic.ToUpperInvariant())
+            {
+                // Single byte/string insertion
+                case "%DAT":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Count, operands.Length));
+                    }
+                    OperandType operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_DAT_Operand_Label_Reference);
+                    }
+                    byte[] parsedBytes = ParseLiteral(operands[0], true);
+                    if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
+                    {
+                        throw new OperandException(
+                            string.Format(Strings.Assembler_Error_DAT_Operand_Too_Large, operands[0]));
+                    }
+                    newBytes = operands[0][0] != '"' ? parsedBytes[..1] : parsedBytes;
+                    return true;
+                // 0-padding
+                case "%PAD":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_PAD_Operand_Label_Reference);
+                    }
+                    _ = ParseLiteral(operands[0], false, out ulong parsedNumber);
+                    // Generate an array of 0-bytes with the specified length
+                    newBytes = Enumerable.Repeat((byte)0, (int)parsedNumber).ToArray();
+                    return true;
+                // 64-bit/floating point number insertion
+                case "%NUM":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        // Label reference used as %NUM operand
+                        referencedLabels.Add((operands[0][2..], 0));
+                        // Label location will be resolved later, pad with 0s for now
+                        newBytes = Enumerable.Repeat((byte)0, 8).ToArray();
+                        return true;
+                    }
+                    newBytes = ParseLiteral(operands[0], false);
+                    return true;
+                // Raw file insertion
+                case "%IBF":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] != '"')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_IBF_Operand_String);
+                    }
+                    parsedBytes = ParseLiteral(operands[0], true);
+                    string importPath = Encoding.UTF8.GetString(parsedBytes);
+                    string resolvedPath = Path.GetFullPath(importPath);
+                    if (!File.Exists(resolvedPath))
+                    {
+                        throw new ImportException(string.Format(Strings.Assembler_Error_IBF_File_Not_Exists, resolvedPath));
+                    }
+                    newBytes = File.ReadAllBytes(resolvedPath);
+                    return true;
+                default:
+                    newBytes = null;
                     return false;
             }
         }
