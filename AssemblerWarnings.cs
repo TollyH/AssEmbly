@@ -314,13 +314,13 @@ namespace AssEmbly
             lineOperands[(file, line)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
-            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.CurrentCultureIgnoreCase);
+            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
             instructionIsString = false;
 
             if (instructionIsData)
             {
                 dataInsertionLines.Add((line, file));
-                if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.CurrentCultureIgnoreCase))
+                if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
                 {
                     instructionIsString = true;
                     if (lastInstructionWasString)
@@ -392,7 +392,7 @@ namespace AssEmbly
             {
                 foreach (int operandIndex in writtenOperands)
                 {
-                    if (operands[operandIndex].ToLower() == "rpo")
+                    if (operands[operandIndex].Equals("rpo", StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
@@ -581,7 +581,7 @@ namespace AssEmbly
             if (newBytes.Length > 0 && !instructionIsData
                 && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
-                return writtenOperands.Any(operandIndex => operands[operandIndex].ToLower() == "rsf");
+                return writtenOperands.Any(operandIndex => operands[operandIndex].Equals("rsf", StringComparison.OrdinalIgnoreCase));
             }
             return false;
         }
@@ -592,7 +592,7 @@ namespace AssEmbly
             if (newBytes.Length > 0 && !instructionIsData
                 && writingInstructions.TryGetValue(instructionOpcode, out int[]? writtenOperands))
             {
-                return writtenOperands.Any(operandIndex => operands[operandIndex].ToLower() == "rsb");
+                return writtenOperands.Any(operandIndex => operands[operandIndex].Equals("rsb", StringComparison.OrdinalIgnoreCase));
             }
             return false;
         }
@@ -720,13 +720,13 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0026()
         {
             // Warning 0026: %LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.
-            return mnemonic.ToUpper() == "%LABEL_OVERRIDE" && !labelled;
+            return mnemonic.Equals("%LABEL_OVERRIDE", StringComparison.OrdinalIgnoreCase) && !labelled;
         }
 
         private bool Analyzer_Rolling_Warning_0027()
         {
             // Warning 0027: Addresses are always positive integers, but a signed or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.
-            return mnemonic.ToUpper() == "%LABEL_OVERRIDE" && operands[0][0] != ':' && (operands[0][0] == '-' || operands[0].Contains('.'));
+            return mnemonic.Equals("%LABEL_OVERRIDE", StringComparison.OrdinalIgnoreCase) && operands[0][0] != ':' && (operands[0][0] == '-' || operands[0].Contains('.'));
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()
@@ -738,7 +738,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0002()
         {
             // Suggestion 0002: Use the `%PAD` directive instead of chaining `%DAT 0` directives.
-            if (mnemonic.ToUpper() == "%DAT" && lastMnemonic.ToUpper() == "%DAT")
+            if (mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase) && lastMnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
             {
                 if (operands[0][0] is ':' or '"' || lastOperands[0][0] is ':' or '"')
                 {
@@ -898,7 +898,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0012()
         {
             // Suggestion 0012: Remove useless `%PAD 0` directive.
-            if (mnemonic.ToUpper() == "%PAD")
+            if (mnemonic.Equals("%PAD", StringComparison.OrdinalIgnoreCase))
             {
                 if (operands[0][0] == ':')
                 {

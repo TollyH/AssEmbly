@@ -267,7 +267,7 @@ namespace AssEmbly
                         {
                             throw new LabelNameException(string.Format(Strings.Assembler_Error_Label_Already_Defined, labelName));
                         }
-                        if (labelName.ToUpperInvariant() == "ENTRY")
+                        if (labelName.Equals("ENTRY", StringComparison.OrdinalIgnoreCase))
                         {
                             lineIsEntry = true;
                         }
@@ -464,7 +464,7 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.ToUpperInvariant() == "%MAC";
+                        isMacro = mnemonic.Equals("%MAC", StringComparison.OrdinalIgnoreCase);
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -856,7 +856,7 @@ namespace AssEmbly
 
             foreach ((string labelName, ulong labelAddress) in labels)
             {
-                if (labelName.ToUpperInvariant() == "ENTRY")
+                if (labelName.Equals("ENTRY", StringComparison.OrdinalIgnoreCase))
                 {
                     entryPoint = labelAddress;
                 }
@@ -920,7 +920,7 @@ namespace AssEmbly
                     {
                         throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
                     }
-                    if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.InvariantCultureIgnoreCase)))
+                    if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.OrdinalIgnoreCase)))
                     {
                         throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
                     }
