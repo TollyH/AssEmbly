@@ -1277,4 +1277,13 @@ Current extensions used: {0}</value>
 	<data name="Processor_Error_No_Program" xml:space="preserve">
 		<value>A program has not been loaded in this processor.</value>
 	</data>
+	<data name="Assembler_Error_LABEL_OVERRIDE_Operand_Count" xml:space="preserve">
+		<value>The %LABEL_OVERRIDE directive requires a single operand. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_LABEL_OVERRIDE_Operand_Type" xml:space="preserve">
+		<value>The operand to the %LABEL_OVERRIDE directive must be a literal. An operand of type {0} was provided.</value>
+	</data>
+	<data name="Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target" xml:space="preserve">
+		<value>Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. "{0}" was given as both.</value>
+	</data>
 </root>

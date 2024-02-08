@@ -471,6 +471,33 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. &quot;{0}&quot; was given as both..
+        /// </summary>
+        internal static string Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target {
+            get {
+                return ResourceManager.GetString("Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %LABEL_OVERRIDE directive requires a single operand. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_LABEL_OVERRIDE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_LABEL_OVERRIDE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operand to the %LABEL_OVERRIDE directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_LABEL_OVERRIDE_Operand_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_LABEL_OVERRIDE_Operand_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Label names cannot contain spaces.
         ///    {0} {1}
         ///    {2}^.

@@ -36,9 +36,12 @@ namespace AssEmbly
         private readonly List<byte> program = new();
         // Map of label names to final memory addresses
         private readonly Dictionary<string, ulong> labels = new();
+        // Map of label names that link to another label name, along with the file and line the link was made on
+        private readonly Dictionary<string, (string Target, string? FilePath, int Line)> labelLinks = new();
         // List of references to labels by name along with the address to insert the relevant address in to.
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
         private readonly List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
+        private readonly HashSet<string> overriddenLabels = new();
         // string -> replacement
         private readonly Dictionary<string, string> macros = new();
         private AAPFeatures usedExtensions = AAPFeatures.None;
@@ -270,12 +273,6 @@ namespace AssEmbly
                             lineIsEntry = true;
                         }
                         labels[labelName] = (uint)program.Count;
-
-                        if (!addressLabelNames.ContainsKey((uint)program.Count))
-                        {
-                            addressLabelNames[(uint)program.Count] = new List<string>();
-                        }
-                        addressLabelNames[(uint)program.Count].Add(labelName);
 
                         lineIsLabelled = true;
                         continue;
@@ -846,6 +843,29 @@ namespace AssEmbly
 
         private void ResolveLabelReferences()
         {
+            foreach ((string labelLink, (string labelTarget, string? filePath, int line)) in labelLinks)
+            {
+                if (!labels.TryGetValue(labelTarget, out ulong targetOffset))
+                {
+                    LabelNameException exc = new(
+                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelTarget), line, filePath ?? "");
+                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
+                    throw exc;
+                }
+                labels[labelLink] = targetOffset;
+            }
+
+            foreach ((string labelName, ulong labelAddress) in labels)
+            {
+                // Store address mapped to label name for debug file
+                if (!addressLabelNames.TryGetValue(labelAddress, out List<string>? labelNameList))
+                {
+                    labelNameList = new List<string>();
+                    addressLabelNames[labelAddress] = labelNameList;
+                }
+                labelNameList.Add(labelName);
+            }
+
             Span<byte> programSpan = CollectionsMarshal.AsSpan(program);
             foreach ((string labelName, ulong insertOffset, string? filePath, int line) in labelReferences)
             {
@@ -921,6 +941,52 @@ namespace AssEmbly
                         throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
                     }
                     macros[operands[0]] = operands[1];
+                    return true;
+                // Define label address manually
+                case "%LABEL_OVERRIDE":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Operand_Type, operandType));
+                    }
+                    lineIsLabelled = false;
+                    lineIsEntry = false;
+                    List<string> labelsToEdit = labels
+                        .Where(kv => kv.Value == (ulong)program.Count && !overriddenLabels.Contains(kv.Key))
+                        .Select(kv => kv.Key).ToList();
+                    if (operands[0][0] == ':')
+                    {
+                        // Label reference used as %LABEL_OVERRIDE operand
+                        foreach (string labelName in labelsToEdit)
+                        {
+                            // It's possible we don't know the address of the label yet, so store it as a "link" to resolve later
+                            string linkedName = operands[0][2..];
+                            if (labelName == linkedName)
+                            {
+                                throw new LabelNameException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
+                            }
+                            // If the target label is already a link, store link to the actual target instead of chaining links
+                            while (labelLinks.TryGetValue(linkedName, out (string Target, string? FilePath, int Line) checkName))
+                            {
+                                linkedName = checkName.Target;
+                            }
+                            labelLinks[labelName] = (linkedName, currentImport?.ImportPath, currentImport?.CurrentLine ?? baseFileLine);
+                        }
+                    }
+                    else
+                    {
+                        _ = ParseLiteral(operands[0], true, out ulong parsedNumber);
+                        foreach (string labelName in labelsToEdit)
+                        {
+                            // Overwrite the old label address
+                            labels[labelName] = parsedNumber;
+                        }
+                    }
+                    overriddenLabels.UnionWith(labelsToEdit);
                     return true;
                 // Toggle warnings
                 case "%ANALYZER":
