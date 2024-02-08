@@ -1315,6 +1315,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to %LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0026 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0026", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Addresses are always positive integers, but a negative or floating point literal was given as the label address..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0027 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0027", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} is not a valid error code to disable..
         /// </summary>
         internal static string CLI_Assemble_Error_Invalid_Error_Code {

@@ -75,6 +75,7 @@ namespace AssEmbly
         private readonly Dictionary<(string File, int Line), string> lineText = new();
 
         private byte[] finalProgram = Array.Empty<byte>();
+        private ulong entryPoint = 0;
 
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
@@ -161,10 +162,12 @@ namespace AssEmbly
         /// to run analyzers that need the entire program to work.
         /// </summary>
         /// <param name="finalProgram">The fully assembled program, with all label locations inserted.</param>
+        /// <param name="entryPoint">The address that the program will start executing from.</param>
         /// <returns>An array of any warnings caused by final analysis.</returns>
-        public Warning[] Finalize(byte[] finalProgram)
+        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint)
         {
             this.finalProgram = finalProgram;
+            this.entryPoint = entryPoint;
 
             List<Warning> warnings = new();
 
@@ -218,7 +221,6 @@ namespace AssEmbly
                 { 0014, Analyzer_Rolling_Warning_0014 },
                 { 0015, Analyzer_Rolling_Warning_0015 },
                 { 0016, Analyzer_Rolling_Warning_0016 },
-                { 0017, Analyzer_Rolling_Warning_0017 },
                 { 0018, Analyzer_Rolling_Warning_0018 },
                 { 0019, Analyzer_Rolling_Warning_0019 },
                 { 0020, Analyzer_Rolling_Warning_0020 },
@@ -227,6 +229,8 @@ namespace AssEmbly
                 { 0023, Analyzer_Rolling_Warning_0023 },
                 { 0024, Analyzer_Rolling_Warning_0024 },
                 { 0025, Analyzer_Rolling_Warning_0025 },
+                { 0026, Analyzer_Rolling_Warning_0026 },
+                { 0027, Analyzer_Rolling_Warning_0027 },
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -257,6 +261,7 @@ namespace AssEmbly
                 { 0006, Analyzer_Final_Warning_0006 },
                 { 0009, Analyzer_Final_Warning_0009 },
                 { 0013, Analyzer_Final_Warning_0013 },
+                { 0017, Analyzer_Final_Warning_0017 },
             };
             suggestionFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>
             {
@@ -275,8 +280,9 @@ namespace AssEmbly
         private bool instructionIsData;
         private bool instructionIsImport;
         private bool instructionIsString;
+        private (int Line, string File)? entryPointDefinitionPosition = null;
         private readonly List<(int Line, string File)> dataInsertionLines = new();
-        private readonly HashSet<ulong> dataAddresses = new();
+        private readonly HashSet<ulong> executableAddresses = new();
         private readonly List<(int Line, string File)> endingStringInsertionLines = new();
         private readonly List<(int Line, string File)> importLines = new();
         private readonly Dictionary<string, int> lastExecutableLine = new();
@@ -314,7 +320,6 @@ namespace AssEmbly
             if (instructionIsData)
             {
                 dataInsertionLines.Add((line, file));
-                _ = dataAddresses.Add(currentAddress);
                 if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.CurrentCultureIgnoreCase))
                 {
                     instructionIsString = true;
@@ -333,6 +338,7 @@ namespace AssEmbly
             else if (newBytes.Length > 0)
             {
                 lastExecutableLine[file] = line;
+                _ = executableAddresses.Add(currentAddress);
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
                     jumpCallToLabels[(line, file)] = currentAddress + operandStart;
@@ -349,6 +355,11 @@ namespace AssEmbly
                 {
                     jumpsCalls[(line, file)] = currentAddress + operandStart;
                 }
+            }
+
+            if (isEntry)
+            {
+                entryPointDefinitionPosition = (line, file);
             }
         }
 
@@ -432,12 +443,12 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0002()
         {
-            // Warning 0002: Jump/Call target label points to data, not executable code.
+            // Warning 0002: Jump/Call target label does not point to executable code.
             List<Warning> warnings = new();
             foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpCallToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (dataAddresses.Contains(address))
+                if (!executableAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpFile, jumpLine,
                         lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
@@ -471,7 +482,7 @@ namespace AssEmbly
             foreach (((int writeLine, string writeFile), ulong labelAddress) in writesToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (!dataAddresses.Contains(address) && address < currentAddress)
+                if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0004, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
@@ -488,7 +499,7 @@ namespace AssEmbly
             foreach (((int writeLine, string writeFile), ulong labelAddress) in readsFromLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (!dataAddresses.Contains(address) && address < currentAddress)
+                if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writeFile, writeLine,
                         lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
@@ -542,7 +553,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0008()
         {
             // Warning 0008: Unreachable code detected.
-            return !labelled && lastInstructionWasTerminator && !instructionIsData && !instructionIsImport;
+            return !labelled && lastInstructionWasTerminator && !instructionIsData && !instructionIsImport && newBytes.Length > 0;
         }
 
         private List<Warning> Analyzer_Final_Warning_0009()
@@ -622,10 +633,21 @@ namespace AssEmbly
                 && moveLimits.TryGetValue(instructionOpcode, out (ulong MaxValue, long MinValue) limit) && limit.MaxValue != ulong.MaxValue;
         }
 
-        private bool Analyzer_Rolling_Warning_0017()
+        private List<Warning> Analyzer_Final_Warning_0017()
         {
-            // Warning 0017: Entry point points to data, not executable code.
-            return isEntry && instructionIsData;
+            // Warning 0017: Entry point does not point to executable code.
+            if (entryPointDefinitionPosition is not null && !executableAddresses.Contains(entryPoint))
+            {
+                string entryPointFile = entryPointDefinitionPosition.Value.File;
+                int entryPointLine = entryPointDefinitionPosition.Value.Line;
+                return new List<Warning>()
+                {
+                    new(WarningSeverity.Warning, 0017, entryPointFile, entryPointLine,
+                        lineMnemonics[(entryPointFile, entryPointLine)], lineOperands[(entryPointFile, entryPointLine)],
+                        lineText[(entryPointFile, entryPointLine)])
+                };
+            }
+            return new List<Warning>();
         }
 
         private bool Analyzer_Rolling_Warning_0018()
@@ -693,6 +715,18 @@ namespace AssEmbly
         {
             // Warning 0025: Use of an extension instruction when assembling to v1 format.
             return usingV1Format && newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0xFF;
+        }
+
+        private bool Analyzer_Rolling_Warning_0026()
+        {
+            // Warning 0026: %LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.
+            return mnemonic.ToUpper() == "%LABEL_OVERRIDE" && !labelled;
+        }
+
+        private bool Analyzer_Rolling_Warning_0027()
+        {
+            // Warning 0027: Addresses are always positive integers, but a signed or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.
+            return mnemonic.ToUpper() == "%LABEL_OVERRIDE" && operands[0][0] != ':' && (operands[0][0] == '-' || operands[0].Contains('.'));
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()

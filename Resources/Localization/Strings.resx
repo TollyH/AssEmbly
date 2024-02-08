@@ -872,7 +872,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 		<value>Data insertion is not directly preceded by an unconditional jump, return, or halt instruction.</value>
 	</data>
 	<data name="AssemblerWarnings_Warning_0002" xml:space="preserve">
-		<value>Jump/Call target label points to data, not executable code.</value>
+		<value>Jump/Call target label does not point to executable code.</value>
 	</data>
 	<data name="AssemblerWarnings_Warning_0003" xml:space="preserve">
 		<value>Jump/Call target label points to end of file, not executable code.</value>
@@ -917,7 +917,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
 		<value>Addresses are 64-bit values, however this move instruction moves less than 64 bits.</value>
 	</data>
 	<data name="AssemblerWarnings_Warning_0017" xml:space="preserve">
-		<value>Entry point points to data, not executable code.</value>
+		<value>Entry point does not point to executable code.</value>
 	</data>
 	<data name="AssemblerWarnings_Warning_0018" xml:space="preserve">
 		<value>Entry point points to an import.</value>
@@ -1285,5 +1285,11 @@ Current extensions used: {0}</value>
 	</data>
 	<data name="Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target" xml:space="preserve">
 		<value>Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. "{0}" was given as both.</value>
+	</data>
+	<data name="AssemblerWarnings_Warning_0026" xml:space="preserve">
+		<value>%LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.</value>
+	</data>
+	<data name="AssemblerWarnings_Warning_0027" xml:space="preserve">
+		<value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
 	</data>
 </root>

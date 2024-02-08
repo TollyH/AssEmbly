@@ -166,7 +166,7 @@ namespace AssEmbly
             {
                 ResolveLabelReferences();
                 programBytes = program.ToArray();
-                warnings.AddRange(warningGenerator.Finalize(programBytes));
+                warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint));
                 Finalized = true;
             }
             else
@@ -269,7 +269,6 @@ namespace AssEmbly
                         }
                         if (labelName.ToUpperInvariant() == "ENTRY")
                         {
-                            entryPoint = (uint)program.Count;
                             lineIsEntry = true;
                         }
                         labels[labelName] = (uint)program.Count;
@@ -857,6 +856,10 @@ namespace AssEmbly
 
             foreach ((string labelName, ulong labelAddress) in labels)
             {
+                if (labelName.ToUpperInvariant() == "ENTRY")
+                {
+                    entryPoint = labelAddress;
+                }
                 // Store address mapped to label name for debug file
                 if (!addressLabelNames.TryGetValue(labelAddress, out List<string>? labelNameList))
                 {
@@ -953,8 +956,6 @@ namespace AssEmbly
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Operand_Type, operandType));
                     }
-                    lineIsLabelled = false;
-                    lineIsEntry = false;
                     List<string> labelsToEdit = labels
                         .Where(kv => kv.Value == (ulong)program.Count && !overriddenLabels.Contains(kv.Key))
                         .Select(kv => kv.Key).ToList();
@@ -986,6 +987,14 @@ namespace AssEmbly
                             labels[labelName] = parsedNumber;
                         }
                     }
+
+                    warnings.AddRange(warningGenerator.NextInstruction(
+                        Array.Empty<byte>(), mnemonic, operands,
+                        currentImport?.CurrentLine ?? baseFileLine,
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
+
+                    lineIsLabelled = false;
+                    lineIsEntry = false;
                     overriddenLabels.UnionWith(labelsToEdit);
                     return true;
                 // Toggle warnings
