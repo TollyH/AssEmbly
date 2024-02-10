@@ -1,6 +1,7 @@
 ﻿using System.Buffers.Binary;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using System.Text;
 using AssEmbly.Resources.Localization;
@@ -3509,6 +3510,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a word (16 bit, 2 byte, unsigned, integer) from the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadMemoryWord(ulong offset)
         {
             return BinaryPrimitives.ReadUInt16LittleEndian(Memory.AsSpan()[(int)offset..]);
@@ -3517,6 +3519,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a double word (32 bit, 4 byte, unsigned integer) from the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadMemoryDWord(ulong offset)
         {
             return BinaryPrimitives.ReadUInt32LittleEndian(Memory.AsSpan()[(int)offset..]);
@@ -3525,6 +3528,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a quad word (64 bit, 8 byte, unsigned integer) from the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryQWord(ulong offset)
         {
             return BinaryPrimitives.ReadUInt64LittleEndian(Memory.AsSpan()[(int)offset..]);
@@ -3533,6 +3537,7 @@ namespace AssEmbly
         /// <summary>
         /// Read the stored register type at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Register ReadMemoryRegisterType(ulong offset)
         {
             return (Register)Memory[offset];
@@ -3541,6 +3546,7 @@ namespace AssEmbly
         /// <summary>
         /// Read the value of the stored register type at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryRegister(ulong offset)
         {
             return Registers[(int)ReadMemoryRegisterType(offset)];
@@ -3549,6 +3555,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a byte from the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadMemoryRegisterPointedByte(ulong offset)
         {
             return Memory[Registers[(int)ReadMemoryRegisterType(offset)]];
@@ -3557,6 +3564,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a word (16 bit, 2 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadMemoryRegisterPointedWord(ulong offset)
         {
             return ReadMemoryWord(Registers[(int)ReadMemoryRegisterType(offset)]);
@@ -3565,6 +3573,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a double word (32 bit, 4 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadMemoryRegisterPointedDWord(ulong offset)
         {
             return ReadMemoryDWord(Registers[(int)ReadMemoryRegisterType(offset)]);
@@ -3573,6 +3582,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a quad word (64 bit, 8 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryRegisterPointedQWord(ulong offset)
         {
             return ReadMemoryQWord(Registers[(int)ReadMemoryRegisterType(offset)]);
@@ -3581,6 +3591,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a byte from the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadMemoryPointedByte(ulong offset)
         {
             return Memory[ReadMemoryQWord(offset)];
@@ -3589,6 +3600,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a word (16 bit, 2 byte, unsigned integer) from the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadMemoryPointedWord(ulong offset)
         {
             return ReadMemoryWord(ReadMemoryQWord(offset));
@@ -3597,6 +3609,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a double word (32 bit, 4 byte, unsigned integer) from the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadMemoryPointedDWord(ulong offset)
         {
             return ReadMemoryDWord(ReadMemoryQWord(offset));
@@ -3605,6 +3618,7 @@ namespace AssEmbly
         /// <summary>
         /// Read a quad word (64 bit, 8 byte, unsigned integer) from the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryPointedQWord(ulong offset)
         {
             return ReadMemoryQWord(ReadMemoryQWord(offset));
@@ -3613,6 +3627,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a word (16 bit, 2 byte, unsigned integer) to the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryWord(ulong offset, ushort value)
         {
             BinaryPrimitives.WriteUInt16LittleEndian(Memory.AsSpan()[(int)offset..], value);
@@ -3621,6 +3636,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a double word (32 bit, 4 byte, unsigned integer) to the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryDWord(ulong offset, uint value)
         {
             BinaryPrimitives.WriteUInt32LittleEndian(Memory.AsSpan()[(int)offset..], value);
@@ -3629,6 +3645,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a quad word (64 bit, 8 byte, unsigned integer) to the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryQWord(ulong offset, ulong value)
         {
             BinaryPrimitives.WriteUInt64LittleEndian(Memory.AsSpan()[(int)offset..], value);
@@ -3637,6 +3654,7 @@ namespace AssEmbly
         /// <summary>
         /// Modify the value of the stored register type at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegister(ulong offset, ulong value)
         {
             Register registerType = ReadMemoryRegisterType(offset);
@@ -3650,6 +3668,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a byte to the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedByte(ulong offset, byte value)
         {
             Memory[Registers[(int)ReadMemoryRegisterType(offset)]] = value;
@@ -3658,6 +3677,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a word (16 bit, 2 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedWord(ulong offset, ushort value)
         {
             WriteMemoryWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
@@ -3666,6 +3686,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a double word (32 bit, 4 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedDWord(ulong offset, uint value)
         {
             WriteMemoryDWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
@@ -3674,6 +3695,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a quad word (64 bit, 8 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedQWord(ulong offset, ulong value)
         {
             WriteMemoryQWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
@@ -3682,6 +3704,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a byte to the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryPointedByte(ulong offset, byte value)
         {
             Memory[ReadMemoryQWord(offset)] = value;
@@ -3690,6 +3713,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a word (16 bit, 2 byte, unsigned integer) to the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryPointedWord(ulong offset, ushort value)
         {
             WriteMemoryWord(ReadMemoryQWord(offset), value);
@@ -3698,6 +3722,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a double word (32 bit, 4 byte, unsigned integer) to the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryPointedDWord(ulong offset, uint value)
         {
             WriteMemoryDWord(ReadMemoryQWord(offset), value);
@@ -3706,6 +3731,7 @@ namespace AssEmbly
         /// <summary>
         /// Write a quad word (64 bit, 8 byte, unsigned integer) to the memory address stored at the given memory offset.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryPointedQWord(ulong offset, ulong value)
         {
             WriteMemoryQWord(ReadMemoryQWord(offset), value);
