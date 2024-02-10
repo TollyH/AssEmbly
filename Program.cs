@@ -22,6 +22,9 @@ namespace AssEmbly
                 Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} {(Environment.Is64BitProcess ? "64-bit" : "32-bit")}" +
                     $" - CLR {Environment.Version}, {Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                 Console.Error.WriteLine(Strings.Generic_Copyright_Header);
+#if DEBUG
+                Console.Error.WriteLine("(DEBUG BUILD)");
+#endif
                 Console.Error.WriteLine();
             }
             if (args.Length < 1)
