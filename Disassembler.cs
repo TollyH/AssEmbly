@@ -101,13 +101,30 @@ namespace AssEmbly
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
         public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(Span<byte> instruction)
         {
+            if (instruction.Length == 0)
+            {
+                return ("", 0, new List<ulong>());
+            }
             bool fallbackToDat = false;
 
             ulong totalBytes = 0;
-            Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
-            totalBytes++;
-            KeyValuePair<(string, OperandType[]), Opcode>[] matching = Data.Mnemonics.Where(x => x.Value == opcode).ToArray();
-            if (matching.Length != 0)
+            KeyValuePair<(string, OperandType[]), Opcode>[] matching;
+            if (instruction[0] == 0xFF && instruction.Length < 3)
+            {
+                // We can't parse this data as an opcode properly,
+                // as it starts with 0xFF but there are not enough bytes for it to be a fully qualified opcode.
+                // Can happen with non-instruction statements like "%DAT 0xFF".
+                fallbackToDat = true;
+                totalBytes = 1;
+                matching = Array.Empty<KeyValuePair<(string, OperandType[]), Opcode>>();
+            }
+            else
+            {
+                Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
+                totalBytes++;
+                matching = Data.Mnemonics.Where(x => x.Value == opcode).ToArray();
+            }
+            if (!fallbackToDat && matching.Length != 0)
             {
                 (string mnemonic, OperandType[] operandTypes) = matching.First().Key;
                 List<string> operandStrings = new();
