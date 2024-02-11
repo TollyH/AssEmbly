@@ -305,7 +305,18 @@ namespace AssEmbly
             if (newBytes.Length > 0)
             {
                 operandStart = 0;
-                instructionOpcode = Opcode.ParseBytes(newBytes, ref operandStart);
+                if (newBytes[0] == 0xFF && newBytes.Length < 3)
+                {
+                    // We can't parse this data as an opcode properly,
+                    // as it starts with 0xFF but there are not enough bytes for it to be a fully qualified opcode.
+                    // Can happen with non-instruction statements like "%DAT 0xFF".
+                    instructionOpcode = new Opcode(0x00, 0xFF);
+                    operandStart = 1;
+                }
+                else
+                {
+                    instructionOpcode = Opcode.ParseBytes(newBytes, ref operandStart);
+                }
                 operandStart++;
             }
 
