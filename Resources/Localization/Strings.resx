@@ -177,6 +177,7 @@ disassemble - Generate an AssEmbly program listing from an already assembled exe
     Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
     --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes
     --no-pads - Don't attempt to locate uses of the %PAD directive; keep them as chains of HLT
+    --allow-full-base-opcodes - Allow data detected as fully qualified opcodes for the base instruction set to be interpreted as instructions instead of data. Re-assembly may not be byte-perfect.
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format.
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
 

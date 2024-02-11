@@ -72,7 +72,7 @@ namespace AssEmbly
                 // Disassemble line on-the-fly, unless a provided debugging file provides the original text for the line
                 string lineDisassembly = LoadedDebugInfoFile is null
                     || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
-                        ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..]).Line
+                        ? Disassembler.DisassembleInstruction(DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..], true).Line
                         : inst;
 
                 Console.WriteLine();

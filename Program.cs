@@ -362,7 +362,8 @@ namespace AssEmbly
 
             try
             {
-                disassembledProgram = Disassembler.DisassembleProgram(program, !args.Contains("--no-strings"), !args.Contains("--no-pads"));
+                disassembledProgram = Disassembler.DisassembleProgram(
+                    program, !args.Contains("--no-strings"), !args.Contains("--no-pads"), args.Contains("--allow-full-base-opcodes"));
             }
             catch (Exception e)
             {

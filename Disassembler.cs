@@ -8,7 +8,7 @@ namespace AssEmbly
         /// <summary>
         /// Disassemble a program to AssEmbly code from it's assembled bytecode.
         /// </summary>
-        public static string DisassembleProgram(byte[] program, bool detectStrings, bool detectPads)
+        public static string DisassembleProgram(byte[] program, bool detectStrings, bool detectPads, bool allowFullyQualifiedBaseOpcodes)
         {
             ulong offset = 0;
             List<string> result = new();
@@ -17,7 +17,8 @@ namespace AssEmbly
             while (offset < (ulong)program.LongLength)
             {
                 offsetToLine[offset] = result.Count;
-                (string line, ulong additionalOffset, List<ulong> referencedAddresses) = DisassembleInstruction(program.AsSpan()[(int)offset..]);
+                (string line, ulong additionalOffset, List<ulong> referencedAddresses) =
+                    DisassembleInstruction(program.AsSpan()[(int)offset..], allowFullyQualifiedBaseOpcodes);
                 offset += additionalOffset;
                 references.AddRange(referencedAddresses.Select(x => (x, result.Count)));
                 result.Add(line);
@@ -99,7 +100,7 @@ namespace AssEmbly
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
-        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(Span<byte> instruction)
+        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes)
         {
             if (instruction.Length == 0)
             {
@@ -123,6 +124,13 @@ namespace AssEmbly
                 Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
                 totalBytes++;
                 matching = Data.Mnemonics.Where(x => x.Value == opcode).ToArray();
+            }
+            if (!allowFullyQualifiedBaseOpcodes && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
+            {
+                // Opcode is fully qualified but is for the base instruction set
+                // - technically valid but never done by the assembler, so interpret as data.
+                // Will ensure that a re-assembly of the disassembled program remains byte-perfect.
+                fallbackToDat = true;
             }
             if (!fallbackToDat && matching.Length != 0)
             {

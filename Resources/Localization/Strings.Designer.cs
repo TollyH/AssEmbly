@@ -1099,7 +1099,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Jump/Call target label points to data, not executable code..
+        ///   Looks up a localized string similar to Jump/Call target label does not point to executable code..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0002 {
             get {
@@ -1234,7 +1234,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Entry point points to data, not executable code..
+        ///   Looks up a localized string similar to Entry point does not point to executable code..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0017 {
             get {
@@ -1324,7 +1324,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Addresses are always positive integers, but a negative or floating point literal was given as the label address..
+        ///   Looks up a localized string similar to Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0027 {
             get {
