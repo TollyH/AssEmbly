@@ -257,7 +257,7 @@ namespace AssEmbly
                                 Strings.Assembler_Error_Label_Spaces_Contained, mnemonic, line[1], new string(' ', mnemonic.Length)));
                         }
                         // Will throw an error if label is not valid
-                        _ = DetermineOperandType(mnemonic);
+                        _ = DetermineOperandType(mnemonic, false);
                         if (mnemonic[1] == '&')
                         {
                             throw new SyntaxError(string.Format(Strings.Assembler_Error_Invalid_Literal_Label, rawLine));
@@ -375,11 +375,20 @@ namespace AssEmbly
                         }
                         break;
                     case OperandType.Address:
-                        referencedLabels.Add((operands[i][1..], (uint)operandBytes.Count));
-                        for (int j = 0; j < 8; j++)
+                        if (operands[i][1] is >= '0' and <= '9')
                         {
-                            // Label location will be resolved later, pad with 0s for now
-                            operandBytes.Add(0);
+                            // Literal address
+                            operandBytes.AddRange(ParseLiteral(operands[i][1..], false));
+                        }
+                        else
+                        {
+                            // Label address
+                            referencedLabels.Add((operands[i][1..], (uint)operandBytes.Count));
+                            for (int j = 0; j < 8; j++)
+                            {
+                                // Label location will be resolved later, pad with 0s for now
+                                operandBytes.Add(0);
+                            }
                         }
                         break;
                     case OperandType.Pointer:
@@ -706,9 +715,10 @@ namespace AssEmbly
         /// Determine the type for a single operand.
         /// </summary>
         /// <param name="operand">A single operand with no comments or surrounding whitespace.</param>
+        /// <param name="allowAddressLiteral">Whether the use of the literal address syntax (e.g :1024) is valid in this context.</param>
         /// <remarks>Operands will also be validated here.</remarks>
         /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
-        public static OperandType DetermineOperandType(string operand)
+        public static OperandType DetermineOperandType(string operand, bool allowAddressLiteral = true)
         {
             switch (operand[0])
             {
@@ -718,12 +728,30 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
                     }
-                    int offset = operand[1] == '&' ? 2 : 1;
+                    int offset;
+                    if (operand[1] == '&')
+                    {
+                        offset = 2;
+                        allowAddressLiteral = false;
+                    }
+                    else
+                    {
+                        offset = 1;
+                    }
                     if (operand.Length <= offset)
                     {
                         throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
                     }
-                    Match invalidMatch = Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
+                    // Validating address literals with the same rules as labels has the intended
+                    // side effect of disallowing negative and floating point literals
+                    Match invalidMatch = allowAddressLiteral
+                        ? Regex.Match(operand[offset..], "[^A-Za-z0-9_]")
+                        : Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
+                    if (!invalidMatch.Success && operand[offset] is >= '0' and <= '9')
+                    {
+                        // Literal address reference - validate as a numeric literal
+                        ValidateNumericLiteral(operand[offset..]);
+                    }
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success
                         ? throw new SyntaxError(string.Format(Strings.Assembler_Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + offset)))
@@ -731,31 +759,7 @@ namespace AssEmbly
                 }
                 case (>= '0' and <= '9') or '-' or '.':
                 {
-                    operand = operand.ToLowerInvariant();
-                    Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
-                        ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
-                        : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
-                    if (invalidMatch.Success)
-                    {
-                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
-                    }
-                    // Edge-case syntax errors not detected by invalid character regular expressions
-                    if ((operand[0] == '.' && operand.Length == 1) || operand == "-.")
-                    {
-                        throw new SyntaxError(Strings.Assembler_Error_Literal_Floating_Point_Decimal_Only);
-                    }
-                    if (operand[0] == '-' && operand.Length == 1)
-                    {
-                        throw new SyntaxError(Strings.Assembler_Error_Literal_Negative_Dash_Only);
-                    }
-                    if (operand.IndexOf('.') != operand.LastIndexOf('.'))
-                    {
-                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
-                    }
-                    if (operand is "0x" or "0b")
-                    {
-                        throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
-                    }
+                    ValidateNumericLiteral(operand);
                     return OperandType.Literal;
                 }
                 case '"':
@@ -1204,6 +1208,35 @@ namespace AssEmbly
                 default:
                     newBytes = null;
                     return false;
+            }
+        }
+
+        private static void ValidateNumericLiteral(string operand)
+        {
+            operand = operand.ToLowerInvariant();
+            Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
+                ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
+                : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
+            if (invalidMatch.Success)
+            {
+                throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
+            }
+            // Edge-case syntax errors not detected by invalid character regular expressions
+            if ((operand[0] == '.' && operand.Length == 1) || operand == "-.")
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Literal_Floating_Point_Decimal_Only);
+            }
+            if (operand[0] == '-' && operand.Length == 1)
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Literal_Negative_Dash_Only);
+            }
+            if (operand.IndexOf('.') != operand.LastIndexOf('.'))
+            {
+                throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
+            }
+            if (operand is "0x" or "0b")
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
             }
         }
     }
