@@ -36,8 +36,9 @@ namespace AssEmbly
                 {
                     foreach (int lineIndex in references.Where(a => a.Address == address).Select(a => a.SourceLineIndex))
                     {
+                        // Use address literal instead of label if address does not align to the start of an instruction
                         int toReplaceIndex = lineIndex + inserted.Count(l => l <= lineIndex);
-                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", ":INVALID-LABEL") + $"  ; ADDR_{address:X}";
+                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", $":0x{address:X}") + "  ; Address does not align to a disassembled instruction";
                     }
                 }
             }
