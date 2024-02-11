@@ -305,12 +305,12 @@ namespace AssEmbly
             if (newBytes.Length > 0)
             {
                 operandStart = 0;
-                if (newBytes[0] == 0xFF && newBytes.Length < 3)
+                if (newBytes[0] == Opcode.FullyQualifiedMarker && newBytes.Length < 3)
                 {
                     // We can't parse this data as an opcode properly,
                     // as it starts with 0xFF but there are not enough bytes for it to be a fully qualified opcode.
                     // Can happen with non-instruction statements like "%DAT 0xFF".
-                    instructionOpcode = new Opcode(0x00, 0xFF);
+                    instructionOpcode = new Opcode(0x00, Opcode.FullyQualifiedMarker);
                     operandStart = 1;
                 }
                 else
@@ -725,7 +725,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0025()
         {
             // Warning 0025: Use of an extension instruction when assembling to v1 format.
-            return usingV1Format && newBytes.Length > 0 && !instructionIsData && newBytes[0] == 0xFF;
+            return usingV1Format && newBytes.Length > 0 && !instructionIsData && newBytes[0] == Opcode.FullyQualifiedMarker;
         }
 
         private bool Analyzer_Rolling_Warning_0026()

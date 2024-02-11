@@ -2,6 +2,8 @@
 {
     public readonly struct Opcode : IEquatable<Opcode>
     {
+        public const byte FullyQualifiedMarker = 0xFF;
+        
         public readonly byte ExtensionSet;
         public readonly byte InstructionCode;
 
@@ -20,7 +22,7 @@
         /// <remarks><paramref name="offset"/> will be incremented to the index of the end of the opcode by this method.</remarks>
         public static Opcode ParseBytes(Span<byte> bytes, ref ulong offset)
         {
-            if (bytes[(int)offset] == 0xFF)
+            if (bytes[(int)offset] == FullyQualifiedMarker)
             {
                 return new Opcode(bytes[(int)++offset], bytes[(int)++offset]);
             }

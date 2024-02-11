@@ -411,7 +411,7 @@ namespace AssEmbly
             {
                 opcodeSize = 3;
                 operandBytes.Insert(0, opcode.ExtensionSet);
-                operandBytes.Insert(0, 0xFF);
+                operandBytes.Insert(0, Opcode.FullyQualifiedMarker);
             }
             if (Data.ExtensionSetFeatureFlags.TryGetValue(opcode.ExtensionSet, out AAPFeatures newFlag))
             {

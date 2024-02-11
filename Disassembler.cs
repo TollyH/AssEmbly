@@ -109,7 +109,7 @@ namespace AssEmbly
 
             ulong totalBytes = 0;
             KeyValuePair<(string, OperandType[]), Opcode>[] matching;
-            if (instruction[0] == 0xFF && instruction.Length < 3)
+            if (instruction[0] == Opcode.FullyQualifiedMarker && instruction.Length < 3)
             {
                 // We can't parse this data as an opcode properly,
                 // as it starts with 0xFF but there are not enough bytes for it to be a fully qualified opcode.

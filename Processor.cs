@@ -137,7 +137,7 @@ namespace AssEmbly
             {
                 byte extensionSet;
                 byte opcode;
-                if (Memory[Registers[(int)Register.rpo]] == 0xFF)
+                if (Memory[Registers[(int)Register.rpo]] == Opcode.FullyQualifiedMarker)
                 {
                     extensionSet = Memory[++Registers[(int)Register.rpo]];
                     opcode = Memory[++Registers[(int)Register.rpo]];
