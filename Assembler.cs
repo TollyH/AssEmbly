@@ -63,6 +63,9 @@ namespace AssEmbly
 
         // Used to keep track of multi-line macros
         private readonly Stack<MacroStackFrame> macroStack = new();
+        private MacroStackFrame? currentMacro = null;
+        // The number of lines assembled for all macros referenced by current file line
+        private int macroLineDepth = 0;
 
         // Used for debug files
         private readonly List<(ulong Address, string Line)> assembledLines = new();
@@ -311,7 +314,8 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands,
                         currentImport?.CurrentLine ?? baseFileLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
+                        currentMacro?.MacroName, macroLineDepth));
 
                     lineIsLabelled = false;
                     lineIsEntry = false;
@@ -321,15 +325,19 @@ namespace AssEmbly
                     // Some directives change the current line index, so get the raw line contents again.
                     // Also includes comments on original line that were removed by CleanLine.
                     rawLine = dynamicLines[lineIndex];
+
                     if (currentImport is null)
                     {
                         e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
-                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(), rawLine, e.Message);
+                        e.WarningObject = new Warning(
+                            WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(),
+                            rawLine, currentMacro?.MacroName, e.Message);
                     }
                     else
                     {
                         e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
-                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(), rawLine, e.Message);
+                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(),
+                            rawLine, currentMacro?.MacroName, e.Message);
                         string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
                         _ = importStack.Pop();  // Remove already printed frame from stack
                         while (importStack.TryPop(out ImportStackFrame? nestedImport))
@@ -338,6 +346,12 @@ namespace AssEmbly
                         }
                         newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Base, baseFileLine, e.Message);
                         e.ConsoleMessage = newMessage;
+                    }
+
+                    if (currentMacro is not null)
+                    {
+                        e.ConsoleMessage += string.Format(
+                            Strings.Assembler_Error_Message_Macro_Stack, string.Join(" -> ", macroStack.Select(m => m.MacroName)));
                     }
                     throw;
                 }
@@ -918,9 +932,10 @@ namespace AssEmbly
         private void IncrementCurrentLine()
         {
             bool insideMacro = false;
-            if (macroStack.TryPeek(out MacroStackFrame? currentMacro))
+            if (macroStack.TryPeek(out currentMacro))
             {
                 insideMacro = true;
+                macroLineDepth++;
                 // Currently inside the usage of a multi-line macro
                 currentMacro.RemainingLines--;
                 while (currentMacro.RemainingLines < 0)
@@ -944,6 +959,7 @@ namespace AssEmbly
             // If we're inside an expanded macro the line number from the original file isn't changing
             if (!insideMacro)
             {
+                macroLineDepth = 0;
                 if (importStack.TryPeek(out currentImport))
                 {
                     // Currently inside an imported file
@@ -1020,7 +1036,8 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         Array.Empty<byte>(), mnemonic, operands,
                         currentImport?.CurrentLine ?? baseFileLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
+                        currentMacro?.MacroName, macroLineDepth));
 
                     importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
                     visitedFiles++;
@@ -1126,7 +1143,8 @@ namespace AssEmbly
                     warnings.AddRange(warningGenerator.NextInstruction(
                         Array.Empty<byte>(), mnemonic, operands,
                         currentImport?.CurrentLine ?? baseFileLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack));
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
+                        currentMacro?.MacroName, macroLineDepth));
 
                     lineIsLabelled = false;
                     lineIsEntry = false;
@@ -1191,7 +1209,7 @@ namespace AssEmbly
                     }
                     warnings.Add(new Warning(
                         severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
-                        mnemonic, operands, rawLine, message));
+                        mnemonic, operands, rawLine, currentMacro?.MacroName, message));
                     return true;
                 // Print assembler state
                 case "%DEBUG":
@@ -1203,6 +1221,10 @@ namespace AssEmbly
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
                         currentImport?.CurrentLine ?? baseFileLine,
                         currentImport is null ? Strings.Generic_Base_File : currentImport.ImportPath, program.Count);
+                    if (macroLineDepth != 0)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header_Macro_Lines, macroLineDepth);
+                    }
                     Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
                     foreach ((string labelName, ulong address) in labels)

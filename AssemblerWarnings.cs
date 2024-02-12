@@ -17,6 +17,7 @@ namespace AssEmbly
         public readonly int Code;
         public readonly string File;
         public readonly int Line;
+        public readonly string MacroName;
         public readonly string OriginalLine;
 
         /// <summary>
@@ -27,12 +28,13 @@ namespace AssEmbly
         public readonly string Message;
 
         public Warning(WarningSeverity severity, int code, string file, int line, string mnemonic, string[] operands,
-            string originalLine, string? message = null)
+            string originalLine, string? macroName, string? message = null)
         {
             Severity = severity;
             Code = code;
             File = file;
             Line = line;
+            MacroName = macroName ?? "";
             OriginalLine = originalLine;
 
             InstructionElements = new string[operands.Length + 1];
@@ -67,12 +69,14 @@ namespace AssEmbly
         private int line;
         private int firstLine;
         private string file = "";
+        private string? macroName;
+        private int macroLineDepth;
         private bool labelled;
         private bool isEntry;
         private readonly bool usingV1Format;
         private Stack<Assembler.ImportStackFrame> importStack = new();
 
-        private readonly Dictionary<(string File, int Line), string> lineText = new();
+        private readonly Dictionary<(string File, int Line, int MacroDepth), string> lineText = new();
 
         private byte[] finalProgram = Array.Empty<byte>();
         private ulong entryPoint = 0;
@@ -94,19 +98,23 @@ namespace AssEmbly
         /// <param name="labelled">Was this instruction preceded by one or more label definitions?</param>
         /// <param name="isEntry">Is this instruction the entry point?</param>
         /// <param name="importStack">The current state of the program's import stack.</param>
+        /// <param name="macroName">The name of the current macro being expanded, or <see langword="null"/> if no macro is.</param>
+        /// <param name="macroLineDepth">The number of lines of any macro already assembled for the current line in the file.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
         public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled,
-            bool isEntry, string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack)
+            bool isEntry, string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack, string? macroName, int macroLineDepth)
         {
             this.newBytes = newBytes;
             this.mnemonic = mnemonic;
             this.operands = operands;
             this.line = line;
             this.file = file;
+            this.macroName = macroName;
+            this.macroLineDepth = macroLineDepth;
             this.labelled = labelled;
             this.isEntry = isEntry;
             this.importStack = new Stack<Assembler.ImportStackFrame>(importStack);
-            lineText[(file, line)] = rawLine;
+            lineText[(file, line, macroLineDepth)] = rawLine;
 
             if (firstLine == 0)
             {
@@ -125,7 +133,7 @@ namespace AssEmbly
                 if (rollingAnalyzer())
                 {
                     warnings.Add(
-                        new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands, rawLine));
+                        new Warning(WarningSeverity.NonFatalError, code, file, line, mnemonic, operands, rawLine, macroName));
                 }
             }
             foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in warningRollingAnalyzers)
@@ -137,7 +145,7 @@ namespace AssEmbly
                 if (rollingAnalyzer())
                 {
                     warnings.Add(
-                        new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands, rawLine));
+                        new Warning(WarningSeverity.Warning, code, file, line, mnemonic, operands, rawLine, macroName));
                 }
             }
             foreach ((int code, RollingWarningAnalyzer rollingAnalyzer) in suggestionRollingAnalyzers)
@@ -149,7 +157,7 @@ namespace AssEmbly
                 if (rollingAnalyzer())
                 {
                     warnings.Add(
-                        new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands, rawLine));
+                        new Warning(WarningSeverity.Suggestion, code, file, line, mnemonic, operands, rawLine, macroName));
                 }
             }
             PostAnalyzeStateUpdate();
@@ -274,22 +282,22 @@ namespace AssEmbly
 
         private Opcode instructionOpcode;
         private ulong operandStart;
-        private readonly Dictionary<(string File, int Line), ulong> lineAddresses = new();
-        private readonly Dictionary<(string File, int Line), string> lineMnemonics = new();
-        private readonly Dictionary<(string File, int Line), string[]> lineOperands = new();
+        private readonly Dictionary<(string File, int Line, int MacroDepth), ulong> lineAddresses = new();
+        private readonly Dictionary<(string File, int Line, int MacroDepth), string> lineMnemonics = new();
+        private readonly Dictionary<(string File, int Line, int MacroDepth), string[]> lineOperands = new();
         private bool instructionIsData;
         private bool instructionIsImport;
         private bool instructionIsString;
-        private (int Line, string File)? entryPointDefinitionPosition = null;
-        private readonly List<(int Line, string File)> dataInsertionLines = new();
+        private (int Line, string File, string? MacroName, int MacroLineDepth)? entryPointDefinitionPosition = null;
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth)> dataInsertionLines = new();
         private readonly HashSet<ulong> executableAddresses = new();
-        private readonly List<(int Line, string File)> endingStringInsertionLines = new();
-        private readonly List<(int Line, string File)> importLines = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth)> endingStringInsertionLines = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth)> importLines = new();
         private readonly Dictionary<string, int> lastExecutableLine = new();
-        private readonly Dictionary<(int Line, string File), ulong> jumpCallToLabels = new();
-        private readonly Dictionary<(int Line, string File), ulong> writesToLabels = new();
-        private readonly Dictionary<(int Line, string File), ulong> readsFromLabels = new();
-        private readonly Dictionary<(int Line, string File), ulong> jumpsCalls = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth, ulong Address)> jumpCallToLabels = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth, ulong Address)> writesToLabels = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth, ulong Address)> readsFromLabels = new();
+        private readonly List<(int Line, string File, string? MacroName, int MacroLineDepth, ulong Address)> jumpsCalls = new();
 
         private ulong currentAddress;
         private bool lastInstructionWasTerminator;
@@ -297,6 +305,8 @@ namespace AssEmbly
         private bool lastInstructionWasString;
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
+        private string? lastMacroName;
+        private int lastMacroLineDepth;
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
         private bool insertedAnyExecutable;
 
@@ -320,9 +330,9 @@ namespace AssEmbly
                 operandStart++;
             }
 
-            lineAddresses[(file, line)] = currentAddress;
-            lineMnemonics[(file, line)] = mnemonic;
-            lineOperands[(file, line)] = operands;
+            lineAddresses[(file, line, macroLineDepth)] = currentAddress;
+            lineMnemonics[(file, line, macroLineDepth)] = mnemonic;
+            lineOperands[(file, line, macroLineDepth)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
             instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
@@ -330,7 +340,7 @@ namespace AssEmbly
 
             if (instructionIsData)
             {
-                dataInsertionLines.Add((line, file));
+                dataInsertionLines.Add((line, file, macroName, macroLineDepth));
                 if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
                 {
                     instructionIsString = true;
@@ -339,12 +349,12 @@ namespace AssEmbly
                         // Only store the last in a chain of string insertions
                         endingStringInsertionLines.RemoveAt(endingStringInsertionLines.Count - 1);
                     }
-                    endingStringInsertionLines.Add((line, file));
+                    endingStringInsertionLines.Add((line, file, macroName, macroLineDepth));
                 }
             }
             else if (instructionIsImport)
             {
-                importLines.Add((line, file));
+                importLines.Add((line, file, macroName, macroLineDepth));
             }
             else if (newBytes.Length > 0)
             {
@@ -352,25 +362,25 @@ namespace AssEmbly
                 _ = executableAddresses.Add(currentAddress);
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
-                    jumpCallToLabels[(line, file)] = currentAddress + operandStart;
+                    jumpCallToLabels.Add((line, file, macroName, macroLineDepth, currentAddress + operandStart));
                 }
                 if (writeToMemory.Contains(instructionOpcode))
                 {
-                    writesToLabels[(line, file)] = currentAddress + operandStart;
+                    writesToLabels.Add((line, file, macroName, macroLineDepth, currentAddress + operandStart));
                 }
                 if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong addressOpcodeOffset))
                 {
-                    readsFromLabels[(line, file)] = currentAddress + operandStart + addressOpcodeOffset;
+                    readsFromLabels.Add((line, file, macroName, macroLineDepth, currentAddress + operandStart + addressOpcodeOffset));
                 }
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
-                    jumpsCalls[(line, file)] = currentAddress + operandStart;
+                    jumpsCalls.Add((line, file, macroName, macroLineDepth, currentAddress + operandStart));
                 }
             }
 
             if (isEntry)
             {
-                entryPointDefinitionPosition = (line, file);
+                entryPointDefinitionPosition = (line, file, macroName, macroLineDepth);
             }
         }
 
@@ -386,6 +396,8 @@ namespace AssEmbly
             lastMnemonic = mnemonic;
             lastOperands = operands;
             lastImportStack = importStack;
+            lastMacroName = macroName;
+            lastMacroLineDepth = macroLineDepth;
             if (!instructionIsData && !instructionIsImport)
             {
                 insertedAnyExecutable = true;
@@ -456,14 +468,14 @@ namespace AssEmbly
         {
             // Warning 0002: Jump/Call target label does not point to executable code.
             List<Warning> warnings = new();
-            foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpCallToLabels)
+            foreach ((int jumpLine, string jumpFile, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpCallToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
                 if (!executableAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
-                        lineText[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine, jumpMacroLineDepth)], lineOperands[(jumpFile, jumpLine, jumpMacroLineDepth)],
+                        lineText[(jumpFile, jumpLine, jumpMacroLineDepth)], jumpMacroName));
                 }
             }
             return warnings;
@@ -473,14 +485,14 @@ namespace AssEmbly
         {
             // Warning 0003: Jump/Call target label points to end of file, not executable code.
             List<Warning> warnings = new();
-            foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpCallToLabels)
+            foreach ((int jumpLine, string jumpFile, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpCallToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
                 if (address >= currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0003, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
-                        lineText[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine, jumpMacroLineDepth)], lineOperands[(jumpFile, jumpLine, jumpMacroLineDepth)],
+                        lineText[(jumpFile, jumpLine, jumpMacroLineDepth)], jumpMacroName));
                 }
             }
             return warnings;
@@ -490,14 +502,14 @@ namespace AssEmbly
         {
             // Warning 0004: Instruction writes to a label pointing to executable code.
             List<Warning> warnings = new();
-            foreach (((int writeLine, string writeFile), ulong labelAddress) in writesToLabels)
+            foreach ((int writeLine, string writeFile, string? writeMacroName, int writeMacroLineDepth, ulong labelAddress) in writesToLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0004, writeFile, writeLine,
-                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
-                        lineText[(writeFile, writeLine)]));
+                        lineMnemonics[(writeFile, writeLine, writeMacroLineDepth)], lineOperands[(writeFile, writeLine, writeMacroLineDepth)],
+                        lineText[(writeFile, writeLine, writeMacroLineDepth)], writeMacroName));
                 }
             }
             return warnings;
@@ -507,14 +519,14 @@ namespace AssEmbly
         {
             // Warning 0005: Instruction reads from a label pointing to executable code in a context that likely expects data.
             List<Warning> warnings = new();
-            foreach (((int writeLine, string writeFile), ulong labelAddress) in readsFromLabels)
+            foreach ((int writeLine, string writeFile, string? writeMacroName, int writeMacroLineDepth, ulong labelAddress) in readsFromLabels)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writeFile, writeLine,
-                        lineMnemonics[(writeFile, writeLine)], lineOperands[(writeFile, writeLine)],
-                        lineText[(writeFile, writeLine)]));
+                        lineMnemonics[(writeFile, writeLine, writeMacroLineDepth)], lineOperands[(writeFile, writeLine, writeMacroLineDepth)],
+                        lineText[(writeFile, writeLine, writeMacroLineDepth)], writeMacroName));
                 }
             }
             return warnings;
@@ -524,20 +536,21 @@ namespace AssEmbly
         {
             // Warning 0006: String insertion is not immediately followed by a 0 (null) byte.
             List<Warning> warnings = new();
-            foreach ((int stringLine, string stringFile) in endingStringInsertionLines)
+            foreach ((int stringLine, string stringFile, string? stringMacroName, int stringMacroLineDepth) in endingStringInsertionLines)
             {
-                string[] stringOperands = lineOperands[(stringFile, stringLine)];
+                string[] stringOperands = lineOperands[(stringFile, stringLine, stringMacroLineDepth)];
                 byte[] stringBytes = Assembler.ParseLiteral(stringOperands[0], true);
                 if (stringBytes[^1] == 0)
                 {
                     // String itself is terminated with null (likely '\0')
                     continue;
                 }
-                ulong address = lineAddresses[(stringFile, stringLine)] + (uint)stringBytes.Length;
+                ulong address = lineAddresses[(stringFile, stringLine, stringMacroLineDepth)] + (uint)stringBytes.Length;
                 if (address >= (uint)finalProgram.Length || finalProgram[(int)address] != 0)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0006, stringFile, stringLine,
-                        lineMnemonics[(stringFile, stringLine)], stringOperands, lineText[(stringFile, stringLine)]));
+                        lineMnemonics[(stringFile, stringLine, stringMacroLineDepth)], stringOperands,
+                        lineText[(stringFile, stringLine, stringMacroLineDepth)], stringMacroName));
                 }
             }
             return warnings;
@@ -574,7 +587,7 @@ namespace AssEmbly
             {
                 return new List<Warning>
                 {
-                    new(WarningSeverity.Warning, 0009, file, line, mnemonic, operands, lineText[(file, line)])
+                    new(WarningSeverity.Warning, 0009, file, line, mnemonic, operands, lineText[(file, line, lastMacroLineDepth)], lastMacroName)
                 };
             }
             return new List<Warning>();
@@ -612,14 +625,14 @@ namespace AssEmbly
         {
             // Warning 0013: Jump/Call target label points to itself, resulting in an unbreakable infinite loop.
             List<Warning> warnings = new();
-            foreach (((int jumpLine, string jumpFile), ulong labelAddress) in jumpsCalls)
+            foreach ((int jumpLine, string jumpFile, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpsCalls)
             {
                 ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
                 if (address == labelAddress - 1)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0013, jumpFile, jumpLine,
-                        lineMnemonics[(jumpFile, jumpLine)], lineOperands[(jumpFile, jumpLine)],
-                        lineText[(jumpFile, jumpLine)]));
+                        lineMnemonics[(jumpFile, jumpLine, jumpMacroLineDepth)], lineOperands[(jumpFile, jumpLine, jumpMacroLineDepth)],
+                        lineText[(jumpFile, jumpLine, jumpMacroLineDepth)], jumpMacroName));
                 }
             }
             return warnings;
@@ -651,11 +664,13 @@ namespace AssEmbly
             {
                 string entryPointFile = entryPointDefinitionPosition.Value.File;
                 int entryPointLine = entryPointDefinitionPosition.Value.Line;
+                int entryPointMacroLineDepth = entryPointDefinitionPosition.Value.MacroLineDepth;
                 return new List<Warning>()
                 {
                     new(WarningSeverity.Warning, 0017, entryPointFile, entryPointLine,
-                        lineMnemonics[(entryPointFile, entryPointLine)], lineOperands[(entryPointFile, entryPointLine)],
-                        lineText[(entryPointFile, entryPointLine)])
+                        lineMnemonics[(entryPointFile, entryPointLine, entryPointMacroLineDepth)],
+                        lineOperands[(entryPointFile, entryPointLine, entryPointMacroLineDepth)],
+                        lineText[(entryPointFile, entryPointLine, entryPointMacroLineDepth)], entryPointDefinitionPosition.Value.MacroName)
                 };
             }
             return new List<Warning>();
@@ -767,13 +782,13 @@ namespace AssEmbly
             // Suggestion 0003: Put importing directives at the end of the file,
             // unless the position of the directive is important given the file's contents.
             List<Warning> warnings = new();
-            foreach ((int impLine, string impFile) in importLines)
+            foreach ((int impLine, string impFile, string? impMacroName, int impMacroLineDepth) in importLines)
             {
                 if (lastExecutableLine.TryGetValue(impFile, out int execLine) && impLine < execLine)
                 {
                     warnings.Add(new Warning(WarningSeverity.Suggestion, 0003, impFile, impLine,
-                        lineMnemonics[(impFile, impLine)], lineOperands[(impFile, impLine)],
-                        lineText[(impFile, impLine)]));
+                        lineMnemonics[(impFile, impLine, impMacroLineDepth)], lineOperands[(impFile, impLine, impMacroLineDepth)],
+                        lineText[(impFile, impLine, impMacroLineDepth)], impMacroName));
                 }
             }
             return warnings;
@@ -783,13 +798,13 @@ namespace AssEmbly
         {
             // Suggestion 0004: Put data at the end of the file, unless the position of the data is important.
             List<Warning> warnings = new();
-            foreach ((int dataLine, string dataFile) in dataInsertionLines)
+            foreach ((int dataLine, string dataFile, string? dataMacroName, int dataMacroLineDepth) in dataInsertionLines)
             {
                 if (lastExecutableLine.TryGetValue(dataFile, out int execLine) && dataLine < execLine)
                 {
                     warnings.Add(new Warning(WarningSeverity.Suggestion, 0004, dataFile, dataLine,
-                        lineMnemonics[(dataFile, dataLine)], lineOperands[(dataFile, dataLine)],
-                        lineText[(dataFile, dataLine)]));
+                        lineMnemonics[(dataFile, dataLine, dataMacroLineDepth)], lineOperands[(dataFile, dataLine, dataMacroLineDepth)],
+                        lineText[(dataFile, dataLine, dataMacroLineDepth)], dataMacroName));
                 }
             }
             return warnings;

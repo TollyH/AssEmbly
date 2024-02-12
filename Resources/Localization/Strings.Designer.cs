@@ -100,6 +100,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Currently {0} lines into macro expansion for current line..
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Header_Macro_Lines {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Header_Macro_Lines", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to     Base file at line {0}.
         /// </summary>
         internal static string Assembler_Debug_Directive_Import_Stack_Base {
@@ -176,7 +185,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to     {0} with {1} lines remaining.
         /// </summary>
         internal static string Assembler_Debug_Directive_Macro_Stack_Line {
             get {
@@ -692,6 +701,17 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Message_Imported_Import {
             get {
                 return ResourceManager.GetString("Assembler_Error_Message_Imported_Import", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///
+        ///Currently expanding the following macro(s): {0}.
+        /// </summary>
+        internal static string Assembler_Error_Message_Macro_Stack {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Message_Macro_Stack", resourceCulture);
             }
         }
         
@@ -1426,13 +1446,22 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0} {1:D4} on line {2} in {3}
+        ///{0} {1:D4}{6} on line {2} in {3}
         ///    {4}
         ///{5}.
         /// </summary>
         internal static string CLI_Assemble_Error_Warning_Printout {
             get {
                 return ResourceManager.GetString("CLI_Assemble_Error_Warning_Printout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string CLI_Assemble_Error_Warning_Printout_InMacro {
+            get {
+                return ResourceManager.GetString("CLI_Assemble_Error_Warning_Printout_InMacro", resourceCulture);
             }
         }
         

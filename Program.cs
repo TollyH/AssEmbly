@@ -195,9 +195,14 @@ namespace AssEmbly
                             break;
                         default: break;
                     }
+                    string macroName = "";
+                    if (warning.MacroName != "")
+                    {
+                        macroName = string.Format(Strings.CLI_Assemble_Error_Warning_Printout_InMacro, warning.MacroName);
+                    }
                     Console.WriteLine(Strings.CLI_Assemble_Error_Warning_Printout,
                         messageStart, warning.Code, warning.Line, warning.File == "" ? Strings.Generic_Base_File : warning.File,
-                        warning.OriginalLine, warning.Message);
+                        warning.OriginalLine, warning.Message, macroName);
                     Console.ResetColor();
                 }
             }
