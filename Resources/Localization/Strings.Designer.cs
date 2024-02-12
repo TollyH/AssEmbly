@@ -167,20 +167,58 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///{0} defined macro(s):.
+        ///Current macro stack (current macro first):.
         /// </summary>
-        internal static string Assembler_Debug_Directive_Macro_Header {
+        internal static string Assembler_Debug_Directive_Macro_Stack_Header {
             get {
-                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Header", resourceCulture);
+                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Stack_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Macro_Stack_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Stack_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///{0} defined multi-line macro(s):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Multi_Line_Macro_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Multi_Line_Macro_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {0} -&gt; {1}....
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Multi_Line_Macro_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Multi_Line_Macro_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///{0} defined single-line macro(s):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Single_Line_Macro_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Single_Line_Macro_Header", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to     {0} -&gt; {1}.
         /// </summary>
-        internal static string Assembler_Debug_Directive_Macro_Line {
+        internal static string Assembler_Debug_Directive_Single_Line_Macro_Line {
             get {
-                return ResourceManager.GetString("Assembler_Debug_Directive_Macro_Line", resourceCulture);
+                return ResourceManager.GetString("Assembler_Debug_Directive_Single_Line_Macro_Line", resourceCulture);
             }
         }
         
@@ -252,6 +290,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Circular macro detected: attempted to expand &quot;{0}&quot; when it is already in macro stack..
+        /// </summary>
+        internal static string Assembler_Error_Circular_Macro {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Circular_Macro", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The %DAT directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_DAT_Operand_Count {
@@ -305,6 +352,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Empty_Operand {
             get {
                 return ResourceManager.GetString("Assembler_Error_Empty_Operand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?.
+        /// </summary>
+        internal static string Assembler_Error_ENDMACRO_Missing {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDMACRO_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %ENDMACRO directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_ENDMACRO_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDMACRO_Operand_Count", resourceCulture);
             }
         }
         
@@ -579,11 +644,11 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The %MAC directive requires two operands. {0} were given..
+        ///   Looks up a localized string similar to The %MACRO directive requires either one or two operands. {0} were given..
         /// </summary>
-        internal static string Assembler_Error_MAC_Operand_Count {
+        internal static string Assembler_Error_MACRO_Operand_Count {
             get {
-                return ResourceManager.GetString("Assembler_Error_MAC_Operand_Count", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_MACRO_Operand_Count", resourceCulture);
             }
         }
         

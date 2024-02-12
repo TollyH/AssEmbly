@@ -95,6 +95,24 @@
         public LabelNameException(string message, int line, string file) : base(message, line, file) { }
     }
 
+    /// <summary>
+    /// The exception that is thrown when the end of the file is reached before a required closing directive is encountered.
+    /// </summary>
+    public class MissingEndDirectiveException : AssemblerException
+    {
+        public MissingEndDirectiveException(string message) : base(message) { }
+        public MissingEndDirectiveException(string message, int line, string file) : base(message, line, file) { }
+    }
+
+    /// <summary>
+    /// The exception that is thrown when an error is encountered whilst attempting to expand the usage of a macro.
+    /// </summary>
+    public class MacroExpansionException : AssemblerException
+    {
+        public MacroExpansionException(string message) : base(message) { }
+        public MacroExpansionException(string message, int line, string file) : base(message, line, file) { }
+    }
+
     // DEBUGGER EXCEPTIONS
 
     /// <summary>

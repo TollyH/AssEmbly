@@ -30,6 +30,12 @@ namespace AssEmbly
             public int TotalLines { get; } = totalLines;
         }
 
+        public class MacroStackFrame(string macroName, int remainingLines)
+        {
+            public string MacroName { get; } = macroName;
+            public int RemainingLines { get; set; } = remainingLines;
+        }
+
         public bool Finalized { get; private set; }
 
         // Final compiled byte list
@@ -42,14 +48,21 @@ namespace AssEmbly
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
         private readonly List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
         private readonly HashSet<string> overriddenLabels = new();
-        // string -> replacement
-        private readonly Dictionary<string, string> macros = new();
+        // string -> replacement. All single-line macros are expanded before multi-line macros.
+        private readonly Dictionary<string, string> singleLineMacros = new();
+        private readonly Dictionary<string, string[]> multiLineMacros = new();
+        // Sorted from the longest name to the shortest name - should always match the keys of the above dictionaries
+        private List<string> singleLineMacroNames = new();
+        private List<string> multiLineMacroNames = new();
         private AAPFeatures usedExtensions = AAPFeatures.None;
 
         // For detecting circular imports and tracking imported line numbers
         private readonly Stack<ImportStackFrame> importStack = new();
         private ImportStackFrame? currentImport = null;
         private int baseFileLine = 0;
+
+        // Used to keep track of multi-line macros
+        private readonly Stack<MacroStackFrame> macroStack = new();
 
         // Used for debug files
         private readonly List<(ulong Address, string Line)> assembledLines = new();
@@ -209,38 +222,35 @@ namespace AssEmbly
 
             for (int lineIndex = 0; lineIndex < dynamicLines.Count; lineIndex++)
             {
-                if (importStack.TryPeek(out currentImport))
+                IncrementCurrentLine();
+                string rawLine = CleanLine(dynamicLines[lineIndex]);
+                foreach (string macro in singleLineMacroNames)
                 {
-                    // Currently inside an imported file
-                    currentImport.CurrentLine++;
-                    while (currentImport.CurrentLine > currentImport.TotalLines)
-                    {
-                        // Reached the end of an imported file.
-                        // Pop from the import stack until we reach an import that hasn't ended yet,
-                        // or the base file.
-                        _ = importStack.Pop();
-                        if (importStack.TryPeek(out currentImport))
-                        {
-                            currentImport.CurrentLine++;
-                        }
-                        else
-                        {
-                            baseFileLine++;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    baseFileLine++;
-                }
-                string rawLine = dynamicLines[lineIndex];
-                foreach ((string macro, string replacement) in macros)
-                {
-                    rawLine = rawLine.Replace(macro, replacement);
+                    rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
                 }
                 try
                 {
+                    bool multiLineMacroMatched = false;
+                    foreach (string macro in multiLineMacroNames)
+                    {
+                        if (rawLine == macro)
+                        {
+                            if (macroStack.Any(m => m.MacroName == macro))
+                            {
+                                throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
+                            }
+                            string[] replacement = multiLineMacros[macro];
+                            dynamicLines.InsertRange(lineIndex + 1, replacement);
+                            macroStack.Push(new MacroStackFrame(macro, replacement.Length));
+                            multiLineMacroMatched = true;
+                            break;
+                        }
+                    }
+                    if (multiLineMacroMatched)
+                    {
+                        continue;
+                    }
+
                     string[] line = ParseLine(rawLine);
                     if (line.Length == 0)
                     {
@@ -308,6 +318,9 @@ namespace AssEmbly
                 }
                 catch (AssemblerException e)
                 {
+                    // Some directives change the current line index, so get the raw line contents again.
+                    // Also includes comments on original line that were removed by CleanLine.
+                    rawLine = dynamicLines[lineIndex];
                     if (currentImport is null)
                     {
                         e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
@@ -439,6 +452,20 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Remove surrounding whitespace and comments from a string.
+        /// </summary>
+        /// <param name="line">The raw AssEmbly source line.</param>
+        public static string CleanLine(string line)
+        {
+            int indexOfSemicolon = line.IndexOf(';');
+            if (indexOfSemicolon != -1)
+            {
+                line = line[..indexOfSemicolon];
+            }
+            return line.Trim();
+        }
+
+        /// <summary>
         /// Split a line of AssEmbly into its individual components.
         /// </summary>
         /// <param name="line">The raw AssEmbly source line.</param>
@@ -473,7 +500,7 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.Equals("%MAC", StringComparison.OrdinalIgnoreCase);
+                        isMacro = mnemonic.Equals("%MACRO", StringComparison.OrdinalIgnoreCase);
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -888,6 +915,63 @@ namespace AssEmbly
             }
         }
 
+        private void IncrementCurrentLine()
+        {
+            bool insideMacro = false;
+            if (macroStack.TryPeek(out MacroStackFrame? currentMacro))
+            {
+                insideMacro = true;
+                // Currently inside the usage of a multi-line macro
+                currentMacro.RemainingLines--;
+                while (currentMacro.RemainingLines < 0)
+                {
+                    // Reached the end of a macro.
+                    // Pop from the macro stack until we reach an import that hasn't ended yet,
+                    // or the end of all current macros.
+                    _ = macroStack.Pop();
+                    if (macroStack.TryPeek(out currentMacro))
+                    {
+                        currentMacro.RemainingLines--;
+                    }
+                    else
+                    {
+                        insideMacro = false;
+                        break;
+                    }
+                }
+            }
+
+            // If we're inside an expanded macro the line number from the original file isn't changing
+            if (!insideMacro)
+            {
+                if (importStack.TryPeek(out currentImport))
+                {
+                    // Currently inside an imported file
+                    currentImport.CurrentLine++;
+                    while (currentImport.CurrentLine > currentImport.TotalLines)
+                    {
+                        // Reached the end of an imported file.
+                        // Pop from the import stack until we reach an import that hasn't ended yet,
+                        // or the base file.
+                        _ = importStack.Pop();
+                        if (importStack.TryPeek(out currentImport))
+                        {
+                            currentImport.CurrentLine++;
+                        }
+                        else
+                        {
+                            baseFileLine++;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    baseFileLine++;
+                }
+            }
+        }
+
         /// <summary>
         /// Determine if a given statement is a known state-modifying assembler directive and process it if it is.
         /// </summary>
@@ -942,12 +1026,59 @@ namespace AssEmbly
                     visitedFiles++;
                     return true;
                 // Define macro
-                case "%MAC":
-                    if (operands.Length != 2)
+                case "%MACRO":
+                    if (operands.Length == 2)
                     {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_MAC_Operand_Count, operands.Length));
+                        // Single-line macro
+                        singleLineMacros[operands[0]] = operands[1];
+                        singleLineMacroNames.Add(operands[0]);
+                        singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).ToList();
                     }
-                    macros[operands[0]] = operands[1];
+                    else if (operands.Length == 1)
+                    {
+                        // Multi-line macro (must be terminated with %ENDMACRO)
+                        int lineIndexAtStart = currentLineIndex;
+                        int baseFileLineAtStart = baseFileLine;
+                        Stack<ImportStackFrame> importStackAtStart = new(importStack.Select(f => new ImportStackFrame(f.ImportPath, f.CurrentLine, f.TotalLines)));
+                        List<string> replacement = new();
+                        // Add each line before the next encountered %ENDMACRO directive to the replacement text
+                        while (true)
+                        {
+                            IncrementCurrentLine();
+                            string line = dynamicLines[++currentLineIndex];
+                            if (line.TrimStart().StartsWith("%ENDMACRO", StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Parse the line to check it wasn't given with any operands
+                                string[] parsedLine = ParseLine(line);
+                                if (parsedLine.Length != 1)
+                                {
+                                    throw new OperandException(string.Format(Strings.Assembler_Error_ENDMACRO_Operand_Count, parsedLine.Length - 1));
+                                }
+                                break;
+                            }
+                            if (currentLineIndex >= dynamicLines.Count - 1)
+                            {
+                                // Rollback the state of the import stack to when macro definition started,
+                                // so that error message shows that line instead of the end of the file
+                                baseFileLine = baseFileLineAtStart;
+                                currentLineIndex = lineIndexAtStart;
+                                importStack.Clear();
+                                foreach (ImportStackFrame frame in importStackAtStart.Reverse())
+                                {
+                                    importStack.Push(frame);
+                                }
+                                throw new MissingEndDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
+                            }
+                            replacement.Add(line);
+                        }
+                        multiLineMacros[operands[0]] = replacement.ToArray();
+                        multiLineMacroNames.Add(operands[0]);
+                        multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
+                    }
+                    else
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
+                    }
                     return true;
                 // Define label address manually
                 case "%LABEL_OVERRIDE":
@@ -1083,10 +1214,20 @@ namespace AssEmbly
                     {
                         Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
                     }
-                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Header, macros.Count);
-                    foreach ((string macro, string replacement) in macros)
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Header, singleLineMacros.Count);
+                    foreach ((string macro, string replacement) in singleLineMacros)
                     {
-                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Line, macro, replacement);
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Line, macro, replacement);
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Multi_Line_Macro_Header, multiLineMacros.Count);
+                    foreach ((string macro, string[] replacement) in multiLineMacros)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Multi_Line_Macro_Line, macro, replacement.Length >= 1 ? replacement[0] : "");
+                    }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Header);
+                    foreach (MacroStackFrame macroFrame in macroStack)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Line, macroFrame.MacroName, macroFrame.RemainingLines);
                     }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
                     foreach (ImportStackFrame importFrame in importStack)

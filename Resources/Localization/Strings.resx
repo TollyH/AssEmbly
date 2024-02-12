@@ -685,8 +685,8 @@ return - Continue to the next return instruction in this subroutine or higher</v
 	<data name="Assembler_Error_Circular_Import" xml:space="preserve">
 		<value>Circular import detected: attempted import from "{0}" when it is already in import stack.</value>
 	</data>
-	<data name="Assembler_Error_MAC_Operand_Count" xml:space="preserve">
-		<value>The %MAC directive requires two operands. {0} were given.</value>
+	<data name="Assembler_Error_MACRO_Operand_Count" xml:space="preserve">
+		<value>The %MACRO directive requires either one or two operands. {0} were given.</value>
 	</data>
 	<data name="Assembler_Error_ANALYZER_Operand_Count" xml:space="preserve">
 		<value>The %ANALYZER directive requires 3 operands. {0} were given.</value>
@@ -1183,11 +1183,11 @@ Program is currently {2:N0} bytes long.</value>
 	<data name="Assembler_Debug_Directive_LabelRef_Line" xml:space="preserve">
 		<value>    {0} -&gt; {1:X16} from {2} at line {3}</value>
 	</data>
-	<data name="Assembler_Debug_Directive_Macro_Header" xml:space="preserve">
+	<data name="Assembler_Debug_Directive_Single_Line_Macro_Header" xml:space="preserve">
 		<value>
-{0} defined macro(s):</value>
+{0} defined single-line macro(s):</value>
 	</data>
-	<data name="Assembler_Debug_Directive_Macro_Line" xml:space="preserve">
+	<data name="Assembler_Debug_Directive_Single_Line_Macro_Line" xml:space="preserve">
 		<value>    {0} -&gt; {1}</value>
 	</data>
 	<data name="Assembler_Debug_Directive_Import_Stack_Header" xml:space="preserve">
@@ -1292,5 +1292,28 @@ Current extensions used: {0}</value>
 	</data>
 	<data name="AssemblerWarnings_Warning_0027" xml:space="preserve">
 		<value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
+	</data>
+	<data name="Assembler_Error_ENDMACRO_Operand_Count" xml:space="preserve">
+		<value>The %ENDMACRO directive takes no operands. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_ENDMACRO_Missing" xml:space="preserve">
+		<value>End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Multi_Line_Macro_Header" xml:space="preserve">
+		<value>
+{0} defined multi-line macro(s):</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Multi_Line_Macro_Line" xml:space="preserve">
+		<value>    {0} -&gt; {1}...</value>
+	</data>
+	<data name="Assembler_Error_Circular_Macro" xml:space="preserve">
+		<value>Circular macro detected: attempted to expand "{0}" when it is already in macro stack.</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Macro_Stack_Header" xml:space="preserve">
+		<value>
+Current macro stack (current macro first):</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Macro_Stack_Line" xml:space="preserve">
+		<value>    {0} with {1} lines remaining</value>
 	</data>
 </root>
