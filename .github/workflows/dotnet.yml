@@ -9,8 +9,23 @@ on:
   push:
 
 jobs:
-  build:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
 
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Test Project
+        run: dotnet test -c Release
+
+  build:
     strategy:
       matrix:
         runtime-target: [
@@ -27,8 +42,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Test Project
-      run: dotnet test
     - name: Publish Project
       run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/${{ matrix.runtime-target }}.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
     - name: Upload Build Artifact
