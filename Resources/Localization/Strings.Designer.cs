@@ -792,6 +792,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is a block ending directive, however there is no currently open instance of the block it closes..
+        /// </summary>
+        internal static string Assembler_Error_Opening_Directive_Missing {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Opening_Directive_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type of operand &quot;{0}&quot; could not be determined. Did you forget a colon before a label name or misspell a register name?.
         /// </summary>
         internal static string Assembler_Error_Operand_Invalid {
@@ -1457,7 +1466,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to  in macro {0}.
         /// </summary>
         internal static string CLI_Assemble_Error_Warning_Printout_InMacro {
             get {

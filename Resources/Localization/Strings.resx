@@ -1327,4 +1327,7 @@ Currently expanding the following macro(s): {0}</value>
 	<data name="CLI_Assemble_Error_Warning_Printout_InMacro" xml:space="preserve">
 		<value> in macro {0}</value>
 	</data>
+	<data name="Assembler_Error_Opening_Directive_Missing" xml:space="preserve">
+		<value>{0} is a block ending directive, however there is no currently open instance of the block it closes.</value>
+	</data>
 </root>

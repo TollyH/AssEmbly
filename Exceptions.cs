@@ -98,10 +98,10 @@
     /// <summary>
     /// The exception that is thrown when the end of the file is reached before a required closing directive is encountered.
     /// </summary>
-    public class MissingEndDirectiveException : AssemblerException
+    public class EndingDirectiveException : AssemblerException
     {
-        public MissingEndDirectiveException(string message) : base(message) { }
-        public MissingEndDirectiveException(string message, int line, string file) : base(message, line, file) { }
+        public EndingDirectiveException(string message) : base(message) { }
+        public EndingDirectiveException(string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>

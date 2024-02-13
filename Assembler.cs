@@ -1084,7 +1084,7 @@ namespace AssEmbly
                                 {
                                     importStack.Push(frame);
                                 }
-                                throw new MissingEndDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
+                                throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
                             }
                             replacement.Add(line);
                         }
@@ -1260,6 +1260,8 @@ namespace AssEmbly
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
                     Console.ResetColor();
                     return true;
+                case "%ENDMACRO":
+                    throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
                 default:
                     return false;
             }
