@@ -1,3 +1,6 @@
+# Stop executing script if a cmdlet fails
+$ErrorActionPreference = "Stop"
+
 $publishFolder = "Publish"
 
 Write-Output "`nDeleting existing Publish folder..."
@@ -10,6 +13,10 @@ foreach ($file in $publishProfiles) {
     $profileName = [System.IO.Path]::GetFileNameWithoutExtension($file.Name)
     Write-Output "`nStarting build for $profileName..."
     dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/$profileName.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
+    
+    if ($LastExitCode -ne 0) {
+        exit $LastExitCode
+    }
 }
 
 Write-Output ""
