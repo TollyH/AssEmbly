@@ -13,14 +13,13 @@ jobs:
 
     strategy:
       matrix:
-        build-os: [ubuntu-latest, windows-latest, macos-latest]
         runtime-target: [
           win-x64, win-x86, win-arm64,
           osx-x64, osx-arm64,
           linux-x64, linux-arm, linux-arm64
         ]
 
-    runs-on: ${{ matrix.build-os }}
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
@@ -35,6 +34,6 @@ jobs:
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: AssEmbly-${{ matrix.build-os }}-${{ matrix.runtime-target }}
+        name: AssEmbly-${{ matrix.runtime-target }}
         path: Publish/${{ matrix.runtime-target }}/
         if-no-files-found: error
