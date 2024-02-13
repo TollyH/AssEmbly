@@ -487,7 +487,45 @@ namespace AssEmbly
         /// <param name="line">The raw AssEmbly source line.</param>
         public static string CleanLine(string line)
         {
-            int indexOfSemicolon = line.IndexOf(';');
+            bool openDoubleQuote = false;
+            bool openSingleQuote = false;
+            bool openBackslash = false;
+            int indexOfSemicolon = -1;
+            // Find the first instance of an unquoted semicolon, removing it and every character after it if found.
+            // We don't need to actually validate string/character literals yet, we just care about removing comments.
+            for (int i = 0; i < line.Length && indexOfSemicolon == -1; i++)
+            {
+                switch (line[i])
+                {
+                    case '"':
+                        if (!openSingleQuote && !openBackslash)
+                        {
+                            openDoubleQuote = !openDoubleQuote;
+                        }
+                        break;
+                    case '\'':
+                        if (!openDoubleQuote && !openBackslash)
+                        {
+                            openSingleQuote = !openSingleQuote;
+                        }
+                        break;
+                    case '\\':
+                        if (openDoubleQuote || openSingleQuote)
+                        {
+                            openBackslash = !openBackslash;
+                        }
+                        break;
+                    case ';':
+                        if (!openDoubleQuote && !openSingleQuote)
+                        {
+                            indexOfSemicolon = i;
+                        }
+                        break;
+                    default:
+                        openBackslash = false;
+                        break;
+                }
+            }
             if (indexOfSemicolon != -1)
             {
                 line = line[..indexOfSemicolon];
