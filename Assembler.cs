@@ -227,31 +227,47 @@ namespace AssEmbly
             {
                 IncrementCurrentLine();
                 string rawLine = CleanLine(dynamicLines[lineIndex]);
-                foreach (string macro in singleLineMacroNames)
+                if (rawLine.Length == 0)
                 {
-                    rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
+                    continue;
+                }
+                bool skipMacros = rawLine[0] == '!';
+                if (skipMacros)
+                {
+                    // Remove the '!' prefix
+                    rawLine = CleanLine(rawLine[1..]);
+                }
+                else
+                {
+                    foreach (string macro in singleLineMacroNames)
+                    {
+                        rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
+                    }
                 }
                 try
                 {
-                    bool multiLineMacroMatched = false;
-                    foreach (string macro in multiLineMacroNames)
+                    if (!skipMacros)
                     {
-                        if (rawLine == macro)
+                        bool multiLineMacroMatched = false;
+                        foreach (string macro in multiLineMacroNames)
                         {
-                            if (macroStack.Any(m => m.MacroName == macro))
+                            if (rawLine == macro)
                             {
-                                throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
+                                if (macroStack.Any(m => m.MacroName == macro))
+                                {
+                                    throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
+                                }
+                                string[] replacement = multiLineMacros[macro];
+                                dynamicLines.InsertRange(lineIndex + 1, replacement);
+                                macroStack.Push(new MacroStackFrame(macro, replacement.Length));
+                                multiLineMacroMatched = true;
+                                break;
                             }
-                            string[] replacement = multiLineMacros[macro];
-                            dynamicLines.InsertRange(lineIndex + 1, replacement);
-                            macroStack.Push(new MacroStackFrame(macro, replacement.Length));
-                            multiLineMacroMatched = true;
-                            break;
                         }
-                    }
-                    if (multiLineMacroMatched)
-                    {
-                        continue;
+                        if (multiLineMacroMatched)
+                        {
+                            continue;
+                        }
                     }
 
                     string[] line = ParseLine(rawLine);
