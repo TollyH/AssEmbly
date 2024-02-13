@@ -166,7 +166,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to     {0} -&gt; {1} (from {2} at line {3}).
         /// </summary>
         internal static string Assembler_Debug_Directive_Label_Link_Line {
             get {
@@ -668,6 +668,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Literal_Too_Small {
             get {
                 return ResourceManager.GetString("Assembler_Error_Literal_Too_Small", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with &apos;!&gt;&apos;..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Disable_Block_Missing_Start {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Disable_Block_Missing_Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start of macro disabling block found when already inside one. Macro disabling blocks cannot be nested..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Disable_Block_Nested {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Disable_Block_Nested", resourceCulture);
             }
         }
         

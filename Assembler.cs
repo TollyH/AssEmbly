@@ -67,6 +67,8 @@ namespace AssEmbly
         // The number of lines assembled for all macros referenced by current file line
         private int macroLineDepth = 0;
 
+        private bool insideMacroSkipBlock = false;
+
         // Used for debug files
         private readonly List<(ulong Address, string Line)> assembledLines = new();
         private readonly Dictionary<ulong, List<string>> addressLabelNames = new();
@@ -231,43 +233,11 @@ namespace AssEmbly
                 {
                     continue;
                 }
-                bool skipMacros = rawLine[0] == '!';
-                if (skipMacros)
-                {
-                    // Remove the '!' prefix
-                    rawLine = CleanLine(rawLine[1..]);
-                }
-                else
-                {
-                    foreach (string macro in singleLineMacroNames)
-                    {
-                        rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
-                    }
-                }
                 try
                 {
-                    if (!skipMacros)
+                    if (ProcessLineMacros(ref rawLine, dynamicLines, lineIndex))
                     {
-                        bool multiLineMacroMatched = false;
-                        foreach (string macro in multiLineMacroNames)
-                        {
-                            if (rawLine == macro)
-                            {
-                                if (macroStack.Any(m => m.MacroName == macro))
-                                {
-                                    throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
-                                }
-                                string[] replacement = multiLineMacros[macro];
-                                dynamicLines.InsertRange(lineIndex + 1, replacement);
-                                macroStack.Push(new MacroStackFrame(macro, replacement.Length));
-                                multiLineMacroMatched = true;
-                                break;
-                            }
-                        }
-                        if (multiLineMacroMatched)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
 
                     string[] line = ParseLine(rawLine);
@@ -1040,6 +1010,57 @@ namespace AssEmbly
                     baseFileLine++;
                 }
             }
+        }
+
+        private bool ProcessLineMacros(ref string rawLine, List<string> dynamicLines, int lineIndex)
+        {
+            if (rawLine == "!>")
+            {
+                if (insideMacroSkipBlock)
+                {
+                    throw new SyntaxError(Strings.Assembler_Error_Macro_Disable_Block_Nested);
+                }
+                insideMacroSkipBlock = true;
+                return true;
+            }
+            if (rawLine == "<!")
+            {
+                if (!insideMacroSkipBlock)
+                {
+                    throw new SyntaxError(Strings.Assembler_Error_Macro_Disable_Block_Missing_Start);
+                }
+                insideMacroSkipBlock = false;
+                return true;
+            }
+
+            if (rawLine[0] == '!')
+            {
+                // Remove the '!' prefix and skip macro processing for this line
+                rawLine = CleanLine(rawLine[1..]);
+            }
+            else if (!insideMacroSkipBlock)
+            {
+                foreach (string macro in singleLineMacroNames)
+                {
+                    rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
+                }
+
+                foreach (string macro in multiLineMacroNames)
+                {
+                    if (rawLine == macro)
+                    {
+                        if (macroStack.Any(m => m.MacroName == macro))
+                        {
+                            throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
+                        }
+                        string[] replacement = multiLineMacros[macro];
+                        dynamicLines.InsertRange(lineIndex + 1, replacement);
+                        macroStack.Push(new MacroStackFrame(macro, replacement.Length));
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>

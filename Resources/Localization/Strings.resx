@@ -1337,4 +1337,10 @@ Currently expanding the following macro(s): {0}</value>
 	<data name="Assembler_Debug_Directive_Label_Link_Line" xml:space="preserve">
 		<value>    {0} -&gt; {1} (from {2} at line {3})</value>
 	</data>
+	<data name="Assembler_Error_Macro_Disable_Block_Nested" xml:space="preserve">
+		<value>Start of macro disabling block found when already inside one. Macro disabling blocks cannot be nested.</value>
+	</data>
+	<data name="Assembler_Error_Macro_Disable_Block_Missing_Start" xml:space="preserve">
+		<value>End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with '!&gt;'.</value>
+	</data>
 </root>
