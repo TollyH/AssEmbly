@@ -11,7 +11,16 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build-os: [ubuntu-latest, windows-latest, macos-latest]
+        runtime-target: [
+          win-x64, win-x86, win-arm64,
+          osx-x64, osx-arm64,
+          linux-x64, linux-arm, linux-arm64
+        ]
+
+    runs-on: ${{ matrix.build-os }}
 
     steps:
     - uses: actions/checkout@v3
@@ -22,10 +31,10 @@ jobs:
     - name: Test Project
       run: dotnet test
     - name: Publish Project
-      run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/FolderProfile.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
+      run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/${{ matrix.runtime-target }}.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
-        name: AssEmbly
-        path: Publish/AssEmbly.exe
+        name: AssEmbly-${{ matrix.build-os }}-${{ matrix.runtime-target }}
+        path: Publish/${{ matrix.runtime-target }}/AssEmbly.exe
         if-no-files-found: error
