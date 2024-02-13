@@ -1231,10 +1231,17 @@ namespace AssEmbly
                     {
                         Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
                     }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Link_Header, labelLinks.Count);
+                    foreach ((string labelName, (string target, string? filePath, int line)) in labelLinks)
+                    {
+                        Console.Error.WriteLine(
+                            Strings.Assembler_Debug_Directive_Label_Link_Line, labelName, target, filePath ?? Strings.Generic_Base_File, line);
+                    }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
                     foreach ((string labelName, ulong insertOffset, string? filePath, int lineNum) in labelReferences)
                     {
-                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
+                        Console.Error.WriteLine(
+                            Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
                     }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Header, singleLineMacros.Count);
                     foreach ((string macro, string replacement) in singleLineMacros)

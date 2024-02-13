@@ -1330,4 +1330,11 @@ Currently expanding the following macro(s): {0}</value>
 	<data name="Assembler_Error_Opening_Directive_Missing" xml:space="preserve">
 		<value>{0} is a block ending directive, however there is no currently open instance of the block it closes.</value>
 	</data>
+	<data name="Assembler_Debug_Directive_Label_Link_Header" xml:space="preserve">
+		<value>
+{0} label link(s) currently defined:</value>
+	</data>
+	<data name="Assembler_Debug_Directive_Label_Link_Line" xml:space="preserve">
+		<value>    {0} -&gt; {1} (from {2} at line {3})</value>
+	</data>
 </root>

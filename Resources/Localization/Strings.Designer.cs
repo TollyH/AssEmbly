@@ -157,6 +157,25 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
+        ///{0} label link(s) currently defined:.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Label_Link_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Label_Link_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Label_Link_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Label_Link_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
         ///{0} label reference(s) pending fill:.
         /// </summary>
         internal static string Assembler_Debug_Directive_LabelRef_Header {
