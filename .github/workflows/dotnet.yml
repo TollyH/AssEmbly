@@ -23,9 +23,9 @@ jobs:
     runs-on: ${{ matrix.build-os }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
     - name: Test Project
@@ -33,8 +33,8 @@ jobs:
     - name: Publish Project
       run: dotnet publish AssEmbly.csproj -p:PublishProfile="Properties/PublishProfiles/${{ matrix.runtime-target }}.pubxml" -p:TreatWarningsAsErrors=true -warnaserror
     - name: Upload Build Artifact
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v4
       with:
         name: AssEmbly-${{ matrix.build-os }}-${{ matrix.runtime-target }}
-        path: Publish/${{ matrix.runtime-target }}/AssEmbly.exe
+        path: Publish/${{ matrix.runtime-target }}/
         if-no-files-found: error
