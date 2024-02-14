@@ -1012,6 +1012,14 @@ namespace AssEmbly
             }
         }
 
+        /// <summary>
+        /// Expand any matching single-line macros on the current line,
+        /// then insert the contents of a matching multi-line macro after the current line if an exact match exists.
+        /// </summary>
+        /// <param name="rawLine">The line of AssEmbly code without trailing whitespace or comments</param>
+        /// <returns>
+        /// <see langword="true"/> if assembly should now immediately move onto the next line, <see langword="false"/> otherwise.
+        /// </returns>
         private bool ProcessLineMacros(ref string rawLine, List<string> dynamicLines, int lineIndex)
         {
             if (rawLine == "!>")
