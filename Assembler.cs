@@ -1020,6 +1020,10 @@ namespace AssEmbly
         /// <returns>
         /// <see langword="true"/> if assembly should now immediately move onto the next line, <see langword="false"/> otherwise.
         /// </returns>
+        /// <remarks>
+        /// This method accounts for the '!' line prefix and handles the starting and stopping of macro disabling blocks.
+        /// <paramref name="rawLine"/> will have the '!' removed by this method.
+        /// </remarks>
         private bool ProcessLineMacros(ref string rawLine, List<string> dynamicLines, int lineIndex)
         {
             if (rawLine == "!>")
