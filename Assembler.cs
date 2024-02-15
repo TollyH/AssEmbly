@@ -467,29 +467,17 @@ namespace AssEmbly
             {
                 switch (line[i])
                 {
-                    case '"':
-                        if (!openSingleQuote && !openBackslash)
-                        {
-                            openDoubleQuote = !openDoubleQuote;
-                        }
+                    case '"' when !openSingleQuote && !openBackslash:
+                        openDoubleQuote = !openDoubleQuote;
                         break;
-                    case '\'':
-                        if (!openDoubleQuote && !openBackslash)
-                        {
-                            openSingleQuote = !openSingleQuote;
-                        }
+                    case '\'' when !openDoubleQuote && !openBackslash:
+                        openSingleQuote = !openSingleQuote;
                         break;
-                    case '\\':
-                        if (openDoubleQuote || openSingleQuote)
-                        {
-                            openBackslash = !openBackslash;
-                        }
+                    case '\\' when openDoubleQuote || openSingleQuote:
+                        openBackslash = !openBackslash;
                         break;
-                    case ';':
-                        if (!openDoubleQuote && !openSingleQuote)
-                        {
-                            indexOfSemicolon = i;
-                        }
+                    case ';' when !openDoubleQuote && !openSingleQuote:
+                        indexOfSemicolon = i;
                         break;
                     default:
                         openBackslash = false;
