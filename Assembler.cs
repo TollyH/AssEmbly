@@ -1204,7 +1204,7 @@ namespace AssEmbly
                 {
                     foreach (string macro in singleLineMacroNames)
                     {
-                        if (macro.Length > rawLine.Length)
+                        if (macro.Length > rawLine.Length - i)
                         {
                             continue;
                         }
@@ -1212,7 +1212,7 @@ namespace AssEmbly
                         bool match = true;
                         for (int j = 0; j < macro.Length; j++)
                         {
-                            if (i + j >= rawLine.Length || rawLine[i + j] != macro[j])
+                            if (rawLine[i + j] != macro[j])
                             {
                                 match = false;
                                 break;
