@@ -897,6 +897,163 @@ namespace AssEmbly
             return ParseLiteral(operand, allowString, out _);
         }
 
+        /// <summary>
+        /// Process a set of macro parameters as a part of an entire line of AssEmbly source.
+        /// Accounts for backslash escapes and ensures that the parameters are surrounded with brackets.
+        /// </summary>
+        /// <param name="line">The entire source line with the parameters contained.</param>
+        /// <param name="startIndex">
+        /// The index in the line to the opening bracket.
+        /// It will be incremented automatically by this method to the index of the closing bracket.
+        /// </param>
+        /// <returns>
+        /// An array where each element represents a single parameter to the macro.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
+        /// <exception cref="ArgumentException">The given line is invalid.</exception>
+        /// <exception cref="SyntaxError">The parameters in the line are invalid.</exception>
+        public static string[] ParseMacroParameters(string line, ref int startIndex)
+        {
+            if (startIndex < 0 || startIndex >= line.Length)
+            {
+                throw new IndexOutOfRangeException(Strings.Assembler_Error_Macro_Params_Bad_StartIndex);
+            }
+            if (line[startIndex] != '(')
+            {
+                throw new ArgumentException(Strings.Assembler_Error_Macro_Params_Bad_First_Char);
+            }
+
+            List<string> parameters = new();
+            StringBuilder currentParameter = new();
+            bool openBackslash = false;
+            int i = startIndex;
+            bool paramsClosed = false;
+            while (!paramsClosed)
+            {
+                if (++i >= line.Length)
+                {
+                    throw new SyntaxError(
+                        string.Format(Strings.Assembler_Error_Macro_Params_EndOfLine, line, new string(' ', i - 1)));
+                }
+
+                if (!openBackslash)
+                {
+                    switch (line[i])
+                    {
+                        case ')':
+                            paramsClosed = true;
+                            continue;
+                        case '\\':
+                            openBackslash = true;
+                            continue;
+                        case ',':
+                            parameters.Add(currentParameter.ToString());
+                            _ = currentParameter.Clear();
+                            continue;
+                    }
+                }
+
+                _ = currentParameter.Append(line[i]);
+                openBackslash = false;
+            }
+            startIndex = i;
+
+            // Add the final parameter
+            parameters.Add(currentParameter.ToString());
+            return parameters.ToArray();
+        }
+
+        /// <summary>
+        /// Replaces parameters in the form $x within a macro replacement string with their corresponding value in the given list of parameters.
+        /// </summary>
+        /// <returns>A string with all macro parameters replaced.</returns>
+        /// <remarks>
+        /// Missing parameters will be replaced with empty strings, unless the parameter index is followed by an ! in which case an error will be thrown.
+        /// The $ sign can be escaped by doubling it up ($$).
+        /// </remarks>
+        /// <exception cref="MacroExpansionException">Thrown if a required parameter is missing.</exception>
+        /// <exception cref="SyntaxError">Thrown if a $ is missing an index number.</exception>
+        public static string InsertMacroParameters(string macroContent, IList<string> parameters)
+        {
+            StringBuilder formattedContent = new();
+            bool parsingParameter = false;
+            int parsedParameterIndex = 0;
+
+            for (int i = 0; i < macroContent.Length; i++)
+            {
+                char c = macroContent[i];
+
+                if (parsingParameter)
+                {
+                    if (char.IsAsciiDigit(c))
+                    {
+                        parsedParameterIndex *= 10;
+                        // Convert digit value to integer
+                        parsedParameterIndex += c - '0';
+                    }
+                    // Parameter indices are terminated as soon as a non-numeric character is encountered
+                    else
+                    {
+                        parsingParameter = false;
+
+                        if (parsedParameterIndex < parameters.Count)
+                        {
+                            _ = formattedContent.Append(parameters[parsedParameterIndex]);
+                        }
+
+                        // Parameter marked as required (! not included in final content)
+                        if (c == '!')
+                        {
+                            if (parsedParameterIndex >= parameters.Count)
+                            {
+                                throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Missing_Parameter, parsedParameterIndex));
+                            }
+                            // Don't add literal ! character to replacement text
+                            continue;
+                        }
+
+                        parsedParameterIndex = 0;
+                    }
+                }
+
+                // parsingParameter can be false here even if it was true before (i.e. if parameter just ended)
+                if (!parsingParameter)
+                {
+                    if (c == '$')
+                    {
+                        if (i >= macroContent.Length - 1 || (!char.IsAsciiDigit(macroContent[i + 1]) && macroContent[i + 1] != '$'))
+                        {
+                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Param_No_Number, macroContent, new string(' ', i)));
+                        }
+
+                        if (macroContent[i + 1] != '$')
+                        {
+                            parsingParameter = true;
+                        }
+                        else
+                        {
+                            // $$ escapes to a single $ without starting a parameter
+                            i++;
+                            _ = formattedContent.Append('$');
+                        }
+                    }
+                    else
+                    {
+                        _ = formattedContent.Append(c);
+                    }
+                }
+            }
+
+            if (parsingParameter && parsedParameterIndex < parameters.Count)
+            {
+                // Process any parameter that may be at the end of the string
+                // We can skip the required parameter check, as we know the parameter can't have ended in an '!'
+                _ = formattedContent.Append(parameters[parsedParameterIndex]);
+            }
+
+            return formattedContent.ToString();
+        }
+
         private void ResolveLabelReferences()
         {
             foreach ((string labelLink, (string labelTarget, string? filePath, int line)) in labelLinks)
@@ -1040,13 +1197,75 @@ namespace AssEmbly
             }
             else if (!insideMacroSkipBlock)
             {
-                foreach (string macro in singleLineMacroNames)
+                // Single-line macro expansion
+                // FIXME: At the moment, nested macros can cause this to go into an infinite loop.
+                // TODO: Turn into recursive method that can also be used to put macros inside parameters. Should fix the above in the process.
+                for (int i = 0; i < rawLine.Length; i++)
                 {
-                    rawLine = CleanLine(rawLine.Replace(macro, singleLineMacros[macro]));
+                    foreach (string macro in singleLineMacroNames)
+                    {
+                        if (macro.Length > rawLine.Length)
+                        {
+                            continue;
+                        }
+
+                        bool match = true;
+                        for (int j = 0; j < macro.Length; j++)
+                        {
+                            if (i + j >= rawLine.Length || rawLine[i + j] != macro[j])
+                            {
+                                match = false;
+                                break;
+                            }
+                        }
+                        if (match)
+                        {
+                            string[] parameters;
+                            int paramIndex = i + macro.Length;
+                            if (rawLine.Length > paramIndex && rawLine[paramIndex] == '(')
+                            {
+                                parameters = ParseMacroParameters(rawLine, ref paramIndex);
+                                // Don't include the closing bracket
+                                paramIndex++;
+                            }
+                            else
+                            {
+                                parameters = Array.Empty<string>();
+                            }
+                            rawLine = CleanLine(rawLine[..i] + InsertMacroParameters(singleLineMacros[macro], parameters) + rawLine[paramIndex..]);
+                            // If a replacement occured, stay on the current character and try every macro again
+                            i--;
+                            break;
+                        }
+                    }
                 }
 
+                // Multi-line macro expansion
                 foreach (string macro in multiLineMacroNames)
                 {
+                    if (macro.Length > rawLine.Length)
+                    {
+                        continue;
+                    }
+                    string[] parameters;
+                    // A multi-line macro can be considered as having parameters when the name of the macro and a parameter list are the only things on a line
+                    if (macro.Length < rawLine.Length && rawLine[macro.Length] == '(' && rawLine[^1] == ')' &&
+                        rawLine[..macro.Length] == macro)
+                    {
+                        int paramIndex = macro.Length;
+                        parameters = ParseMacroParameters(rawLine, ref paramIndex);
+                        if (paramIndex != rawLine.Length - 1)
+                        {
+                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Params_Unescaped_Close, rawLine, new string(' ', paramIndex)));
+                        }
+                        // Remove now-parsed parameters from line
+                        rawLine = rawLine[..macro.Length];
+                    }
+                    else
+                    {
+                        parameters = Array.Empty<string>();
+                    }
+                    // Multi-line macros need an exact match with the macro name
                     if (rawLine == macro)
                     {
                         if (macroStack.Any(m => m.MacroName == macro))
@@ -1054,7 +1273,7 @@ namespace AssEmbly
                             throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
                         }
                         string[] replacement = multiLineMacros[macro];
-                        dynamicLines.InsertRange(lineIndex + 1, replacement);
+                        dynamicLines.InsertRange(lineIndex + 1, replacement.Select(r => InsertMacroParameters(r, parameters)));
                         macroStack.Push(new MacroStackFrame(macro, replacement.Length));
                         return true;
                     }

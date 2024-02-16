@@ -690,11 +690,71 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A parameter at index {0} is required for this macro, but was not given..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Missing_Parameter {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Missing_Parameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The %MACRO directive requires either one or two operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_MACRO_Operand_Count {
             get {
                 return ResourceManager.GetString("Assembler_Error_MACRO_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Macro parameter is missing an index value. Use &apos;$$&apos; to insert a literal &apos;$&apos; into the parameter content.
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Assembler_Error_Macro_Param_No_Number {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Param_No_Number", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Given macro parameter start index does not point to an opening bracket..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Params_Bad_First_Char {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Params_Bad_First_Char", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Macro parameter start index is outside the range of the given line..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Params_Bad_StartIndex {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Params_Bad_StartIndex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End of line found while processing macro parameters. Did you forget a closing bracket?
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Assembler_Error_Macro_Params_EndOfLine {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Params_EndOfLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unescaped closing bracket found before end of line in macro parameter list. Use &apos;\)&apos; to have a literal closing bracket character inside a parameter.
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Assembler_Error_Macro_Params_Unescaped_Close {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Params_Unescaped_Close", resourceCulture);
             }
         }
         

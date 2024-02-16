@@ -1343,4 +1343,28 @@ Currently expanding the following macro(s): {0}</value>
 	<data name="Assembler_Error_Macro_Disable_Block_Missing_Start" xml:space="preserve">
 		<value>End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with '!&gt;'.</value>
 	</data>
+	<data name="Assembler_Error_Macro_Params_Bad_StartIndex" xml:space="preserve">
+		<value>Macro parameter start index is outside the range of the given line.</value>
+	</data>
+	<data name="Assembler_Error_Macro_Params_Bad_First_Char" xml:space="preserve">
+		<value>Given macro parameter start index does not point to an opening bracket.</value>
+	</data>
+	<data name="Assembler_Error_Macro_Params_EndOfLine" xml:space="preserve">
+		<value>End of line found while processing macro parameters. Did you forget a closing bracket?
+    {0}
+    {1}^</value>
+	</data>
+	<data name="Assembler_Error_Macro_Params_Unescaped_Close" xml:space="preserve">
+		<value>Unescaped closing bracket found before end of line in macro parameter list. Use '\)' to have a literal closing bracket character inside a parameter.
+    {0}
+    {1}^</value>
+	</data>
+	<data name="Assembler_Error_Macro_Missing_Parameter" xml:space="preserve">
+		<value>A parameter at index {0} is required for this macro, but was not given.</value>
+	</data>
+	<data name="Assembler_Error_Macro_Param_No_Number" xml:space="preserve">
+		<value>Macro parameter is missing an index value. Use '$$' to insert a literal '$' into the parameter content.
+    {0}
+    {1}^</value>
+	</data>
 </root>
