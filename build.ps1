@@ -31,7 +31,7 @@ foreach ($folder in $subFolders) {
 
 Write-Output "`nBuilding documentation..."
 .\build-docs.ps1
-$docsZipPath = Join-Path $publishFolder "Documentation.zip"
+$docsZipPath = Join-Path $publishFolder "ReferenceManual.zip"
 Write-Output "`nCompressing documentation..."
 Compress-Archive -Path "Documentation\ReferenceManual\ReferenceManual.*" -DestinationPath $docsZipPath -CompressionLevel Optimal
 
