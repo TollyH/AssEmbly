@@ -1367,4 +1367,16 @@ Currently expanding the following macro(s): {0}</value>
     {0}
     {1}^</value>
 	</data>
+	<data name="Assembler_Error_STOP_Operand_Count" xml:space="preserve">
+		<value>The %STOP directive requires either 1 or no operands. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_STOP_Operand_First_Type" xml:space="preserve">
+		<value>The operand to the %STOP directive must be a literal. An operand of type {0} was provided.</value>
+	</data>
+	<data name="Assembler_Error_STOP_Operand_First_String" xml:space="preserve">
+		<value>The operand to the %STOP directive must be a string.</value>
+	</data>
+	<data name="Assembler_Error_STOP" xml:space="preserve">
+		<value>Assembly stopped by %STOP directive.</value>
+	</data>
 </root>

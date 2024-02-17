@@ -113,6 +113,15 @@
         public MacroExpansionException(string message, int line, string file) : base(message, line, file) { }
     }
 
+    /// <summary>
+    /// The exception that is thrown when the program requests that assembly stop.
+    /// </summary>
+    public class AssemblyStoppedException : AssemblerException
+    {
+        public AssemblyStoppedException(string message) : base(message) { }
+        public AssemblyStoppedException(string message, int line, string file) : base(message, line, file) { }
+    }
+
     // DEBUGGER EXCEPTIONS
 
     /// <summary>

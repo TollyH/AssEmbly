@@ -987,6 +987,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_STOP {
+            get {
+                return ResourceManager.GetString("Assembler_Error_STOP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %STOP directive requires either 1 or no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_STOP_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_STOP_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_STOP_Operand_First_String {
+            get {
+                return ResourceManager.GetString("Assembler_Error_STOP_Operand_First_String", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_STOP_Operand_First_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_STOP_Operand_First_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Given string start index does not point to a quote mark..
         /// </summary>
         internal static string Assembler_Error_String_Bad_First_Char {

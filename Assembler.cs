@@ -1505,6 +1505,28 @@ namespace AssEmbly
                         severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
                         mnemonic, operands, rawLine, currentMacro?.MacroName, message));
                     return true;
+                // Stop assembly
+                case "%STOP":
+                    if (operands.Length > 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_STOP_Operand_Count, operands.Length));
+                    }
+                    message = null;
+                    if (operands.Length == 1)
+                    {
+                        operandType = DetermineOperandType(operands[0]);
+                        if (operandType != OperandType.Literal)
+                        {
+                            throw new OperandException(string.Format(Strings.Assembler_Error_STOP_Operand_First_Type, operandType));
+                        }
+                        if (operands[0][0] != '"')
+                        {
+                            throw new OperandException(Strings.Assembler_Error_STOP_Operand_First_String);
+                        }
+                        parsedBytes = ParseLiteral(operands[0], true);
+                        message = Encoding.UTF8.GetString(parsedBytes);
+                    }
+                    throw new AssemblyStoppedException(message ?? Strings.Assembler_Error_STOP);
                 // Print assembler state
                 case "%DEBUG":
                     if (operands.Length != 0)
