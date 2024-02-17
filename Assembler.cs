@@ -23,17 +23,27 @@ namespace AssEmbly
     /// </summary>
     public class Assembler
     {
-        public class ImportStackFrame(string importPath, int currentLine, int totalLines)
+        public class ImportStackFrame(string importPath, int currentLine, int totalLines) : ICloneable
         {
             public string ImportPath { get; } = importPath;
             public int CurrentLine { get; set; } = currentLine;
             public int TotalLines { get; } = totalLines;
+
+            public object Clone()
+            {
+                return new ImportStackFrame(ImportPath, CurrentLine, TotalLines);
+            }
         }
 
-        public class MacroStackFrame(string macroName, int remainingLines)
+        public class MacroStackFrame(string macroName, int remainingLines) : ICloneable
         {
             public string MacroName { get; } = macroName;
             public int RemainingLines { get; set; } = remainingLines;
+
+            public object Clone()
+            {
+                return new MacroStackFrame(MacroName, RemainingLines);
+            }
         }
 
         public bool Finalized { get; private set; }
@@ -1350,7 +1360,7 @@ namespace AssEmbly
                         // Multi-line macro (must be terminated with %ENDMACRO)
                         int lineIndexAtStart = currentLineIndex;
                         int baseFileLineAtStart = baseFileLine;
-                        Stack<ImportStackFrame> importStackAtStart = new(importStack.Select(f => new ImportStackFrame(f.ImportPath, f.CurrentLine, f.TotalLines)));
+                        Stack<ImportStackFrame> importStackAtStart = importStack.NestedCopy();
                         List<string> replacement = new();
                         // Add each line before the next encountered %ENDMACRO directive to the replacement text
                         while (true)
