@@ -1373,11 +1373,7 @@ namespace AssEmbly
                                 // so that error message shows that line instead of the end of the file
                                 baseFileLine = baseFileLineAtStart;
                                 currentLineIndex = lineIndexAtStart;
-                                importStack.Clear();
-                                foreach (ImportStackFrame frame in importStackAtStart.Reverse())
-                                {
-                                    importStack.Push(frame);
-                                }
+                                importStack.SetContentTo(importStackAtStart);
                                 throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
                             }
                             replacement.Add(line);
