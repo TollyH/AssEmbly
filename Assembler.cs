@@ -11,6 +11,7 @@ namespace AssEmbly
     (
         byte[] Program,
         string DebugInfo,
+        List<string> ExpandedSourceFile,
         List<Warning> Warnings,
         ulong EntryPoint,
         AAPFeatures UsedExtensions,
@@ -223,7 +224,7 @@ namespace AssEmbly
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports);
-            return new AssemblyResult(programBytes, debugInfo, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
+            return new AssemblyResult(programBytes, debugInfo, dynamicLines, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
         }
 
         /// <summary>

@@ -246,6 +246,10 @@ namespace AssEmbly
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
+            if (args.Contains("--output-expanded"))
+            {
+                File.WriteAllLines(filename + ".exp.asm", assemblyResult.ExpandedSourceFile);
+            }
 
             assemblyStopwatch.Stop();
 
