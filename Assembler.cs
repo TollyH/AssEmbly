@@ -252,11 +252,9 @@ namespace AssEmbly
             importStack.Clear();
             baseFileLine = 0;
 
-            // 1 less than starting index as increment happens at start of loop
-            lineIndex = -1;
-            while (lineIndex < dynamicLines.Count - 1)
+            lineIndex = 0;
+            do
             {
-                IncrementCurrentLine();
                 string rawLine = CleanLine(dynamicLines[lineIndex]);
                 if (rawLine.Length == 0)
                 {
@@ -339,7 +337,7 @@ namespace AssEmbly
                     HandleAssemblerException(e);
                     throw;
                 }
-            }
+            } while (IncrementCurrentLine());
 
             // Check for missing %ENDREPEAT directives
             if (currentRepeatSections.Count > 0)
@@ -1111,7 +1109,7 @@ namespace AssEmbly
             }
         }
 
-        private void IncrementCurrentLine()
+        private bool IncrementCurrentLine()
         {
             lineIndex++;
 
@@ -1170,6 +1168,8 @@ namespace AssEmbly
                     baseFileLine++;
                 }
             }
+
+            return lineIndex < dynamicLines.Count;
         }
 
         private AssemblyPosition GetCurrentPosition()
@@ -1420,10 +1420,10 @@ namespace AssEmbly
                         // Multi-line macro (must be terminated with %ENDMACRO)
                         AssemblyPosition startPosition = GetCurrentPosition();
                         List<string> replacement = new();
+                        bool foundEndTag = false;
                         // Add each line before the next encountered %ENDMACRO directive to the replacement text
-                        while (true)
+                        while (IncrementCurrentLine())
                         {
-                            IncrementCurrentLine();
                             string line = dynamicLines[currentLineIndex];
                             if (line.TrimStart().StartsWith("%ENDMACRO", StringComparison.OrdinalIgnoreCase))
                             {
@@ -1433,16 +1433,17 @@ namespace AssEmbly
                                 {
                                     throw new OperandException(string.Format(Strings.Assembler_Error_ENDMACRO_Operand_Count, parsedLine.Length - 1));
                                 }
+                                foundEndTag = true;
                                 break;
                             }
-                            if (currentLineIndex >= dynamicLines.Count - 1)
-                            {
-                                // Rollback the state of the import stack to when macro definition started,
-                                // so that error message shows that line instead of the end of the file
-                                SetCurrentPosition(startPosition);
-                                throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
-                            }
                             replacement.Add(line);
+                        }
+                        if (!foundEndTag)
+                        {
+                            // Rollback the state of the import stack to when macro definition started,
+                            // so that error message shows that line instead of the end of the file
+                            SetCurrentPosition(startPosition);
+                            throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
                         }
                         multiLineMacros[operands[0]] = replacement.ToArray();
                         multiLineMacroNames.Add(operands[0]);
