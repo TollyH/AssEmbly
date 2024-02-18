@@ -402,6 +402,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?.
+        /// </summary>
+        internal static string Assembler_Error_ENDREPEAT_Missing {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDREPEAT_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %ENDREPEAT directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_ENDREPEAT_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDREPEAT_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This assembler has already been finalized. No more lines can be assembled..
         /// </summary>
         internal static string Assembler_Error_Finalized {
@@ -987,7 +1005,52 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The %REPEAT directive requires a single operand. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_REPEAT_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_REPEAT_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The literal operand to the %REPEAT directive cannot be a label reference..
+        /// </summary>
+        internal static string Assembler_Error_REPEAT_Operand_Label_Reference {
+            get {
+                return ResourceManager.GetString("Assembler_Error_REPEAT_Operand_Label_Reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The literal operand to the %REPEAT directive cannot be negative or floating point..
+        /// </summary>
+        internal static string Assembler_Error_REPEAT_Operand_Signed_Or_Floating {
+            get {
+                return ResourceManager.GetString("Assembler_Error_REPEAT_Operand_Signed_Or_Floating", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operand to the %REPEAT directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_REPEAT_Operand_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_REPEAT_Operand_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The literal operand to the %REPEAT directive cannot be zero..
+        /// </summary>
+        internal static string Assembler_Error_REPEAT_Zero {
+            get {
+                return ResourceManager.GetString("Assembler_Error_REPEAT_Zero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assembly stopped by %STOP directive..
         /// </summary>
         internal static string Assembler_Error_STOP {
             get {

@@ -1379,4 +1379,25 @@ Currently expanding the following macro(s): {0}</value>
 	<data name="Assembler_Error_STOP" xml:space="preserve">
 		<value>Assembly stopped by %STOP directive.</value>
 	</data>
+	<data name="Assembler_Error_REPEAT_Operand_Count" xml:space="preserve">
+		<value>The %REPEAT directive requires a single operand. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_REPEAT_Operand_Type" xml:space="preserve">
+		<value>The operand to the %REPEAT directive must be a literal. An operand of type {0} was provided.</value>
+	</data>
+	<data name="Assembler_Error_REPEAT_Operand_Label_Reference" xml:space="preserve">
+		<value>The literal operand to the %REPEAT directive cannot be a label reference.</value>
+	</data>
+	<data name="Assembler_Error_REPEAT_Operand_Signed_Or_Floating" xml:space="preserve">
+		<value>The literal operand to the %REPEAT directive cannot be negative or floating point.</value>
+	</data>
+	<data name="Assembler_Error_REPEAT_Zero" xml:space="preserve">
+		<value>The literal operand to the %REPEAT directive cannot be zero.</value>
+	</data>
+	<data name="Assembler_Error_ENDREPEAT_Operand_Count" xml:space="preserve">
+		<value>The %ENDREPEAT directive takes no operands. {0} were given.</value>
+	</data>
+	<data name="Assembler_Error_ENDREPEAT_Missing" xml:space="preserve">
+		<value>End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?</value>
+	</data>
 </root>

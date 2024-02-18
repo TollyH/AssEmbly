@@ -86,6 +86,9 @@ namespace AssEmbly
         private ImportStackFrame? currentImport = null;
         private int baseFileLine = 0;
 
+        // When %REPEAT is used, the current position of the assembler is cloned and added to this stack
+        private readonly Stack<(AssemblyPosition StartPosition, ulong RemainingIterations)> currentRepeatSections = new();
+
         // Used to keep track of multi-line macros
         private readonly Stack<MacroStackFrame> macroStack = new();
         private MacroStackFrame? currentMacro = null;
@@ -336,6 +339,18 @@ namespace AssEmbly
                     HandleAssemblerException(e);
                     throw;
                 }
+            }
+
+            // Check for missing %ENDREPEAT directives
+            if (currentRepeatSections.Count > 0)
+            {
+                // Rollback the current position of the assembler,
+                // so that the line that the repeat started on is shown in the error message
+                SetCurrentPosition(currentRepeatSections.Pop().StartPosition);
+                EndingDirectiveException e = new(
+                    string.Format(Strings.Assembler_Error_ENDREPEAT_Missing, currentRepeatSections.Count));
+                HandleAssemblerException(e);
+                throw e;
             }
         }
 
@@ -1574,6 +1589,49 @@ namespace AssEmbly
                         message = Encoding.UTF8.GetString(parsedBytes);
                     }
                     throw new AssemblyStoppedException(message ?? Strings.Assembler_Error_STOP);
+                // Repeat lines
+                case "%REPEAT":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_REPEAT_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[0]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_REPEAT_Operand_Type, operandType));
+                    }
+                    if (operands[0][0] == ':')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_REPEAT_Operand_Label_Reference);
+                    }
+                    if (operands[0][0] == '-' || operands[0].Contains('.'))
+                    {
+                        throw new OperandException(Strings.Assembler_Error_REPEAT_Operand_Signed_Or_Floating);
+                    }
+                    _ = ParseLiteral(operands[0], false, out ulong repeatCount);
+                    if (repeatCount == 0)
+                    {
+                        throw new OperandException(Strings.Assembler_Error_REPEAT_Zero);
+                    }
+                    currentRepeatSections.Push((GetCurrentPosition(), repeatCount - 1));
+                    return true;
+                case "%ENDREPEAT":
+                    if (operands.Length != 0)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_ENDREPEAT_Operand_Count, operands.Length));
+                    }
+                    if (currentRepeatSections.Count == 0)
+                    {
+                        throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
+                    }
+                    (AssemblyPosition position, ulong iterationsRemaining) = currentRepeatSections.Pop();
+                    if (iterationsRemaining > 0)
+                    {
+                        currentRepeatSections.Push((position, iterationsRemaining - 1));
+                        // Assembler will increment line by 1 after this set, which is what we want to skip repeating the initial %REPEAT directive
+                        SetCurrentPosition(position);
+                    }
+                    return true;
                 // Print assembler state
                 case "%DEBUG":
                     if (operands.Length != 0)
