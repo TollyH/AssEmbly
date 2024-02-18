@@ -13,7 +13,7 @@
 
         public static Stack<T> NestedCopy<T>(this Stack<T> stack) where T : ICloneable
         {
-            return new Stack<T>(stack.Select(i => (T)i.Clone()));
+            return new Stack<T>(stack.Select(i => (T)i.Clone()).Reverse());
         }
     }
 }

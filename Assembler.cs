@@ -46,8 +46,23 @@ namespace AssEmbly
             }
         }
 
+        public readonly struct AssemblyPosition(Stack<ImportStackFrame> importStack, Stack<MacroStackFrame> macroStack, List<string> lines,
+            int currentLineIndex, int baseFileLine, int macroLineDepth)
+        {
+            public readonly Stack<ImportStackFrame> ImportStack = importStack;
+            public readonly Stack<MacroStackFrame> MacroStack = macroStack;
+            public readonly List<string> Lines = lines;
+            public readonly int CurrentLineIndex = currentLineIndex;
+            public readonly int BaseFileLine = baseFileLine;
+            public readonly int MacroLineDepth = macroLineDepth;
+        }
+
         public bool Finalized { get; private set; }
 
+        // The lines to assemble may change during assembly, for example importing a file
+        // will extend the list of lines to assemble as and when the import is reached.
+        private readonly List<string> dynamicLines = new();
+        private int lineIndex = 0;
         // Final compiled byte list
         private readonly List<byte> program = new();
         // Map of label names to final memory addresses
@@ -228,14 +243,15 @@ namespace AssEmbly
                 throw new InvalidOperationException(Strings.Assembler_Error_Finalized);
             }
 
-            // The lines to assemble may change during assembly, for example importing a file
-            // will extend the list of lines to assemble as and when the import is reached.
-            List<string> dynamicLines = lines.ToList();
+            dynamicLines.Clear();
+            dynamicLines.AddRange(lines.ToList());
 
             importStack.Clear();
             baseFileLine = 0;
 
-            for (int lineIndex = 0; lineIndex < dynamicLines.Count; lineIndex++)
+            // 1 less than starting index as increment happens at start of loop
+            lineIndex = -1;
+            while (lineIndex < dynamicLines.Count)
             {
                 IncrementCurrentLine();
                 string rawLine = CleanLine(dynamicLines[lineIndex]);
@@ -1110,6 +1126,8 @@ namespace AssEmbly
 
         private void IncrementCurrentLine()
         {
+            lineIndex++;
+
             bool insideMacro = false;
             if (macroStack.TryPeek(out currentMacro))
             {
@@ -1165,6 +1183,28 @@ namespace AssEmbly
                     baseFileLine++;
                 }
             }
+        }
+
+        private AssemblyPosition GetCurrentPosition()
+        {
+            return new AssemblyPosition(importStack.NestedCopy(), macroStack.NestedCopy(), new List<string>(dynamicLines),
+                lineIndex, baseFileLine, macroLineDepth);
+        }
+
+        private void SetCurrentPosition(AssemblyPosition position)
+        {
+            importStack.SetContentTo(position.ImportStack);
+            macroStack.SetContentTo(position.MacroStack);
+
+            dynamicLines.Clear();
+            dynamicLines.AddRange(position.Lines);
+
+            lineIndex = position.CurrentLineIndex;
+            baseFileLine = position.BaseFileLine;
+            macroLineDepth = position.MacroLineDepth;
+
+            _ = macroStack.TryPeek(out currentMacro);
+            _ = importStack.TryPeek(out currentImport);
         }
 
         /// <summary>
@@ -1358,15 +1398,13 @@ namespace AssEmbly
                     else if (operands.Length == 1)
                     {
                         // Multi-line macro (must be terminated with %ENDMACRO)
-                        int lineIndexAtStart = currentLineIndex;
-                        int baseFileLineAtStart = baseFileLine;
-                        Stack<ImportStackFrame> importStackAtStart = importStack.NestedCopy();
+                        AssemblyPosition startPosition = GetCurrentPosition();
                         List<string> replacement = new();
                         // Add each line before the next encountered %ENDMACRO directive to the replacement text
                         while (true)
                         {
                             IncrementCurrentLine();
-                            string line = dynamicLines[++currentLineIndex];
+                            string line = dynamicLines[currentLineIndex];
                             if (line.TrimStart().StartsWith("%ENDMACRO", StringComparison.OrdinalIgnoreCase))
                             {
                                 // Parse the line to check it wasn't given with any operands
@@ -1381,9 +1419,7 @@ namespace AssEmbly
                             {
                                 // Rollback the state of the import stack to when macro definition started,
                                 // so that error message shows that line instead of the end of the file
-                                baseFileLine = baseFileLineAtStart;
-                                currentLineIndex = lineIndexAtStart;
-                                importStack.SetContentTo(importStackAtStart);
+                                SetCurrentPosition(startPosition);
                                 throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
                             }
                             replacement.Add(line);
