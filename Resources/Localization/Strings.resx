@@ -1,142 +1,142 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-	<!-- 
-		Microsoft ResX Schema
+    <!-- 
+        Microsoft ResX Schema
 
-		Version 1.3
+        Version 1.3
 
-		The primary goals of this format is to allow a simple XML format 
-		that is mostly human readable. The generation and parsing of the 
-		various data types are done through the TypeConverter classes 
-		associated with the data types.
+        The primary goals of this format is to allow a simple XML format 
+        that is mostly human readable. The generation and parsing of the 
+        various data types are done through the TypeConverter classes 
+        associated with the data types.
 
-		Example:
+        Example:
 
-		... ado.net/XML headers & schema ...
-		<resheader name="resmimetype">text/microsoft-resx</resheader>
-		<resheader name="version">1.3</resheader>
-		<resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-		<resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-		<data name="Name1">this is my long string</data>
-		<data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-		<data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-			[base64 mime encoded serialized .NET Framework object]
-		</data>
-		<data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-			[base64 mime encoded string representing a byte array form of the .NET Framework object]
-		</data>
+        ... ado.net/XML headers & schema ...
+        <resheader name="resmimetype">text/microsoft-resx</resheader>
+        <resheader name="version">1.3</resheader>
+        <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+        <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+        <data name="Name1">this is my long string</data>
+        <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+        <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+            [base64 mime encoded serialized .NET Framework object]
+        </data>
+        <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+            [base64 mime encoded string representing a byte array form of the .NET Framework object]
+        </data>
 
-		There are any number of "resheader" rows that contain simple 
-		name/value pairs.
+        There are any number of "resheader" rows that contain simple 
+        name/value pairs.
 
-		Each data row contains a name, and value. The row also contains a 
-		type or mimetype. Type corresponds to a .NET class that support 
-		text/value conversion through the TypeConverter architecture. 
-		Classes that don't support this are serialized and stored with the 
-		mimetype set.
+        Each data row contains a name, and value. The row also contains a 
+        type or mimetype. Type corresponds to a .NET class that support 
+        text/value conversion through the TypeConverter architecture. 
+        Classes that don't support this are serialized and stored with the 
+        mimetype set.
 
-		The mimetype is used for serialized objects, and tells the 
-		ResXResourceReader how to depersist the object. This is currently not 
-		extensible. For a given mimetype the value must be set accordingly:
+        The mimetype is used for serialized objects, and tells the 
+        ResXResourceReader how to depersist the object. This is currently not 
+        extensible. For a given mimetype the value must be set accordingly:
 
-		Note - application/x-microsoft.net.object.binary.base64 is the format 
-		that the ResXResourceWriter will generate, however the reader can 
-		read any of the formats listed below.
+        Note - application/x-microsoft.net.object.binary.base64 is the format 
+        that the ResXResourceWriter will generate, however the reader can 
+        read any of the formats listed below.
 
-		mimetype: application/x-microsoft.net.object.binary.base64
-		value   : The object must be serialized with 
-			: System.Serialization.Formatters.Binary.BinaryFormatter
-			: and then encoded with base64 encoding.
+        mimetype: application/x-microsoft.net.object.binary.base64
+        value   : The object must be serialized with 
+            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
 
-		mimetype: application/x-microsoft.net.object.soap.base64
-		value   : The object must be serialized with 
-			: System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-			: and then encoded with base64 encoding.
+        mimetype: application/x-microsoft.net.object.soap.base64
+        value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
 
-		mimetype: application/x-microsoft.net.object.bytearray.base64
-		value   : The object must be serialized into a byte array 
-			: using a System.ComponentModel.TypeConverter
-			: and then encoded with base64 encoding.
-	-->
-	
-	<xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-		<xsd:element name="root" msdata:IsDataSet="true">
-			<xsd:complexType>
-				<xsd:choice maxOccurs="unbounded">
-					<xsd:element name="data">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-								<xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
-							<xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-							<xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="resheader">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-							</xsd:sequence>
-							<xsd:attribute name="name" type="xsd:string" use="required" />
-						</xsd:complexType>
-					</xsd:element>
-				</xsd:choice>
-			</xsd:complexType>
-		</xsd:element>
-	</xsd:schema>
-	<resheader name="resmimetype">
-		<value>text/microsoft-resx</value>
-	</resheader>
-	<resheader name="version">
-		<value>1.3</value>
-	</resheader>
-	<resheader name="reader">
-		<value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<resheader name="writer">
-		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-	</resheader>
-	<data name="CLI_Error_Missing_Operation_Body" xml:space="preserve">
-		<value>An operation to perform is required. Run the 'help' operation for information on available operations.</value>
-	</data>
-	<data name="CLI_Error_Missing_Operation_Hint" xml:space="preserve">
-		<value>i.e. 'AssEmbly help'</value>
-	</data>
-	<data name="CLI_Error_Invalid_Operation" xml:space="preserve">
-		<value>"{0}" is not a valid operation.</value>
-	</data>
-	<data name="CLI_Assemble_Error_Invalid_Error_Code" xml:space="preserve">
-		<value>{0} is not a valid error code to disable.</value>
-	</data>
-	<data name="CLI_Assemble_Error_Invalid_Warning_Code" xml:space="preserve">
-		<value>{0} is not a valid warning code to disable.</value>
-	</data>
-	<data name="CLI_Assemble_Error_Invalid_Suggestion_Code" xml:space="preserve">
-		<value>{0} is not a valid suggestion code to disable.</value>
-	</data>
-	<data name="CLI_Assemble_Error_Warning_Printout" xml:space="preserve">
-		<value>
+        mimetype: application/x-microsoft.net.object.bytearray.base64
+        value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+    
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            <xsd:complexType>
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" />
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
+            </xsd:complexType>
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="CLI_Error_Missing_Operation_Body" xml:space="preserve">
+        <value>An operation to perform is required. Run the 'help' operation for information on available operations.</value>
+    </data>
+    <data name="CLI_Error_Missing_Operation_Hint" xml:space="preserve">
+        <value>i.e. 'AssEmbly help'</value>
+    </data>
+    <data name="CLI_Error_Invalid_Operation" xml:space="preserve">
+        <value>"{0}" is not a valid operation.</value>
+    </data>
+    <data name="CLI_Assemble_Error_Invalid_Error_Code" xml:space="preserve">
+        <value>{0} is not a valid error code to disable.</value>
+    </data>
+    <data name="CLI_Assemble_Error_Invalid_Warning_Code" xml:space="preserve">
+        <value>{0} is not a valid warning code to disable.</value>
+    </data>
+    <data name="CLI_Assemble_Error_Invalid_Suggestion_Code" xml:space="preserve">
+        <value>{0} is not a valid suggestion code to disable.</value>
+    </data>
+    <data name="CLI_Assemble_Error_Warning_Printout" xml:space="preserve">
+        <value>
 {0} {1:D4}{6} on line {2} in {3}
     {4}
 {5}</value>
-	</data>
-	<data name="CLI_Assemble_Result_Success" xml:space="preserve">
-		<value>Processed {6} line(s) from {7} file(s) in {8:N0} milliseconds.
+    </data>
+    <data name="CLI_Assemble_Result_Success" xml:space="preserve">
+        <value>Processed {6} line(s) from {7} file(s) in {8:N0} milliseconds.
 {3} error(s), {4} warning(s), {5} suggestion(s).
 Program size: {0} bytes ({2} inc. header).
 Path: "{1}".</value>
-	</data>
-	<data name="CLI_Disassemble_Error_Unexpected" xml:space="preserve">
-		<value>An unexpected error occurred during disassembly:
+    </data>
+    <data name="CLI_Disassemble_Error_Unexpected" xml:space="preserve">
+        <value>An unexpected error occurred during disassembly:
     {0}: {1}</value>
-	</data>
-	<data name="CLI_Disassemble_Success" xml:space="preserve">
-		<value>Program disassembled successfully. It can be found at: "{0}"</value>
-	</data>
-	<data name="CLI_Help_Body" xml:space="preserve">
-		<value>Usage: 'AssEmbly &lt;operation&gt; &lt;required-parameters (if any)&gt; [optional-parameters]'
+    </data>
+    <data name="CLI_Disassemble_Success" xml:space="preserve">
+        <value>Program disassembled successfully. It can be found at: "{0}"</value>
+    </data>
+    <data name="CLI_Help_Body" xml:space="preserve">
+        <value>Usage: 'AssEmbly &lt;operation&gt; &lt;required-parameters (if any)&gt; [optional-parameters]'
 Any command can take the '--no-header' optional parameter to disable the copyright printout.
 Using the '--version' optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
 
@@ -187,297 +187,297 @@ repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
 </value>
-	</data>
-	<data name="CLI_Error_Invalid_AAP" xml:space="preserve">
-		<value>The given executable file is invalid. Make sure you're not attempting to load the source file instead of the executable. To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.</value>
-	</data>
-	<data name="CLI_Error_AAP_Feature_Incompatible" xml:space="preserve">
-		<value>This program uses features incompatible with the current version of AssEmbly.</value>
-	</data>
-	<data name="CLI_Warning_Newer_Build_Version" xml:space="preserve">
-		<value>Warning: This program was assembled for a newer version of AssEmbly. It was built for version {0}.{1}.{2} - you have version {3}.{4}.{5}.</value>
-	</data>
-	<data name="CLI_Error_Newer_Major_Build_Version" xml:space="preserve">
-		<value>Because the major release number is higher ({0} &gt; {1}), this program will not be executed. Use the --ignore-newer-version parameter to override this.</value>
-	</data>
-	<data name="CLI_Error_Program_Load_Unexpected" xml:space="preserve">
-		<value>An unexpected error occurred while loading your program:
+    </data>
+    <data name="CLI_Error_Invalid_AAP" xml:space="preserve">
+        <value>The given executable file is invalid. Make sure you're not attempting to load the source file instead of the executable. To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.</value>
+    </data>
+    <data name="CLI_Error_AAP_Feature_Incompatible" xml:space="preserve">
+        <value>This program uses features incompatible with the current version of AssEmbly.</value>
+    </data>
+    <data name="CLI_Warning_Newer_Build_Version" xml:space="preserve">
+        <value>Warning: This program was assembled for a newer version of AssEmbly. It was built for version {0}.{1}.{2} - you have version {3}.{4}.{5}.</value>
+    </data>
+    <data name="CLI_Error_Newer_Major_Build_Version" xml:space="preserve">
+        <value>Because the major release number is higher ({0} &gt; {1}), this program will not be executed. Use the --ignore-newer-version parameter to override this.</value>
+    </data>
+    <data name="CLI_Error_Program_Load_Unexpected" xml:space="preserve">
+        <value>An unexpected error occurred while loading your program:
     {0}: {1}</value>
-	</data>
-	<data name="CLI_Error_File_Not_Exists" xml:space="preserve">
-		<value>The specified file does not exist.</value>
-	</data>
-	<data name="CLI_Error_Invalid_Memory_Size" xml:space="preserve">
-		<value>{0} is not a valid number of bytes for memory size.</value>
-	</data>
-	<data name="CLI_Error_Unexpected_With_Type" xml:space="preserve">
-		<value>An unexpected error occurred:
+    </data>
+    <data name="CLI_Error_File_Not_Exists" xml:space="preserve">
+        <value>The specified file does not exist.</value>
+    </data>
+    <data name="CLI_Error_Invalid_Memory_Size" xml:space="preserve">
+        <value>{0} is not a valid number of bytes for memory size.</value>
+    </data>
+    <data name="CLI_Error_Unexpected_With_Type" xml:space="preserve">
+        <value>An unexpected error occurred:
     {0}: {1}</value>
-	</data>
-	<data name="CLI_Error_Runtime_Known" xml:space="preserve">
-		<value>
+    </data>
+    <data name="CLI_Error_Runtime_Known" xml:space="preserve">
+        <value>
 
 An error occurred executing your program:
     {0}</value>
-	</data>
-	<data name="CLI_Error_Runtime_Zero_Divide" xml:space="preserve">
-		<value>An instruction attempted to divide by zero.</value>
-	</data>
-	<data name="CLI_Error_Runtime_Invalid_Address" xml:space="preserve">
-		<value>An instruction tried to access an invalid memory address.</value>
-	</data>
-	<data name="Generic_Register_States_Header" xml:space="preserve">
-		<value>Register states:</value>
-	</data>
-	<data name="Generic_Indented_Key_Value" xml:space="preserve">
-		<value>    {0}: {1}</value>
-	</data>
-	<data name="Generic_Register_Floating_Value" xml:space="preserve">
-		<value> ({0:0.0###############})</value>
-	</data>
-	<data name="Generic_Register_Hex_Value" xml:space="preserve">
-		<value> (0x{0:X})</value>
-	</data>
-	<data name="Generic_Register_Denary_Value" xml:space="preserve">
-		<value> ({0})</value>
-	</data>
-	<data name="Generic_Register_Binary_Value" xml:space="preserve">
-		<value> (0b{0})</value>
-	</data>
-	<data name="Generic_Register_Char_Value" xml:space="preserve">
-		<value> ('{0}')</value>
-	</data>
-	<data name="Generic_Hex_Value" xml:space="preserve">
-		<value>{0:X}</value>
-	</data>
-	<data name="Debugger_Warning_Debug_Info_File" xml:space="preserve">
-		<value>An error occurred whilst loading the debug information file:
+    </data>
+    <data name="CLI_Error_Runtime_Zero_Divide" xml:space="preserve">
+        <value>An instruction attempted to divide by zero.</value>
+    </data>
+    <data name="CLI_Error_Runtime_Invalid_Address" xml:space="preserve">
+        <value>An instruction tried to access an invalid memory address.</value>
+    </data>
+    <data name="Generic_Register_States_Header" xml:space="preserve">
+        <value>Register states:</value>
+    </data>
+    <data name="Generic_Indented_Key_Value" xml:space="preserve">
+        <value>    {0}: {1}</value>
+    </data>
+    <data name="Generic_Register_Floating_Value" xml:space="preserve">
+        <value> ({0:0.0###############})</value>
+    </data>
+    <data name="Generic_Register_Hex_Value" xml:space="preserve">
+        <value> (0x{0:X})</value>
+    </data>
+    <data name="Generic_Register_Denary_Value" xml:space="preserve">
+        <value> ({0})</value>
+    </data>
+    <data name="Generic_Register_Binary_Value" xml:space="preserve">
+        <value> (0b{0})</value>
+    </data>
+    <data name="Generic_Register_Char_Value" xml:space="preserve">
+        <value> ('{0}')</value>
+    </data>
+    <data name="Generic_Hex_Value" xml:space="preserve">
+        <value>{0:X}</value>
+    </data>
+    <data name="Debugger_Warning_Debug_Info_File" xml:space="preserve">
+        <value>An error occurred whilst loading the debug information file:
 "{0}: {1}".
 Label names and original source lines will not be available.</value>
-	</data>
-	<data name="Debugger_Execution_Preface_Header" xml:space="preserve">
-		<value>About to execute instruction:
+    </data>
+    <data name="Debugger_Execution_Preface_Header" xml:space="preserve">
+        <value>About to execute instruction:
     </value>
-	</data>
-	<data name="Debugger_Execution_Preface_Labels" xml:space="preserve">
-		<value>This address is referenced by the following labels:
+    </data>
+    <data name="Debugger_Execution_Preface_Labels" xml:space="preserve">
+        <value>This address is referenced by the following labels:
     </value>
-	</data>
-	<data name="Debugger_Execution_Preface_Imports" xml:space="preserve">
-		<value>The following file was imported here:
+    </data>
+    <data name="Debugger_Execution_Preface_Imports" xml:space="preserve">
+        <value>The following file was imported here:
     </value>
-	</data>
-	<data name="Generic_Double_Newline" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Generic_Double_Newline" xml:space="preserve">
+        <value>
 
 </value>
-	</data>
-	<data name="Generic_Flags_Header" xml:space="preserve">
-		<value>Flags:</value>
-	</data>
-	<data name="Generic_Single_Indent" xml:space="preserve">
-		<value> {0}</value>
-	</data>
-	<data name="REPL_Changed_Registers_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Generic_Flags_Header" xml:space="preserve">
+        <value>Flags:</value>
+    </data>
+    <data name="Generic_Single_Indent" xml:space="preserve">
+        <value> {0}</value>
+    </data>
+    <data name="REPL_Changed_Registers_Header" xml:space="preserve">
+        <value>
 
 Changed registers:</value>
-	</data>
-	<data name="REPL_Changed_Registers_Line" xml:space="preserve">
-		<value>    {0}: {1} -&gt; {2} (0x{3:X} -&gt; 0x{4:X})</value>
-	</data>
-	<data name="REPL_Changed_Flags_Header" xml:space="preserve">
-		<value>Flag changes:</value>
-	</data>
-	<data name="Generic_Single_Indented_Key_Value" xml:space="preserve">
-		<value> {0}:{1}</value>
-	</data>
-	<data name="REPL_Changed_Flags_Unset" xml:space="preserve">
-		<value>UNSET</value>
-	</data>
-	<data name="REPL_Changed_Flags_Set" xml:space="preserve">
-		<value>SET</value>
-	</data>
-	<data name="REPL_Remaining_Memory" xml:space="preserve">
-		<value>
+    </data>
+    <data name="REPL_Changed_Registers_Line" xml:space="preserve">
+        <value>    {0}: {1} -&gt; {2} (0x{3:X} -&gt; 0x{4:X})</value>
+    </data>
+    <data name="REPL_Changed_Flags_Header" xml:space="preserve">
+        <value>Flag changes:</value>
+    </data>
+    <data name="Generic_Single_Indented_Key_Value" xml:space="preserve">
+        <value> {0}:{1}</value>
+    </data>
+    <data name="REPL_Changed_Flags_Unset" xml:space="preserve">
+        <value>UNSET</value>
+    </data>
+    <data name="REPL_Changed_Flags_Set" xml:space="preserve">
+        <value>SET</value>
+    </data>
+    <data name="REPL_Remaining_Memory" xml:space="preserve">
+        <value>
 {0} bytes of memory remaining</value>
-	</data>
-	<data name="REPL_Header" xml:space="preserve">
-		<value>AssEmbly REPL Environment
+    </data>
+    <data name="REPL_Header" xml:space="preserve">
+        <value>AssEmbly REPL Environment
 
 Type an AssEmbly instruction and press ENTER to insert and execute it.
 Preface the instruction with one or more spaces to insert it without executing it.
 Press ENTER without typing anything to output the state of all registers.</value>
-	</data>
-	<data name="Debugger_Breakpoint_Hit" xml:space="preserve">
-		<value>Breakpoint hit! {0} == {1}</value>
-	</data>
-	<data name="Debugger_Error_Unrecognised_Command" xml:space="preserve">
-		<value>"{0}" is not a recognised command. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Warning_HLT_Reached" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Debugger_Breakpoint_Hit" xml:space="preserve">
+        <value>Breakpoint hit! {0} == {1}</value>
+    </data>
+    <data name="Debugger_Error_Unrecognised_Command" xml:space="preserve">
+        <value>"{0}" is not a recognised command. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Warning_HLT_Reached" xml:space="preserve">
+        <value>
 
 Halt instruction reached. You should not continue unless this instruction was placed as a breakpoint.</value>
-	</data>
-	<data name="Debugger_Any_Key_Continue" xml:space="preserve">
-		<value>Press any key to continue, or CTRL+C to stop...</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Size" xml:space="preserve">
-		<value>"{0}" is not a valid size specifier. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Address" xml:space="preserve">
-		<value>"{0}" is not a valid memory address. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_OutOfRange_Address" xml:space="preserve">
-		<value>"{0}" is outside the range of allowed memory addresses.</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_2" xml:space="preserve">
-		<value>This command requires 2 arguments. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Memory_Value" xml:space="preserve">
-		<value>Value at {0}: {1} (0x{2:X}) (0b{3})</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Byte_Value" xml:space="preserve">
-		<value>"{0}" is not a valid byte value for memory.</value>
-	</data>
-	<data name="Debugger_Success_Address_Value_Set" xml:space="preserve">
-		<value>Successfully set value of address {0} to {1}</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Register" xml:space="preserve">
-		<value>"{0}" is not a valid register. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Register_Value" xml:space="preserve">
-		<value>"{0}" is not a valid value for register.</value>
-	</data>
-	<data name="Debugger_Success_Register_Value_Set" xml:space="preserve">
-		<value>Successfully set value of register {0} to {1}</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Location" xml:space="preserve">
-		<value>"{0}" is not a valid location specifier. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Offset" xml:space="preserve">
-		<value>"{0}" is not a valid offset. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Limit" xml:space="preserve">
-		<value>"{0}" is not a valid limit. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_0to2" xml:space="preserve">
-		<value>This command requires 0 to 2 arguments. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_3" xml:space="preserve">
-		<value>This command requires 3 arguments. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_MemoryMap_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Debugger_Any_Key_Continue" xml:space="preserve">
+        <value>Press any key to continue, or CTRL+C to stop...</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Size" xml:space="preserve">
+        <value>"{0}" is not a valid size specifier. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Address" xml:space="preserve">
+        <value>"{0}" is not a valid memory address. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_OutOfRange_Address" xml:space="preserve">
+        <value>"{0}" is outside the range of allowed memory addresses.</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_2" xml:space="preserve">
+        <value>This command requires 2 arguments. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Memory_Value" xml:space="preserve">
+        <value>Value at {0}: {1} (0x{2:X}) (0b{3})</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Byte_Value" xml:space="preserve">
+        <value>"{0}" is not a valid byte value for memory.</value>
+    </data>
+    <data name="Debugger_Success_Address_Value_Set" xml:space="preserve">
+        <value>Successfully set value of address {0} to {1}</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Register" xml:space="preserve">
+        <value>"{0}" is not a valid register. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Register_Value" xml:space="preserve">
+        <value>"{0}" is not a valid value for register.</value>
+    </data>
+    <data name="Debugger_Success_Register_Value_Set" xml:space="preserve">
+        <value>Successfully set value of register {0} to {1}</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Location" xml:space="preserve">
+        <value>"{0}" is not a valid location specifier. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Offset" xml:space="preserve">
+        <value>"{0}" is not a valid offset. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Limit" xml:space="preserve">
+        <value>"{0}" is not a valid limit. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_0to2" xml:space="preserve">
+        <value>This command requires 0 to 2 arguments. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_3" xml:space="preserve">
+        <value>This command requires 3 arguments. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_MemoryMap_Header" xml:space="preserve">
+        <value>
 Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F │ ASCII
 ─────────────────┼─────────────────────────────────────────────────┼─────────────────
 </value>
-	</data>
-	<data name="Debugger_MemoryMap_FirstCol" xml:space="preserve">
-		<value>{0:X16} │ </value>
-	</data>
-	<data name="Debugger_MemoryMap_Cell" xml:space="preserve">
-		<value>{0:X2}</value>
-	</data>
-	<data name="Generic_Register_rpo" xml:space="preserve">
-		<value>rpo</value>
-	</data>
-	<data name="Generic_CommaSeparate" xml:space="preserve">
-		<value>, </value>
-	</data>
-	<data name="Generic_Register_rsb" xml:space="preserve">
-		<value>rsb</value>
-	</data>
-	<data name="Generic_Register_rso" xml:space="preserve">
-		<value>rso</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_0to1" xml:space="preserve">
-		<value>This command requires either 1 or no arguments. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Warning_Stack_Empty" xml:space="preserve">
-		<value>The stack is currently empty.</value>
-	</data>
-	<data name="Debugger_Warning_rso_GT_rsb" xml:space="preserve">
-		<value>The stack pointer is currently greater than the stack base - stack visualisation not available in this state.</value>
-	</data>
-	<data name="Debugger_Stack_CurrentFrame_Header" xml:space="preserve">
-		<value>Current stack frame (likely local variables)</value>
-	</data>
-	<data name="Debugger_Stack_Box_Top" xml:space="preserve">
-		<value>┌──────────────────┬───────────────────────────────┬────────────┐</value>
-	</data>
-	<data name="Debugger_Stack_Box_Bottom" xml:space="preserve">
-		<value>└──────────────────┴───────────────────────────────┴────────────┘</value>
-	</data>
-	<data name="Debugger_Stack_Pointer_rso" xml:space="preserve">
-		<value> &lt;- rso</value>
-	</data>
-	<data name="Debugger_Stack_ReturnInfo_Header" xml:space="preserve">
-		<value>Return information</value>
-	</data>
-	<data name="Debugger_Stack_ReturnInfo_First" xml:space="preserve">
-		<value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 0    | &lt;- rsb</value>
-	</data>
-	<data name="Debugger_Stack_ReturnInfo_Second" xml:space="preserve">
-		<value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 8    |</value>
-	</data>
-	<data name="Debugger_Stack_ReturnInfo_Third" xml:space="preserve">
-		<value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 16   |</value>
-	</data>
-	<data name="Debugger_Stack_CurrentFrame_Row" xml:space="preserve">
-		<value>│ {0:X16} │ {1:X16}              │ rsb - {2,-4} │</value>
-	</data>
-	<data name="Debugger_Stack_ParentFrame_Row" xml:space="preserve">
-		<value>│ {0:X16} │ {1:X16}              │ rsb + {2,-4} │</value>
-	</data>
-	<data name="Debugger_Stack_ParentFrame_Header" xml:space="preserve">
-		<value>Parent stack frame (possibly parameters to this subroutine)</value>
-	</data>
-	<data name="Debugger_Warning_Stack_Bottom" xml:space="preserve">
-		<value>Bottom of the stack reached - most likely the program is not currently in a subroutine.</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_1" xml:space="preserve">
-		<value>This command requires 1 argument. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Convert_Value" xml:space="preserve">
-		<value>"{0}" is not a valid value to convert.</value>
-	</data>
-	<data name="Debugger_Value_In_Hex" xml:space="preserve">
-		<value>{0} in hexadecimal is {1:X}</value>
-	</data>
-	<data name="Debugger_Value_In_Decimal" xml:space="preserve">
-		<value>{0} in decimal is {1}</value>
-	</data>
-	<data name="Debugger_Breakpoints_Header" xml:space="preserve">
-		<value>Current breakpoints:</value>
-	</data>
-	<data name="Generic_Key_Value" xml:space="preserve">
-		<value>{0}: {1}</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Break_Value" xml:space="preserve">
-		<value>"{0}" is not a valid value to break on.</value>
-	</data>
-	<data name="Debugger_Success_Breakpoint" xml:space="preserve">
-		<value>Breakpoint added for {0} with value {1}</value>
-	</data>
-	<data name="Debugger_Warning_Breakpoint_Exists" xml:space="preserve">
-		<value>There is already a breakpoint added for {0} with value {1}.</value>
-	</data>
-	<data name="Debugger_Warning_Breakpoint_No_Matching" xml:space="preserve">
-		<value>There were no matching breakpoints to remove.</value>
-	</data>
-	<data name="Debugger_Success_Breakpoint_Remove" xml:space="preserve">
-		<value>Breakpoint removed for {0} with value {1}</value>
-	</data>
-	<data name="Debugger_Error_Invalid_Breakpoint_Action" xml:space="preserve">
-		<value>"{0}" is not a valid breakpoint action. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Error_Args_Required_Breakpoint" xml:space="preserve">
-		<value>This command requires either 3 arguments to add or remove a breakpoint, or none to list them. Run 'help' for more info.</value>
-	</data>
-	<data name="Debugger_Help_Body" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Debugger_MemoryMap_FirstCol" xml:space="preserve">
+        <value>{0:X16} │ </value>
+    </data>
+    <data name="Debugger_MemoryMap_Cell" xml:space="preserve">
+        <value>{0:X2}</value>
+    </data>
+    <data name="Generic_Register_rpo" xml:space="preserve">
+        <value>rpo</value>
+    </data>
+    <data name="Generic_CommaSeparate" xml:space="preserve">
+        <value>, </value>
+    </data>
+    <data name="Generic_Register_rsb" xml:space="preserve">
+        <value>rsb</value>
+    </data>
+    <data name="Generic_Register_rso" xml:space="preserve">
+        <value>rso</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_0to1" xml:space="preserve">
+        <value>This command requires either 1 or no arguments. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Warning_Stack_Empty" xml:space="preserve">
+        <value>The stack is currently empty.</value>
+    </data>
+    <data name="Debugger_Warning_rso_GT_rsb" xml:space="preserve">
+        <value>The stack pointer is currently greater than the stack base - stack visualisation not available in this state.</value>
+    </data>
+    <data name="Debugger_Stack_CurrentFrame_Header" xml:space="preserve">
+        <value>Current stack frame (likely local variables)</value>
+    </data>
+    <data name="Debugger_Stack_Box_Top" xml:space="preserve">
+        <value>┌──────────────────┬───────────────────────────────┬────────────┐</value>
+    </data>
+    <data name="Debugger_Stack_Box_Bottom" xml:space="preserve">
+        <value>└──────────────────┴───────────────────────────────┴────────────┘</value>
+    </data>
+    <data name="Debugger_Stack_Pointer_rso" xml:space="preserve">
+        <value> &lt;- rso</value>
+    </data>
+    <data name="Debugger_Stack_ReturnInfo_Header" xml:space="preserve">
+        <value>Return information</value>
+    </data>
+    <data name="Debugger_Stack_ReturnInfo_First" xml:space="preserve">
+        <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 0    | &lt;- rsb</value>
+    </data>
+    <data name="Debugger_Stack_ReturnInfo_Second" xml:space="preserve">
+        <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 8    |</value>
+    </data>
+    <data name="Debugger_Stack_ReturnInfo_Third" xml:space="preserve">
+        <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 16   |</value>
+    </data>
+    <data name="Debugger_Stack_CurrentFrame_Row" xml:space="preserve">
+        <value>│ {0:X16} │ {1:X16}              │ rsb - {2,-4} │</value>
+    </data>
+    <data name="Debugger_Stack_ParentFrame_Row" xml:space="preserve">
+        <value>│ {0:X16} │ {1:X16}              │ rsb + {2,-4} │</value>
+    </data>
+    <data name="Debugger_Stack_ParentFrame_Header" xml:space="preserve">
+        <value>Parent stack frame (possibly parameters to this subroutine)</value>
+    </data>
+    <data name="Debugger_Warning_Stack_Bottom" xml:space="preserve">
+        <value>Bottom of the stack reached - most likely the program is not currently in a subroutine.</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_1" xml:space="preserve">
+        <value>This command requires 1 argument. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Convert_Value" xml:space="preserve">
+        <value>"{0}" is not a valid value to convert.</value>
+    </data>
+    <data name="Debugger_Value_In_Hex" xml:space="preserve">
+        <value>{0} in hexadecimal is {1:X}</value>
+    </data>
+    <data name="Debugger_Value_In_Decimal" xml:space="preserve">
+        <value>{0} in decimal is {1}</value>
+    </data>
+    <data name="Debugger_Breakpoints_Header" xml:space="preserve">
+        <value>Current breakpoints:</value>
+    </data>
+    <data name="Generic_Key_Value" xml:space="preserve">
+        <value>{0}: {1}</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Break_Value" xml:space="preserve">
+        <value>"{0}" is not a valid value to break on.</value>
+    </data>
+    <data name="Debugger_Success_Breakpoint" xml:space="preserve">
+        <value>Breakpoint added for {0} with value {1}</value>
+    </data>
+    <data name="Debugger_Warning_Breakpoint_Exists" xml:space="preserve">
+        <value>There is already a breakpoint added for {0} with value {1}.</value>
+    </data>
+    <data name="Debugger_Warning_Breakpoint_No_Matching" xml:space="preserve">
+        <value>There were no matching breakpoints to remove.</value>
+    </data>
+    <data name="Debugger_Success_Breakpoint_Remove" xml:space="preserve">
+        <value>Breakpoint removed for {0} with value {1}</value>
+    </data>
+    <data name="Debugger_Error_Invalid_Breakpoint_Action" xml:space="preserve">
+        <value>"{0}" is not a valid breakpoint action. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Error_Args_Required_Breakpoint" xml:space="preserve">
+        <value>This command requires either 3 arguments to add or remove a breakpoint, or none to list them. Run 'help' for more info.</value>
+    </data>
+    <data name="Debugger_Help_Body" xml:space="preserve">
+        <value>
 read &lt;byte|word|dword|qword&gt; &lt;address&gt; - Read data at a memory address
 write &lt;mem|reg&gt; &lt;address|register-name&gt; &lt;value&gt; - Modify the value of a memory address or register
 map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes
@@ -490,620 +490,620 @@ refresh - Display the instruction to be executed and register states again
 run - Run the program without debugging until the next HLT instruction
 over - Continue to the next instruction in the current subroutine
 return - Continue to the next return instruction in this subroutine or higher</value>
-	</data>
-	<data name="AAP_Error_Invalid_Not_Enough_Bytes" xml:space="preserve">
-		<value>There are not enough bytes in the given array to be a valid AAP file</value>
-	</data>
-	<data name="AAP_Error_Invalid_Bad_Header" xml:space="preserve">
-		<value>Given bytes do not start with the correct header</value>
-	</data>
-	<data name="REPL_Error_Label_Ampersand" xml:space="preserve">
-		<value>The first character of a label cannot be '&amp;'</value>
-	</data>
-	<data name="REPL_Error_Label_Not_Exists" xml:space="preserve">
-		<value>A label with the name "{0}" doesn't exist. Labels must be defined before usage in REPL.</value>
-	</data>
-	<data name="DebugInfo_Error_Invalid_Format" xml:space="preserve">
-		<value>The provided debug information file was in an invalid format</value>
-	</data>
-	<data name="DebugInfo_Error_Wrong_Version" xml:space="preserve">
-		<value>The provided debug information file was created for a different version of AssEmbly</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Control" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set control low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Addition" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set addition low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Subtraction" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set subtraction low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Multiplication" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set multiplication low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Division" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set division low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Shifting" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set shifting low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Bitwise" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set bitwise low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Comparison" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set comparison low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_SmallMove" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set small move low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_LargeMove" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set large move low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Stack" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set stack low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Subroutine" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set subroutine low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_ConsoleWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set console write low opcode</value>
-	</data>
-	<data name="Processor_Error_File_No_Open" xml:space="preserve">
-		<value>Cannot perform file operations if no file is open. Run OFL (0xE0) first</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_FileWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set file write low opcode</value>
-	</data>
-	<data name="Processor_Error_File_Already_Open" xml:space="preserve">
-		<value>Cannot execute open file instruction if a file is already open</value>
-	</data>
-	<data name="Processor_Error_File_Close_None_Open" xml:space="preserve">
-		<value>Cannot execute close file instruction if a file is not open</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_FileOperation" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set file operation low opcode</value>
-	</data>
-	<data name="Processor_Error_File_Read_No_Open" xml:space="preserve">
-		<value>Cannot execute file read instruction if a file is not open</value>
-	</data>
-	<data name="Processor_Error_File_Read_End_Reached" xml:space="preserve">
-		<value>Cannot execute file read instruction. The end of the file has already been reached.</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Base_Reading" xml:space="preserve">
-		<value>{0:X} is not a recognised base instruction set reading low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_Base" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the base instruction set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_Jump" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set jump low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_Division" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set division low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_Shifting" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set shifting low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_SmallMove" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set small move low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_LargeMove" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set large move low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_ConsoleWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set console write low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_FileWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set file write low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_Extend" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set extend low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Signed_Negate" xml:space="preserve">
-		<value>{0:X} is not a recognised signed extension set negate low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_Signed" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the signed extension set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Addition" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set addition low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Subtraction" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set subtraction low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Multiplication" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set multiplication low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Division" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set division low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Trigonometry" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set trigonometry low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Exponentiation" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set exponentiation low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Logarithm" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set logarithm low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_ConsoleWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set console write low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_FileWrite" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set file write low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_SizeConversion" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set size conversion low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Negate" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set negate low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_IntToFloat" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set int to float low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_FloatToInt" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set float to int low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_FloatingPoint_Comparison" xml:space="preserve">
-		<value>{0:X} is not a recognised floating point extension set comparison low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_FloatingPoint" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the floating point extension set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Extended_ByteSwap" xml:space="preserve">
-		<value>{0:X} is not a recognised extended base set byte swap low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_Extended" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the extended base set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Extension_Set" xml:space="preserve">
-		<value>{0:X} is not a recognised extension set</value>
-	</data>
-	<data name="Processor_Error_Read_Only_Register" xml:space="preserve">
-		<value>Cannot write to read-only register {0}</value>
-	</data>
-	<data name="Assembler_Error_Invalid_Literal_Label" xml:space="preserve">
-		<value>Cannot convert a label definition to a literal address. Are you sure you meant to include the '&amp;'?
+    </data>
+    <data name="AAP_Error_Invalid_Not_Enough_Bytes" xml:space="preserve">
+        <value>There are not enough bytes in the given array to be a valid AAP file</value>
+    </data>
+    <data name="AAP_Error_Invalid_Bad_Header" xml:space="preserve">
+        <value>Given bytes do not start with the correct header</value>
+    </data>
+    <data name="REPL_Error_Label_Ampersand" xml:space="preserve">
+        <value>The first character of a label cannot be '&amp;'</value>
+    </data>
+    <data name="REPL_Error_Label_Not_Exists" xml:space="preserve">
+        <value>A label with the name "{0}" doesn't exist. Labels must be defined before usage in REPL.</value>
+    </data>
+    <data name="DebugInfo_Error_Invalid_Format" xml:space="preserve">
+        <value>The provided debug information file was in an invalid format</value>
+    </data>
+    <data name="DebugInfo_Error_Wrong_Version" xml:space="preserve">
+        <value>The provided debug information file was created for a different version of AssEmbly</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Control" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set control low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Addition" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set addition low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Subtraction" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set subtraction low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Multiplication" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set multiplication low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Division" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set division low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Shifting" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set shifting low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Bitwise" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set bitwise low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Comparison" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set comparison low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_SmallMove" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set small move low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_LargeMove" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set large move low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Stack" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set stack low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Subroutine" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set subroutine low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_ConsoleWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set console write low opcode</value>
+    </data>
+    <data name="Processor_Error_File_No_Open" xml:space="preserve">
+        <value>Cannot perform file operations if no file is open. Run OFL (0xE0) first</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_FileWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set file write low opcode</value>
+    </data>
+    <data name="Processor_Error_File_Already_Open" xml:space="preserve">
+        <value>Cannot execute open file instruction if a file is already open</value>
+    </data>
+    <data name="Processor_Error_File_Close_None_Open" xml:space="preserve">
+        <value>Cannot execute close file instruction if a file is not open</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_FileOperation" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set file operation low opcode</value>
+    </data>
+    <data name="Processor_Error_File_Read_No_Open" xml:space="preserve">
+        <value>Cannot execute file read instruction if a file is not open</value>
+    </data>
+    <data name="Processor_Error_File_Read_End_Reached" xml:space="preserve">
+        <value>Cannot execute file read instruction. The end of the file has already been reached.</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Base_Reading" xml:space="preserve">
+        <value>{0:X} is not a recognised base instruction set reading low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_Base" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the base instruction set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_Jump" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set jump low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_Division" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set division low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_Shifting" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set shifting low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_SmallMove" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set small move low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_LargeMove" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set large move low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_ConsoleWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set console write low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_FileWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set file write low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_Extend" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set extend low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Signed_Negate" xml:space="preserve">
+        <value>{0:X} is not a recognised signed extension set negate low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_Signed" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the signed extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Addition" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set addition low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Subtraction" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set subtraction low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Multiplication" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set multiplication low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Division" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set division low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Trigonometry" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set trigonometry low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Exponentiation" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set exponentiation low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Logarithm" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set logarithm low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_ConsoleWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set console write low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_FileWrite" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set file write low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_SizeConversion" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set size conversion low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Negate" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set negate low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_IntToFloat" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set int to float low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_FloatToInt" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set float to int low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FloatingPoint_Comparison" xml:space="preserve">
+        <value>{0:X} is not a recognised floating point extension set comparison low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_FloatingPoint" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the floating point extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Extended_ByteSwap" xml:space="preserve">
+        <value>{0:X} is not a recognised extended base set byte swap low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_Extended" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the extended base set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Extension_Set" xml:space="preserve">
+        <value>{0:X} is not a recognised extension set</value>
+    </data>
+    <data name="Processor_Error_Read_Only_Register" xml:space="preserve">
+        <value>Cannot write to read-only register {0}</value>
+    </data>
+    <data name="Assembler_Error_Invalid_Literal_Label" xml:space="preserve">
+        <value>Cannot convert a label definition to a literal address. Are you sure you meant to include the '&amp;'?
     {0}
      ^</value>
-	</data>
-	<data name="Assembler_Error_Label_Already_Defined" xml:space="preserve">
-		<value>Label "{0}" has already been defined. Label names must be unique.</value>
-	</data>
-	<data name="Assembler_Error_IMP_Operand_Count" xml:space="preserve">
-		<value>The %IMP directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_IMP_Operand_Type" xml:space="preserve">
-		<value>The operand to the %IMP directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_IMP_Operand_String" xml:space="preserve">
-		<value>The literal operand to the %IMP directive must be a string.</value>
-	</data>
-	<data name="Assembler_Error_IMP_File_Not_Exists" xml:space="preserve">
-		<value>The file "{0}" given to the %IMP directive could not be found.</value>
-	</data>
-	<data name="Assembler_Error_Circular_Import" xml:space="preserve">
-		<value>Circular import detected: attempted import from "{0}" when it is already in import stack.</value>
-	</data>
-	<data name="Assembler_Error_MACRO_Operand_Count" xml:space="preserve">
-		<value>The %MACRO directive requires either one or two operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_ANALYZER_Operand_Count" xml:space="preserve">
-		<value>The %ANALYZER directive requires 3 operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_ANALYZER_Operand_First" xml:space="preserve">
-		<value>The first operand to the %ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.</value>
-	</data>
-	<data name="Assembler_Error_ANALYZER_Operand_Second" xml:space="preserve">
-		<value>The second operand to the %ANALYZER directive must be an integer.</value>
-	</data>
-	<data name="Assembler_Error_ANALYZER_Operand_Third" xml:space="preserve">
-		<value>The third operand to the %ANALYZER directive must be one of '0', '1', or 'r'.</value>
-	</data>
-	<data name="Assembler_Error_Message_Base_File" xml:space="preserve">
-		<value>Error on line {0} in base file
+    </data>
+    <data name="Assembler_Error_Label_Already_Defined" xml:space="preserve">
+        <value>Label "{0}" has already been defined. Label names must be unique.</value>
+    </data>
+    <data name="Assembler_Error_IMP_Operand_Count" xml:space="preserve">
+        <value>The %IMP directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_IMP_Operand_Type" xml:space="preserve">
+        <value>The operand to the %IMP directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_IMP_Operand_String" xml:space="preserve">
+        <value>The literal operand to the %IMP directive must be a string.</value>
+    </data>
+    <data name="Assembler_Error_IMP_File_Not_Exists" xml:space="preserve">
+        <value>The file "{0}" given to the %IMP directive could not be found.</value>
+    </data>
+    <data name="Assembler_Error_Circular_Import" xml:space="preserve">
+        <value>Circular import detected: attempted import from "{0}" when it is already in import stack.</value>
+    </data>
+    <data name="Assembler_Error_MACRO_Operand_Count" xml:space="preserve">
+        <value>The %MACRO directive requires either one or two operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ANALYZER_Operand_Count" xml:space="preserve">
+        <value>The %ANALYZER directive requires 3 operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ANALYZER_Operand_First" xml:space="preserve">
+        <value>The first operand to the %ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.</value>
+    </data>
+    <data name="Assembler_Error_ANALYZER_Operand_Second" xml:space="preserve">
+        <value>The second operand to the %ANALYZER directive must be an integer.</value>
+    </data>
+    <data name="Assembler_Error_ANALYZER_Operand_Third" xml:space="preserve">
+        <value>The third operand to the %ANALYZER directive must be one of '0', '1', or 'r'.</value>
+    </data>
+    <data name="Assembler_Error_Message_Base_File" xml:space="preserve">
+        <value>Error on line {0} in base file
     "{1}"
 {2}</value>
-	</data>
-	<data name="Assembler_Error_Message_Imported" xml:space="preserve">
-		<value>Error on line {0} in "{1}"
+    </data>
+    <data name="Assembler_Error_Message_Imported" xml:space="preserve">
+        <value>Error on line {0} in "{1}"
     "{2}"</value>
-	</data>
-	<data name="Assembler_Error_Message_Imported_Import" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Error_Message_Imported_Import" xml:space="preserve">
+        <value>
 Imported on line {0} of "{1}"</value>
-	</data>
-	<data name="Assembler_Error_Message_Imported_Base" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Error_Message_Imported_Base" xml:space="preserve">
+        <value>
 Imported on line {0} of base file
 
 {1}</value>
-	</data>
-	<data name="Assembler_Error_Label_Not_Exists" xml:space="preserve">
-		<value>A label with the name "{0}" does not exist, but a reference was made to it. Have you missed a definition?</value>
-	</data>
-	<data name="Assembler_Error_On_Line" xml:space="preserve">
-		<value>Error on line {0} in {1}
+    </data>
+    <data name="Assembler_Error_Label_Not_Exists" xml:space="preserve">
+        <value>A label with the name "{0}" does not exist, but a reference was made to it. Have you missed a definition?</value>
+    </data>
+    <data name="Assembler_Error_On_Line" xml:space="preserve">
+        <value>Error on line {0} in {1}
 
 {2}</value>
-	</data>
-	<data name="Assembler_Error_DAT_Operand_Count" xml:space="preserve">
-		<value>The %DAT directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_DAT_Operand_Type" xml:space="preserve">
-		<value>The operand to the %DAT directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_DAT_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the %DAT directive cannot be a label reference.</value>
-	</data>
-	<data name="Assembler_Error_DAT_Operand_Too_Large" xml:space="preserve">
-		<value>Numeric literal too large for %DAT, or is negative/floating point. 255 is the maximum value:
+    </data>
+    <data name="Assembler_Error_DAT_Operand_Count" xml:space="preserve">
+        <value>The %DAT directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_DAT_Operand_Type" xml:space="preserve">
+        <value>The operand to the %DAT directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_DAT_Operand_Label_Reference" xml:space="preserve">
+        <value>The literal operand to the %DAT directive cannot be a label reference.</value>
+    </data>
+    <data name="Assembler_Error_DAT_Operand_Too_Large" xml:space="preserve">
+        <value>Numeric literal too large for %DAT, or is negative/floating point. 255 is the maximum value:
     {0}</value>
-	</data>
-	<data name="Assembler_Error_PAD_Operand_Count" xml:space="preserve">
-		<value>The %PAD directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_PAD_Operand_Type" xml:space="preserve">
-		<value>The operand to the %PAD directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_PAD_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the %PAD directive cannot be a label reference.</value>
-	</data>
-	<data name="Assembler_Error_NUM_Operand_Count" xml:space="preserve">
-		<value>The %NUM directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_NUM_Operand_Type" xml:space="preserve">
-		<value>The operand to the %NUM directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_Invalid_Mnemonic_Combo" xml:space="preserve">
-		<value>Unrecognised mnemonic and operand combination:
+    </data>
+    <data name="Assembler_Error_PAD_Operand_Count" xml:space="preserve">
+        <value>The %PAD directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_PAD_Operand_Type" xml:space="preserve">
+        <value>The operand to the %PAD directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_PAD_Operand_Label_Reference" xml:space="preserve">
+        <value>The literal operand to the %PAD directive cannot be a label reference.</value>
+    </data>
+    <data name="Assembler_Error_NUM_Operand_Count" xml:space="preserve">
+        <value>The %NUM directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_NUM_Operand_Type" xml:space="preserve">
+        <value>The operand to the %NUM directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_Invalid_Mnemonic_Combo" xml:space="preserve">
+        <value>Unrecognised mnemonic and operand combination:
     {0} {1}
 Consult the language reference for a list of all valid mnemonic/operand combinations.</value>
-	</data>
-	<data name="Assembler_Error_Mnemonic_Operand_Space" xml:space="preserve">
-		<value>Mnemonics should be separated from operands with spaces, not commas:
+    </data>
+    <data name="Assembler_Error_Mnemonic_Operand_Space" xml:space="preserve">
+        <value>Mnemonics should be separated from operands with spaces, not commas:
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Empty_Operand" xml:space="preserve">
-		<value>Operands cannot be empty:
+    </data>
+    <data name="Assembler_Error_Empty_Operand" xml:space="preserve">
+        <value>Operands cannot be empty:
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Operand_Whitespace" xml:space="preserve">
-		<value>Operands cannot contain whitespace. Did you forget a comma?
+    </data>
+    <data name="Assembler_Error_Operand_Whitespace" xml:space="preserve">
+        <value>Operands cannot contain whitespace. Did you forget a comma?
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Quoted_Literal_Followed" xml:space="preserve">
-		<value>Non-whitespace characters found after quoted literal. Did you forget a comma?
+    </data>
+    <data name="Assembler_Error_Quoted_Literal_Followed" xml:space="preserve">
+        <value>Non-whitespace characters found after quoted literal. Did you forget a comma?
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Quoted_Literal_Following" xml:space="preserve">
-		<value>Quoted literal defined after non-whitespace characters. Did you forget a comma?:
+    </data>
+    <data name="Assembler_Error_Quoted_Literal_Following" xml:space="preserve">
+        <value>Quoted literal defined after non-whitespace characters. Did you forget a comma?:
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Quoted_Literal_EndOfLine" xml:space="preserve">
-		<value>End of line found while processing quoted literal. Did you forget a closing quote?
+    </data>
+    <data name="Assembler_Error_Quoted_Literal_EndOfLine" xml:space="preserve">
+        <value>End of line found while processing quoted literal. Did you forget a closing quote?
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Character_Literal_Too_Long" xml:space="preserve">
-		<value>Character literals may only contain a single character. Did you mean to use double quotes for a string literal?
+    </data>
+    <data name="Assembler_Error_Character_Literal_Too_Long" xml:space="preserve">
+        <value>Character literals may only contain a single character. Did you mean to use double quotes for a string literal?
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Unicode_Escape_EndOfLine" xml:space="preserve">
-		<value>End of line reached when processing unicode escape
+    </data>
+    <data name="Assembler_Error_Unicode_Escape_EndOfLine" xml:space="preserve">
+        <value>End of line reached when processing unicode escape
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Unicode_Escape_4_Digits" xml:space="preserve">
-		<value>Unicode escape must be immediately followed a 4 digit unicode codepoint
+    </data>
+    <data name="Assembler_Error_Unicode_Escape_4_Digits" xml:space="preserve">
+        <value>Unicode escape must be immediately followed a 4 digit unicode codepoint
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Unicode_Escape_8_Digits" xml:space="preserve">
-		<value>Unicode escape must be immediately followed a valid 8 digit unicode codepoint (0x00000000 - 0x0010ffff excluding 0x0000d800 - 0x0000dfff)
+    </data>
+    <data name="Assembler_Error_Unicode_Escape_8_Digits" xml:space="preserve">
+        <value>Unicode escape must be immediately followed a valid 8 digit unicode codepoint (0x00000000 - 0x0010ffff excluding 0x0000d800 - 0x0000dfff)
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Invalid_Escape_Sequence" xml:space="preserve">
-		<value>Unrecognised escape character '{0}'. Did you forget to escape the backslash?
+    </data>
+    <data name="Assembler_Error_Invalid_Escape_Sequence" xml:space="preserve">
+        <value>Unrecognised escape character '{0}'. Did you forget to escape the backslash?
     {1}
     {2}^</value>
-	</data>
-	<data name="Assembler_Error_Character_Literal_Empty" xml:space="preserve">
-		<value>Character literals must contain at least 1 character.
+    </data>
+    <data name="Assembler_Error_Character_Literal_Empty" xml:space="preserve">
+        <value>Character literals must contain at least 1 character.
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Label_Invalid_Character" xml:space="preserve">
-		<value>Invalid character in label:
+    </data>
+    <data name="Assembler_Error_Label_Invalid_Character" xml:space="preserve">
+        <value>Invalid character in label:
     {0}
     {1}^
 Label names may not contain symbols other than underscores, and cannot start with a numeral.</value>
-	</data>
-	<data name="Assembler_Error_Literal_Invalid_Character" xml:space="preserve">
-		<value>Invalid character in numeric literal:
+    </data>
+    <data name="Assembler_Error_Literal_Invalid_Character" xml:space="preserve">
+        <value>Invalid character in numeric literal:
     {0}
     {1}^
 Did you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?</value>
-	</data>
-	<data name="Assembler_Error_Literal_Floating_Point_Decimal_Only" xml:space="preserve">
-		<value>Floating point numeric literals must contain a digit on at least one side of the decimal point.</value>
-	</data>
-	<data name="Assembler_Error_Literal_Too_Many_Points" xml:space="preserve">
-		<value>Numeric literal contains more than one decimal point:
+    </data>
+    <data name="Assembler_Error_Literal_Floating_Point_Decimal_Only" xml:space="preserve">
+        <value>Floating point numeric literals must contain a digit on at least one side of the decimal point.</value>
+    </data>
+    <data name="Assembler_Error_Literal_Too_Many_Points" xml:space="preserve">
+        <value>Numeric literal contains more than one decimal point:
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Operand_Invalid" xml:space="preserve">
-		<value>Type of operand "{0}" could not be determined. Did you forget a colon before a label name or misspell a register name?</value>
-	</data>
-	<data name="Assembler_Error_String_Not_Allowed" xml:space="preserve">
-		<value>A string literal is not a valid operand in this context.</value>
-	</data>
-	<data name="Assembler_Error_String_Followed_Internal" xml:space="preserve">
-		<value>String literal contains characters after closing quote mark.</value>
-	</data>
-	<data name="Generic_Base_File" xml:space="preserve">
-		<value>base file</value>
-	</data>
-	<data name="Debugger_Command_Prompt" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Error_Operand_Invalid" xml:space="preserve">
+        <value>Type of operand "{0}" could not be determined. Did you forget a colon before a label name or misspell a register name?</value>
+    </data>
+    <data name="Assembler_Error_String_Not_Allowed" xml:space="preserve">
+        <value>A string literal is not a valid operand in this context.</value>
+    </data>
+    <data name="Assembler_Error_String_Followed_Internal" xml:space="preserve">
+        <value>String literal contains characters after closing quote mark.</value>
+    </data>
+    <data name="Generic_Base_File" xml:space="preserve">
+        <value>base file</value>
+    </data>
+    <data name="Debugger_Command_Prompt" xml:space="preserve">
+        <value>
 Press ENTER to continue, or type a command ('help' for command list): </value>
-	</data>
-	<data name="REPL_Command_Prompt" xml:space="preserve">
-		<value>
+    </data>
+    <data name="REPL_Command_Prompt" xml:space="preserve">
+        <value>
 &gt;&gt;&gt; </value>
-	</data>
-	<data name="AssemblerWarnings_NonFatal_0001" xml:space="preserve">
-		<value>Instruction writes to the rpo register.</value>
-	</data>
-	<data name="AssemblerWarnings_NonFatal_0002" xml:space="preserve">
-		<value>Division by constant 0.</value>
-	</data>
-	<data name="AssemblerWarnings_NonFatal_0003" xml:space="preserve">
-		<value>File has an entry point explicitly defined, but the program is being assembled into v1 format which doesn't support them.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0001" xml:space="preserve">
-		<value>Data insertion is not directly preceded by an unconditional jump, return, or halt instruction.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0002" xml:space="preserve">
-		<value>Jump/Call target label does not point to executable code.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0003" xml:space="preserve">
-		<value>Jump/Call target label points to end of file, not executable code.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0004" xml:space="preserve">
-		<value>Instruction writes to a label pointing to executable code.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0005" xml:space="preserve">
-		<value>Instruction reads from a label pointing to executable code in a context that likely expects data.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0006" xml:space="preserve">
-		<value>String insertion is not immediately followed by a 0 (null) byte.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0007" xml:space="preserve">
-		<value>Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0008" xml:space="preserve">
-		<value>Unreachable code detected.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0009" xml:space="preserve">
-		<value>Program runs to end of file without being terminated by an unconditional jump, return, or halt instruction.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0010" xml:space="preserve">
-		<value>File import is not directly preceded by an unconditional jump, return, or halt instruction.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0011" xml:space="preserve">
-		<value>Instruction writes to the rsf register.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0012" xml:space="preserve">
-		<value>Instruction writes to the rsb register.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0013" xml:space="preserve">
-		<value>Jump/Call target label points to itself, resulting in an unbreakable infinite loop.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0014" xml:space="preserve">
-		<value>Unlabelled executable code found after data insertion.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0015" xml:space="preserve">
-		<value>Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0016" xml:space="preserve">
-		<value>Addresses are 64-bit values, however this move instruction moves less than 64 bits.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0017" xml:space="preserve">
-		<value>Entry point does not point to executable code.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0018" xml:space="preserve">
-		<value>Entry point points to an import.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0019" xml:space="preserve">
-		<value>Signed literal given to an instruction that expects an unsigned literal.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0020" xml:space="preserve">
-		<value>Floating point literal given to an instruction that expects an integer literal.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0021" xml:space="preserve">
-		<value>Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0022" xml:space="preserve">
-		<value>Value is too large for a signed instruction. This positive value will overflow into a negative one.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0023" xml:space="preserve">
-		<value>Addresses are unsigned, however this operation is signed.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0024" xml:space="preserve">
-		<value>Addresses are integers, however this operation is floating point.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0025" xml:space="preserve">
-		<value>Use of an extension instruction when assembling to v1 format.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0001" xml:space="preserve">
-		<value>Avoid use of NOP instruction.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0002" xml:space="preserve">
-		<value>Use the `%PAD` directive instead of chaining `%DAT 0` directives.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0003" xml:space="preserve">
-		<value>Put %IMP directives at the end of the file, unless the position of the directive is important given the file's contents.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0004" xml:space="preserve">
-		<value>Put data at the end of the file, unless the position of the data is important.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0005" xml:space="preserve">
-		<value>Use `TST {1}, {1}` instead of `CMP {1}, 0`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0006" xml:space="preserve">
-		<value>Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0007" xml:space="preserve">
-		<value>Use `ICR {1}` instead of `ADD {1}, 1`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0008" xml:space="preserve">
-		<value>Use `DCR {1}` instead of `SUB {1}, 1`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0009" xml:space="preserve">
-		<value>Operation has no effect.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0010" xml:space="preserve">
-		<value>Shift operation shifts by 64 bits or more, which will always shift out all bits.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0011" xml:space="preserve">
-		<value>Remove leading 0 digits from denary number.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0012" xml:space="preserve">
-		<value>Remove useless `%PAD 0` directive.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0013" xml:space="preserve">
-		<value>Use `DCR {1}` instead of `ADD {1}, -1`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0014" xml:space="preserve">
-		<value>Use `ICR {1}` instead of `SUB {1}, -1`, as it results in less bytes.</value>
-	</data>
-	<data name="CLI_Error_Argument_Missing_Path_Assemble" xml:space="preserve">
-		<value>A path to the program listing to be assembled is required.</value>
-	</data>
-	<data name="CLI_Error_Argument_Missing_Path_Execute" xml:space="preserve">
-		<value>A path to the assembled program to be executed is required.</value>
-	</data>
-	<data name="CLI_Error_Argument_Missing_Path_AssembleAndExecute" xml:space="preserve">
-		<value>A path to the program listing to be executed is required.</value>
-	</data>
-	<data name="CLI_Error_Argument_Missing_Path_Debugger" xml:space="preserve">
-		<value>A path to the assembled program to be debugged is required.</value>
-	</data>
-	<data name="CLI_Error_Argument_Missing_Path_Disassemble" xml:space="preserve">
-		<value>A path to the program to be disassembled is required.</value>
-	</data>
-	<data name="Generic_Severity_Error" xml:space="preserve">
-		<value>Error</value>
-	</data>
-	<data name="Generic_Severity_Warning" xml:space="preserve">
-		<value>Warning</value>
-	</data>
-	<data name="Generic_Severity_Suggestion" xml:space="preserve">
-		<value>Suggestion</value>
-	</data>
-	<data name="Generic_Unknown" xml:space="preserve">
-		<value>Unknown</value>
-	</data>
-	<data name="Assembler_Error_Quoted_Literal_Line_Length_One" xml:space="preserve">
-		<value>An opening quote mark cannot be the only character on a line.</value>
-	</data>
-	<data name="Assembler_Error_Label_Spaces_Contained" xml:space="preserve">
-		<value>Label names cannot contain spaces.
+    </data>
+    <data name="AssemblerWarnings_NonFatal_0001" xml:space="preserve">
+        <value>Instruction writes to the rpo register.</value>
+    </data>
+    <data name="AssemblerWarnings_NonFatal_0002" xml:space="preserve">
+        <value>Division by constant 0.</value>
+    </data>
+    <data name="AssemblerWarnings_NonFatal_0003" xml:space="preserve">
+        <value>File has an entry point explicitly defined, but the program is being assembled into v1 format which doesn't support them.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0001" xml:space="preserve">
+        <value>Data insertion is not directly preceded by an unconditional jump, return, or halt instruction.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0002" xml:space="preserve">
+        <value>Jump/Call target label does not point to executable code.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0003" xml:space="preserve">
+        <value>Jump/Call target label points to end of file, not executable code.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0004" xml:space="preserve">
+        <value>Instruction writes to a label pointing to executable code.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0005" xml:space="preserve">
+        <value>Instruction reads from a label pointing to executable code in a context that likely expects data.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0006" xml:space="preserve">
+        <value>String insertion is not immediately followed by a 0 (null) byte.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0007" xml:space="preserve">
+        <value>Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0008" xml:space="preserve">
+        <value>Unreachable code detected.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0009" xml:space="preserve">
+        <value>Program runs to end of file without being terminated by an unconditional jump, return, or halt instruction.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0010" xml:space="preserve">
+        <value>File import is not directly preceded by an unconditional jump, return, or halt instruction.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0011" xml:space="preserve">
+        <value>Instruction writes to the rsf register.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0012" xml:space="preserve">
+        <value>Instruction writes to the rsb register.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0013" xml:space="preserve">
+        <value>Jump/Call target label points to itself, resulting in an unbreakable infinite loop.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0014" xml:space="preserve">
+        <value>Unlabelled executable code found after data insertion.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0015" xml:space="preserve">
+        <value>Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0016" xml:space="preserve">
+        <value>Addresses are 64-bit values, however this move instruction moves less than 64 bits.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0017" xml:space="preserve">
+        <value>Entry point does not point to executable code.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0018" xml:space="preserve">
+        <value>Entry point points to an import.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0019" xml:space="preserve">
+        <value>Signed literal given to an instruction that expects an unsigned literal.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0020" xml:space="preserve">
+        <value>Floating point literal given to an instruction that expects an integer literal.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0021" xml:space="preserve">
+        <value>Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0022" xml:space="preserve">
+        <value>Value is too large for a signed instruction. This positive value will overflow into a negative one.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0023" xml:space="preserve">
+        <value>Addresses are unsigned, however this operation is signed.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0024" xml:space="preserve">
+        <value>Addresses are integers, however this operation is floating point.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0025" xml:space="preserve">
+        <value>Use of an extension instruction when assembling to v1 format.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0001" xml:space="preserve">
+        <value>Avoid use of NOP instruction.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0002" xml:space="preserve">
+        <value>Use the `%PAD` directive instead of chaining `%DAT 0` directives.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0003" xml:space="preserve">
+        <value>Put %IMP directives at the end of the file, unless the position of the directive is important given the file's contents.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0004" xml:space="preserve">
+        <value>Put data at the end of the file, unless the position of the data is important.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0005" xml:space="preserve">
+        <value>Use `TST {1}, {1}` instead of `CMP {1}, 0`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0006" xml:space="preserve">
+        <value>Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0007" xml:space="preserve">
+        <value>Use `ICR {1}` instead of `ADD {1}, 1`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0008" xml:space="preserve">
+        <value>Use `DCR {1}` instead of `SUB {1}, 1`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0009" xml:space="preserve">
+        <value>Operation has no effect.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0010" xml:space="preserve">
+        <value>Shift operation shifts by 64 bits or more, which will always shift out all bits.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0011" xml:space="preserve">
+        <value>Remove leading 0 digits from denary number.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0012" xml:space="preserve">
+        <value>Remove useless `%PAD 0` directive.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0013" xml:space="preserve">
+        <value>Use `DCR {1}` instead of `ADD {1}, -1`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0014" xml:space="preserve">
+        <value>Use `ICR {1}` instead of `SUB {1}, -1`, as it results in less bytes.</value>
+    </data>
+    <data name="CLI_Error_Argument_Missing_Path_Assemble" xml:space="preserve">
+        <value>A path to the program listing to be assembled is required.</value>
+    </data>
+    <data name="CLI_Error_Argument_Missing_Path_Execute" xml:space="preserve">
+        <value>A path to the assembled program to be executed is required.</value>
+    </data>
+    <data name="CLI_Error_Argument_Missing_Path_AssembleAndExecute" xml:space="preserve">
+        <value>A path to the program listing to be executed is required.</value>
+    </data>
+    <data name="CLI_Error_Argument_Missing_Path_Debugger" xml:space="preserve">
+        <value>A path to the assembled program to be debugged is required.</value>
+    </data>
+    <data name="CLI_Error_Argument_Missing_Path_Disassemble" xml:space="preserve">
+        <value>A path to the program to be disassembled is required.</value>
+    </data>
+    <data name="Generic_Severity_Error" xml:space="preserve">
+        <value>Error</value>
+    </data>
+    <data name="Generic_Severity_Warning" xml:space="preserve">
+        <value>Warning</value>
+    </data>
+    <data name="Generic_Severity_Suggestion" xml:space="preserve">
+        <value>Suggestion</value>
+    </data>
+    <data name="Generic_Unknown" xml:space="preserve">
+        <value>Unknown</value>
+    </data>
+    <data name="Assembler_Error_Quoted_Literal_Line_Length_One" xml:space="preserve">
+        <value>An opening quote mark cannot be the only character on a line.</value>
+    </data>
+    <data name="Assembler_Error_Label_Spaces_Contained" xml:space="preserve">
+        <value>Label names cannot contain spaces.
     {0} {1}
     {2}^</value>
-	</data>
-	<data name="Assembler_Error_Label_Empty_Name" xml:space="preserve">
-		<value>Label names cannot be empty. Did you mean to include a colon here?</value>
-	</data>
-	<data name="Assembler_Error_Literal_Negative_Dash_Only" xml:space="preserve">
-		<value>Negative numeric literals must contain at least one digit.</value>
-	</data>
-	<data name="Assembler_Error_Literal_Base_Prefix_Only" xml:space="preserve">
-		<value>Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix.</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_External" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the external assembly extension set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_External_Load" xml:space="preserve">
-		<value>{0:X} is not a recognised external assembly extension set loading low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_External_Close" xml:space="preserve">
-		<value>{0:X} is not a recognised external assembly extension set closing low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_External_Existence" xml:space="preserve">
-		<value>{0:X} is not a recognised external assembly extension set existence low opcode</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_External_Call" xml:space="preserve">
-		<value>{0:X} is not a recognised external assembly extension set calling low opcode</value>
-	</data>
-	<data name="Processor_Error_Assembly_Already_Open" xml:space="preserve">
-		<value>Cannot execute load external assembly instruction if an assembly is already loaded</value>
-	</data>
-	<data name="Processor_Error_Assembly_Unknown" xml:space="preserve">
-		<value>An unexpected error occurred trying to load the external assembly</value>
-	</data>
-	<data name="Processor_Error_Assembly_Not_Found" xml:space="preserve">
-		<value>The specified external assembly file could not be found</value>
-	</data>
-	<data name="Processor_Error_Assembly_Invalid" xml:space="preserve">
-		<value>The specified external assembly file is invalid</value>
-	</data>
-	<data name="Processor_Error_Assembly_Not_Open" xml:space="preserve">
-		<value>Cannot execute instruction if an external assembly is not loaded</value>
-	</data>
-	<data name="Processor_Error_Function_Already_Open" xml:space="preserve">
-		<value>Cannot execute open external function instruction if a function is already loaded</value>
-	</data>
-	<data name="Processor_Error_Function_Unknown" xml:space="preserve">
-		<value>An unexpected error occurred trying to load the external function</value>
-	</data>
-	<data name="Processor_Error_Function_Invalid" xml:space="preserve">
-		<value>The specified external function is invalid or does not exist in the loaded external assembly</value>
-	</data>
-	<data name="Processor_Error_Function_Not_Open" xml:space="preserve">
-		<value>Cannot execute instruction if an external function is not loaded</value>
-	</data>
-	<data name="Processor_Error_Assembly_No_Type" xml:space="preserve">
-		<value>The specified external assembly file does not contain a global public static class named 'AssEmblyInterop'</value>
-	</data>
-	<data name="Generic_Unmapped" xml:space="preserve">
-		<value>unmapped</value>
-	</data>
-	<data name="Processor_Error_Stack_Collide" xml:space="preserve">
-		<value>The stack has collided with already allocated memory</value>
-	</data>
-	<data name="Processor_Error_Stack_Out_Of_Range" xml:space="preserve">
-		<value>The rso register is outside the range of available memory</value>
-	</data>
-	<data name="Processor_Error_Opcode_High_Allocation" xml:space="preserve">
-		<value>{0:X} is not a recognised high opcode for the memory allocation extension set</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Allocation_Allocation" xml:space="preserve">
-		<value>{0:X} is not a recognised memory allocation extension set allocation low opcode</value>
-	</data>
-	<data name="Processor_Error_Memory_Allocation" xml:space="preserve">
-		<value>Memory allocation failed. There may not be enough free contiguous memory remaining.</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Allocation_Reallocation" xml:space="preserve">
-		<value>{0:X} is not a recognised memory allocation extension set re-allocation low opcode</value>
-	</data>
-	<data name="Processor_Error_Invalid_Memory_Block" xml:space="preserve">
-		<value>The given memory address does not correspond to the start of an allocated memory block.</value>
-	</data>
-	<data name="Processor_Error_Opcode_Low_Allocation_Free" xml:space="preserve">
-		<value>{0:X} is not a recognised memory allocation extension set free low opcode</value>
-	</data>
-	<data name="Debugger_Heap_Stats_Main" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Error_Label_Empty_Name" xml:space="preserve">
+        <value>Label names cannot be empty. Did you mean to include a colon here?</value>
+    </data>
+    <data name="Assembler_Error_Literal_Negative_Dash_Only" xml:space="preserve">
+        <value>Negative numeric literals must contain at least one digit.</value>
+    </data>
+    <data name="Assembler_Error_Literal_Base_Prefix_Only" xml:space="preserve">
+        <value>Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix.</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_External" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the external assembly extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_External_Load" xml:space="preserve">
+        <value>{0:X} is not a recognised external assembly extension set loading low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_External_Close" xml:space="preserve">
+        <value>{0:X} is not a recognised external assembly extension set closing low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_External_Existence" xml:space="preserve">
+        <value>{0:X} is not a recognised external assembly extension set existence low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_External_Call" xml:space="preserve">
+        <value>{0:X} is not a recognised external assembly extension set calling low opcode</value>
+    </data>
+    <data name="Processor_Error_Assembly_Already_Open" xml:space="preserve">
+        <value>Cannot execute load external assembly instruction if an assembly is already loaded</value>
+    </data>
+    <data name="Processor_Error_Assembly_Unknown" xml:space="preserve">
+        <value>An unexpected error occurred trying to load the external assembly</value>
+    </data>
+    <data name="Processor_Error_Assembly_Not_Found" xml:space="preserve">
+        <value>The specified external assembly file could not be found</value>
+    </data>
+    <data name="Processor_Error_Assembly_Invalid" xml:space="preserve">
+        <value>The specified external assembly file is invalid</value>
+    </data>
+    <data name="Processor_Error_Assembly_Not_Open" xml:space="preserve">
+        <value>Cannot execute instruction if an external assembly is not loaded</value>
+    </data>
+    <data name="Processor_Error_Function_Already_Open" xml:space="preserve">
+        <value>Cannot execute open external function instruction if a function is already loaded</value>
+    </data>
+    <data name="Processor_Error_Function_Unknown" xml:space="preserve">
+        <value>An unexpected error occurred trying to load the external function</value>
+    </data>
+    <data name="Processor_Error_Function_Invalid" xml:space="preserve">
+        <value>The specified external function is invalid or does not exist in the loaded external assembly</value>
+    </data>
+    <data name="Processor_Error_Function_Not_Open" xml:space="preserve">
+        <value>Cannot execute instruction if an external function is not loaded</value>
+    </data>
+    <data name="Processor_Error_Assembly_No_Type" xml:space="preserve">
+        <value>The specified external assembly file does not contain a global public static class named 'AssEmblyInterop'</value>
+    </data>
+    <data name="Generic_Unmapped" xml:space="preserve">
+        <value>unmapped</value>
+    </data>
+    <data name="Processor_Error_Stack_Collide" xml:space="preserve">
+        <value>The stack has collided with already allocated memory</value>
+    </data>
+    <data name="Processor_Error_Stack_Out_Of_Range" xml:space="preserve">
+        <value>The rso register is outside the range of available memory</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_Allocation" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the memory allocation extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Allocation_Allocation" xml:space="preserve">
+        <value>{0:X} is not a recognised memory allocation extension set allocation low opcode</value>
+    </data>
+    <data name="Processor_Error_Memory_Allocation" xml:space="preserve">
+        <value>Memory allocation failed. There may not be enough free contiguous memory remaining.</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Allocation_Reallocation" xml:space="preserve">
+        <value>{0:X} is not a recognised memory allocation extension set re-allocation low opcode</value>
+    </data>
+    <data name="Processor_Error_Invalid_Memory_Block" xml:space="preserve">
+        <value>The given memory address does not correspond to the start of an allocated memory block.</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Allocation_Free" xml:space="preserve">
+        <value>{0:X} is not a recognised memory allocation extension set free low opcode</value>
+    </data>
+    <data name="Debugger_Heap_Stats_Main" xml:space="preserve">
+        <value>
 Current memory statistics:
 Total memory: {0:N0} bytes
 Total free memory: {1:N0} bytes
@@ -1116,288 +1116,288 @@ Total size of allocated blocks: {6:N0} bytes
 
 Stack size: {7:N0} bytes{8}
 Program size: {9:N0} bytes</value>
-	</data>
-	<data name="Debugger_Heap_Unmapped" xml:space="preserve">
-		<value> (unmapped)</value>
-	</data>
-	<data name="Debugger_Heap_Map_Header" xml:space="preserve">
-		<value>Memory map:</value>
-	</data>
-	<data name="Debugger_Heap_Map_Fully_Unmapped" xml:space="preserve">
-		<value> = Fully unmapped, </value>
-	</data>
-	<data name="Debugger_Heap_Map_Fully_Mapped" xml:space="preserve">
-		<value> = Fully mapped, </value>
-	</data>
-	<data name="Debugger_Heap_Map_Partially_Mapped" xml:space="preserve">
-		<value> = Partially mapped  (1 block = {0:N2} bytes)</value>
-	</data>
-	<data name="Processor_Error_External_Method" xml:space="preserve">
-		<value>An error was thrown by an external method ({0} -&gt; {1}):
+    </data>
+    <data name="Debugger_Heap_Unmapped" xml:space="preserve">
+        <value> (unmapped)</value>
+    </data>
+    <data name="Debugger_Heap_Map_Header" xml:space="preserve">
+        <value>Memory map:</value>
+    </data>
+    <data name="Debugger_Heap_Map_Fully_Unmapped" xml:space="preserve">
+        <value> = Fully unmapped, </value>
+    </data>
+    <data name="Debugger_Heap_Map_Fully_Mapped" xml:space="preserve">
+        <value> = Fully mapped, </value>
+    </data>
+    <data name="Debugger_Heap_Map_Partially_Mapped" xml:space="preserve">
+        <value> = Partially mapped  (1 block = {0:N2} bytes)</value>
+    </data>
+    <data name="Processor_Error_External_Method" xml:space="preserve">
+        <value>An error was thrown by an external method ({0} -&gt; {1}):
         {2}: {3}</value>
-	</data>
-	<data name="AssemblerWarnings_NonFatal_0004" xml:space="preserve">
-		<value>Allocating constant 0 bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0015" xml:space="preserve">
-		<value>Use `MVB {1}, {1}` instead of `AND {1}, 0xFF`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0016" xml:space="preserve">
-		<value>Use `MVW {1}, {1}` instead of `AND {1}, 0xFFFF`, as it results in less bytes.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0017" xml:space="preserve">
-		<value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
-	</data>
-	<data name="CLI_Assemble_Result_Success_Compressed" xml:space="preserve">
-		<value>Processed {8} line(s) from {9} file(s) in {10:N0} milliseconds.
+    </data>
+    <data name="AssemblerWarnings_NonFatal_0004" xml:space="preserve">
+        <value>Allocating constant 0 bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0015" xml:space="preserve">
+        <value>Use `MVB {1}, {1}` instead of `AND {1}, 0xFF`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0016" xml:space="preserve">
+        <value>Use `MVW {1}, {1}` instead of `AND {1}, 0xFFFF`, as it results in less bytes.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0017" xml:space="preserve">
+        <value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
+    </data>
+    <data name="CLI_Assemble_Result_Success_Compressed" xml:space="preserve">
+        <value>Processed {8} line(s) from {9} file(s) in {10:N0} milliseconds.
 {5} error(s), {6} warning(s), {7} suggestion(s).
 Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header).
 Path: "{1}".</value>
-	</data>
-	<data name="CLI_Assemble_Result_Header_Start" xml:space="preserve">
-		<value>
+    </data>
+    <data name="CLI_Assemble_Result_Header_Start" xml:space="preserve">
+        <value>
 Assembly </value>
-	</data>
-	<data name="CLI_Assemble_Result_Header_Success" xml:space="preserve">
-		<value>SUCCESS</value>
-	</data>
-	<data name="CLI_Assemble_Result_Header_Failed" xml:space="preserve">
-		<value>FAILED</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="CLI_Assemble_Result_Header_Success" xml:space="preserve">
+        <value>SUCCESS</value>
+    </data>
+    <data name="CLI_Assemble_Result_Header_Failed" xml:space="preserve">
+        <value>FAILED</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Header" xml:space="preserve">
+        <value>
 %DEBUG directive on line {0} in {1}
 Program is currently {2:N0} bytes long.</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Label_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Label_Header" xml:space="preserve">
+        <value>
 {0} label(s) currently defined:</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Label_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1:X16}</value>
-	</data>
-	<data name="Assembler_Debug_Directive_LabelRef_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Label_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1:X16}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_LabelRef_Header" xml:space="preserve">
+        <value>
 {0} label reference(s) pending fill:</value>
-	</data>
-	<data name="Assembler_Debug_Directive_LabelRef_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1:X16}</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Single_Line_Macro_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_LabelRef_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1:X16}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Single_Line_Macro_Header" xml:space="preserve">
+        <value>
 {0} defined single-line macro(s):</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Single_Line_Macro_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1}</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Import_Stack_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Single_Line_Macro_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Import_Stack_Header" xml:space="preserve">
+        <value>
 Current import stack (deepest file first):</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Import_Stack_Line" xml:space="preserve">
-		<value>    {0} at line {1}/{2}</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Import_Stack_Base" xml:space="preserve">
-		<value>    Base file at line {0}</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Current_Extensions" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Import_Stack_Line" xml:space="preserve">
+        <value>    {0} at line {1}/{2}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Import_Stack_Base" xml:space="preserve">
+        <value>    Base file at line {0}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Current_Extensions" xml:space="preserve">
+        <value>
 Current extensions used: {0}</value>
-	</data>
-	<data name="Assembler_Error_IBF_Operand_Count" xml:space="preserve">
-		<value>The %IBF directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_IBF_Operand_Type" xml:space="preserve">
-		<value>The operand to the %IBF directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_IBF_Operand_String" xml:space="preserve">
-		<value>The literal operand to the %IBF directive must be a string.</value>
-	</data>
-	<data name="Assembler_Error_IBF_File_Not_Exists" xml:space="preserve">
-		<value>The file "{0}" given to the %IBF directive could not be found.</value>
-	</data>
-	<data name="Debugger_MemoryMap_VerticalSep" xml:space="preserve">
-		<value>│ </value>
-	</data>
-	<data name="AssemblerWarnings_NonFatal_0000" xml:space="preserve">
-		<value>Manually emitted error.</value>
-	</data>
-	<data name="AssemblerWarnings_Suggestion_0000" xml:space="preserve">
-		<value>Manually emitted suggestion.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0000" xml:space="preserve">
-		<value>Manually emitted warning.</value>
-	</data>
-	<data name="Assembler_Error_MESSAGE_Operand_Count" xml:space="preserve">
-		<value>The %MESSAGE directive requires either 1 or 2 operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_MESSAGE_Operand_First" xml:space="preserve">
-		<value>The first operand to the %MESSAGE directive must be one of 'error', 'warning' or 'suggestion'.</value>
-	</data>
-	<data name="Assembler_Error_MESSAGE_Operand_Second_Type" xml:space="preserve">
-		<value>The second operand to the %MESSAGE directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_MESSAGE_Operand_Second_String" xml:space="preserve">
-		<value>The second operand to the %MESSAGE directive must be a string.</value>
-	</data>
-	<data name="Assembler_Error_DEBUG_Operand_Count" xml:space="preserve">
-		<value>The %DEBUG directive takes no operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_Finalized" xml:space="preserve">
-		<value>This assembler has already been finalized. No more lines can be assembled.</value>
-	</data>
-	<data name="Assembler_Error_Literal_Too_Small" xml:space="preserve">
-		<value>Numeric literal too small. {0:N0} is the minimum value:
+    </data>
+    <data name="Assembler_Error_IBF_Operand_Count" xml:space="preserve">
+        <value>The %IBF directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_IBF_Operand_Type" xml:space="preserve">
+        <value>The operand to the %IBF directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_IBF_Operand_String" xml:space="preserve">
+        <value>The literal operand to the %IBF directive must be a string.</value>
+    </data>
+    <data name="Assembler_Error_IBF_File_Not_Exists" xml:space="preserve">
+        <value>The file "{0}" given to the %IBF directive could not be found.</value>
+    </data>
+    <data name="Debugger_MemoryMap_VerticalSep" xml:space="preserve">
+        <value>│ </value>
+    </data>
+    <data name="AssemblerWarnings_NonFatal_0000" xml:space="preserve">
+        <value>Manually emitted error.</value>
+    </data>
+    <data name="AssemblerWarnings_Suggestion_0000" xml:space="preserve">
+        <value>Manually emitted suggestion.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0000" xml:space="preserve">
+        <value>Manually emitted warning.</value>
+    </data>
+    <data name="Assembler_Error_MESSAGE_Operand_Count" xml:space="preserve">
+        <value>The %MESSAGE directive requires either 1 or 2 operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_MESSAGE_Operand_First" xml:space="preserve">
+        <value>The first operand to the %MESSAGE directive must be one of 'error', 'warning' or 'suggestion'.</value>
+    </data>
+    <data name="Assembler_Error_MESSAGE_Operand_Second_Type" xml:space="preserve">
+        <value>The second operand to the %MESSAGE directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_MESSAGE_Operand_Second_String" xml:space="preserve">
+        <value>The second operand to the %MESSAGE directive must be a string.</value>
+    </data>
+    <data name="Assembler_Error_DEBUG_Operand_Count" xml:space="preserve">
+        <value>The %DEBUG directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_Finalized" xml:space="preserve">
+        <value>This assembler has already been finalized. No more lines can be assembled.</value>
+    </data>
+    <data name="Assembler_Error_Literal_Too_Small" xml:space="preserve">
+        <value>Numeric literal too small. {0:N0} is the minimum value:
     {1}</value>
-	</data>
-	<data name="Assembler_Error_Literal_Too_Large" xml:space="preserve">
-		<value>Numeric literal too large. {0:N0} is the maximum value:
+    </data>
+    <data name="Assembler_Error_Literal_Too_Large" xml:space="preserve">
+        <value>Numeric literal too large. {0:N0} is the maximum value:
     {1}</value>
-	</data>
-	<data name="Generic_Copyright_Header" xml:space="preserve">
-		<value>Copyright © 2022-2024  Ptolemy Hill</value>
-	</data>
-	<data name="Assembler_Error_Invalid_Severity" xml:space="preserve">
-		<value>Given severity is not valid.</value>
-	</data>
-	<data name="Assembler_Error_String_Bad_StartIndex" xml:space="preserve">
-		<value>String start index is outside the range of the given line.</value>
-	</data>
-	<data name="Assembler_Error_String_Too_Short" xml:space="preserve">
-		<value>Given line is less than two characters long, which is invalid.</value>
-	</data>
-	<data name="Assembler_Error_String_Bad_First_Char" xml:space="preserve">
-		<value>Given string start index does not point to a quote mark.</value>
-	</data>
-	<data name="Processor_Error_Already_Loaded" xml:space="preserve">
-		<value>A program is already loaded in this processor.</value>
-	</data>
-	<data name="Processor_Error_Program_Too_Large" xml:space="preserve">
-		<value>Program too large to fit in allocated memory. {0} bytes available, {1} given.</value>
-	</data>
-	<data name="Processor_Error_No_Program" xml:space="preserve">
-		<value>A program has not been loaded in this processor.</value>
-	</data>
-	<data name="Assembler_Error_LABEL_OVERRIDE_Operand_Count" xml:space="preserve">
-		<value>The %LABEL_OVERRIDE directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_LABEL_OVERRIDE_Operand_Type" xml:space="preserve">
-		<value>The operand to the %LABEL_OVERRIDE directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target" xml:space="preserve">
-		<value>Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. "{0}" was given as both.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0026" xml:space="preserve">
-		<value>%LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.</value>
-	</data>
-	<data name="AssemblerWarnings_Warning_0027" xml:space="preserve">
-		<value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
-	</data>
-	<data name="Assembler_Error_ENDMACRO_Operand_Count" xml:space="preserve">
-		<value>The %ENDMACRO directive takes no operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_ENDMACRO_Missing" xml:space="preserve">
-		<value>End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Multi_Line_Macro_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Generic_Copyright_Header" xml:space="preserve">
+        <value>Copyright © 2022-2024  Ptolemy Hill</value>
+    </data>
+    <data name="Assembler_Error_Invalid_Severity" xml:space="preserve">
+        <value>Given severity is not valid.</value>
+    </data>
+    <data name="Assembler_Error_String_Bad_StartIndex" xml:space="preserve">
+        <value>String start index is outside the range of the given line.</value>
+    </data>
+    <data name="Assembler_Error_String_Too_Short" xml:space="preserve">
+        <value>Given line is less than two characters long, which is invalid.</value>
+    </data>
+    <data name="Assembler_Error_String_Bad_First_Char" xml:space="preserve">
+        <value>Given string start index does not point to a quote mark.</value>
+    </data>
+    <data name="Processor_Error_Already_Loaded" xml:space="preserve">
+        <value>A program is already loaded in this processor.</value>
+    </data>
+    <data name="Processor_Error_Program_Too_Large" xml:space="preserve">
+        <value>Program too large to fit in allocated memory. {0} bytes available, {1} given.</value>
+    </data>
+    <data name="Processor_Error_No_Program" xml:space="preserve">
+        <value>A program has not been loaded in this processor.</value>
+    </data>
+    <data name="Assembler_Error_LABEL_OVERRIDE_Operand_Count" xml:space="preserve">
+        <value>The %LABEL_OVERRIDE directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_LABEL_OVERRIDE_Operand_Type" xml:space="preserve">
+        <value>The operand to the %LABEL_OVERRIDE directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target" xml:space="preserve">
+        <value>Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. "{0}" was given as both.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0026" xml:space="preserve">
+        <value>%LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0027" xml:space="preserve">
+        <value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
+    </data>
+    <data name="Assembler_Error_ENDMACRO_Operand_Count" xml:space="preserve">
+        <value>The %ENDMACRO directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ENDMACRO_Missing" xml:space="preserve">
+        <value>End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Multi_Line_Macro_Header" xml:space="preserve">
+        <value>
 {0} defined multi-line macro(s):</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Multi_Line_Macro_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1}...</value>
-	</data>
-	<data name="Assembler_Error_Circular_Macro" xml:space="preserve">
-		<value>Circular macro detected: attempted to expand "{0}" when it is already in macro stack.</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Macro_Stack_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Multi_Line_Macro_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1}...</value>
+    </data>
+    <data name="Assembler_Error_Circular_Macro" xml:space="preserve">
+        <value>Circular macro detected: attempted to expand "{0}" when it is already in macro stack.</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Macro_Stack_Header" xml:space="preserve">
+        <value>
 Current macro stack (current macro first):</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Macro_Stack_Line" xml:space="preserve">
-		<value>    {0} with {1} lines remaining</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Header_Macro_Lines" xml:space="preserve">
-		<value>Currently {0} lines into macro expansion for current line.</value>
-	</data>
-	<data name="Assembler_Error_Message_Macro_Stack" xml:space="preserve">
-		<value>
+    </data>
+    <data name="Assembler_Debug_Directive_Macro_Stack_Line" xml:space="preserve">
+        <value>    {0} with {1} lines remaining</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Header_Macro_Lines" xml:space="preserve">
+        <value>Currently {0} lines into macro expansion for current line.</value>
+    </data>
+    <data name="Assembler_Error_Message_Macro_Stack" xml:space="preserve">
+        <value>
 
 Currently expanding the following macro(s): {0}</value>
-	</data>
-	<data name="CLI_Assemble_Error_Warning_Printout_InMacro" xml:space="preserve">
-		<value> in macro {0}</value>
-	</data>
-	<data name="Assembler_Error_Opening_Directive_Missing" xml:space="preserve">
-		<value>{0} is a block ending directive, however there is no currently open instance of the block it closes.</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Label_Link_Header" xml:space="preserve">
-		<value>
+    </data>
+    <data name="CLI_Assemble_Error_Warning_Printout_InMacro" xml:space="preserve">
+        <value> in macro {0}</value>
+    </data>
+    <data name="Assembler_Error_Opening_Directive_Missing" xml:space="preserve">
+        <value>{0} is a block ending directive, however there is no currently open instance of the block it closes.</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Label_Link_Header" xml:space="preserve">
+        <value>
 {0} label link(s) currently defined:</value>
-	</data>
-	<data name="Assembler_Debug_Directive_Label_Link_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1} (from {2} at line {3})</value>
-	</data>
-	<data name="Assembler_Error_Macro_Disable_Block_Nested" xml:space="preserve">
-		<value>Start of macro disabling block found when already inside one. Macro disabling blocks cannot be nested.</value>
-	</data>
-	<data name="Assembler_Error_Macro_Disable_Block_Missing_Start" xml:space="preserve">
-		<value>End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with '!&gt;'.</value>
-	</data>
-	<data name="Assembler_Error_Macro_Params_Bad_StartIndex" xml:space="preserve">
-		<value>Macro parameter start index is outside the range of the given line.</value>
-	</data>
-	<data name="Assembler_Error_Macro_Params_Bad_First_Char" xml:space="preserve">
-		<value>Given macro parameter start index does not point to an opening bracket.</value>
-	</data>
-	<data name="Assembler_Error_Macro_Params_EndOfLine" xml:space="preserve">
-		<value>End of line found while processing macro parameters. Did you forget a closing bracket?
+    </data>
+    <data name="Assembler_Debug_Directive_Label_Link_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1} (from {2} at line {3})</value>
+    </data>
+    <data name="Assembler_Error_Macro_Disable_Block_Nested" xml:space="preserve">
+        <value>Start of macro disabling block found when already inside one. Macro disabling blocks cannot be nested.</value>
+    </data>
+    <data name="Assembler_Error_Macro_Disable_Block_Missing_Start" xml:space="preserve">
+        <value>End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with '!&gt;'.</value>
+    </data>
+    <data name="Assembler_Error_Macro_Params_Bad_StartIndex" xml:space="preserve">
+        <value>Macro parameter start index is outside the range of the given line.</value>
+    </data>
+    <data name="Assembler_Error_Macro_Params_Bad_First_Char" xml:space="preserve">
+        <value>Given macro parameter start index does not point to an opening bracket.</value>
+    </data>
+    <data name="Assembler_Error_Macro_Params_EndOfLine" xml:space="preserve">
+        <value>End of line found while processing macro parameters. Did you forget a closing bracket?
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Macro_Params_Unescaped_Close" xml:space="preserve">
-		<value>Unescaped closing bracket found before end of line in macro parameter list. Use '\)' to have a literal closing bracket character inside a parameter.
+    </data>
+    <data name="Assembler_Error_Macro_Params_Unescaped_Close" xml:space="preserve">
+        <value>Unescaped closing bracket found before end of line in macro parameter list. Use '\)' to have a literal closing bracket character inside a parameter.
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_Macro_Missing_Parameter" xml:space="preserve">
-		<value>A parameter at index {0} is required for this macro, but was not given.</value>
-	</data>
-	<data name="Assembler_Error_Macro_Param_No_Number" xml:space="preserve">
-		<value>Macro parameter is missing an index value. Use '$$' to insert a literal '$' into the parameter content.
+    </data>
+    <data name="Assembler_Error_Macro_Missing_Parameter" xml:space="preserve">
+        <value>A parameter at index {0} is required for this macro, but was not given.</value>
+    </data>
+    <data name="Assembler_Error_Macro_Param_No_Number" xml:space="preserve">
+        <value>Macro parameter is missing an index value. Use '$$' to insert a literal '$' into the parameter content.
     {0}
     {1}^</value>
-	</data>
-	<data name="Assembler_Error_STOP_Operand_Count" xml:space="preserve">
-		<value>The %STOP directive requires either 1 or no operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_STOP_Operand_First_Type" xml:space="preserve">
-		<value>The operand to the %STOP directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_STOP_Operand_First_String" xml:space="preserve">
-		<value>The operand to the %STOP directive must be a string.</value>
-	</data>
-	<data name="Assembler_Error_STOP" xml:space="preserve">
-		<value>Assembly stopped by %STOP directive.</value>
-	</data>
-	<data name="Assembler_Error_REPEAT_Operand_Count" xml:space="preserve">
-		<value>The %REPEAT directive requires a single operand. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_REPEAT_Operand_Type" xml:space="preserve">
-		<value>The operand to the %REPEAT directive must be a literal. An operand of type {0} was provided.</value>
-	</data>
-	<data name="Assembler_Error_REPEAT_Operand_Label_Reference" xml:space="preserve">
-		<value>The literal operand to the %REPEAT directive cannot be a label reference.</value>
-	</data>
-	<data name="Assembler_Error_REPEAT_Operand_Signed_Or_Floating" xml:space="preserve">
-		<value>The literal operand to the %REPEAT directive cannot be negative or floating point.</value>
-	</data>
-	<data name="Assembler_Error_REPEAT_Zero" xml:space="preserve">
-		<value>The literal operand to the %REPEAT directive cannot be zero.</value>
-	</data>
-	<data name="Assembler_Error_ENDREPEAT_Operand_Count" xml:space="preserve">
-		<value>The %ENDREPEAT directive takes no operands. {0} were given.</value>
-	</data>
-	<data name="Assembler_Error_ENDREPEAT_Missing" xml:space="preserve">
-		<value>End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?</value>
-	</data>
+    </data>
+    <data name="Assembler_Error_STOP_Operand_Count" xml:space="preserve">
+        <value>The %STOP directive requires either 1 or no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_STOP_Operand_First_Type" xml:space="preserve">
+        <value>The operand to the %STOP directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_STOP_Operand_First_String" xml:space="preserve">
+        <value>The operand to the %STOP directive must be a string.</value>
+    </data>
+    <data name="Assembler_Error_STOP" xml:space="preserve">
+        <value>Assembly stopped by %STOP directive.</value>
+    </data>
+    <data name="Assembler_Error_REPEAT_Operand_Count" xml:space="preserve">
+        <value>The %REPEAT directive requires a single operand. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_REPEAT_Operand_Type" xml:space="preserve">
+        <value>The operand to the %REPEAT directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_REPEAT_Operand_Label_Reference" xml:space="preserve">
+        <value>The literal operand to the %REPEAT directive cannot be a label reference.</value>
+    </data>
+    <data name="Assembler_Error_REPEAT_Operand_Signed_Or_Floating" xml:space="preserve">
+        <value>The literal operand to the %REPEAT directive cannot be negative or floating point.</value>
+    </data>
+    <data name="Assembler_Error_REPEAT_Zero" xml:space="preserve">
+        <value>The literal operand to the %REPEAT directive cannot be zero.</value>
+    </data>
+    <data name="Assembler_Error_ENDREPEAT_Operand_Count" xml:space="preserve">
+        <value>The %ENDREPEAT directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ENDREPEAT_Missing" xml:space="preserve">
+        <value>End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?</value>
+    </data>
 </root>
