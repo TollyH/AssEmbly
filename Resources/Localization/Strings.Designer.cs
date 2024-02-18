@@ -373,6 +373,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A macro with the name &quot;{0}&quot; does not exist..
+        /// </summary>
+        internal static string Assembler_Error_DELMACRO_Not_Exists {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DELMACRO_Not_Exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %DELMACRO directive takes a single operand..
+        /// </summary>
+        internal static string Assembler_Error_DELMACRO_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DELMACRO_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operands cannot be empty:
         ///    {0}
         ///    {1}^.

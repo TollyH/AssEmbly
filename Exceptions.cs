@@ -96,6 +96,15 @@
     }
 
     /// <summary>
+    /// The exception that is thrown when an error is encountered with an otherwise valid macro name during assembly.
+    /// </summary>
+    public class MacroNameException : AssemblerException
+    {
+        public MacroNameException(string message) : base(message) { }
+        public MacroNameException(string message, int line, string file) : base(message, line, file) { }
+    }
+
+    /// <summary>
     /// The exception that is thrown when the end of the file is reached before a required closing directive is encountered.
     /// </summary>
     public class EndingDirectiveException : AssemblerException

@@ -535,7 +535,8 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.Equals("%MACRO", StringComparison.OrdinalIgnoreCase);
+                        isMacro = mnemonic.Equals("%MACRO", StringComparison.OrdinalIgnoreCase)
+                            || mnemonic.Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase);
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -1233,7 +1234,8 @@ namespace AssEmbly
                 // Remove the '!' prefix and skip macro processing for this line
                 rawLine = CleanLine(rawLine[1..]);
             }
-            else if (!insideMacroSkipBlock)
+            // We can't do macro replacement on the %DELMACRO directive else it won't be possible to un-define a single-line macro
+            else if (!insideMacroSkipBlock && !rawLine.Split(' ')[0].Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase))
             {
                 // Single-line macro expansion
                 // FIXME: At the moment, nested macros can cause this to go into an infinite loop.
@@ -1453,6 +1455,28 @@ namespace AssEmbly
                     else
                     {
                         throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
+                    }
+                    return true;
+                // Remove macro
+                case "%DELMACRO":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(Strings.Assembler_Error_DELMACRO_Operand_Count);
+                    }
+                    bool removed = false;
+                    if (singleLineMacros.Remove(operands[0]))
+                    {
+                        _ = singleLineMacroNames.Remove(operands[0]);
+                        removed = true;
+                    }
+                    if (multiLineMacros.Remove(operands[0]))
+                    {
+                        _ = multiLineMacroNames.Remove(operands[0]);
+                        removed = true;
+                    }
+                    if (!removed)
+                    {
+                        throw new MacroNameException(string.Format(Strings.Assembler_Error_DELMACRO_Not_Exists, operands[0]));
                     }
                     return true;
                 // Define label address manually

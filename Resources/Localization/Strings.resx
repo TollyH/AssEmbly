@@ -1401,4 +1401,10 @@ Currently expanding the following macro(s): {0}</value>
     <data name="Assembler_Error_ENDREPEAT_Missing" xml:space="preserve">
         <value>End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?</value>
     </data>
+    <data name="Assembler_Error_DELMACRO_Operand_Count" xml:space="preserve">
+        <value>The %DELMACRO directive takes a single operand.</value>
+    </data>
+    <data name="Assembler_Error_DELMACRO_Not_Exists" xml:space="preserve">
+        <value>A macro with the name "{0}" does not exist.</value>
+    </data>
 </root>
