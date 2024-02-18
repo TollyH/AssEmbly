@@ -71,7 +71,7 @@ namespace AssEmbly
         private readonly Dictionary<string, (string Target, string? FilePath, int Line)> labelLinks = new();
         // List of references to labels by name along with the address to insert the relevant address in to.
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
-        private readonly List<(string LabelName, ulong Address, string? FilePath, int Line)> labelReferences = new();
+        private readonly List<(string LabelName, ulong Address, AssemblyPosition Position)> labelReferences = new();
         private readonly HashSet<string> overriddenLabels = new();
         // string -> replacement. All single-line macros are expanded before multi-line macros.
         private readonly Dictionary<string, string> singleLineMacros = new();
@@ -251,7 +251,7 @@ namespace AssEmbly
 
             // 1 less than starting index as increment happens at start of loop
             lineIndex = -1;
-            while (lineIndex < dynamicLines.Count)
+            while (lineIndex < dynamicLines.Count - 1)
             {
                 IncrementCurrentLine();
                 string rawLine = CleanLine(dynamicLines[lineIndex]);
@@ -316,8 +316,7 @@ namespace AssEmbly
 
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
-                        labelReferences.Add((label, relativeOffset + (uint)program.Count, currentImport?.ImportPath,
-                            currentImport?.CurrentLine ?? baseFileLine));
+                        labelReferences.Add((label, relativeOffset + (uint)program.Count, GetCurrentPosition()));
                     }
 
                     assembledLines.Add(((uint)program.Count, rawLine));
@@ -334,37 +333,7 @@ namespace AssEmbly
                 }
                 catch (AssemblerException e)
                 {
-                    // Some directives change the current line index, so get the raw line contents again.
-                    // Also includes comments on original line that were removed by CleanLine.
-                    rawLine = dynamicLines[lineIndex];
-
-                    if (currentImport is null)
-                    {
-                        e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
-                        e.WarningObject = new Warning(
-                            WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(),
-                            rawLine, currentMacro?.MacroName, e.Message);
-                    }
-                    else
-                    {
-                        e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
-                            currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(),
-                            rawLine, currentMacro?.MacroName, e.Message);
-                        string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
-                        _ = importStack.Pop();  // Remove already printed frame from stack
-                        while (importStack.TryPop(out ImportStackFrame? nestedImport))
-                        {
-                            newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Import, nestedImport.CurrentLine, nestedImport.ImportPath);
-                        }
-                        newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Base, baseFileLine, e.Message);
-                        e.ConsoleMessage = newMessage;
-                    }
-
-                    if (currentMacro is not null)
-                    {
-                        e.ConsoleMessage += string.Format(
-                            Strings.Assembler_Error_Message_Macro_Stack, string.Join(" -> ", macroStack.Select(m => m.MacroName)));
-                    }
+                    HandleAssemblerException(e);
                     throw;
                 }
             }
@@ -1110,13 +1079,16 @@ namespace AssEmbly
             }
 
             Span<byte> programSpan = CollectionsMarshal.AsSpan(program);
-            foreach ((string labelName, ulong insertOffset, string? filePath, int line) in labelReferences)
+            foreach ((string labelName, ulong insertOffset, AssemblyPosition position) in labelReferences)
             {
                 if (!labels.TryGetValue(labelName, out ulong targetOffset))
                 {
+                    // Rollback the current position of the assembler,
+                    // so that the line that the label was defined on is shown in the error message
+                    SetCurrentPosition(position);
                     LabelNameException exc = new(
-                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName), line, filePath ?? "");
-                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
+                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName));
+                    HandleAssemblerException(exc);
                     throw exc;
                 }
                 // Write the now known address of the label to where it is required within the program
@@ -1330,6 +1302,39 @@ namespace AssEmbly
                 }
             }
             return false;
+        }
+
+        private void HandleAssemblerException(AssemblerException e)
+        {
+            string rawLine = dynamicLines[lineIndex];
+
+            if (currentImport is null)
+            {
+                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
+                e.WarningObject = new Warning(
+                    WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(),
+                    rawLine, currentMacro?.MacroName, e.Message);
+            }
+            else
+            {
+                e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
+                    currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(),
+                    rawLine, currentMacro?.MacroName, e.Message);
+                string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
+                _ = importStack.Pop();  // Remove already printed frame from stack
+                while (importStack.TryPop(out ImportStackFrame? nestedImport))
+                {
+                    newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Import, nestedImport.CurrentLine, nestedImport.ImportPath);
+                }
+                newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Base, baseFileLine, e.Message);
+                e.ConsoleMessage = newMessage;
+            }
+
+            if (currentMacro is not null)
+            {
+                e.ConsoleMessage += string.Format(
+                    Strings.Assembler_Error_Message_Macro_Stack, string.Join(" -> ", macroStack.Select(m => m.MacroName)));
+            }
         }
 
         /// <summary>
@@ -1596,10 +1601,10 @@ namespace AssEmbly
                             Strings.Assembler_Debug_Directive_Label_Link_Line, labelName, target, filePath ?? Strings.Generic_Base_File, line);
                     }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
-                    foreach ((string labelName, ulong insertOffset, string? filePath, int lineNum) in labelReferences)
+                    foreach ((string labelName, ulong insertOffset, _) in labelReferences)
                     {
                         Console.Error.WriteLine(
-                            Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset, filePath ?? Strings.Generic_Base_File, lineNum);
+                            Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset);
                     }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Header, singleLineMacros.Count);
                     foreach ((string macro, string replacement) in singleLineMacros)

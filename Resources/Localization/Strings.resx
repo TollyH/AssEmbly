@@ -1181,7 +1181,7 @@ Program is currently {2:N0} bytes long.</value>
 {0} label reference(s) pending fill:</value>
 	</data>
 	<data name="Assembler_Debug_Directive_LabelRef_Line" xml:space="preserve">
-		<value>    {0} -&gt; {1:X16} from {2} at line {3}</value>
+		<value>    {0} -&gt; {1:X16}</value>
 	</data>
 	<data name="Assembler_Debug_Directive_Single_Line_Macro_Header" xml:space="preserve">
 		<value>

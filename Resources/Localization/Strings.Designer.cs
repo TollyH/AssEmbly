@@ -185,7 +185,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     {0} -&gt; {1:X16} from {2} at line {3}.
+        ///   Looks up a localized string similar to     {0} -&gt; {1:X16}.
         /// </summary>
         internal static string Assembler_Debug_Directive_LabelRef_Line {
             get {
@@ -1005,7 +1005,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The operand to the %STOP directive must be a string..
         /// </summary>
         internal static string Assembler_Error_STOP_Operand_First_String {
             get {
@@ -1014,7 +1014,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The operand to the %STOP directive must be a literal. An operand of type {0} was provided..
         /// </summary>
         internal static string Assembler_Error_STOP_Operand_First_Type {
             get {
