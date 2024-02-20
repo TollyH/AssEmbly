@@ -29,10 +29,14 @@ namespace AssEmbly
             public string ImportPath { get; } = importPath;
             public int CurrentLine { get; set; } = currentLine;
             public int TotalLines { get; } = totalLines;
+            public bool AnyAssembledLines { get; set; } = false;
 
             public object Clone()
             {
-                return new ImportStackFrame(ImportPath, CurrentLine, TotalLines);
+                return new ImportStackFrame(ImportPath, CurrentLine, TotalLines)
+                {
+                    AnyAssembledLines = AnyAssembledLines
+                };
             }
         }
 
@@ -116,7 +120,9 @@ namespace AssEmbly
         private ulong entryPoint = 0;
 
         private int processedLines = 0;
-        private int visitedFiles = 1;
+        private Dictionary<string, int> timesSeenFile = new();
+        // Files that begin with an %ASM_ONCE directive (i.e. won't throw a circular import error)
+        private HashSet<string> completeAsmOnceFiles = new();
 
         /// <param name="usingV1Format">
         /// Whether or not a v1 executable will be generated from this assembly.
@@ -224,7 +230,7 @@ namespace AssEmbly
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports);
-            return new AssemblyResult(programBytes, debugInfo, dynamicLines, warnings, entryPoint, usedExtensions, processedLines, visitedFiles);
+            return new AssemblyResult(programBytes, debugInfo, dynamicLines, warnings, entryPoint, usedExtensions, processedLines, timesSeenFile.Count);
         }
 
         /// <summary>
@@ -309,6 +315,11 @@ namespace AssEmbly
                     {
                         // Directive found and processed, move onto next statement
                         continue;
+                    }
+
+                    if (currentImport is not null)
+                    {
+                        currentImport.AnyAssembledLines = true;
                     }
 
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
@@ -1391,7 +1402,9 @@ namespace AssEmbly
                     {
                         throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
                     }
-                    if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.OrdinalIgnoreCase)))
+                    if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.OrdinalIgnoreCase))
+                        // If a file is entirely guarded by %ASM_ONCE, we don't need to error if it's already present on import stack.
+                        && !completeAsmOnceFiles.Any(s => string.Equals(s, resolvedPath, StringComparison.OrdinalIgnoreCase)))
                     {
                         throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
                     }
@@ -1400,6 +1413,11 @@ namespace AssEmbly
                     dynamicLines.InsertRange(currentLineIndex + 1, linesToImport);
                     resolvedImports.Add((importPath, resolvedPath, (uint)program.Count));
 
+                    if (!timesSeenFile.TryAdd(resolvedPath, 1))
+                    {
+                        timesSeenFile[resolvedPath]++;
+                    }
+
                     warnings.AddRange(warningGenerator.NextInstruction(
                         Array.Empty<byte>(), mnemonic, operands,
                         currentImport?.CurrentLine ?? baseFileLine,
@@ -1407,7 +1425,6 @@ namespace AssEmbly
                         currentMacro?.MacroName, macroLineDepth));
 
                     importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
-                    visitedFiles++;
                     return true;
                 // Define macro
                 case "%MACRO":
@@ -1656,6 +1673,27 @@ namespace AssEmbly
                         currentRepeatSections.Push((position, iterationsRemaining - 1));
                         // Assembler will increment line by 1 after this set, which is what we want to skip repeating the initial %REPEAT directive
                         SetCurrentPosition(position);
+                    }
+                    return true;
+                // Only assemble file once
+                case "%ASM_ONCE":
+                    if (operands.Length != 0)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_ASM_ONCE_Operand_Count, operands.Length));
+                    }
+                    if (currentImport is not null)
+                    {
+                        if (!currentImport.AnyAssembledLines)
+                        {
+                            _ = completeAsmOnceFiles.Add(currentImport.ImportPath);
+                        }
+                        if (timesSeenFile.TryGetValue(currentImport.ImportPath, out int times) && times > 1)
+                        {
+                            while (currentImport?.CurrentLine < currentImport?.TotalLines)
+                            {
+                                _ = IncrementCurrentLine();
+                            }
+                        }
                     }
                     return true;
                 // Print assembler state

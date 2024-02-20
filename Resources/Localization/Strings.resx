@@ -1407,4 +1407,7 @@ Currently expanding the following macro(s): {0}</value>
     <data name="Assembler_Error_DELMACRO_Not_Exists" xml:space="preserve">
         <value>A macro with the name "{0}" does not exist.</value>
     </data>
+    <data name="Assembler_Error_ASM_ONCE_Operand_Count" xml:space="preserve">
+        <value>The %ASM_ONCE directive takes no operands. {0} were given.</value>
+    </data>
 </root>

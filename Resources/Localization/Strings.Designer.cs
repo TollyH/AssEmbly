@@ -287,6 +287,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_ASM_ONCE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ASM_ONCE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Character literals must contain at least 1 character.
         ///    {0}
         ///    {1}^.
