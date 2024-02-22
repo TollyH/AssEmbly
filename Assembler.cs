@@ -947,6 +947,7 @@ namespace AssEmbly
             List<string> parameters = new();
             StringBuilder currentParameter = new();
             bool openBackslash = false;
+            int openBrackets = 0;
             int i = startIndex;
             bool paramsClosed = false;
             while (!paramsClosed)
@@ -957,24 +958,40 @@ namespace AssEmbly
                         string.Format(Strings.Assembler_Error_Macro_Params_EndOfLine, line, new string(' ', i - 1)));
                 }
 
+                char c = line[i];
+
                 if (!openBackslash)
                 {
-                    switch (line[i])
+                    if (c == '(')
                     {
-                        case ')':
-                            paramsClosed = true;
-                            continue;
-                        case '\\':
-                            openBackslash = true;
-                            continue;
-                        case ',':
-                            parameters.Add(currentParameter.ToString());
-                            _ = currentParameter.Clear();
-                            continue;
+                        openBrackets++;
+                    }
+                    else if (openBrackets > 0)
+                    {
+                        if (c == ')')
+                        {
+                            openBrackets--;
+                        }
+                    }
+                    else
+                    {
+                        switch (c)
+                        {
+                            case ')':
+                                paramsClosed = true;
+                                continue;
+                            case '\\':
+                                openBackslash = true;
+                                continue;
+                            case ',':
+                                parameters.Add(currentParameter.ToString());
+                                _ = currentParameter.Clear();
+                                continue;
+                        }
                     }
                 }
 
-                _ = currentParameter.Append(line[i]);
+                _ = currentParameter.Append(c);
                 openBackslash = false;
             }
             startIndex = i;
@@ -1207,6 +1224,53 @@ namespace AssEmbly
             _ = importStack.TryPeek(out currentImport);
         }
 
+        private string ExpandSingleLineMacros(string text)
+        {
+            // FIXME: At the moment, nested macros can cause this to go into an infinite loop.
+            for (int i = 0; i < text.Length; i++)
+            {
+                foreach (string macro in singleLineMacroNames)
+                {
+                    if (macro.Length > text.Length - i)
+                    {
+                        continue;
+                    }
+
+                    bool match = true;
+                    for (int j = 0; j < macro.Length; j++)
+                    {
+                        if (text[i + j] != macro[j])
+                        {
+                            match = false;
+                            break;
+                        }
+                    }
+                    if (match)
+                    {
+                        string[] parameters;
+                        int paramIndex = i + macro.Length;
+                        if (text.Length > paramIndex && text[paramIndex] == '(')
+                        {
+                            // Recursively expand macros in parameters
+                            parameters = ParseMacroParameters(text, ref paramIndex).Select(ExpandSingleLineMacros).ToArray();
+                            // Don't include the closing bracket
+                            paramIndex++;
+                        }
+                        else
+                        {
+                            parameters = Array.Empty<string>();
+                        }
+                        text = text[..i] + InsertMacroParameters(singleLineMacros[macro], parameters) + text[paramIndex..];
+                        // If a replacement occured, stay on the current character and try every macro again
+                        i--;
+                        break;
+                    }
+                }
+            }
+
+            return text;
+        }
+
         /// <summary>
         /// Expand any matching single-line macros on the current line,
         /// then insert the contents of a matching multi-line macro after the current line if an exact match exists.
@@ -1248,48 +1312,7 @@ namespace AssEmbly
             // We can't do macro replacement on the %DELMACRO directive else it won't be possible to un-define a single-line macro
             else if (!insideMacroSkipBlock && !rawLine.Split(' ')[0].Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase))
             {
-                // Single-line macro expansion
-                // FIXME: At the moment, nested macros can cause this to go into an infinite loop.
-                // TODO: Turn into recursive method that can also be used to put macros inside parameters. Should fix the above in the process.
-                for (int i = 0; i < rawLine.Length; i++)
-                {
-                    foreach (string macro in singleLineMacroNames)
-                    {
-                        if (macro.Length > rawLine.Length - i)
-                        {
-                            continue;
-                        }
-
-                        bool match = true;
-                        for (int j = 0; j < macro.Length; j++)
-                        {
-                            if (rawLine[i + j] != macro[j])
-                            {
-                                match = false;
-                                break;
-                            }
-                        }
-                        if (match)
-                        {
-                            string[] parameters;
-                            int paramIndex = i + macro.Length;
-                            if (rawLine.Length > paramIndex && rawLine[paramIndex] == '(')
-                            {
-                                parameters = ParseMacroParameters(rawLine, ref paramIndex);
-                                // Don't include the closing bracket
-                                paramIndex++;
-                            }
-                            else
-                            {
-                                parameters = Array.Empty<string>();
-                            }
-                            rawLine = CleanLine(rawLine[..i] + InsertMacroParameters(singleLineMacros[macro], parameters) + rawLine[paramIndex..]);
-                            // If a replacement occured, stay on the current character and try every macro again
-                            i--;
-                            break;
-                        }
-                    }
-                }
+                rawLine = ExpandSingleLineMacros(rawLine);
 
                 // Multi-line macro expansion
                 foreach (string macro in multiLineMacroNames)
@@ -1304,7 +1327,7 @@ namespace AssEmbly
                         rawLine[..macro.Length] == macro)
                     {
                         int paramIndex = macro.Length;
-                        parameters = ParseMacroParameters(rawLine, ref paramIndex);
+                        parameters = ParseMacroParameters(rawLine, ref paramIndex).Select(ExpandSingleLineMacros).ToArray();
                         if (paramIndex != rawLine.Length - 1)
                         {
                             throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Params_Unescaped_Close, rawLine, new string(' ', paramIndex)));
@@ -1428,11 +1451,27 @@ namespace AssEmbly
                     return true;
                 // Define macro
                 case "%MACRO":
+                    if (operands.Length is < 1 or > 2)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
+                    }
+
+                    string newMacroName = operands[0];
+                    int index;
+                    if ((index = newMacroName.IndexOf('(')) != -1)
+                    {
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, newMacroName, new string(' ', index)));
+                    }
+                    if ((index = newMacroName.IndexOf(')')) != -1)
+                    {
+                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, newMacroName, new string(' ', index)));
+                    }
+
                     if (operands.Length == 2)
                     {
                         // Single-line macro
-                        singleLineMacros[operands[0]] = operands[1];
-                        singleLineMacroNames.Add(operands[0]);
+                        singleLineMacros[newMacroName] = operands[1];
+                        singleLineMacroNames.Add(newMacroName);
                         singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).ToList();
                     }
                     else if (operands.Length == 1)
@@ -1465,13 +1504,9 @@ namespace AssEmbly
                             SetCurrentPosition(startPosition);
                             throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
                         }
-                        multiLineMacros[operands[0]] = replacement.ToArray();
-                        multiLineMacroNames.Add(operands[0]);
+                        multiLineMacros[newMacroName] = replacement.ToArray();
+                        multiLineMacroNames.Add(newMacroName);
                         multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
-                    }
-                    else
-                    {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
                     }
                     return true;
                 // Remove macro

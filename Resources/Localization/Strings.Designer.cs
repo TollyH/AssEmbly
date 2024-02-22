@@ -287,7 +287,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to The %ASM_ONCE directive takes no operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_ASM_ONCE_Operand_Count {
             get {
@@ -740,6 +740,17 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Macro_Missing_Parameter {
             get {
                 return ResourceManager.GetString("Assembler_Error_Macro_Missing_Parameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Macro names cannot contain brackets.
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Assembler_Error_Macro_Name_Brackets {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Name_Brackets", resourceCulture);
             }
         }
         

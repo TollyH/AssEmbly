@@ -1410,4 +1410,9 @@ Currently expanding the following macro(s): {0}</value>
     <data name="Assembler_Error_ASM_ONCE_Operand_Count" xml:space="preserve">
         <value>The %ASM_ONCE directive takes no operands. {0} were given.</value>
     </data>
+    <data name="Assembler_Error_Macro_Name_Brackets" xml:space="preserve">
+        <value>Macro names cannot contain brackets.
+    {0}
+    {1}^</value>
+    </data>
 </root>
