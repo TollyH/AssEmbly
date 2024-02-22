@@ -85,6 +85,7 @@ namespace AssEmbly
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
             bool useV1Format = false;
+            int macroExpansionLimit = -1;
             foreach (string a in args)
             {
                 string lowerA = a.ToLowerInvariant();
@@ -140,6 +141,17 @@ namespace AssEmbly
                 {
                     useV1Format = true;
                 }
+                else if (lowerA.StartsWith("--macro-limit="))
+                {
+                    string macroLimitString = a.Split("=")[1];
+                    if (!int.TryParse(macroLimitString, out macroExpansionLimit))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                    }
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -149,6 +161,10 @@ namespace AssEmbly
             try
             {
                 Assembler assembler = new(useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                if (macroExpansionLimit >= 0)
+                {
+                    assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
                 // Sort warnings by severity, then file, then line
@@ -441,7 +457,7 @@ namespace AssEmbly
 
         private static void DisplayHelp()
         {
-            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize);
+            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
         }
     }
 }

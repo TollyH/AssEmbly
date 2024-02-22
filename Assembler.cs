@@ -62,7 +62,11 @@ namespace AssEmbly
             public readonly int MacroLineDepth = macroLineDepth;
         }
 
+        public const int DefaultMacroExpansionLimit = 1024;
+
         public bool Finalized { get; private set; }
+
+        public int MacroExpansionLimit { get; set; } = DefaultMacroExpansionLimit;
 
         // The lines to assemble may change during assembly, for example importing a file
         // will extend the list of lines to assemble as and when the import is reached.
@@ -1226,7 +1230,8 @@ namespace AssEmbly
 
         private string ExpandSingleLineMacros(string text)
         {
-            // FIXME: At the moment, nested macros can cause this to go into an infinite loop.
+            int currentExpansions = 0;
+
             for (int i = 0; i < text.Length; i++)
             {
                 foreach (string macro in singleLineMacroNames)
@@ -1247,6 +1252,10 @@ namespace AssEmbly
                     }
                     if (match)
                     {
+                        if (++currentExpansions > MacroExpansionLimit)
+                        {
+                            throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Limit_Exceeded, MacroExpansionLimit));
+                        }
                         string[] parameters;
                         int paramIndex = i + macro.Length;
                         if (text.Length > paramIndex && text[paramIndex] == '(')

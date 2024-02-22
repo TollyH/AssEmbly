@@ -735,6 +735,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Macro expansion limit of {0} exceeded..
+        /// </summary>
+        internal static string Assembler_Error_Macro_Limit_Exceeded {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Macro_Limit_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A parameter at index {0} is required for this macro, but was not given..
         /// </summary>
         internal static string Assembler_Error_Macro_Missing_Parameter {
@@ -1848,6 +1857,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string CLI_Error_Invalid_AAP {
             get {
                 return ResourceManager.GetString("CLI_Error_Invalid_AAP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is not a valid maximum number of macro expansions..
+        /// </summary>
+        internal static string CLI_Error_Invalid_Macro_Limit {
+            get {
+                return ResourceManager.GetString("CLI_Error_Invalid_Macro_Limit", resourceCulture);
             }
         }
         

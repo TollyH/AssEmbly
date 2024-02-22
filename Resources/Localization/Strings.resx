@@ -146,6 +146,7 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --no-debug-file - Do not generate a debug information file with the executable.
     --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
     --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.
+    --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
     --compress - Apply GZip compression to the resulting executable.
     --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
@@ -1414,5 +1415,11 @@ Currently expanding the following macro(s): {0}</value>
         <value>Macro names cannot contain brackets.
     {0}
     {1}^</value>
+    </data>
+    <data name="Assembler_Error_Macro_Limit_Exceeded" xml:space="preserve">
+        <value>Macro expansion limit of {0} exceeded.</value>
+    </data>
+    <data name="CLI_Error_Invalid_Macro_Limit" xml:space="preserve">
+        <value>{0} is not a valid maximum number of macro expansions.</value>
     </data>
 </root>
