@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
@@ -1843,7 +1842,7 @@ namespace AssEmbly
                     }
                     if (!assemblerVariables.Remove(operands[0]))
                     {
-                        throw new MacroNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, operands[0]));
+                        throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, operands[0]));
                     }
                     return true;
                 // Print assembler state
