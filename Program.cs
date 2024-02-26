@@ -160,6 +160,10 @@ namespace AssEmbly
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
                 }
+                foreach ((string name, ulong value) in GetVariableDefinitions(args))
+                {
+                    assembler.SetAssemblerVariable(name, value);
+                }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
                 // Sort warnings by severity, then file, then line
@@ -325,6 +329,10 @@ namespace AssEmbly
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
                 }
+                foreach ((string name, ulong value) in GetVariableDefinitions(args))
+                {
+                    assembler.SetAssemblerVariable(name, value);
+                }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
             }
@@ -442,6 +450,10 @@ namespace AssEmbly
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
+                foreach ((string name, ulong value) in GetVariableDefinitions(args))
+                {
+                    assembler.SetAssemblerVariable(name, value);
                 }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 AssemblyResult assemblyResult = assembler.GetAssemblyResult(true);

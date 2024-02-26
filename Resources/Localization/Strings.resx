@@ -147,6 +147,7 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
     --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.
     --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
+    --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
     --compress - Apply GZip compression to the resulting executable.
     --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
@@ -162,6 +163,8 @@ execute - Execute an already assembled executable file
 
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
+    --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
+    --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
@@ -1428,7 +1431,7 @@ Currently expanding the following macro(s): {0}</value>
     <data name="Assembler_Error_DEFINE_Operand_Type" xml:space="preserve">
         <value>The second operand to the %DEFINE directive must be a literal. An operand of type {0} was provided.</value>
     </data>
-    <data name="Assembler_Error_DEFINE_Invalid_Character" xml:space="preserve">
+    <data name="Assembler_Error_Variable_Invalid_Character" xml:space="preserve">
         <value>Invalid character in assembler variable name:
     {0}
     {1}^
@@ -1455,5 +1458,8 @@ Assembler variable names may not contain symbols other than underscores.</value>
     </data>
     <data name="Assembler_Debug_Directive_Assembler_Variable_Line" xml:space="preserve">
         <value>    {0} -&gt; {1:N0}</value>
+    </data>
+    <data name="CLI_Error_Invalid_Variable_Value" xml:space="preserve">
+        <value>{0} is not a valid value for an assembler variable.</value>
     </data>
 </root>

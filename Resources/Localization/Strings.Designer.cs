@@ -89,7 +89,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to     {0} -&gt; {1:N0}.
         /// </summary>
         internal static string Assembler_Debug_Directive_Assembler_Variable_Line {
             get {
@@ -415,18 +415,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_DEBUG_Operand_Count {
             get {
                 return ResourceManager.GetString("Assembler_Error_DEBUG_Operand_Count", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid character in assembler variable name:
-        ///    {0}
-        ///    {1}^
-        ///Assembler variable names may not contain symbols other than underscores..
-        /// </summary>
-        internal static string Assembler_Error_DEFINE_Invalid_Character {
-            get {
-                return ResourceManager.GetString("Assembler_Error_DEFINE_Invalid_Character", resourceCulture);
             }
         }
         
@@ -1296,6 +1284,18 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid character in assembler variable name:
+        ///    {0}
+        ///    {1}^
+        ///Assembler variable names may not contain symbols other than underscores..
+        /// </summary>
+        internal static string Assembler_Error_Variable_Invalid_Character {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Variable_Invalid_Character", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An assembler variable with the name &quot;{0}&quot; does not exist. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Variable_Not_Exists {
@@ -1978,6 +1978,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string CLI_Error_Invalid_Operation {
             get {
                 return ResourceManager.GetString("CLI_Error_Invalid_Operation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} is not a valid value for an assembler variable..
+        /// </summary>
+        internal static string CLI_Error_Invalid_Variable_Value {
+            get {
+                return ResourceManager.GetString("CLI_Error_Invalid_Variable_Value", resourceCulture);
             }
         }
         

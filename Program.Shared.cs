@@ -154,6 +154,34 @@ namespace AssEmbly
             return -1;
         }
 
+        public static List<(string Name, ulong Value)> GetVariableDefinitions(string[] args)
+        {
+            List<(string Name, ulong Value)> result = new();
+            foreach (string a in args)
+            {
+                if (a.StartsWith("--define=", StringComparison.OrdinalIgnoreCase))
+                {
+                    string definitionString = a.Split("=")[1];
+                    foreach (string variableDefinition in definitionString.Split(','))
+                    {
+                        string[] split = variableDefinition.Split(':', 2);
+                        ulong value = 0;
+                        if (split.Length == 2 && !ulong.TryParse(split[1], out value))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
+                            Console.ResetColor();
+                            Environment.Exit(1);
+                            return new List<(string Name, ulong Value)>();
+                        }
+                        result.Add((split[0], value));
+                    }
+                    return result;
+                }
+            }
+            return new List<(string Name, ulong Value)>();
+        }
+
         public static void OnExecutionException(Exception e, Processor processor)
         {
             Console.ForegroundColor = ConsoleColor.Red;

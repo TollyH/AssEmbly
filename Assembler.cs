@@ -225,6 +225,28 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Create or update an assembler variable with the given name to the specified value.
+        /// </summary>
+        /// <remarks>This method will perform validation the name of the assembler variable.</remarks>
+        /// <exception cref="SyntaxError">Thrown if the given name is invalid.</exception>
+        public void SetAssemblerVariable(string name, ulong value)
+        {
+            if (name.Length == 0)
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
+            }
+
+            Match invalidMatch = Regex.Match(name, "[^A-Za-z0-9_]");
+            if (invalidMatch.Success)
+            {
+                throw new SyntaxError(
+                    string.Format(Strings.Assembler_Error_Variable_Invalid_Character, name, new string(' ', invalidMatch.Index)));
+            }
+
+            assemblerVariables[name] = value;
+        }
+
+        /// <summary>
         /// Get the result of the assembly, including the assembled program bytes.
         /// </summary>
         /// <remarks>
@@ -1874,15 +1896,8 @@ namespace AssEmbly
                     }
 
                     string newVariableName = operands[0];
-                    Match invalidMatch = Regex.Match(newVariableName, "[^A-Za-z0-9_]");
-                    if (invalidMatch.Success)
-                    {
-                        throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_DEFINE_Invalid_Character, newVariableName, new string(' ', invalidMatch.Index)));
-                    }
-
                     _ = ParseLiteral(operands[1], false, out ulong variableValue);
-                    assemblerVariables[newVariableName] = variableValue;
+                    SetAssemblerVariable(newVariableName, variableValue);
                     return true;
                 // Remove assembler variable
                 case "%UNDEFINE":
