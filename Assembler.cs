@@ -294,6 +294,8 @@ namespace AssEmbly
                         continue;
                     }
 
+                    rawLine = ProcessAssemblerVariables(rawLine);
+
                     string[] line = ParseLine(rawLine);
                     if (line.Length == 0)
                     {
@@ -330,8 +332,6 @@ namespace AssEmbly
                         continue;
                     }
                     string[] operands = line[1..];
-
-                    ProcessAssemblerVariables(operands);
 
                     if (mnemonic[0] == '%' && ProcessStateDirective(mnemonic, operands, rawLine, dynamicLines, ref lineIndex))
                     {
@@ -1384,56 +1384,106 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Replace any assembler variable/constant references in a list of operands with their currently stored value.
+        /// Replace any assembler variable/constant references in a string with their currently stored value.
         /// </summary>
-        private void ProcessAssemblerVariables(IList<string> operands)
+        private string ProcessAssemblerVariables(string text)
         {
-            for (int i = 0; i < operands.Count; i++)
-            {
-                string operand = operands[i];
+            StringBuilder currentName = new();
+            int currentStartIndex = 0;
+            bool openBackslash = false;
+            bool parsingName = false;
 
-                if (operand.Length == 0 || operand[0] != '@')
+            for (int i = 0; i <= text.Length; i++)
+            {
+                // Terminate the string with a null character so that variables at the end of the line are still replaced
+                char c = i < text.Length ? text[i] : '\0';
+
+                if (parsingName)
                 {
+                    if (c is (< 'a' or > 'z') and (< 'A' or > 'Z') and (< '0' or > '9') and not '_'
+                        && (currentStartIndex != i - 1 || c != '!'))
+                    {
+                        // Character not valid for an assembler variable, so mark the end of the current name and replace it
+                        parsingName = false;
+
+                        string value = GetAssemblerVariableValue(currentName.ToString());
+                        text = text[..currentStartIndex] + value + text[i..];
+                        // Adjust current string index based on newly replaced text
+                        i = currentStartIndex - 1;
+
+                        _ = currentName.Clear();
+                        continue;
+                    }
+                    _ = currentName.Append(c);
                     continue;
                 }
 
-                if (operand.Length >= 2 && operand[1] == '!')
+                if (!openBackslash)
                 {
-                    // Assembler constant
-                    if (operand.Length == 2)
+                    switch (c)
                     {
-                        throw new SyntaxError(Strings.Assembler_Error_Constant_Empty_Name);
-                    }
-
-                    string name = operand[2..];
-                    if (assemblerConstants.TryGetValue(name, out Func<ulong>? valueGetter))
-                    {
-                        operands[i] = valueGetter().ToString();
-                    }
-                    else
-                    {
-                        throw new VariableNameException(string.Format(Strings.Assembler_Error_Constant_Not_Exists, name));
+                        case '@':
+                            currentStartIndex = i;
+                            parsingName = true;
+                            continue;
+                        case '\\':
+                            openBackslash = true;
+                            continue;
                     }
                 }
-                else
-                {
-                    // Assembler variable
-                    if (operand.Length == 1)
-                    {
-                        throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
-                    }
 
-                    string name = operand[1..];
-                    if (assemblerVariables.TryGetValue(name, out ulong value))
-                    {
-                        operands[i] = value.ToString();
-                    }
-                    else
-                    {
-                        throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, name));
-                    }
+                if (c == '@')
+                {
+                    // Remove the backslash that escaped this '@' sign from the string
+                    text = text[..(i - 1)] + text[i..];
+                    i--;
                 }
+                
+                openBackslash = false;
             }
+
+            return text;
+        }
+
+        /// <summary>
+        /// Get the string representation of an assembler variable/constant's current value.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the variable/constant.
+        /// Should not include the '@' prefix, but should include the '!' prefix for constants.
+        /// </param>
+        /// <remarks>This method performs validation on the name.</remarks>
+        private string GetAssemblerVariableValue(string name)
+        {
+            if (name.Length >= 1 && name[0] == '!')
+            {
+                // Assembler constant
+                if (name.Length == 1)
+                {
+                    throw new SyntaxError(Strings.Assembler_Error_Constant_Empty_Name);
+                }
+
+                name = name[1..];
+                if (assemblerConstants.TryGetValue(name, out Func<ulong>? valueGetter))
+                {
+                    return valueGetter().ToString();
+                }
+
+                throw new VariableNameException(string.Format(Strings.Assembler_Error_Constant_Not_Exists, name));
+            }
+
+            // Assembler variable
+            if (name.Length == 0)
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
+            }
+
+            if (assemblerVariables.TryGetValue(name, out ulong value))
+            {
+                return value.ToString();
+            }
+
+            throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, name));
         }
 
         private void HandleAssemblerException(AssemblerException e)

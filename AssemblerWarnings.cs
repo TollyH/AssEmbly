@@ -583,7 +583,7 @@ namespace AssEmbly
         private List<Warning> Analyzer_Final_Warning_0009()
         {
             // Warning 0009: Program runs to end of file without being terminated by unconditional jump, return, or halt.
-            if (!lastInstructionWasTerminator && !lastInstructionWasData)
+            if (!lastInstructionWasTerminator && !lastInstructionWasData && finalProgram.Length > 0)
             {
                 return new List<Warning>
                 {

@@ -336,7 +336,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assembler constant names cannot be empty..
+        ///   Looks up a localized string similar to Assembler constant names cannot be empty. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Constant_Empty_Name {
             get {
@@ -345,7 +345,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An assembler constant with the name &quot;{0}&quot; does not exist..
+        ///   Looks up a localized string similar to An assembler constant with the name &quot;{0}&quot; does not exist. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Constant_Not_Exists {
             get {
@@ -412,7 +412,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The %DEFINE directive takes 2 operands. {0} were given..
+        ///   Looks up a localized string similar to The %DEFINE directive requires 2 operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_DEFINE_Operand_Count {
             get {
@@ -439,7 +439,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The %DELMACRO directive takes a single operand..
+        ///   Looks up a localized string similar to The %DELMACRO directive requires a single operand..
         /// </summary>
         internal static string Assembler_Error_DELMACRO_Operand_Count {
             get {
@@ -1226,7 +1226,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The %UNDEFINE directive takes a single operand..
+        ///   Looks up a localized string similar to The %UNDEFINE directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_UNDEFINE_Operand_Count {
             get {
@@ -1268,7 +1268,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Assembler variable names cannot be empty..
+        ///   Looks up a localized string similar to Assembler variable names cannot be empty. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Variable_Empty_Name {
             get {
@@ -1277,7 +1277,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to An assembler variable with the name &quot;{0}&quot; does not exist..
+        ///   Looks up a localized string similar to An assembler variable with the name &quot;{0}&quot; does not exist. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Variable_Not_Exists {
             get {

@@ -1438,15 +1438,15 @@ Assembler variable names may not contain symbols other than underscores.</value>
         <value>The %UNDEFINE directive requires a single operand. {0} were given.</value>
     </data>
     <data name="Assembler_Error_Variable_Not_Exists" xml:space="preserve">
-        <value>An assembler variable with the name "{0}" does not exist.</value>
+        <value>An assembler variable with the name "{0}" does not exist. To use an '@' sign in a string, escape it with a backslash.</value>
     </data>
     <data name="Assembler_Error_Constant_Empty_Name" xml:space="preserve">
-        <value>Assembler constant names cannot be empty. Did you mean to include an @ sign here?</value>
+        <value>Assembler constant names cannot be empty. To use an '@' sign in a string, escape it with a backslash.</value>
     </data>
     <data name="Assembler_Error_Variable_Empty_Name" xml:space="preserve">
-        <value>Assembler variable names cannot be empty. Did you mean to include an @ sign here?</value>
+        <value>Assembler variable names cannot be empty. To use an '@' sign in a string, escape it with a backslash.</value>
     </data>
     <data name="Assembler_Error_Constant_Not_Exists" xml:space="preserve">
-        <value>An assembler constant with the name "{0}" does not exist.</value>
+        <value>An assembler constant with the name "{0}" does not exist. To use an '@' sign in a string, escape it with a backslash.</value>
     </data>
 </root>
