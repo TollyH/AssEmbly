@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
@@ -88,6 +89,11 @@ namespace AssEmbly
         // Sorted from the longest name to the shortest name - should always match the keys of the above dictionaries
         private List<string> singleLineMacroNames = new();
         private List<string> multiLineMacroNames = new();
+        // '@' prefix is not included in name
+        private readonly Dictionary<string, ulong> assemblerVariables = new();
+        // '@!' prefix is not included in name
+        // Cannot be edited by program
+        private readonly Dictionary<string, Func<ulong>> assemblerConstants;
         private AAPFeatures usedExtensions = AAPFeatures.None;
 
         // For detecting circular imports and tracking imported line numbers
@@ -130,12 +136,15 @@ namespace AssEmbly
 
         /// <param name="usingV1Format">
         /// Whether or not a v1 executable will be generated from this assembly.
-        /// Used only for warning generation. Does not affect the resulting bytes.
+        /// </param>
+        /// <param name="usingV1Stack">
+        /// Whether or not this program expects to use the v1 callstack behaviour.
         /// </param>
         /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
         /// <param name="disabledWarnings">A set of warning codes to disable.</param>
         /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
-        public Assembler(bool usingV1Format, IEnumerable<int> disabledNonFatalErrors, IEnumerable<int> disabledWarnings, IEnumerable<int> disabledSuggestions)
+        public Assembler(bool usingV1Format, bool usingV1Stack,
+            IEnumerable<int> disabledNonFatalErrors, IEnumerable<int> disabledWarnings, IEnumerable<int> disabledSuggestions)
         {
             warningGenerator = new AssemblerWarnings(usingV1Format);
             warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
@@ -145,16 +154,24 @@ namespace AssEmbly
             initialDisabledNonFatalErrors = warningGenerator.DisabledNonFatalErrors.ToHashSet();
             initialDisabledWarnings = warningGenerator.DisabledWarnings.ToHashSet();
             initialDisabledSuggestions = warningGenerator.DisabledSuggestions.ToHashSet();
+
+            assemblerConstants = new Dictionary<string, Func<ulong>>()
+            {
+                { "ASSEMBLER_VERSION_MAJOR", () => (ulong)(Program.version?.Major ?? 0) },
+                { "ASSEMBLER_VERSION_MINOR", () => (ulong)(Program.version?.Minor ?? 0) },
+                { "ASSEMBLER_VERSION_PATCH", () => (ulong)(Program.version?.Build ?? 0) },
+                { "COMPAT_VERSION_MAJOR", () => 0 },  // TODO: Add once compatibility feature is added
+                { "COMPAT_VERSION_MINOR", () => 0 },  // TODO: Add once compatibility feature is added
+                { "COMPAT_VERSION_PATCH", () => 0 },  // TODO: Add once compatibility feature is added
+                { "V1_FORMAT", () => usingV1Format ? 1UL : 0UL },
+                { "V1_CALL_STACK", () => usingV1Stack ? 1UL : 0UL },
+                { "IMPORT_DEPTH", () => (ulong)importStack.Count },
+                { "CURRENT_ADDRESS", () => (ulong)program.Count },
+            };
         }
 
-        public Assembler()
-        {
-            warningGenerator = new AssemblerWarnings(false);
-
-            initialDisabledNonFatalErrors = new HashSet<int>();
-            initialDisabledWarnings = new HashSet<int>();
-            initialDisabledSuggestions = new HashSet<int>();
-        }
+        public Assembler() : this(false, false,
+            Enumerable.Empty<int>(), Enumerable.Empty<int>(), Enumerable.Empty<int>()) { }
 
         /// <returns>
         /// <see langword="false"/> if the warning with the given severity and code was already disabled, else <see langword="true"/>
@@ -314,6 +331,8 @@ namespace AssEmbly
                         continue;
                     }
                     string[] operands = line[1..];
+
+                    ProcessAssemblerVariables(operands);
 
                     if (mnemonic[0] == '%' && ProcessStateDirective(mnemonic, operands, rawLine, dynamicLines, ref lineIndex))
                     {
@@ -1365,6 +1384,59 @@ namespace AssEmbly
             return false;
         }
 
+        /// <summary>
+        /// Replace any assembler variable/constant references in a list of operands with their currently stored value.
+        /// </summary>
+        private void ProcessAssemblerVariables(IList<string> operands)
+        {
+            for (int i = 0; i < operands.Count; i++)
+            {
+                string operand = operands[i];
+
+                if (operand.Length == 0 || operand[0] != '@')
+                {
+                    continue;
+                }
+
+                if (operand.Length >= 2 && operand[1] == '!')
+                {
+                    // Assembler constant
+                    if (operand.Length == 2)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Constant_Empty_Name);
+                    }
+
+                    string name = operand[2..];
+                    if (assemblerConstants.TryGetValue(name, out Func<ulong>? valueGetter))
+                    {
+                        operands[i] = valueGetter().ToString();
+                    }
+                    else
+                    {
+                        throw new VariableNameException(string.Format(Strings.Assembler_Error_Constant_Not_Exists, name));
+                    }
+                }
+                else
+                {
+                    // Assembler variable
+                    if (operand.Length == 1)
+                    {
+                        throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
+                    }
+
+                    string name = operand[1..];
+                    if (assemblerVariables.TryGetValue(name, out ulong value))
+                    {
+                        operands[i] = value.ToString();
+                    }
+                    else
+                    {
+                        throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, name));
+                    }
+                }
+            }
+        }
+
         private void HandleAssemblerException(AssemblerException e)
         {
             string rawLine = dynamicLines[lineIndex];
@@ -1738,6 +1810,40 @@ namespace AssEmbly
                                 _ = IncrementCurrentLine();
                             }
                         }
+                    }
+                    return true;
+                // Define assembler variable
+                case "%DEFINE":
+                    if (operands.Length != 2)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DEFINE_Operand_Count, operands.Length));
+                    }
+                    operandType = DetermineOperandType(operands[1]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_DEFINE_Operand_Type, operandType));
+                    }
+
+                    string newVariableName = operands[0];
+                    Match invalidMatch = Regex.Match(newVariableName, "[^A-Za-z0-9_]");
+                    if (invalidMatch.Success)
+                    {
+                        throw new SyntaxError(
+                            string.Format(Strings.Assembler_Error_DEFINE_Invalid_Character, newVariableName, new string(' ', invalidMatch.Index)));
+                    }
+
+                    _ = ParseLiteral(operands[1], false, out ulong variableValue);
+                    assemblerVariables[newVariableName] = variableValue;
+                    return true;
+                // Remove assembler variable
+                case "%UNDEFINE":
+                    if (operands.Length != 1)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_UNDEFINE_Operand_Count, operands.Length));
+                    }
+                    if (!assemblerVariables.Remove(operands[0]))
+                    {
+                        throw new MacroNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, operands[0]));
                     }
                     return true;
                 // Print assembler state

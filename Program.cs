@@ -85,6 +85,7 @@ namespace AssEmbly
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
             bool useV1Format = false;
+            bool useV1Stack = false;
             int macroExpansionLimit = -1;
             foreach (string a in args)
             {
@@ -140,6 +141,11 @@ namespace AssEmbly
                 else if (lowerA == "--v1-format")
                 {
                     useV1Format = true;
+                    useV1Stack = true;
+                }
+                else if (lowerA == "--v1-call-stack")
+                {
+                    useV1Stack = true;
                 }
                 else if (lowerA.StartsWith("--macro-limit="))
                 {
@@ -160,7 +166,7 @@ namespace AssEmbly
             int totalSuggestions = 0;
             try
             {
-                Assembler assembler = new(useV1Format, disabledErrors, disabledWarnings, disabledSuggestions);
+                Assembler assembler = new(useV1Format, useV1Stack, disabledErrors, disabledWarnings, disabledSuggestions);
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
@@ -244,7 +250,7 @@ namespace AssEmbly
             else
             {
                 AAPFeatures features = assemblyResult.UsedExtensions;
-                if (args.Contains("--v1-call-stack"))
+                if (useV1Stack)
                 {
                     features |= AAPFeatures.V1CallStack;
                 }

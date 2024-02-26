@@ -336,6 +336,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assembler constant names cannot be empty..
+        /// </summary>
+        internal static string Assembler_Error_Constant_Empty_Name {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Constant_Empty_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An assembler constant with the name &quot;{0}&quot; does not exist..
+        /// </summary>
+        internal static string Assembler_Error_Constant_Not_Exists {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Constant_Not_Exists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The %DAT directive requires a single operand. {0} were given..
         /// </summary>
         internal static string Assembler_Error_DAT_Operand_Count {
@@ -378,6 +396,36 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_DEBUG_Operand_Count {
             get {
                 return ResourceManager.GetString("Assembler_Error_DEBUG_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid character in assembler variable name:
+        ///    {0}
+        ///    {1}^
+        ///Assembler variable names may not contain symbols other than underscores..
+        /// </summary>
+        internal static string Assembler_Error_DEFINE_Invalid_Character {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DEFINE_Invalid_Character", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %DEFINE directive takes 2 operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_DEFINE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DEFINE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The second operand to the %DEFINE directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_DEFINE_Operand_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_DEFINE_Operand_Type", resourceCulture);
             }
         }
         
@@ -1178,6 +1226,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The %UNDEFINE directive takes a single operand..
+        /// </summary>
+        internal static string Assembler_Error_UNDEFINE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_UNDEFINE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unicode escape must be immediately followed a 4 digit unicode codepoint
         ///    {0}
         ///    {1}^.
@@ -1207,6 +1264,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_Unicode_Escape_EndOfLine {
             get {
                 return ResourceManager.GetString("Assembler_Error_Unicode_Escape_EndOfLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assembler variable names cannot be empty..
+        /// </summary>
+        internal static string Assembler_Error_Variable_Empty_Name {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Variable_Empty_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An assembler variable with the name &quot;{0}&quot; does not exist..
+        /// </summary>
+        internal static string Assembler_Error_Variable_Not_Exists {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Variable_Not_Exists", resourceCulture);
             }
         }
         

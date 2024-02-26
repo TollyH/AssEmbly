@@ -105,6 +105,15 @@
     }
 
     /// <summary>
+    /// The exception that is thrown when an error is encountered with an otherwise valid assembler variable/constant name during assembly.
+    /// </summary>
+    public class VariableNameException : AssemblerException
+    {
+        public VariableNameException(string message) : base(message) { }
+        public VariableNameException(string message, int line, string file) : base(message, line, file) { }
+    }
+
+    /// <summary>
     /// The exception that is thrown when the end of the file is reached before a required closing directive is encountered.
     /// </summary>
     public class EndingDirectiveException : AssemblerException
