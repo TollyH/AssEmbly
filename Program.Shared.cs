@@ -116,7 +116,7 @@ namespace AssEmbly
         {
             foreach (string a in args)
             {
-                if (a.ToLowerInvariant().StartsWith("--mem-size="))
+                if (a.StartsWith("--mem-size=", StringComparison.OrdinalIgnoreCase))
                 {
                     string memSizeString = a.Split("=")[1];
                     if (!ulong.TryParse(memSizeString, out ulong memSize))
@@ -131,6 +131,27 @@ namespace AssEmbly
                 }
             }
             return DefaultMemorySize;
+        }
+
+        public static int GetMacroLimit(string[] args)
+        {
+            foreach (string a in args)
+            {
+                if (a.StartsWith("--macro-limit=", StringComparison.OrdinalIgnoreCase))
+                {
+                    string macroLimitString = a.Split("=")[1];
+                    if (!int.TryParse(macroLimitString, out int macroLimit))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return -1;
+                    }
+                    return macroLimit;
+                }
+            }
+            return -1;
         }
 
         public static void OnExecutionException(Exception e, Processor processor)

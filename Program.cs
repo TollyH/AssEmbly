@@ -86,7 +86,7 @@ namespace AssEmbly
             HashSet<int> disabledSuggestions = new();
             bool useV1Format = false;
             bool useV1Stack = false;
-            int macroExpansionLimit = -1;
+            int macroExpansionLimit = GetMacroLimit(args);
             foreach (string a in args)
             {
                 string lowerA = a.ToLowerInvariant();
@@ -146,17 +146,6 @@ namespace AssEmbly
                 else if (lowerA == "--v1-call-stack")
                 {
                     useV1Stack = true;
-                }
-                else if (lowerA.StartsWith("--macro-limit="))
-                {
-                    string macroLimitString = a.Split("=")[1];
-                    if (!int.TryParse(macroLimitString, out macroExpansionLimit))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                    }
                 }
             }
 
@@ -329,7 +318,13 @@ namespace AssEmbly
             AssemblyResult assemblyResult;
             try
             {
+                int macroExpansionLimit = GetMacroLimit(args);
+
                 Assembler assembler = new();
+                if (macroExpansionLimit >= 0)
+                {
+                    assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
             }
@@ -441,7 +436,13 @@ namespace AssEmbly
 
             try
             {
+                int macroExpansionLimit = GetMacroLimit(args);
+
                 Assembler assembler = new();
+                if (macroExpansionLimit >= 0)
+                {
+                    assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 AssemblyResult assemblyResult = assembler.GetAssemblyResult(true);
                 Console.WriteLine(JsonSerializer.Serialize(assemblyResult.Warnings, new JsonSerializerOptions { IncludeFields = true }));
