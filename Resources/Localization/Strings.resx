@@ -1449,4 +1449,11 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_Constant_Not_Exists" xml:space="preserve">
         <value>An assembler constant with the name "{0}" does not exist. To use an '@' sign in a string, escape it with a backslash.</value>
     </data>
+    <data name="Assembler_Debug_Directive_Assembler_Variable_Header" xml:space="preserve">
+        <value>
+{0} defined assembler variable(s):</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Assembler_Variable_Line" xml:space="preserve">
+        <value>    {0} -&gt; {1:N0}</value>
+    </data>
 </root>

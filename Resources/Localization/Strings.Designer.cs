@@ -80,6 +80,25 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
+        ///{0} defined assembler variable(s):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Assembler_Variable_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Assembler_Variable_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Assembler_Variable_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Assembler_Variable_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
         ///Current extensions used: {0}.
         /// </summary>
         internal static string Assembler_Debug_Directive_Current_Extensions {

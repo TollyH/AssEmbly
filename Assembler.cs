@@ -1937,6 +1937,11 @@ namespace AssEmbly
                     {
                         Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Multi_Line_Macro_Line, macro, replacement.Length >= 1 ? replacement[0] : "");
                     }
+                    Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Assembler_Variable_Header, assemblerVariables.Count);
+                    foreach ((string variable, ulong value) in assemblerVariables)
+                    {
+                        Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Assembler_Variable_Line, variable, value);
+                    }
                     Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Header);
                     foreach (MacroStackFrame macroFrame in macroStack)
                     {
