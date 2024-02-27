@@ -334,7 +334,7 @@ namespace AssEmbly
             lineMnemonics[(file, line, macroLineDepth)] = mnemonic;
             lineOperands[(file, line, macroLineDepth)] = operands;
 
-            instructionIsData = dataInsertionDirectives.Contains(mnemonic.ToUpper());
+            instructionIsData = dataInsertionDirectives.Contains(mnemonic);
             instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
             instructionIsString = false;
 

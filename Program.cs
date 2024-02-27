@@ -89,8 +89,7 @@ namespace AssEmbly
             int macroExpansionLimit = GetMacroLimit(args);
             foreach (string a in args)
             {
-                string lowerA = a.ToLowerInvariant();
-                if (lowerA.StartsWith("--disable-error-"))
+                if (a.StartsWith("--disable-error-", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!int.TryParse(a[16..], out int errorCode))
                     {
@@ -102,7 +101,7 @@ namespace AssEmbly
                     }
                     _ = disabledErrors.Add(errorCode);
                 }
-                else if (lowerA.StartsWith("--disable-warning-"))
+                else if (a.StartsWith("--disable-warning-", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!int.TryParse(a[18..], out int errorCode))
                     {
@@ -114,7 +113,7 @@ namespace AssEmbly
                     }
                     _ = disabledWarnings.Add(errorCode);
                 }
-                else if (lowerA.StartsWith("--disable-suggestion-"))
+                else if (a.StartsWith("--disable-suggestion-", StringComparison.OrdinalIgnoreCase))
                 {
                     if (!int.TryParse(a[21..], out int errorCode))
                     {
@@ -126,24 +125,24 @@ namespace AssEmbly
                     }
                     _ = disabledSuggestions.Add(errorCode);
                 }
-                else if (lowerA == "--no-errors")
+                else if (a.Equals("--no-errors", StringComparison.OrdinalIgnoreCase))
                 {
                     disabledErrors = AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet();
                 }
-                else if (lowerA == "--no-warnings")
+                else if (a.Equals("--no-warnings", StringComparison.OrdinalIgnoreCase))
                 {
                     disabledWarnings = AssemblerWarnings.WarningMessages.Keys.ToHashSet();
                 }
-                else if (lowerA == "--no-suggestions")
+                else if (a.Equals("--no-suggestions", StringComparison.OrdinalIgnoreCase))
                 {
                     disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
                 }
-                else if (lowerA == "--v1-format")
+                else if (a.Equals("--v1-format", StringComparison.OrdinalIgnoreCase))
                 {
                     useV1Format = true;
                     useV1Stack = true;
                 }
-                else if (lowerA == "--v1-call-stack")
+                else if (a.Equals("--v1-call-stack", StringComparison.OrdinalIgnoreCase))
                 {
                     useV1Stack = true;
                 }

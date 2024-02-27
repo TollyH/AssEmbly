@@ -442,7 +442,7 @@ namespace AssEmbly
                 switch (operandTypes[i])
                 {
                     case OperandType.Register:
-                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i].ToLowerInvariant()));
+                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i], true));
                         break;
                     case OperandType.Literal:
                         if (operands[i].StartsWith(":&"))
@@ -478,12 +478,12 @@ namespace AssEmbly
                         break;
                     case OperandType.Pointer:
                         // Convert register name to associated byte value
-                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i][1..].ToLowerInvariant()));
+                        operandBytes.Add((byte)Enum.Parse<Register>(operands[i][1..], true));
                         break;
                     default: break;
                 }
             }
-            if (!Data.Mnemonics.TryGetValue((mnemonic.ToUpperInvariant(), operandTypes), out Opcode opcode))
+            if (!Data.Mnemonics.TryGetValue((mnemonic, operandTypes), out Opcode opcode))
             {
                 throw new OpcodeException(string.Format(Strings.Assembler_Error_Invalid_Mnemonic_Combo, mnemonic, string.Join(Strings.Generic_CommaSeparate, operandTypes)));
             }
@@ -893,7 +893,7 @@ namespace AssEmbly
                 default:
                 {
                     int offset = operand[0] == '*' ? 1 : 0;
-                    return Enum.TryParse<Register>(operand[offset..].ToLowerInvariant(), out _)
+                    return Enum.TryParse<Register>(operand[offset..], true, out _)
                         ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
                         : throw new SyntaxError(
                             string.Format(Strings.Assembler_Error_Operand_Invalid, operand));
@@ -933,13 +933,13 @@ namespace AssEmbly
                 parsedNumber = (uint)str.Length;
                 return Encoding.UTF8.GetBytes(str);
             }
-            operand = operand.ToLowerInvariant().Replace("_", "");
+            operand = operand.Replace("_", "");
             try
             {
                 // Hex (0x), Binary (0b), and Decimal literals are all supported
-                parsedNumber = operand.StartsWith("0x")
+                parsedNumber = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
                     ? Convert.ToUInt64(operand[2..], 16)
-                : operand.StartsWith("0b")
+                : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
                     ? Convert.ToUInt64(operand[2..], 2)
                 : operand.Contains('.')
                     ? BitConverter.DoubleToUInt64Bits(Convert.ToDouble(operand))
@@ -1594,10 +1594,11 @@ namespace AssEmbly
 
         private static void ValidateNumericLiteral(string operand)
         {
-            operand = operand.ToLowerInvariant();
-            Match invalidMatch = operand.StartsWith("0x") ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])") : operand.StartsWith("0b")
-                ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")
-                : Regex.Match(operand, @"[^0-9_\.](?<!^-)");
+            Match invalidMatch = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])")  // Hex
+                : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
+                    ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")  // Bin
+                    : Regex.Match(operand, @"[^0-9_\.](?<!^-)");  // Dec
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));

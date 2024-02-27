@@ -230,8 +230,8 @@ namespace AssEmbly
                         }
                         else
                         {
-                            string[] command = userInput.Trim().ToLower().Split(' ');
-                            switch (command[0])
+                            string[] command = userInput.Trim().Split(' ');
+                            switch (command[0].ToLower())
                             {
                                 case "":
                                     endCommandEntryLoop = true;
@@ -702,7 +702,7 @@ namespace AssEmbly
             try
             {
                 ulong convertedValue = Convert.ToUInt64(command[1], 16);
-                Console.WriteLine(Strings.Debugger_Value_In_Decimal, command[1].ToUpperInvariant(), convertedValue);
+                Console.WriteLine(Strings.Debugger_Value_In_Decimal, command[1], convertedValue);
             }
             catch
             {
@@ -724,7 +724,6 @@ namespace AssEmbly
             }
             else if (command.Length == 4)
             {
-                string action = command[1].ToLower();
                 if (!Enum.TryParse(command[2], out Register register))
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -739,7 +738,7 @@ namespace AssEmbly
                     Console.ResetColor();
                     return;
                 }
-                switch (action)
+                switch (command[1].ToLower())
                 {
                     case "add":
                         if (!Breakpoints.Contains((register, value)))
