@@ -1595,7 +1595,7 @@ namespace AssEmbly
         private static void ValidateNumericLiteral(string operand)
         {
             Match invalidMatch = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-                ? Regex.Match(operand, "[^0-9a-f_](?<!^0[xX])")  // Hex
+                ? Regex.Match(operand, "[^0-9A-Fa-f_](?<!^0[xX])")  // Hex
                 : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
                     ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")  // Bin
                     : Regex.Match(operand, @"[^0-9_\.](?<!^-)");  // Dec
