@@ -35,6 +35,7 @@ namespace AssEmbly
                 { "%ASM_ONCE", StateDirective_SingleAssemblyGuard },
                 { "%DEFINE", StateDirective_DefineAssemblerVariable },
                 { "%UNDEFINE", StateDirective_RemoveAssemblerVariable },
+                { "%VAROP", StateDirective_AssemblerVariableOperation },
                 { "%DEBUG", StateDirective_PrintAssemblerState },
                 { "%ENDMACRO", StateDirective_DanglingClosingDirective },
             };
@@ -396,6 +397,95 @@ namespace AssEmbly
             if (!assemblerVariables.Remove(operands[0]))
             {
                 throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, operands[0]));
+            }
+        }
+
+        private void StateDirective_AssemblerVariableOperation(string mnemonic, string[] operands)
+        {
+            if (operands.Length != 3)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Count, operands.Length));
+            }
+            OperandType operandType = DetermineOperandType(operands[2]);
+            if (operandType != OperandType.Literal)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Third_Type, operandType));
+            }
+            if (operands[2][0] == ':')
+            {
+                throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Label_Reference);
+            }
+            _ = ParseLiteral(operands[2], false, out ulong value);
+
+            string variableName = operands[1];
+            if (!assemblerVariables.ContainsKey(variableName))
+            {
+                throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, variableName));
+            }
+
+            switch (operands[0].ToUpperInvariant())
+            {
+                case "ADD":
+                    assemblerVariables[variableName] += value;
+                    break;
+                case "SUB":
+                    assemblerVariables[variableName] -= value;
+                    break;
+                case "MUL":
+                    assemblerVariables[variableName] *= value;
+                    break;
+                case "DIV":
+                    assemblerVariables[variableName] /= value;
+                    break;
+                case "REM":
+                    assemblerVariables[variableName] %= value;
+                    break;
+                case "BIT_AND":
+                    assemblerVariables[variableName] &= value;
+                    break;
+                case "BIT_OR":
+                    assemblerVariables[variableName] |= value;
+                    break;
+                case "BIT_XOR":
+                    assemblerVariables[variableName] ^= value;
+                    break;
+                case "BIT_NOT":
+                    assemblerVariables[variableName] = ~value;
+                    break;
+                case "AND":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] != 0 && value != 0 ? 1UL : 0UL;
+                    break;
+                case "OR":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] != 0 || value != 0 ? 1UL : 0UL;
+                    break;
+                case "XOR":
+                    assemblerVariables[variableName] = (assemblerVariables[variableName] != 0) ^ (value != 0) ? 1UL : 0UL;
+                    break;
+                case "NOT":
+                    assemblerVariables[variableName] = value == 0 ? 1UL : 0UL;
+                    break;
+                case "SHL":
+                    if (value < 64)
+                    {
+                        assemblerVariables[variableName] <<= (int)value;
+                    }
+                    else
+                    {
+                        assemblerVariables[variableName] = 0;
+                    }
+                    break;
+                case "SHR":
+                    if (value < 64)
+                    {
+                        assemblerVariables[variableName] >>= (int)value;
+                    }
+                    else
+                    {
+                        assemblerVariables[variableName] = 0;
+                    }
+                    break;
+                default:
+                    throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Second, operands[0]));
             }
         }
 

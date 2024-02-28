@@ -1462,4 +1462,16 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="CLI_Error_Invalid_Variable_Value" xml:space="preserve">
         <value>{0} is not a valid value for an assembler variable.</value>
     </data>
+    <data name="Assembler_Error_VAROP_Operand_Count" xml:space="preserve">
+        <value>The %VAROP directive requires 3 operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_VAROP_Operand_Third_Type" xml:space="preserve">
+        <value>The third operand to the %VAROP directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_VAROP_Operand_Third_Label_Reference" xml:space="preserve">
+        <value>The third operand to the %VAROP directive cannot be a label reference.</value>
+    </data>
+    <data name="Assembler_Error_VAROP_Operand_Second" xml:space="preserve">
+        <value>"{0}" is not a recognised operation for the %VAROP directive.</value>
+    </data>
 </root>

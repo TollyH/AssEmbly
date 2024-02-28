@@ -1305,6 +1305,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The %VAROP directive requires 3 operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_VAROP_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_VAROP_Operand_Second {
+            get {
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Second", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The third operand to the %VAROP directive cannot be a label reference..
+        /// </summary>
+        internal static string Assembler_Error_VAROP_Operand_Third_Label_Reference {
+            get {
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Third_Label_Reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The third operand to the %VAROP directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_VAROP_Operand_Third_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Third_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted error..
         /// </summary>
         internal static string AssemblerWarnings_NonFatal_0000 {
