@@ -108,13 +108,13 @@
         <value>"{0}" is not a valid operation.</value>
     </data>
     <data name="CLI_Assemble_Error_Invalid_Error_Code" xml:space="preserve">
-        <value>{0} is not a valid error code to disable.</value>
+        <value>"{0}" is not a valid error code to disable.</value>
     </data>
     <data name="CLI_Assemble_Error_Invalid_Warning_Code" xml:space="preserve">
-        <value>{0} is not a valid warning code to disable.</value>
+        <value>"{0}" is not a valid warning code to disable.</value>
     </data>
     <data name="CLI_Assemble_Error_Invalid_Suggestion_Code" xml:space="preserve">
-        <value>{0} is not a valid suggestion code to disable.</value>
+        <value>"{0}" is not a valid suggestion code to disable.</value>
     </data>
     <data name="CLI_Assemble_Error_Warning_Printout" xml:space="preserve">
         <value>
@@ -213,7 +213,7 @@ repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly
         <value>The specified file does not exist.</value>
     </data>
     <data name="CLI_Error_Invalid_Memory_Size" xml:space="preserve">
-        <value>{0} is not a valid number of bytes for memory size.</value>
+        <value>"{0}" is not a valid number of bytes for memory size.</value>
     </data>
     <data name="CLI_Error_Unexpected_With_Type" xml:space="preserve">
         <value>An unexpected error occurred:
@@ -1333,7 +1333,7 @@ Currently expanding the following macro(s): {0}</value>
         <value> in macro {0}</value>
     </data>
     <data name="Assembler_Error_Opening_Directive_Missing" xml:space="preserve">
-        <value>{0} is a block ending directive, however there is no currently open instance of the block it closes.</value>
+        <value>"{0}" is a block ending directive, however there is no currently open instance of the block it closes.</value>
     </data>
     <data name="Assembler_Debug_Directive_Label_Link_Header" xml:space="preserve">
         <value>
@@ -1423,7 +1423,7 @@ Currently expanding the following macro(s): {0}</value>
         <value>Macro expansion limit of {0} exceeded.</value>
     </data>
     <data name="CLI_Error_Invalid_Macro_Limit" xml:space="preserve">
-        <value>{0} is not a valid maximum number of macro expansions.</value>
+        <value>"{0}" is not a valid maximum number of macro expansions.</value>
     </data>
     <data name="Assembler_Error_DEFINE_Operand_Count" xml:space="preserve">
         <value>The %DEFINE directive requires 2 operands. {0} were given.</value>
@@ -1460,7 +1460,7 @@ Assembler variable names may not contain symbols other than underscores.</value>
         <value>    {0} -&gt; {1:N0}</value>
     </data>
     <data name="CLI_Error_Invalid_Variable_Value" xml:space="preserve">
-        <value>{0} is not a valid value for an assembler variable.</value>
+        <value>"{0}" is not a valid value for an assembler variable.</value>
     </data>
     <data name="Assembler_Error_VAROP_Operand_Count" xml:space="preserve">
         <value>The %VAROP directive requires 3 operands. {0} were given.</value>
