@@ -435,9 +435,17 @@ namespace AssEmbly
                     assemblerVariables[variableName] *= value;
                     break;
                 case "DIV":
+                    if (value == 0)
+                    {
+                        throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Zero);
+                    }
                     assemblerVariables[variableName] /= value;
                     break;
                 case "REM":
+                    if (value == 0)
+                    {
+                        throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Zero);
+                    }
                     assemblerVariables[variableName] %= value;
                     break;
                 case "BIT_AND":

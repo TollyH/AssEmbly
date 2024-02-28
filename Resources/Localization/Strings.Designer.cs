@@ -1009,7 +1009,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is a block ending directive, however there is no currently open instance of the block it closes..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is a block ending directive, however there is no currently open instance of the block it closes..
         /// </summary>
         internal static string Assembler_Error_Opening_Directive_Missing {
             get {
@@ -1314,7 +1314,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a recognised operation for the %VAROP directive..
         /// </summary>
         internal static string Assembler_Error_VAROP_Operand_Second {
             get {
@@ -1337,6 +1337,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_VAROP_Operand_Third_Type {
             get {
                 return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Third_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The third operand to the %VAROP directive cannot be 0 when the first operand is DIV or REM..
+        /// </summary>
+        internal static string Assembler_Error_VAROP_Operand_Third_Zero {
+            get {
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Third_Zero", resourceCulture);
             }
         }
         
@@ -1800,7 +1809,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid error code to disable..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid error code to disable..
         /// </summary>
         internal static string CLI_Assemble_Error_Invalid_Error_Code {
             get {
@@ -1809,7 +1818,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid suggestion code to disable..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid suggestion code to disable..
         /// </summary>
         internal static string CLI_Assemble_Error_Invalid_Suggestion_Code {
             get {
@@ -1818,7 +1827,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid warning code to disable..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid warning code to disable..
         /// </summary>
         internal static string CLI_Assemble_Error_Invalid_Warning_Code {
             get {
@@ -1991,7 +2000,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid maximum number of macro expansions..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid maximum number of macro expansions..
         /// </summary>
         internal static string CLI_Error_Invalid_Macro_Limit {
             get {
@@ -2000,7 +2009,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid number of bytes for memory size..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid number of bytes for memory size..
         /// </summary>
         internal static string CLI_Error_Invalid_Memory_Size {
             get {
@@ -2018,7 +2027,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} is not a valid value for an assembler variable..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid value for an assembler variable..
         /// </summary>
         internal static string CLI_Error_Invalid_Variable_Value {
             get {

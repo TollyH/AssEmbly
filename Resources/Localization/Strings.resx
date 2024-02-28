@@ -1474,4 +1474,7 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_VAROP_Operand_Second" xml:space="preserve">
         <value>"{0}" is not a recognised operation for the %VAROP directive.</value>
     </data>
+    <data name="Assembler_Error_VAROP_Operand_Third_Zero" xml:space="preserve">
+        <value>The third operand to the %VAROP directive cannot be zero when the first operand is DIV or REM.</value>
+    </data>
 </root>
