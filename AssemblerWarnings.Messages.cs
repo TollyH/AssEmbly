@@ -46,6 +46,9 @@ namespace AssEmbly
             { 0025, Strings.AssemblerWarnings_Warning_0025 },
             { 0026, Strings.AssemblerWarnings_Warning_0026 },
             { 0027, Strings.AssemblerWarnings_Warning_0027 },
+            { 0028, Strings.AssemblerWarnings_Warning_0028 },
+            { 0029, Strings.AssemblerWarnings_Warning_0029 },
+            { 0030, Strings.AssemblerWarnings_Warning_0030 },
         };
 
         [Localizable(true)]

@@ -65,6 +65,7 @@ namespace AssEmbly
         // Variables updated by parameters of the NextInstruction method
         private byte[] newBytes = Array.Empty<byte>();
         private string mnemonic = "";
+        private string preVariableLine = "";
         private string[] operands = Array.Empty<string>();
         private int line;
         private int firstLine;
@@ -91,6 +92,7 @@ namespace AssEmbly
         /// <param name="operands">
         /// The operands that were used in the instruction. They should be stripped of whitespace before being passed.
         /// </param>
+        /// <param name="preVariableLine">The text content of the assembled line before parsing assembler variable names.</param>
         /// <param name="line">The file-based 0-indexed line that the instruction was assembled from.</param>
         /// <param name="file">
         /// The path to the file that the instruction was assembled from, or <see cref="string.Empty"/> for the base file.
@@ -101,12 +103,13 @@ namespace AssEmbly
         /// <param name="macroName">The name of the current macro being expanded, or <see langword="null"/> if no macro is.</param>
         /// <param name="macroLineDepth">The number of lines of any macro already assembled for the current line in the file.</param>
         /// <returns>An array of any warnings caused by the new instruction.</returns>
-        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, int line, string file, bool labelled,
+        public Warning[] NextInstruction(byte[] newBytes, string mnemonic, string[] operands, string preVariableLine, int line, string file, bool labelled,
             bool isEntry, string rawLine, IEnumerable<Assembler.ImportStackFrame> importStack, string? macroName, int macroLineDepth)
         {
             this.newBytes = newBytes;
             this.mnemonic = mnemonic;
             this.operands = operands;
+            this.preVariableLine = preVariableLine;
             this.line = line;
             this.file = file;
             this.macroName = macroName;
@@ -239,6 +242,9 @@ namespace AssEmbly
                 { 0025, Analyzer_Rolling_Warning_0025 },
                 { 0026, Analyzer_Rolling_Warning_0026 },
                 { 0027, Analyzer_Rolling_Warning_0027 },
+                { 0028, Analyzer_Rolling_Warning_0028 },
+                { 0029, Analyzer_Rolling_Warning_0029 },
+                { 0030, Analyzer_Rolling_Warning_0030 },
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -755,6 +761,25 @@ namespace AssEmbly
             return mnemonic.Equals("%LABEL_OVERRIDE", StringComparison.OrdinalIgnoreCase) && operands[0][0] != ':' && (operands[0][0] == '-' || operands[0].Contains('.'));
         }
 
+        private bool Analyzer_Rolling_Warning_0028()
+        {
+            // Warning 0028: The '@' prefix on the target assembler variable name is not required for this directive.
+            //               Including it will result in the current value of the directive being used as the target variable name instead.
+            return takesLiteralVariableName.TryGetValue(mnemonic, out int operandIndex) && Assembler.ParseLine(preVariableLine)[operandIndex + 1][0] == '@';
+        }
+
+        private bool Analyzer_Rolling_Warning_0029()
+        {
+            // Warning 0029: The value of assembler variables is always interpreted as an integer, but the provided value is floating point.
+            return assemblerVariableLiteral.TryGetValue(mnemonic, out int operandIndex) && operands[operandIndex].Contains('.');
+        }
+
+        private bool Analyzer_Rolling_Warning_0030()
+        {
+            // Warning 0030: This assembler variable operation will not work as expected with negative values.
+            return mnemonic.Equals("%VAROP", StringComparison.OrdinalIgnoreCase) && noNegativeVarop.Contains(operands[0]) && operands[2][0] == '-';
+        }
+
         private bool Analyzer_Rolling_Suggestion_0001()
         {
             // Suggestion 0001: Avoid use of NOP instruction.
@@ -841,6 +866,40 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0009()
         {
             // Suggestion 0009: Operation has no effect.
+            if (mnemonic.Equals("%VAROP", StringComparison.OrdinalIgnoreCase))
+            {
+                _ = Assembler.ParseLiteral(operands[2], false, out ulong parsedNumber);
+                switch (operands[0].ToUpperInvariant())
+                {
+                    // Add, Subtract, Shift, Or, or Xor by 0
+                    case "ADD":
+                    case "SUB":
+                    case "SHR":
+                    case "SHL":
+                    case "BIT_OR":
+                    case "BIT_XOR":
+                        if (parsedNumber == 0)
+                        {
+                            return true;
+                        }
+                        break;
+                    // Multiply by 1
+                    case "MUL":
+                        if (parsedNumber == 1)
+                        {
+                            return true;
+                        }
+                        break;
+                    // And by all 1 bits
+                    case "BIT_AND":
+                        if (parsedNumber == ulong.MaxValue)
+                        {
+                            return true;
+                        }
+                        break;
+                }
+                return false;
+            }
             if (instructionIsData || newBytes.Length == 0 || (operands.Length > 0 && operands[^1][0] == ':'))
             {
                 return false;

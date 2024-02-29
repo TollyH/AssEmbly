@@ -341,6 +341,29 @@
         /// </summary>
         internal static readonly HashSet<string> dataInsertionDirectives = new(StringComparer.OrdinalIgnoreCase) { "%DAT", "%PAD", "%NUM", "%IBF" };
         /// <summary>
+        /// Directives that take a literal name of an assembler variable as an operand, without the '@' prefix.
+        /// Mapped to the 0-based index of the operand that is an unprefixed variable name.
+        /// </summary>
+        internal static readonly Dictionary<string, int> takesLiteralVariableName = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "%DEFINE", 0 },
+            { "%UNDEFINE", 0 },
+            { "%VAROP", 1 },
+        };
+        /// <summary>
+        /// All directives that take a literal operand for operating on assembler variables,
+        /// mapped to the 0-based index of the operand that is the literal.
+        /// </summary>
+        internal static readonly Dictionary<string, int> assemblerVariableLiteral = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "%DEFINE", 1 },
+            { "%VAROP", 2 },
+        };
+        /// <summary>
+        /// %VAROP directive operations (the first operand) that do not work as expected when given a negative literal as the third operand.
+        /// </summary>
+        internal static readonly HashSet<string> noNegativeVarop = new(StringComparer.OrdinalIgnoreCase) { "DIV", "REM", "SHL", "SHR" };
+        /// <summary>
         /// Every opcode that results in the location of execution being moved to the address of a label.
         /// As of current, the address to jump to is always the first operand to these opcodes.
         /// </summary>

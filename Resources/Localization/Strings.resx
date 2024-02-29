@@ -1477,4 +1477,13 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_VAROP_Operand_Third_Zero" xml:space="preserve">
         <value>The third operand to the %VAROP directive cannot be zero when the first operand is DIV or REM.</value>
     </data>
+    <data name="AssemblerWarnings_Warning_0028" xml:space="preserve">
+        <value>The '@' prefix on the target assembler variable name is not required for this directive. Including it will result in the current value of the directive being used as the target variable name instead.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0029" xml:space="preserve">
+        <value>The value of assembler variables is always interpreted as an integer, but the provided value is floating point.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0030" xml:space="preserve">
+        <value>This assembler variable operation will not work as expected with negative values.</value>
+    </data>
 </root>

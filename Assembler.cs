@@ -129,9 +129,9 @@ namespace AssEmbly
         private ulong entryPoint = 0;
 
         private int processedLines = 0;
-        private Dictionary<string, int> timesSeenFile = new();
+        private readonly Dictionary<string, int> timesSeenFile = new();
         // Files that begin with an %ASM_ONCE directive (i.e. won't throw a circular import error)
-        private HashSet<string> completeAsmOnceFiles = new();
+        private readonly HashSet<string> completeAsmOnceFiles = new();
 
         /// <param name="usingV1Format">
         /// Whether or not a v1 executable will be generated from this assembly.
@@ -318,6 +318,7 @@ namespace AssEmbly
                         continue;
                     }
 
+                    string preVariableLine = rawLine;
                     rawLine = ProcessAssemblerVariables(rawLine);
 
                     string[] line = ParseLine(rawLine);
@@ -360,7 +361,7 @@ namespace AssEmbly
                     if (ProcessStateDirective(mnemonic, operands))
                     {
                         warnings.AddRange(warningGenerator.NextInstruction(
-                            Array.Empty<byte>(), mnemonic, operands,
+                            Array.Empty<byte>(), mnemonic, operands, preVariableLine,
                             currentImport?.CurrentLine ?? baseFileLine,
                             currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
                             currentMacro?.MacroName, macroLineDepth));
@@ -388,7 +389,7 @@ namespace AssEmbly
                     program.AddRange(newBytes);
 
                     warnings.AddRange(warningGenerator.NextInstruction(
-                        newBytes, mnemonic, operands,
+                        newBytes, mnemonic, operands, preVariableLine,
                         currentImport?.CurrentLine ?? baseFileLine,
                         currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
                         currentMacro?.MacroName, macroLineDepth));

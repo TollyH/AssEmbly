@@ -1341,7 +1341,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The third operand to the %VAROP directive cannot be 0 when the first operand is DIV or REM..
+        ///   Looks up a localized string similar to The third operand to the %VAROP directive cannot be zero when the first operand is DIV or REM..
         /// </summary>
         internal static string Assembler_Error_VAROP_Operand_Third_Zero {
             get {
@@ -1805,6 +1805,33 @@ namespace AssEmbly.Resources.Localization {
         internal static string AssemblerWarnings_Warning_0027 {
             get {
                 return ResourceManager.GetString("AssemblerWarnings_Warning_0027", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The &apos;@&apos; prefix on the target assembler variable name is not required for this directive. Including it will result in the current value of the directive being used as the target variable name instead..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0028 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0028", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value of assembler variables is always interpreted as an integer, but the provided value is floating point..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0029 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0029", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This assembler variable operation will not work as expected with negative values..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0030 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0030", resourceCulture);
             }
         }
         
