@@ -61,6 +61,9 @@ namespace AssEmbly
                 Console.ForegroundColor = ConsoleColor.DarkYellow;
                 Console.WriteLine(Strings.Debugger_Warning_Debug_Info_File, exc.GetType().Name, exc.Message);
                 Console.ResetColor();
+#if DEBUG
+                throw;
+#endif
             }
         }
 
@@ -308,7 +311,11 @@ namespace AssEmbly
                     }
                     else
                     {
+#if DEBUG
+                        throw;
+#else
                         return;
+#endif
                     }
                 }
             }
@@ -915,7 +922,11 @@ namespace AssEmbly
             catch (Exception e)
             {
                 Program.OnAssemblerException(e);
+#if DEBUG
+                throw;
+#else
                 return false;
+#endif
             }
         }
     }

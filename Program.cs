@@ -229,8 +229,12 @@ namespace AssEmbly
                 Console.WriteLine(Strings.CLI_Assemble_Result_Header_Failed);
                 Console.ResetColor();
 
+#if DEBUG
+                throw;
+#else
                 Environment.Exit(1);
                 return;
+#endif
             }
 
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
@@ -338,8 +342,12 @@ namespace AssEmbly
             catch (Exception e)
             {
                 OnAssemblerException(e);
+#if DEBUG
+                throw;
+#else
                 Environment.Exit(1);
                 return;
+#endif
             }
 
             Processor processor = new(
@@ -403,8 +411,12 @@ namespace AssEmbly
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(Strings.CLI_Disassemble_Error_Unexpected, e.GetType().Name, e.Message);
                 Console.ResetColor();
+#if DEBUG
+                throw;
+#else
                 Environment.Exit(1);
                 return;
+#endif
             }
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);

@@ -77,7 +77,14 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(Strings.CLI_Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
+                Console.ResetColor();
+#if DEBUG
+                throw;
+#else
+                Environment.Exit(1);
+#endif
             }
         }
 
@@ -214,6 +221,9 @@ namespace AssEmbly
             catch (Exception e)
             {
                 OnExecutionException(e, processor);
+#if DEBUG
+                throw;
+#endif
             }
         }
 
