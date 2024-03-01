@@ -771,13 +771,16 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0029()
         {
             // Warning 0029: The value of assembler variables is always interpreted as an integer, but the provided value is floating point.
-            return assemblerVariableLiteral.TryGetValue(mnemonic, out int operandIndex) && operands[operandIndex].Contains('.');
+            return assemblerVariableLiteral.TryGetValue(mnemonic, out int operandIndex) && operandIndex < operands.Length && operands[operandIndex].Contains('.');
         }
 
         private bool Analyzer_Rolling_Warning_0030()
         {
             // Warning 0030: This assembler variable operation will not work as expected with negative values.
-            return mnemonic.Equals("%VAROP", StringComparison.OrdinalIgnoreCase) && noNegativeVarop.Contains(operands[0]) && operands[2][0] == '-';
+            return (mnemonic.Equals("%VAROP", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("%IF", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase))
+                && operands.Length >= 3 && noNegativeVarop.Contains(operands[0]) && operands[2][0] == '-';
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()

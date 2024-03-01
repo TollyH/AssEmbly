@@ -349,6 +349,8 @@
             { "%DEFINE", 0 },
             { "%UNDEFINE", 0 },
             { "%VAROP", 1 },
+            { "%IF", 1 },
+            { "%ELSE_IF", 1 },
         };
         /// <summary>
         /// All directives that take a literal operand for operating on assembler variables,
@@ -358,11 +360,13 @@
         {
             { "%DEFINE", 1 },
             { "%VAROP", 2 },
+            { "%IF", 2 },
+            { "%ELSE_IF", 2 },
         };
         /// <summary>
-        /// %VAROP directive operations (the first operand) that do not work as expected when given a negative literal as the third operand.
+        /// %VAROP/%IF directive operations (the first operand) that do not work as expected when given a negative literal as the third operand.
         /// </summary>
-        internal static readonly HashSet<string> noNegativeVarop = new(StringComparer.OrdinalIgnoreCase) { "DIV", "REM", "SHL", "SHR" };
+        internal static readonly HashSet<string> noNegativeVarop = new(StringComparer.OrdinalIgnoreCase) { "DIV", "REM", "SHL", "SHR", "GT", "GTE", "LT", "LTE" };
         /// <summary>
         /// Every opcode that results in the location of execution being moved to the address of a label.
         /// As of current, the address to jump to is always the first operand to these opcodes.

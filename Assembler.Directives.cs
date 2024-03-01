@@ -37,6 +37,10 @@ namespace AssEmbly
                 { "%UNDEFINE", StateDirective_RemoveAssemblerVariable },
                 { "%VAROP", StateDirective_AssemblerVariableOperation },
                 { "%DEBUG", StateDirective_PrintAssemblerState },
+                { "%IF", StateDirective_ConditionalAssembly },
+                { "%ELSE", StateDirective_DanglingElseCheck },
+                { "%ELSE_IF", StateDirective_DanglingElseIfCheck },
+                { "%ENDIF", StateDirective_DanglingEndifCheck },
                 { "%ENDMACRO", StateDirective_DanglingClosingDirective },
             };
         }
@@ -112,33 +116,7 @@ namespace AssEmbly
             else if (operands.Length == 1)
             {
                 // Multi-line macro (must be terminated with %ENDMACRO)
-                AssemblyPosition startPosition = GetCurrentPosition();
-                List<string> replacement = new();
-                bool foundEndTag = false;
-                // Add each line before the next encountered %ENDMACRO directive to the replacement text
-                while (IncrementCurrentLine())
-                {
-                    string line = dynamicLines[lineIndex];
-                    if (line.TrimStart().StartsWith("%ENDMACRO", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Parse the line to check it wasn't given with any operands
-                        string[] parsedLine = ParseLine(line);
-                        if (parsedLine.Length != 1)
-                        {
-                            throw new OperandException(string.Format(Strings.Assembler_Error_ENDMACRO_Operand_Count, parsedLine.Length - 1));
-                        }
-                        foundEndTag = true;
-                        break;
-                    }
-                    replacement.Add(line);
-                }
-                if (!foundEndTag)
-                {
-                    // Rollback the state of the import stack to when macro definition started,
-                    // so that error message shows that line instead of the end of the file
-                    SetCurrentPosition(startPosition);
-                    throw new EndingDirectiveException(Strings.Assembler_Error_ENDMACRO_Missing);
-                }
+                string[] replacement = GoToNextClosingDirective("%ENDMACRO");
                 multiLineMacros[newMacroName] = replacement.ToArray();
                 multiLineMacroNames.Add(newMacroName);
                 multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
@@ -493,7 +471,7 @@ namespace AssEmbly
                     }
                     break;
                 default:
-                    throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Second, operands[0]));
+                    throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_First, operands[0]));
             }
         }
 
@@ -557,6 +535,141 @@ namespace AssEmbly
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
             Console.ResetColor();
+        }
+
+        private void StateDirective_ConditionalAssembly(string mnemonic, string[] operands)
+        {
+            currentlyOpenIfBlocks++;
+            // Keep going through %ELSE_IF checks until a satisfied condition is found
+            while (true)
+            {
+                lastIfDefinedPosition = GetCurrentPosition();
+
+                if (operands.Length < 1)
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Count, operands.Length));
+                }
+
+                string operation = operands[0];
+                bool isDefinedCheck = operation is "DEF" or "NDEF";
+
+                if ((isDefinedCheck && operands.Length != 2)
+                    || (!isDefinedCheck && operands.Length != 3))
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Count, operands.Length));
+                }
+
+                ulong comparison = 0;
+                if (operands.Length == 3)
+                {
+                    OperandType operandType = DetermineOperandType(operands[2]);
+                    if (operandType != OperandType.Literal)
+                    {
+                        throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Third_Type, operandType));
+                    }
+                    if (operands[2][0] == ':')
+                    {
+                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Third_Label_Reference);
+                    }
+                    _ = ParseLiteral(operands[2], false, out comparison);
+                }
+
+                ulong value = 0;
+                string variableName = operands[1];
+                if (!isDefinedCheck && !assemblerVariables.TryGetValue(variableName, out value))
+                {
+                    // Given variable must exist, unless we are checking *if* it exists
+                    throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, variableName));
+                }
+
+                bool result = operation.ToUpperInvariant() switch
+                {
+                    "DEF" => assemblerVariables.ContainsKey(variableName),
+                    "NDEF" => !assemblerVariables.ContainsKey(variableName),
+                    "EQ" => value == comparison,
+                    "NEQ" => value != comparison,
+                    "GT" => value > comparison,
+                    "GTE" => value >= comparison,
+                    "LT" => value < comparison,
+                    "LTE" => value <= comparison,
+                    _ => throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_First, operation)),
+                };
+
+                if (!result)
+                {
+                    _ = GoToNextClosingDirective(new List<string>() { "%ENDIF", "%ELSE", "%ELSE_IF" }, out string[] matchedLine);
+                    if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
+                    {
+                        currentlyOpenIfBlocks--;
+                    }
+                    if (!matchedLine[0].Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (matchedLine.Length != 1)
+                        {
+                            throw new OperandException(
+                                string.Format(Strings.Assembler_Error_Closing_Directive_Operand_Count, matchedLine.Length - 1, matchedLine[0]));
+                        }
+                        // ENDIF and ELSE don't require checking for another condition
+                        break;
+                    }
+                    // Don't process assembler variables on operands until after warning analyzers have run,
+                    // as we need to give the line prior to variable expansion to the analyzers
+                    operands = matchedLine[1..];
+
+                    warnings.AddRange(warningGenerator.NextInstruction(
+                        Array.Empty<byte>(), matchedLine[0], operands, $"{mnemonic} {string.Join(',', operands)}",
+                        currentImport?.CurrentLine ?? baseFileLine,
+                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
+                        currentMacro?.MacroName, macroLineDepth));
+
+                    operands = operands.Select(ProcessAssemblerVariables).ToArray();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private void StateDirective_DanglingElseCheck(string mnemonic, string[] operands)
+        {
+            if (currentlyOpenIfBlocks == 0)
+            {
+                StateDirective_DanglingClosingDirective(mnemonic, operands);
+            }
+            if (operands.Length != 0)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_ELSE_Operand_Count, operands.Length));
+            }
+            currentlyOpenIfBlocks--;
+            _ = GoToNextClosingDirective("%ENDIF");
+        }
+
+        private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands)
+        {
+            if (currentlyOpenIfBlocks == 0)
+            {
+                StateDirective_DanglingClosingDirective(mnemonic, operands);
+            }
+            if (operands.Length is < 2 or > 3)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_ELSEIF_Operand_Count, operands.Length));
+            }
+            currentlyOpenIfBlocks--;
+            _ = GoToNextClosingDirective("%ENDIF");
+        }
+
+        private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands)
+        {
+            if (currentlyOpenIfBlocks == 0)
+            {
+                StateDirective_DanglingClosingDirective(mnemonic, operands);
+            }
+            if (operands.Length != 0)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_ENDIF_Operand_Count, operands.Length));
+            }
+            currentlyOpenIfBlocks--;
         }
 
         private void StateDirective_DanglingClosingDirective(string mnemonic, string[] operands)

@@ -355,6 +355,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End of file reached while processing block contents. Did you forget a closing directive?.
+        /// </summary>
+        internal static string Assembler_Error_Closing_Directive_Missing {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Closing_Directive_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {1} directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_Closing_Directive_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Closing_Directive_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assembler constant names cannot be empty. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Constant_Empty_Name {
@@ -455,6 +473,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The %ELSE directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_ELSE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ELSE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %ELSEIF directive requires 2 or 3 operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_ELSEIF_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ELSEIF_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operands cannot be empty:
         ///    {0}
         ///    {1}^.
@@ -466,20 +502,20 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?.
+        ///   Looks up a localized string similar to End of file reached with a conditional block still open. Did you forget an %ENDIF directive?.
         /// </summary>
-        internal static string Assembler_Error_ENDMACRO_Missing {
+        internal static string Assembler_Error_ENDIF_Missing {
             get {
-                return ResourceManager.GetString("Assembler_Error_ENDMACRO_Missing", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_ENDIF_Missing", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The %ENDMACRO directive takes no operands. {0} were given..
+        ///   Looks up a localized string similar to The %ENDIF directive takes no operands. {0} were given..
         /// </summary>
-        internal static string Assembler_Error_ENDMACRO_Operand_Count {
+        internal static string Assembler_Error_ENDIF_Operand_Count {
             get {
-                return ResourceManager.GetString("Assembler_Error_ENDMACRO_Operand_Count", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_ENDIF_Operand_Count", resourceCulture);
             }
         }
         
@@ -543,6 +579,42 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_IBF_Operand_Type {
             get {
                 return ResourceManager.GetString("Assembler_Error_IBF_Operand_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %IF directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_IF_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a recognised operation for the %IF directive..
+        /// </summary>
+        internal static string Assembler_Error_IF_Operand_First {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_First", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The third operand to the %IF directive cannot be a label reference..
+        /// </summary>
+        internal static string Assembler_Error_IF_Operand_Third_Label_Reference {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_Third_Label_Reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The third operand to the %IF directive must be a literal. An operand of type {0} was provided..
+        /// </summary>
+        internal static string Assembler_Error_IF_Operand_Third_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_Third_Type", resourceCulture);
             }
         }
         
@@ -1316,9 +1388,9 @@ namespace AssEmbly.Resources.Localization {
         /// <summary>
         ///   Looks up a localized string similar to &quot;{0}&quot; is not a recognised operation for the %VAROP directive..
         /// </summary>
-        internal static string Assembler_Error_VAROP_Operand_Second {
+        internal static string Assembler_Error_VAROP_Operand_First {
             get {
-                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_Second", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_VAROP_Operand_First", resourceCulture);
             }
         }
         

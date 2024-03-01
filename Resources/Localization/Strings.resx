@@ -1298,11 +1298,11 @@ Current extensions used: {0}</value>
     <data name="AssemblerWarnings_Warning_0027" xml:space="preserve">
         <value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
     </data>
-    <data name="Assembler_Error_ENDMACRO_Operand_Count" xml:space="preserve">
-        <value>The %ENDMACRO directive takes no operands. {0} were given.</value>
+    <data name="Assembler_Error_Closing_Directive_Operand_Count" xml:space="preserve">
+        <value>The {1} directive takes no operands. {0} were given.</value>
     </data>
-    <data name="Assembler_Error_ENDMACRO_Missing" xml:space="preserve">
-        <value>End of file reached while processing macro contents. Did you forget an %ENDMACRO directive?</value>
+    <data name="Assembler_Error_Closing_Directive_Missing" xml:space="preserve">
+        <value>End of file reached while processing block contents. Did you forget a closing directive?</value>
     </data>
     <data name="Assembler_Debug_Directive_Multi_Line_Macro_Header" xml:space="preserve">
         <value>
@@ -1471,7 +1471,7 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_VAROP_Operand_Third_Label_Reference" xml:space="preserve">
         <value>The third operand to the %VAROP directive cannot be a label reference.</value>
     </data>
-    <data name="Assembler_Error_VAROP_Operand_Second" xml:space="preserve">
+    <data name="Assembler_Error_VAROP_Operand_First" xml:space="preserve">
         <value>"{0}" is not a recognised operation for the %VAROP directive.</value>
     </data>
     <data name="Assembler_Error_VAROP_Operand_Third_Zero" xml:space="preserve">
@@ -1485,5 +1485,29 @@ Assembler variable names may not contain symbols other than underscores.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0030" xml:space="preserve">
         <value>This assembler variable operation will not work as expected with negative values.</value>
+    </data>
+    <data name="Assembler_Error_ENDIF_Missing" xml:space="preserve">
+        <value>End of file reached with a conditional block still open. Did you forget an %ENDIF directive?</value>
+    </data>
+    <data name="Assembler_Error_ENDIF_Operand_Count" xml:space="preserve">
+        <value>The %ENDIF directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ELSE_Operand_Count" xml:space="preserve">
+        <value>The %ELSE directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_ELSEIF_Operand_Count" xml:space="preserve">
+        <value>The %ELSEIF directive requires 2 or 3 operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_IF_Operand_Count" xml:space="preserve">
+        <value>The %IF directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_IF_Operand_First" xml:space="preserve">
+        <value>"{0}" is not a recognised operation for the %IF directive.</value>
+    </data>
+    <data name="Assembler_Error_IF_Operand_Third_Type" xml:space="preserve">
+        <value>The third operand to the %IF directive must be a literal. An operand of type {0} was provided.</value>
+    </data>
+    <data name="Assembler_Error_IF_Operand_Third_Label_Reference" xml:space="preserve">
+        <value>The third operand to the %IF directive cannot be a label reference.</value>
     </data>
 </root>

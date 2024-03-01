@@ -111,6 +111,10 @@ namespace AssEmbly
 
         private bool insideMacroSkipBlock = false;
 
+        private int currentlyOpenIfBlocks = 0;
+        // For generating an exception if an %ENDIF directive is missing
+        private AssemblyPosition lastIfDefinedPosition;
+
         // Used for debug files
         private readonly List<(ulong Address, string Line)> assembledLines = new();
         private readonly Dictionary<ulong, List<string>> addressLabelNames = new();
@@ -410,8 +414,16 @@ namespace AssEmbly
                 // Rollback the current position of the assembler,
                 // so that the line that the repeat started on is shown in the error message
                 SetCurrentPosition(currentRepeatSections.Pop().StartPosition);
-                EndingDirectiveException e = new(
-                    string.Format(Strings.Assembler_Error_ENDREPEAT_Missing, currentRepeatSections.Count));
+                EndingDirectiveException e = new(Strings.Assembler_Error_ENDREPEAT_Missing);
+                HandleAssemblerException(e);
+                throw e;
+            }
+
+            // Check for missing %ENDIF directives
+            if (currentlyOpenIfBlocks > 0)
+            {
+                SetCurrentPosition(lastIfDefinedPosition);
+                EndingDirectiveException e = new(Strings.Assembler_Error_ENDIF_Missing);
                 HandleAssemblerException(e);
                 throw e;
             }
@@ -1568,6 +1580,60 @@ namespace AssEmbly
                 return true;
             }
             return false;
+        }
+
+        private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine)
+        {
+            parsedMatchedLine = Array.Empty<string>();
+
+            HashSet<string> closingTags = new(StringComparer.OrdinalIgnoreCase);
+            closingTags.UnionWith(directives);
+
+            AssemblyPosition startPosition = GetCurrentPosition();
+            List<string> lines = new();
+            bool foundEndTag = false;
+
+            while (IncrementCurrentLine())
+            {
+                string line = dynamicLines[lineIndex];
+                line = CleanLine(line);
+                if (line.Length == 0)
+                {
+                    continue;
+                }
+                if (ProcessLineMacros(ref line, dynamicLines, lineIndex))
+                {
+                    continue;
+                }
+                parsedMatchedLine = ParseLine(line);
+                if (closingTags.Contains(parsedMatchedLine[0]))
+                {
+                    foundEndTag = true;
+                    break;
+                }
+                lines.Add(line);
+            }
+
+            if (!foundEndTag)
+            {
+                // Rollback the state of the import stack to when loop started,
+                // so that error message shows that line instead of the end of the file
+                SetCurrentPosition(startPosition);
+                throw new EndingDirectiveException(Strings.Assembler_Error_Closing_Directive_Missing);
+            }
+
+            return lines.ToArray();
+        }
+
+        private string[] GoToNextClosingDirective(string directive)
+        {
+            string[] lines = GoToNextClosingDirective(new List<string>() { directive }, out string[] parsedMatchedLine);
+            if (parsedMatchedLine.Length != 1)
+            {
+                throw new OperandException(
+                    string.Format(Strings.Assembler_Error_Closing_Directive_Operand_Count, parsedMatchedLine.Length - 1, parsedMatchedLine[0]));
+            }
+            return lines;
         }
 
         /// <summary>
