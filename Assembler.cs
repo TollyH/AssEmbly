@@ -305,7 +305,7 @@ namespace AssEmbly
             dynamicLines.AddRange(lines.ToList());
 
             importStack.Clear();
-            baseFileLine = 0;
+            baseFileLine = 1;
 
             lineIndex = 0;
             do
