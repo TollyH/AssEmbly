@@ -844,6 +844,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Error_Literal_Underscore_Only {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Literal_Underscore_Only", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with &apos;!&gt;&apos;..
         /// </summary>
         internal static string Assembler_Error_Macro_Disable_Block_Missing_Start {

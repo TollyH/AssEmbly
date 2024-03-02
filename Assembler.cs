@@ -1679,6 +1679,10 @@ namespace AssEmbly
             {
                 throw new SyntaxError(Strings.Assembler_Error_Literal_Negative_Dash_Only);
             }
+            if (operand.Equals("0x_", StringComparison.OrdinalIgnoreCase) || operand.Equals("0b_", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new SyntaxError(Strings.Assembler_Error_Literal_Underscore_Only);
+            }
             if (operand.IndexOf('.') != operand.LastIndexOf('.'))
             {
                 throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));

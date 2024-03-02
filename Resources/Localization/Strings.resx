@@ -1510,4 +1510,7 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_IF_Operand_Third_Label_Reference" xml:space="preserve">
         <value>The third operand to the %IF directive cannot be a label reference.</value>
     </data>
+    <data name="Assembler_Error_Literal_Underscore_Only" xml:space="preserve">
+        <value>Numeric literals must contain at least one digit.</value>
+    </data>
 </root>
