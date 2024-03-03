@@ -110,6 +110,8 @@ namespace AssEmbly
         private MacroStackFrame? currentMacro = null;
         // The number of lines assembled for all macros referenced by current file line
         private int macroLineDepth = 0;
+        // The number of macro expansions that have occurred on the current line. Used to enforce the macro expansion limit.
+        private int currentMacroExpansions = 0;
 
         private bool insideMacroSkipBlock = false;
 
@@ -1210,6 +1212,7 @@ namespace AssEmbly
         private bool IncrementCurrentLine()
         {
             lineIndex++;
+            currentMacroExpansions = 0;
 
             bool insideMacro = false;
             if (macroStack.TryPeek(out currentMacro))
@@ -1302,8 +1305,6 @@ namespace AssEmbly
 
         private string ExpandSingleLineMacros(string text)
         {
-            int currentExpansions = 0;
-
             for (int i = 0; i < text.Length; i++)
             {
                 foreach (string macro in singleLineMacroNames)
@@ -1324,7 +1325,7 @@ namespace AssEmbly
                     }
                     if (match)
                     {
-                        if (++currentExpansions > MacroExpansionLimit)
+                        if (++currentMacroExpansions > MacroExpansionLimit)
                         {
                             throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Limit_Exceeded, MacroExpansionLimit));
                         }
