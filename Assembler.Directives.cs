@@ -116,7 +116,7 @@ namespace AssEmbly
             else if (operands.Length == 1)
             {
                 // Multi-line macro (must be terminated with %ENDMACRO)
-                string[] replacement = GoToNextClosingDirective("%ENDMACRO");
+                string[] replacement = GoToNextClosingDirective("%ENDMACRO", true);
                 multiLineMacros[newMacroName] = replacement.ToArray();
                 multiLineMacroNames.Add(newMacroName);
                 multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
@@ -253,7 +253,7 @@ namespace AssEmbly
                 message = Encoding.UTF8.GetString(parsedBytes);
             }
             warnings.Add(new Warning(
-                severity, 0000, currentImport?.ImportPath ?? string.Empty, currentImport?.CurrentLine ?? baseFileLine,
+                severity, 0000, currentFilePosition,
                 mnemonic, operands, dynamicLines[lineIndex], currentMacro?.MacroName, message));
         }
 
@@ -597,7 +597,7 @@ namespace AssEmbly
 
                 if (!result)
                 {
-                    _ = GoToNextClosingDirective(new List<string>() { "%ENDIF", "%ELSE", "%ELSE_IF" }, out string[] matchedLine);
+                    _ = GoToNextClosingDirective(new List<string>() { "%ENDIF", "%ELSE", "%ELSE_IF" }, out string[] matchedLine, false);
                     if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
                     {
                         currentlyOpenIfBlocks--;
@@ -618,8 +618,7 @@ namespace AssEmbly
 
                     warnings.AddRange(warningGenerator.NextInstruction(
                         Array.Empty<byte>(), matchedLine[0], operands, $"{mnemonic} {string.Join(',', operands)}",
-                        currentImport?.CurrentLine ?? baseFileLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
+                        currentFilePosition, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
                         currentMacro?.MacroName, macroLineDepth));
 
                     operands = operands.Select(ProcessAssemblerVariables).ToArray();
@@ -642,7 +641,7 @@ namespace AssEmbly
                 throw new OperandException(string.Format(Strings.Assembler_Error_ELSE_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
-            _ = GoToNextClosingDirective("%ENDIF");
+            _ = GoToNextClosingDirective("%ENDIF", false);
         }
 
         private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands)
@@ -656,7 +655,7 @@ namespace AssEmbly
                 throw new OperandException(string.Format(Strings.Assembler_Error_ELSEIF_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
-            _ = GoToNextClosingDirective("%ENDIF");
+            _ = GoToNextClosingDirective("%ENDIF", false);
         }
 
         private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands)

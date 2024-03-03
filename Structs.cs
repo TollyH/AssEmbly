@@ -127,4 +127,39 @@
             return !left.Equals(right);
         }
     }
+
+    [Serializable]
+    public readonly struct FilePosition(int line, string file) : IEquatable<FilePosition>
+    {
+        public readonly int Line = line;
+        public readonly string File = file;
+
+        public bool Equals(FilePosition other)
+        {
+            return Line == other.Line && string.Equals(File, other.File, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is FilePosition other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hashCode = new();
+            hashCode.Add(Line);
+            hashCode.Add(File, StringComparer.OrdinalIgnoreCase);
+            return hashCode.ToHashCode();
+        }
+
+        public static bool operator ==(FilePosition left, FilePosition right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(FilePosition left, FilePosition right)
+        {
+            return !left.Equals(right);
+        }
+    }
 }

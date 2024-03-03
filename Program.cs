@@ -166,15 +166,15 @@ namespace AssEmbly
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
                 // Sort warnings by severity, then file, then line
-                assemblyResult.Warnings.Sort((a, b) =>
+                Array.Sort(assemblyResult.Warnings, (a, b) =>
                 {
                     if (a.Severity == b.Severity)
                     {
-                        if (a.File.Equals(b.File, StringComparison.OrdinalIgnoreCase))
+                        if (a.Position.File.Equals(b.Position.File, StringComparison.OrdinalIgnoreCase))
                         {
-                            return a.Line.CompareTo(b.Line);
+                            return a.Position.Line.CompareTo(b.Position.Line);
                         }
-                        return string.Compare(b.File, a.File, StringComparison.OrdinalIgnoreCase);
+                        return string.Compare(b.Position.File, a.Position.File, StringComparison.OrdinalIgnoreCase);
                     }
                     // Sort severity in reverse as bottom will be most visible to user
                     return b.Severity.CompareTo(a.Severity);
@@ -215,7 +215,8 @@ namespace AssEmbly
                         macroName = string.Format(Strings.CLI_Assemble_Error_Warning_Printout_InMacro, warning.MacroName);
                     }
                     Console.WriteLine(Strings.CLI_Assemble_Error_Warning_Printout,
-                        messageStart, warning.Code, warning.Line, warning.File == "" ? Strings.Generic_Base_File : warning.File,
+                        messageStart, warning.Code, warning.Position.Line,
+                        warning.Position.File == "" ? Strings.Generic_Base_File : warning.Position.File,
                         warning.OriginalLine, warning.Message, macroName);
                     Console.ResetColor();
                 }
@@ -282,14 +283,14 @@ namespace AssEmbly
                     (double)(useV1Format ? assemblyResult.Program.LongLength : programSize) / assemblyResult.Program.LongLength,
                     useV1Format ? assemblyResult.Program.LongLength : programSize + AAPFile.HeaderSize,
                     totalErrors, totalWarnings, totalSuggestions,
-                    assemblyResult.AssembledLines, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
+                    assemblyResult.AssembledLines.Length, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
             else
             {
                 Console.WriteLine(Strings.CLI_Assemble_Result_Success, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
                     useV1Format ? assemblyResult.Program.LongLength : assemblyResult.Program.LongLength + AAPFile.HeaderSize,
                     totalErrors, totalWarnings, totalSuggestions,
-                    assemblyResult.AssembledLines, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
+                    assemblyResult.AssembledLines.Length, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
         }
 
@@ -468,7 +469,7 @@ namespace AssEmbly
                 }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 AssemblyResult assemblyResult = assembler.GetAssemblyResult(true);
-                Console.WriteLine(JsonSerializer.Serialize(assemblyResult.Warnings, new JsonSerializerOptions { IncludeFields = true }));
+                Console.WriteLine(JsonSerializer.Serialize(assemblyResult, new JsonSerializerOptions { IncludeFields = true }));
             }
             catch (Exception e)
             {

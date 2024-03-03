@@ -7,15 +7,16 @@ using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
+    [Serializable]
     public readonly record struct AssemblyResult
     (
         byte[] Program,
         string DebugInfo,
-        List<string> ExpandedSourceFile,
-        List<Warning> Warnings,
+        string[] ExpandedSourceFile,
+        Warning[] Warnings,
         ulong EntryPoint,
         AAPFeatures UsedExtensions,
-        int AssembledLines,
+        FilePosition[] AssembledLines,
         int AssembledFiles
     );
 
@@ -99,6 +100,7 @@ namespace AssEmbly
         private readonly Stack<ImportStackFrame> importStack = new();
         private ImportStackFrame? currentImport = null;
         private int baseFileLine = 0;
+        private FilePosition currentFilePosition = new();
 
         // When %REPEAT is used, the current position of the assembler is cloned and added to this stack
         private readonly Stack<(AssemblyPosition StartPosition, ulong RemainingIterations)> currentRepeatSections = new();
@@ -129,10 +131,9 @@ namespace AssEmbly
 
         private bool lineIsLabelled = false;
         private bool lineIsEntry = false;
-
         private ulong entryPoint = 0;
 
-        private int processedLines = 0;
+        private readonly HashSet<FilePosition> processedLines = new();
         private readonly Dictionary<string, int> timesSeenFile = new();
         // Files that begin with an %ASM_ONCE directive (i.e. won't throw a circular import error)
         private readonly HashSet<string> completeAsmOnceFiles = new();
@@ -278,7 +279,9 @@ namespace AssEmbly
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports);
-            return new AssemblyResult(programBytes, debugInfo, dynamicLines, warnings, entryPoint, usedExtensions, processedLines, timesSeenFile.Count);
+            return new AssemblyResult(
+                programBytes, debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
+                entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
         }
 
         /// <summary>
@@ -306,10 +309,12 @@ namespace AssEmbly
 
             importStack.Clear();
             baseFileLine = 1;
+            currentFilePosition = new FilePosition(1, "");
 
             lineIndex = 0;
             do
             {
+                _ = processedLines.Add(currentFilePosition);
                 string rawLine = CleanLine(dynamicLines[lineIndex]);
                 if (rawLine.Length == 0)
                 {
@@ -330,7 +335,7 @@ namespace AssEmbly
                     {
                         continue;
                     }
-                    processedLines++;
+                    
                     string mnemonic = line[0];
                     // Lines starting with ':' are label definitions
                     if (mnemonic.StartsWith(':'))
@@ -366,8 +371,7 @@ namespace AssEmbly
                     {
                         warnings.AddRange(warningGenerator.NextInstruction(
                             Array.Empty<byte>(), mnemonic, operands, preVariableLine,
-                            currentImport?.CurrentLine ?? baseFileLine,
-                            currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
+                            currentFilePosition, lineIsLabelled, lineIsEntry, rawLine, importStack,
                             currentMacro?.MacroName, macroLineDepth));
 
                         // Directive found and processed, move onto next statement
@@ -394,8 +398,7 @@ namespace AssEmbly
 
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands, preVariableLine,
-                        currentImport?.CurrentLine ?? baseFileLine,
-                        currentImport?.ImportPath ?? string.Empty, lineIsLabelled, lineIsEntry, rawLine, importStack,
+                        currentFilePosition, lineIsLabelled, lineIsEntry, rawLine, importStack,
                         currentMacro?.MacroName, macroLineDepth));
 
                     lineIsLabelled = false;
@@ -1264,6 +1267,10 @@ namespace AssEmbly
                 }
             }
 
+            currentFilePosition = new FilePosition(
+                currentImport?.CurrentLine ?? baseFileLine,
+                currentImport?.ImportPath ?? string.Empty);
+
             return lineIndex < dynamicLines.Count;
         }
 
@@ -1287,6 +1294,10 @@ namespace AssEmbly
 
             _ = macroStack.TryPeek(out currentMacro);
             _ = importStack.TryPeek(out currentImport);
+
+            currentFilePosition = new FilePosition(
+                currentImport?.CurrentLine ?? baseFileLine,
+                currentImport?.ImportPath ?? string.Empty);
         }
 
         private string ExpandSingleLineMacros(string text)
@@ -1533,18 +1544,16 @@ namespace AssEmbly
         {
             string rawLine = dynamicLines[lineIndex];
 
+            e.WarningObject = new Warning(
+                WarningSeverity.FatalError, 0000, currentFilePosition, "", Array.Empty<string>(),
+                rawLine, currentMacro?.MacroName, e.Message);
+
             if (currentImport is null)
             {
                 e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
-                e.WarningObject = new Warning(
-                    WarningSeverity.FatalError, 0000, "", baseFileLine, "", Array.Empty<string>(),
-                    rawLine, currentMacro?.MacroName, e.Message);
             }
             else
             {
-                e.WarningObject = new Warning(WarningSeverity.FatalError, 0000,
-                    currentImport.ImportPath, currentImport.CurrentLine, "", Array.Empty<string>(),
-                    rawLine, currentMacro?.MacroName, e.Message);
                 string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
                 _ = importStack.Pop();  // Remove already printed frame from stack
                 while (importStack.TryPop(out ImportStackFrame? nestedImport))
@@ -1582,7 +1591,7 @@ namespace AssEmbly
             return false;
         }
 
-        private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine)
+        private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine, bool markProcessed)
         {
             parsedMatchedLine = Array.Empty<string>();
 
@@ -1595,6 +1604,10 @@ namespace AssEmbly
 
             while (IncrementCurrentLine())
             {
+                if (markProcessed)
+                {
+                    _ = processedLines.Add(currentFilePosition);
+                }
                 string line = dynamicLines[lineIndex];
                 line = CleanLine(line);
                 if (line.Length == 0)
@@ -1609,6 +1622,8 @@ namespace AssEmbly
                 if (closingTags.Contains(parsedMatchedLine[0]))
                 {
                     foundEndTag = true;
+                    // Even if intermediate lines aren't being marked as processed, the closing tag still should be
+                    _ = processedLines.Add(currentFilePosition);
                     break;
                 }
                 lines.Add(line);
@@ -1625,9 +1640,9 @@ namespace AssEmbly
             return lines.ToArray();
         }
 
-        private string[] GoToNextClosingDirective(string directive)
+        private string[] GoToNextClosingDirective(string directive, bool markProcessed)
         {
-            string[] lines = GoToNextClosingDirective(new List<string>() { directive }, out string[] parsedMatchedLine);
+            string[] lines = GoToNextClosingDirective(new List<string>() { directive }, out string[] parsedMatchedLine, markProcessed);
             if (parsedMatchedLine.Length != 1)
             {
                 throw new OperandException(

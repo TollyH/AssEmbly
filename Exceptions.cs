@@ -46,7 +46,8 @@
         public AssemblerException(string message, int line, string file) : base(message)
         {
             WarningObject = new Warning(
-                WarningSeverity.FatalError, 0000, file, line, "", Array.Empty<string>(), "", "", message);
+                WarningSeverity.FatalError, 0000, new FilePosition(line, file),
+                "", Array.Empty<string>(), "", "", message);
         }
     }
 
