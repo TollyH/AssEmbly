@@ -649,7 +649,13 @@
 
         public override int GetHashCode((string Mnemonic, OperandType[] OperandTypes) obj)
         {
-            return HashCode.Combine(StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Mnemonic), obj.OperandTypes.Cast<int>().Aggregate(0, HashCode.Combine));
+            HashCode hashCode = new();
+            hashCode.Add(obj.Mnemonic, StringComparer.OrdinalIgnoreCase);
+            foreach (OperandType type in obj.OperandTypes)
+            {
+                hashCode.Add(type);
+            }
+            return hashCode.ToHashCode();
         }
     }
 }

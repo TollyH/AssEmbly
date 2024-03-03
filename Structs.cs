@@ -1,17 +1,11 @@
 ﻿namespace AssEmbly
 {
-    public readonly struct Opcode : IEquatable<Opcode>
+    public readonly struct Opcode(byte extensionSet, byte instructionCode) : IEquatable<Opcode>
     {
         public const byte FullyQualifiedMarker = 0xFF;
         
-        public readonly byte ExtensionSet;
-        public readonly byte InstructionCode;
-
-        public Opcode(byte extensionSet, byte instructionCode)
-        {
-            ExtensionSet = extensionSet;
-            InstructionCode = instructionCode;
-        }
+        public readonly byte ExtensionSet = extensionSet;
+        public readonly byte InstructionCode = instructionCode;
 
         /// <summary>
         /// Parse an opcode from an array of bytes at a given offset.
@@ -22,11 +16,9 @@
         /// <remarks><paramref name="offset"/> will be incremented to the index of the end of the opcode by this method.</remarks>
         public static Opcode ParseBytes(Span<byte> bytes, ref ulong offset)
         {
-            if (bytes[(int)offset] == FullyQualifiedMarker)
-            {
-                return new Opcode(bytes[(int)++offset], bytes[(int)++offset]);
-            }
-            return new Opcode(0x00, bytes[(int)offset]);
+            return bytes[(int)offset] == FullyQualifiedMarker
+                ? new Opcode(bytes[(int)++offset], bytes[(int)++offset])
+                : new Opcode(0x00, bytes[(int)offset]);
         }
 
         public override bool Equals(object? obj)
