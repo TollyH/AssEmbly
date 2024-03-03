@@ -1447,6 +1447,12 @@ namespace AssEmbly
             bool openBackslash = false;
             bool parsingName = false;
 
+            if (text.TrimStart().StartsWith("%MACRO ", StringComparison.OrdinalIgnoreCase))
+            {
+                // Assembler variables in macro definitions should not be replaced
+                return text;
+            }
+
             for (int i = 0; i <= text.Length; i++)
             {
                 // Terminate the string with a null character so that variables at the end of the line are still replaced
