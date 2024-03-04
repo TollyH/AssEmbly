@@ -166,9 +166,6 @@ namespace AssEmbly
                 { "ASSEMBLER_VERSION_MAJOR", () => (ulong)(Program.version?.Major ?? 0) },
                 { "ASSEMBLER_VERSION_MINOR", () => (ulong)(Program.version?.Minor ?? 0) },
                 { "ASSEMBLER_VERSION_PATCH", () => (ulong)(Program.version?.Build ?? 0) },
-                { "COMPAT_VERSION_MAJOR", () => 0 },  // TODO: Add once compatibility feature is added
-                { "COMPAT_VERSION_MINOR", () => 0 },  // TODO: Add once compatibility feature is added
-                { "COMPAT_VERSION_PATCH", () => 0 },  // TODO: Add once compatibility feature is added
                 { "V1_FORMAT", () => usingV1Format ? 1UL : 0UL },
                 { "V1_CALL_STACK", () => usingV1Stack ? 1UL : 0UL },
                 { "IMPORT_DEPTH", () => (ulong)importStack.Count },
