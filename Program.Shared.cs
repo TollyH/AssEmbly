@@ -181,7 +181,12 @@ namespace AssEmbly
                             Environment.Exit(1);
                             return new List<(string Name, ulong Value)>();
                         }
-                        result.Add((split[0], value));
+                        string name = split[0];
+                        if (name.Length == 0)
+                        {
+                            continue;
+                        }
+                        result.Add((name, value));
                     }
                     return result;
                 }
