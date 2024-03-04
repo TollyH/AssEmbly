@@ -272,11 +272,6 @@ Label names and original source lines will not be available.</value>
         <value>The following file was imported here:
     </value>
     </data>
-    <data name="Generic_Double_Newline" xml:space="preserve">
-        <value>
-
-</value>
-    </data>
     <data name="Generic_Flags_Header" xml:space="preserve">
         <value>Flags:</value>
     </data>

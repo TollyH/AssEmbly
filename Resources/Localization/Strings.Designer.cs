@@ -844,7 +844,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to Numeric literals must contain at least one digit..
         /// </summary>
         internal static string Assembler_Error_Literal_Underscore_Only {
             get {
@@ -2874,17 +2874,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string Generic_Copyright_Header {
             get {
                 return ResourceManager.GetString("Generic_Copyright_Header", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 
-        ///
-        ///.
-        /// </summary>
-        internal static string Generic_Double_Newline {
-            get {
-                return ResourceManager.GetString("Generic_Double_Newline", resourceCulture);
             }
         }
         

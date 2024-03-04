@@ -101,7 +101,8 @@ namespace AssEmbly
             }
             else
             {
-                Console.Write(Strings.Generic_Double_Newline);
+                Console.WriteLine();
+                Console.WriteLine();
             }
 
             Program.PrintRegisterStates(DebuggingProcessor);
