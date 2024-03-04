@@ -18,6 +18,9 @@ namespace AssEmbly
             { "%IBF", DataDirective_RawFileInsertion },
         };
 
+        private static readonly string[] closingIfDirectives = new[] { "%ENDIF", "%ELSE", "%ELSE_IF" };
+        private static readonly string[] openingIfDirectives = new[] { "%IF" };
+
         // Used to keep the dictionary definition within this file out of the constructor whilst keeping stateDirectives readonly
         private void InitializeStateDirectives(out Dictionary<string, StateDirective> dictionary)
         {
@@ -597,7 +600,8 @@ namespace AssEmbly
                         currentFilePosition, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
                         currentMacro?.MacroName, macroLineDepth));
 
-                    _ = GoToNextClosingDirective(new List<string>() { "%ENDIF", "%ELSE", "%ELSE_IF" }, out string[] matchedLine, false);
+                    _ = GoToNextClosingDirective(
+                        closingIfDirectives, out string[] matchedLine, false, openingIfDirectives);
                     if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
                     {
                         currentlyOpenIfBlocks--;

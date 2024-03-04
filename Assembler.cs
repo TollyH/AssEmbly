@@ -1607,16 +1607,32 @@ namespace AssEmbly
             return false;
         }
 
-        private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine, bool markProcessed)
+        /// <summary>
+        /// Skip assembly to the next instance of any of the given closing directives.
+        /// </summary>
+        /// <param name="directives">The case-insensitive closing directives to find.</param>
+        /// <param name="parsedMatchedLine">The parsed line that was stopped on.</param>
+        /// <param name="markProcessed">Whether the skipped lines should be considered processed (for linting).</param>
+        /// <param name="reopeningDirectives">
+        /// If any of these are encountered, it will increase the number of closing directive matches required to stop.
+        /// Useful for nested block directives.
+        /// </param>
+        /// <returns>An array of all the lines that were skipped</returns>
+        /// <exception cref="EndingDirectiveException">There were no instances of the given closing directives found</exception>
+        private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine, bool markProcessed, IEnumerable<string> reopeningDirectives)
         {
             parsedMatchedLine = Array.Empty<string>();
 
             HashSet<string> closingTags = new(StringComparer.OrdinalIgnoreCase);
             closingTags.UnionWith(directives);
 
+            HashSet<string> nestedTags = new(StringComparer.OrdinalIgnoreCase);
+            nestedTags.UnionWith(reopeningDirectives);
+
             AssemblyPosition startPosition = GetCurrentPosition();
             List<string> lines = new();
             bool foundEndTag = false;
+            int nestedOpens = 0;
 
             while (IncrementCurrentLine())
             {
@@ -1635,12 +1651,21 @@ namespace AssEmbly
                     continue;
                 }
                 parsedMatchedLine = ParseLine(line);
+                if (nestedTags.Contains(parsedMatchedLine[0]))
+                {
+                    nestedOpens++;
+                    continue;
+                }
                 if (closingTags.Contains(parsedMatchedLine[0]))
                 {
-                    foundEndTag = true;
-                    // Even if intermediate lines aren't being marked as processed, the closing tag still should be
-                    _ = processedLines.Add(currentFilePosition);
-                    break;
+                    if (nestedOpens == 0)
+                    {
+                        foundEndTag = true;
+                        // Even if intermediate lines aren't being marked as processed, the closing tag still should be
+                        _ = processedLines.Add(currentFilePosition);
+                        break;
+                    }
+                    nestedOpens--;
                 }
                 lines.Add(line);
             }
@@ -1658,7 +1683,8 @@ namespace AssEmbly
 
         private string[] GoToNextClosingDirective(string directive, bool markProcessed)
         {
-            string[] lines = GoToNextClosingDirective(new List<string>() { directive }, out string[] parsedMatchedLine, markProcessed);
+            string[] lines = GoToNextClosingDirective(
+                new List<string>() { directive }, out string[] parsedMatchedLine, markProcessed, Enumerable.Empty<string>());
             if (parsedMatchedLine.Length != 1)
             {
                 throw new OperandException(
