@@ -18,7 +18,7 @@ namespace AssEmbly
             {
                 offsetToLine[offset] = result.Count;
                 (string line, ulong additionalOffset, List<ulong> referencedAddresses) =
-                    DisassembleInstruction(program.AsSpan()[(int)offset..], allowFullyQualifiedBaseOpcodes);
+                    DisassembleInstruction(program.AsSpan()[(int)offset..], allowFullyQualifiedBaseOpcodes, true);
                 offset += additionalOffset;
                 references.AddRange(referencedAddresses.Select(x => (x, result.Count)));
                 result.Add(line);
@@ -100,7 +100,8 @@ namespace AssEmbly
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
-        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes)
+        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(
+            Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes, bool useLabelNames)
         {
             if (instruction.Length == 0)
             {
@@ -173,7 +174,7 @@ namespace AssEmbly
                                 break;
                             }
                             referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]));
-                            operandStrings.Add($":ADDR_{referencedAddresses[^1]:X}");
+                            operandStrings.Add(useLabelNames ? $":ADDR_{referencedAddresses[^1]:X}" : $":{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
                         case OperandType.Pointer:
