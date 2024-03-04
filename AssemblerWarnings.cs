@@ -238,6 +238,7 @@ namespace AssEmbly
                 { 0028, Analyzer_Rolling_Warning_0028 },
                 { 0029, Analyzer_Rolling_Warning_0029 },
                 { 0030, Analyzer_Rolling_Warning_0030 },
+                { 0031, Analyzer_Rolling_Warning_0031 },
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -757,13 +758,15 @@ namespace AssEmbly
         {
             // Warning 0028: The '@' prefix on the target assembler variable name is not required for this directive.
             //               Including it will result in the current value of the directive being used as the target variable name instead.
-            return takesLiteralVariableName.TryGetValue(mnemonic, out int operandIndex) && Assembler.ParseLine(preVariableLine)[operandIndex + 1][0] == '@';
+            return takesLiteralVariableName.TryGetValue(mnemonic, out int operandIndex) && Assembler.ParseLine(preVariableLine)[operandIndex + 1][0] == '@'
+                // Only apply to %IF and %ELSE_IF for the DEF and NDEF operations
+                && ((!mnemonic.Equals("%IF", StringComparison.OrdinalIgnoreCase) && !mnemonic.Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase)) || operands.Length == 2);
         }
 
         private bool Analyzer_Rolling_Warning_0029()
         {
             // Warning 0029: The value of assembler variables is always interpreted as an integer, but the provided value is floating point.
-            return assemblerVariableLiteral.TryGetValue(mnemonic, out int operandIndex) && operandIndex < operands.Length && operands[operandIndex].Contains('.');
+            return assemblerVariableLiteral.TryGetValue(mnemonic, out int[]? operandIndexes) && operandIndexes.Any(i => i < operands.Length && operands[i].Contains('.'));
         }
 
         private bool Analyzer_Rolling_Warning_0030()
@@ -773,6 +776,14 @@ namespace AssEmbly
                     || mnemonic.Equals("%IF", StringComparison.OrdinalIgnoreCase)
                     || mnemonic.Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase))
                 && operands.Length >= 3 && noNegativeVarop.Contains(operands[0]) && operands[2][0] == '-';
+        }
+
+        private bool Analyzer_Rolling_Warning_0031()
+        {
+            // Warning 0031: Both operands to this comparison are numeric literals, so the result will never change.
+            return (mnemonic.Equals("%IF", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase))
+                && operands.Length >= 3 && Assembler.ParseLine(preVariableLine).All(o => o[0] != '@');
         }
 
         private bool Analyzer_Rolling_Suggestion_0001()

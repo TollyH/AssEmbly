@@ -369,12 +369,20 @@ namespace AssEmbly
                     }
                     string[] operands = line[1..];
 
-                    if (ProcessStateDirective(mnemonic, operands))
+                    FilePosition startPosition = currentFilePosition;
+                    bool lineWasLabelled = lineIsLabelled;
+                    bool lineWasEntry = lineIsEntry;
+                    if (ProcessStateDirective(mnemonic, operands, preVariableLine))
                     {
-                        warnings.AddRange(warningGenerator.NextInstruction(
-                            Array.Empty<byte>(), mnemonic, operands, preVariableLine,
-                            currentFilePosition, lineIsLabelled, lineIsEntry, rawLine, importStack,
-                            currentMacro?.MacroName, macroLineDepth));
+                        // Don't run warning analyzers if directive has changed our position in the file
+                        // - it will have already run them for the original line if required
+                        if (currentFilePosition == startPosition)
+                        {
+                            warnings.AddRange(warningGenerator.NextInstruction(
+                                Array.Empty<byte>(), mnemonic, operands, preVariableLine,
+                                currentFilePosition, lineWasLabelled, lineWasEntry, rawLine, importStack,
+                                currentMacro?.MacroName, macroLineDepth));
+                        }
 
                         // Directive found and processed, move onto next statement
                         continue;
@@ -1582,17 +1590,18 @@ namespace AssEmbly
         /// Determine if a given statement is a known state-modifying assembler directive and process it if it is.
         /// </summary>
         /// <param name="mnemonic">The mnemonic for the directive, including the % prefix</param>
+        /// <param name="preVariableLine">The contents of the current line before assembler variables are expanded</param>
         /// <returns>
         /// <list type="bullet">
         /// <item><see langword="true"/> - Directive was recognised and processed without error</item>
         /// <item><see langword="false"/> - Directive was not recognised and assembly of the statement should continue</item>
         /// </list>
         /// </returns>
-        private bool ProcessStateDirective(string mnemonic, string[] operands)
+        private bool ProcessStateDirective(string mnemonic, string[] operands, string preVariableLine)
         {
             if (stateDirectives.TryGetValue(mnemonic, out StateDirective? directiveFunc))
             {
-                directiveFunc(mnemonic, operands);
+                directiveFunc(mnemonic, operands, preVariableLine);
                 return true;
             }
             return false;

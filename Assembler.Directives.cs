@@ -5,7 +5,7 @@ namespace AssEmbly
 {
     public partial class Assembler
     {
-        private delegate void StateDirective(string mnemonic, string[] operands);
+        private delegate void StateDirective(string mnemonic, string[] operands, string preVariableLine);
         private delegate byte[] DataDirective(string[] operands, List<(string, ulong)> referencedLabels);
 
         private readonly Dictionary<string, StateDirective> stateDirectives;
@@ -47,7 +47,7 @@ namespace AssEmbly
 
         // STATE DIRECTIVES
 
-        private void StateDirective_ImportSourceFile(string mnemonic, string[] operands)
+        private void StateDirective_ImportSourceFile(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
@@ -88,7 +88,7 @@ namespace AssEmbly
             importStack.Push(new ImportStackFrame(resolvedPath, 0, linesToImport.Length));
         }
 
-        private void StateDirective_DefineMacro(string mnemonic, string[] operands)
+        private void StateDirective_DefineMacro(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length is < 1 or > 2)
             {
@@ -123,7 +123,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_RemoveMacro(string mnemonic, string[] operands)
+        private void StateDirective_RemoveMacro(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
@@ -146,7 +146,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_ManualLabelDefine(string mnemonic, string[] operands)
+        private void StateDirective_ManualLabelDefine(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
@@ -194,7 +194,7 @@ namespace AssEmbly
             overriddenLabels.UnionWith(labelsToEdit);
         }
 
-        private void StateDirective_SetAnalyzerState(string mnemonic, string[] operands)
+        private void StateDirective_SetAnalyzerState(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 3)
             {
@@ -224,7 +224,7 @@ namespace AssEmbly
             };
         }
 
-        private void StateDirective_EmitAssemblerMessage(string mnemonic, string[] operands)
+        private void StateDirective_EmitAssemblerMessage(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length is < 1 or > 2)
             {
@@ -257,7 +257,7 @@ namespace AssEmbly
                 mnemonic, operands, dynamicLines[lineIndex], currentMacro?.MacroName, message));
         }
 
-        private void StateDirective_StopAssembly(string mnemonic, string[] operands)
+        private void StateDirective_StopAssembly(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length > 1)
             {
@@ -281,7 +281,7 @@ namespace AssEmbly
             throw new AssemblyStoppedException(message ?? Strings.Assembler_Error_STOP);
         }
 
-        private void StateDirective_RepeatSourceLines(string mnemonic, string[] operands)
+        private void StateDirective_RepeatSourceLines(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
@@ -308,7 +308,7 @@ namespace AssEmbly
             currentRepeatSections.Push((GetCurrentPosition(), repeatCount - 1));
         }
 
-        private void StateDirective_EndLineRepeat(string mnemonic, string[] operands)
+        private void StateDirective_EndLineRepeat(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 0)
             {
@@ -327,7 +327,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_SingleAssemblyGuard(string mnemonic, string[] operands)
+        private void StateDirective_SingleAssemblyGuard(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 0)
             {
@@ -349,7 +349,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_DefineAssemblerVariable(string mnemonic, string[] operands)
+        private void StateDirective_DefineAssemblerVariable(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 2)
             {
@@ -366,7 +366,7 @@ namespace AssEmbly
             SetAssemblerVariable(newVariableName, variableValue);
         }
 
-        private void StateDirective_RemoveAssemblerVariable(string mnemonic, string[] operands)
+        private void StateDirective_RemoveAssemblerVariable(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
@@ -378,7 +378,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_AssemblerVariableOperation(string mnemonic, string[] operands)
+        private void StateDirective_AssemblerVariableOperation(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 3)
             {
@@ -475,7 +475,7 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_PrintAssemblerState(string mnemonic, string[] operands)
+        private void StateDirective_PrintAssemblerState(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 0)
             {
@@ -537,7 +537,7 @@ namespace AssEmbly
             Console.ResetColor();
         }
 
-        private void StateDirective_ConditionalAssembly(string mnemonic, string[] operands)
+        private void StateDirective_ConditionalAssembly(string mnemonic, string[] operands, string preVariableLine)
         {
             currentlyOpenIfBlocks++;
             // Keep going through %ELSE_IF checks until a satisfied condition is found
@@ -559,33 +559,28 @@ namespace AssEmbly
                     throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Count, operands.Length));
                 }
 
+                ulong value = 0;
                 ulong comparison = 0;
                 if (operands.Length == 3)
                 {
-                    OperandType operandType = DetermineOperandType(operands[2]);
-                    if (operandType != OperandType.Literal)
+                    OperandType operandTypeSecond = DetermineOperandType(operands[1]);
+                    OperandType operandTypeThird = DetermineOperandType(operands[2]);
+                    if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
                     {
-                        throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Third_Type, operandType));
+                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Second_Third_Type);
                     }
-                    if (operands[2][0] == ':')
+                    if (operands[1][0] == ':' || operands[2][0] == ':')
                     {
-                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Third_Label_Reference);
+                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Second_Third_Label_Reference);
                     }
+                    _ = ParseLiteral(operands[1], false, out value);
                     _ = ParseLiteral(operands[2], false, out comparison);
-                }
-
-                ulong value = 0;
-                string variableName = operands[1];
-                if (!isDefinedCheck && !assemblerVariables.TryGetValue(variableName, out value))
-                {
-                    // Given variable must exist, unless we are checking *if* it exists
-                    throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, variableName));
                 }
 
                 bool result = operation.ToUpperInvariant() switch
                 {
-                    "DEF" => assemblerVariables.ContainsKey(variableName),
-                    "NDEF" => !assemblerVariables.ContainsKey(variableName),
+                    "DEF" => assemblerVariables.ContainsKey(operands[1]),
+                    "NDEF" => !assemblerVariables.ContainsKey(operands[1]),
                     "EQ" => value == comparison,
                     "NEQ" => value != comparison,
                     "GT" => value > comparison,
@@ -597,6 +592,11 @@ namespace AssEmbly
 
                 if (!result)
                 {
+                    warnings.AddRange(warningGenerator.NextInstruction(
+                        Array.Empty<byte>(), mnemonic, operands, preVariableLine,
+                        currentFilePosition, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
+                        currentMacro?.MacroName, macroLineDepth));
+
                     _ = GoToNextClosingDirective(new List<string>() { "%ENDIF", "%ELSE", "%ELSE_IF" }, out string[] matchedLine, false);
                     if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
                     {
@@ -612,16 +612,9 @@ namespace AssEmbly
                         // ENDIF and ELSE don't require checking for another condition
                         break;
                     }
-                    // Don't process assembler variables on operands until after warning analyzers have run,
-                    // as we need to give the line prior to variable expansion to the analyzers
-                    operands = matchedLine[1..];
 
-                    warnings.AddRange(warningGenerator.NextInstruction(
-                        Array.Empty<byte>(), matchedLine[0], operands, $"{mnemonic} {string.Join(',', operands)}",
-                        currentFilePosition, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
-                        currentMacro?.MacroName, macroLineDepth));
-
-                    operands = operands.Select(ProcessAssemblerVariables).ToArray();
+                    mnemonic = matchedLine[0];
+                    operands = matchedLine[1..].Select(ProcessAssemblerVariables).ToArray();
                 }
                 else
                 {
@@ -630,11 +623,11 @@ namespace AssEmbly
             }
         }
 
-        private void StateDirective_DanglingElseCheck(string mnemonic, string[] operands)
+        private void StateDirective_DanglingElseCheck(string mnemonic, string[] operands, string preVariableLine)
         {
             if (currentlyOpenIfBlocks == 0)
             {
-                StateDirective_DanglingClosingDirective(mnemonic, operands);
+                StateDirective_DanglingClosingDirective(mnemonic, operands, preVariableLine);
             }
             if (operands.Length != 0)
             {
@@ -644,11 +637,11 @@ namespace AssEmbly
             _ = GoToNextClosingDirective("%ENDIF", false);
         }
 
-        private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands)
+        private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands, string preVariableLine)
         {
             if (currentlyOpenIfBlocks == 0)
             {
-                StateDirective_DanglingClosingDirective(mnemonic, operands);
+                StateDirective_DanglingClosingDirective(mnemonic, operands, preVariableLine);
             }
             if (operands.Length is < 2 or > 3)
             {
@@ -658,11 +651,11 @@ namespace AssEmbly
             _ = GoToNextClosingDirective("%ENDIF", false);
         }
 
-        private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands)
+        private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands, string preVariableLine)
         {
             if (currentlyOpenIfBlocks == 0)
             {
-                StateDirective_DanglingClosingDirective(mnemonic, operands);
+                StateDirective_DanglingClosingDirective(mnemonic, operands, preVariableLine);
             }
             if (operands.Length != 0)
             {
@@ -671,7 +664,7 @@ namespace AssEmbly
             currentlyOpenIfBlocks--;
         }
 
-        private void StateDirective_DanglingClosingDirective(string mnemonic, string[] operands)
+        private void StateDirective_DanglingClosingDirective(string mnemonic, string[] operands, string preVariableLine)
         {
             throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
         }

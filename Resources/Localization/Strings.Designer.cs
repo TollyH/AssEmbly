@@ -601,20 +601,20 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The third operand to the %IF directive cannot be a label reference..
+        ///   Looks up a localized string similar to The second and third operands to the %IF directive cannot be a label reference..
         /// </summary>
-        internal static string Assembler_Error_IF_Operand_Third_Label_Reference {
+        internal static string Assembler_Error_IF_Operand_Second_Third_Label_Reference {
             get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_Third_Label_Reference", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_Second_Third_Label_Reference", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The third operand to the %IF directive must be a literal. An operand of type {0} was provided..
+        ///   Looks up a localized string similar to The second and third operands to the %IF directive must be literals..
         /// </summary>
-        internal static string Assembler_Error_IF_Operand_Third_Type {
+        internal static string Assembler_Error_IF_Operand_Second_Third_Type {
             get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_Third_Type", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_IF_Operand_Second_Third_Type", resourceCulture);
             }
         }
         
@@ -1913,6 +1913,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string AssemblerWarnings_Warning_0030 {
             get {
                 return ResourceManager.GetString("AssemblerWarnings_Warning_0030", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Both operands to this comparison are numeric literals, so the result will never change..
+        /// </summary>
+        internal static string AssemblerWarnings_Warning_0031 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Warning_0031", resourceCulture);
             }
         }
         

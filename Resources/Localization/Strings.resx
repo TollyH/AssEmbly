@@ -1499,13 +1499,16 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_IF_Operand_First" xml:space="preserve">
         <value>"{0}" is not a recognised operation for the %IF directive.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_Third_Type" xml:space="preserve">
-        <value>The third operand to the %IF directive must be a literal. An operand of type {0} was provided.</value>
+    <data name="Assembler_Error_IF_Operand_Second_Third_Type" xml:space="preserve">
+        <value>The second and third operands to the %IF directive must be literals.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_Third_Label_Reference" xml:space="preserve">
-        <value>The third operand to the %IF directive cannot be a label reference.</value>
+    <data name="Assembler_Error_IF_Operand_Second_Third_Label_Reference" xml:space="preserve">
+        <value>The second and third operands to the %IF directive cannot be a label reference.</value>
     </data>
     <data name="Assembler_Error_Literal_Underscore_Only" xml:space="preserve">
         <value>Numeric literals must contain at least one digit.</value>
+    </data>
+    <data name="AssemblerWarnings_Warning_0031" xml:space="preserve">
+        <value>Both operands to this comparison are numeric literals, so the result will never change.</value>
     </data>
 </root>

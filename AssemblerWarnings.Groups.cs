@@ -354,14 +354,14 @@
         };
         /// <summary>
         /// All directives that take a literal operand for operating on assembler variables,
-        /// mapped to the 0-based index of the operand that is the literal.
+        /// mapped to the 0-based indexes of the operand that is the literal.
         /// </summary>
-        internal static readonly Dictionary<string, int> assemblerVariableLiteral = new(StringComparer.OrdinalIgnoreCase)
+        internal static readonly Dictionary<string, int[]> assemblerVariableLiteral = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "%DEFINE", 1 },
-            { "%VAROP", 2 },
-            { "%IF", 2 },
-            { "%ELSE_IF", 2 },
+            { "%DEFINE", new[] { 1 } },
+            { "%VAROP", new[] { 2 } },
+            { "%IF", new[] { 1, 2 } },
+            { "%ELSE_IF", new[] { 1, 2 } },
         };
         /// <summary>
         /// %VAROP/%IF directive operations (the first operand) that do not work as expected when given a negative literal as the third operand.
