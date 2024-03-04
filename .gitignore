@@ -370,3 +370,6 @@ FodyWeavers.xsd
 
 # AssEmbly debug information
 *.adi
+
+# Decompiled AssEmbly files
+*.dis.asm
