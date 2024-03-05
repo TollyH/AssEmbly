@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace AssEmbly
@@ -13,85 +14,69 @@ namespace AssEmbly
             ulong offset = 0;
             List<string> result = new();
             Dictionary<ulong, int> offsetToLine = new();
-            List<(ulong Address, int SourceLineIndex)> references = new();
+            // address -> referencing instruction start offset
+            Dictionary<ulong, List<ulong>> addressReferences = new();
+
+            // %DAT insertions that correspond to ASCII values awaiting insertion as a full string
+            List<byte> pendingStringCharacters = new();
+            // The number of chained "%DAT 0" directives awaiting merge into a single %PAD
+            int pendingZeroPad = 0;
+
             while (offset < (ulong)program.LongLength)
             {
-                offsetToLine[offset] = result.Count;
-                (string line, ulong additionalOffset, List<ulong> referencedAddresses) =
+                (string line, ulong additionalOffset, List<ulong> referencedAddresses, bool datFallback) =
                     DisassembleInstruction(program.AsSpan()[(int)offset..], allowFullyQualifiedBaseOpcodes, true);
-                offset += additionalOffset;
-                references.AddRange(referencedAddresses.Select(x => (x, result.Count)));
-                result.Add(line);
-            }
-            // Insert label definitions
-            references.Sort((a, b) => a.Address.CompareTo(b.Address));
-            List<int> inserted = new();
-            foreach ((ulong address, int _) in references.DistinctBy(a => a.Address))
-            {
-                if (offsetToLine.TryGetValue(address, out int destLineIndex))
+
+                foreach (ulong address in referencedAddresses)
                 {
-                    result.Insert(destLineIndex + inserted.Count, $":ADDR_{address:X}");
-                    inserted.Add(destLineIndex);
+                    _ = addressReferences.TryAdd(address, new List<ulong>());
+                    addressReferences[address].Add(offset);
+                }
+
+                if (detectStrings && char.IsAscii((char)program[offset]) && !char.IsControl((char)program[offset]) && datFallback)
+                {
+                    DumpPendingZeroPad(ref pendingZeroPad, result, offset, offsetToLine);
+                    pendingStringCharacters.Add(program[offset]);
+                }
+                else if (detectPads && program[offset] == 0 && additionalOffset == 1)
+                {
+                    DumpPendingString(pendingStringCharacters, result, offset, offsetToLine);
+                    pendingZeroPad++;
                 }
                 else
                 {
-                    foreach (int lineIndex in references.Where(a => a.Address == address).Select(a => a.SourceLineIndex))
-                    {
-                        // Use address literal instead of label if address does not align to the start of an instruction
-                        int toReplaceIndex = lineIndex + inserted.Count(l => l <= lineIndex);
-                        result[toReplaceIndex] = result[toReplaceIndex].Replace($":ADDR_{address:X}", $":0x{address:X}") + "  ; Address does not align to a disassembled instruction";
-                    }
+                    DumpPendingString(pendingStringCharacters, result, offset, offsetToLine);
+                    DumpPendingZeroPad(ref pendingZeroPad, result, offset, offsetToLine);
+
+                    offsetToLine[offset] = result.Count;
+                    result.Add(line);
                 }
+
+                offset += additionalOffset;
             }
-            if (detectPads || detectStrings)
+
+            DumpPendingString(pendingStringCharacters, result, offset, offsetToLine);
+            DumpPendingZeroPad(ref pendingZeroPad, result, offset, offsetToLine);
+
+            // Insert label definitions
+            foreach ((ulong address, List<ulong> startOffsets) in addressReferences)
             {
-                for (int start = 0; start < result.Count; start++)
+                if (offsetToLine.TryGetValue(address, out int destLineIndex))
                 {
-                    // If an ASCII character is found, keep looping over any other contiguous ASCII characters
-                    if (detectStrings && result[start].StartsWith("%DAT ") && result[start][4] != '"'
-                        && (char)byte.Parse(result[start].Split()[1]) is not '\\' and >= ' ' and <= '~')
+                    result[destLineIndex] = $":ADDR_{address:X}\n" + result[destLineIndex];
+                }
+                else
+                {
+                    foreach (ulong start in startOffsets)
                     {
-                        int end = result.Count;
-                        for (int j = start + 1; j < result.Count; j++)
+                        if (offsetToLine.TryGetValue(start, out int lineIndex))
                         {
-                            if (!result[j].StartsWith("%DAT ") || result[j][4] == '"'
-                                || (char)byte.Parse(result[j].Split()[1]) is '\\' or < ' ' or > '~')
-                            {
-                                end = j;
-                                break;
-                            }
-                        }
-                        if (start < end)
-                        {
-                            string newLine = "%DAT \"";
-                            newLine += Encoding.UTF8.GetString(result.GetRange(start, end - start)
-                                .Select(x => byte.Parse(x.Split(' ')[1])).ToArray()).Replace("\"", "\\\"");
-                            newLine += '"';
-                            result.RemoveRange(start, end - start);
-                            result.Insert(start, newLine);
-                        }
-                    }
-                    // Replace large blocks of HLT (0x00) with %PAD directives
-                    if (detectPads && result[start] == "HLT")
-                    {
-                        if (start < result.Count - 1 && result[start + 1] == "HLT")
-                        {
-                            int end = result.Count;
-                            for (int j = start + 1; j < result.Count; j++)
-                            {
-                                if (result[j] != "HLT")
-                                {
-                                    end = j;
-                                    break;
-                                }
-                            }
-                            string newLine = $"%PAD {end - start - 1}";
-                            result.RemoveRange(start + 1, end - start - 1);
-                            result.Insert(start + 1, newLine);
+                            result[lineIndex] = result[lineIndex].Replace($":ADDR_{address:X}", $":0x{address:X}") + "  ; Address does not align to a disassembled instruction";
                         }
                     }
                 }
             }
+
             return string.Join("\n", result);
         }
 
@@ -99,18 +84,18 @@ namespace AssEmbly
         /// Disassemble a single line of AssEmbly code from it's assembled bytecode.
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
-        /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present])</returns>
-        public static (string Line, ulong AdditionalOffset, List<ulong> References) DisassembleInstruction(
+        /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present], Used %DAT directive)</returns>
+        public static (string Line, ulong AdditionalOffset, List<ulong> References, bool DatFallback) DisassembleInstruction(
             Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes, bool useLabelNames)
         {
             if (instruction.Length == 0)
             {
-                return ("", 0, new List<ulong>());
+                return ("", 0, new List<ulong>(), false);
             }
             bool fallbackToDat = false;
 
             ulong totalBytes = 0;
-            KeyValuePair<(string, OperandType[]), Opcode>[] matching;
+            Opcode opcode;
             if (instruction[0] == Opcode.FullyQualifiedMarker && instruction.Length < 3)
             {
                 // We can't parse this data as an opcode properly,
@@ -118,13 +103,12 @@ namespace AssEmbly
                 // Can happen with non-instruction statements like "%DAT 0xFF".
                 fallbackToDat = true;
                 totalBytes = 1;
-                matching = Array.Empty<KeyValuePair<(string, OperandType[]), Opcode>>();
+                opcode = default;
             }
             else
             {
-                Opcode opcode = Opcode.ParseBytes(instruction, ref totalBytes);
+                opcode = Opcode.ParseBytes(instruction, ref totalBytes);
                 totalBytes++;
-                matching = Data.Mnemonics.Where(x => x.Value == opcode).ToArray();
             }
             if (!allowFullyQualifiedBaseOpcodes && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
             {
@@ -133,9 +117,9 @@ namespace AssEmbly
                 // Will ensure that a re-assembly of the disassembled program remains byte-perfect.
                 fallbackToDat = true;
             }
-            if (!fallbackToDat && matching.Length != 0)
+            if (!fallbackToDat && Data.MnemonicsReverse.TryGetValue(opcode, out (string Mnemonic, OperandType[] OperandTypes) matching))
             {
-                (string mnemonic, OperandType[] operandTypes) = matching.First().Key;
+                (string mnemonic, OperandType[] operandTypes) = matching;
                 List<string> operandStrings = new();
                 List<ulong> referencedAddresses = new();
                 foreach (OperandType type in operandTypes)
@@ -199,11 +183,42 @@ namespace AssEmbly
                 }
                 if (!fallbackToDat)
                 {
-                    return ($"{mnemonic} {string.Join(", ", operandStrings)}".Trim(), totalBytes, referencedAddresses);
+                    return ($"{mnemonic} {string.Join(", ", operandStrings)}".Trim(), totalBytes, referencedAddresses, false);
                 }
             }
 
-            return ($"%DAT {instruction[0]}", 1, new List<ulong>());
+            return ($"%DAT {instruction[0]}", 1, new List<ulong>(), true);
+        }
+
+        private static void DumpPendingString(List<byte> pendingStringCharacters, List<string> result, ulong offset, Dictionary<ulong, int> offsetToLine)
+        {
+            if (pendingStringCharacters.Count > 0)
+            {
+                string newString = Encoding.ASCII.GetString(CollectionsMarshal.AsSpan(pendingStringCharacters));
+                newString = newString.Replace(@"\", @"\\");
+                newString = newString.Replace("\"", "\\\"");
+                newString = newString.Replace("@", @"\@");
+
+                offsetToLine[offset - (ulong)pendingStringCharacters.Count] = result.Count;
+
+                result.Add($"%DAT \"{newString}\"");
+                pendingStringCharacters.Clear();
+            }
+        }
+
+        private static void DumpPendingZeroPad(ref int pendingZeroPad, List<string> result, ulong offset, Dictionary<ulong, int> offsetToLine)
+        {
+            if (pendingZeroPad > 0)
+            {
+                offsetToLine[offset - (ulong)pendingZeroPad] = result.Count;
+                result.Add("HLT");
+                if (pendingZeroPad > 1)
+                {
+                    offsetToLine[offset - (ulong)pendingZeroPad + 1] = result.Count;
+                    result.Add($"%PAD {pendingZeroPad - 1}");
+                }
+                pendingZeroPad = 0;
+            }
         }
     }
 }

@@ -638,6 +638,12 @@
             // HEAP_FRE (Free Allocated Heap Memory)
             { ("HEAP_FRE", new OperandType[1] { OperandType.Register }), new Opcode(0x05, 0x20) },
         };
+
+        /// <summary>
+        /// A mapping of what mnemonic and operand types an opcode corresponds to.
+        /// </summary>
+        public static readonly Dictionary<Opcode, (string Mnemonic, OperandType[] OperandTypes)> MnemonicsReverse =
+            Mnemonics.DistinctBy(kv => kv.Value).ToDictionary(kv => kv.Value, kv => kv.Key);
     }
 
     public class MnemonicComparer : EqualityComparer<(string Mnemonic, OperandType[] OperandTypes)>
