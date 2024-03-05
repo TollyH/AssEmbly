@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
@@ -56,29 +57,30 @@ Total Program Size: .*
             IEnumerable<(ulong Address, string Line)> assembledInstructions, IEnumerable<(ulong Address, List<string> LabelNames)> addressLabels,
             IEnumerable<(string LocalPath, string FullPath, ulong Address)> resolvedImports)
         {
-            string fileText = string.Format(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
+            StringBuilder fileText = new();
+            _ = fileText.AppendFormat(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
             
-            fileText += AssembledInstructionsHeader;
+            _ = fileText.Append(AssembledInstructionsHeader);
             foreach ((ulong address, string instruction) in assembledInstructions)
             {
-                fileText += $"\r\n{address:X16} @ {instruction}";
+                _ = fileText.Append($"\r\n{address:X16} @ {instruction}");
             }
 
-            fileText += $"\r\n{Separator}\r\n{AddressLabelsHeader}";
+            _ = fileText.Append($"\r\n{Separator}\r\n{AddressLabelsHeader}");
             foreach ((ulong address, List<string> labels) in addressLabels)
             {
-                fileText += $"\r\n{address:X16} @ {string.Join(',', labels)}";
+                _ = fileText.Append($"\r\n{address:X16} @ {string.Join(',', labels)}");
             }
 
-            fileText += $"\r\n{Separator}\r\n{ResolvedImportsHeader}";
+            _ = fileText.Append($"\r\n{Separator}\r\n{ResolvedImportsHeader}");
             foreach ((string sourceName, string resolvedName, ulong address) in resolvedImports)
             {
-                fileText += $"\r\n{address:X16} @ \"{sourceName}\" -> \"{resolvedName}\"";
+                _ = fileText.Append($"\r\n{address:X16} @ \"{sourceName}\" -> \"{resolvedName}\"");
             }
 
-            fileText += "\r\n" + Separator;
+            _ = fileText.Append("\r\n").Append(Separator);
 
-            return fileText;
+            return fileText.ToString();
         }
 
         public readonly record struct DebugInfoFile(
