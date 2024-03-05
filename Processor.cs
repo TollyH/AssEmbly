@@ -2904,7 +2904,7 @@ namespace AssEmbly
                                         {
                                             extLoadContext?.Unload();
                                             extLoadContext = null;
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Assembly_No_Type);
+                                            throw new InvalidAssemblyException(Strings.Processor_Error_Assembly_No_Type);
                                         }
                                         break;
                                     case 0x1:  // ASMX_LDA ptr
@@ -2944,7 +2944,7 @@ namespace AssEmbly
                                         {
                                             extLoadContext?.Unload();
                                             extLoadContext = null;
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Assembly_No_Type);
+                                            throw new InvalidAssemblyException(Strings.Processor_Error_Assembly_No_Type);
                                         }
                                         break;
                                     case 0x2:  // ASMX_LDF adr

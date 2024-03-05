@@ -22,6 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="test-empty.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="test-invalid.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
