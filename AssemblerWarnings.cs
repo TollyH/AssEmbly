@@ -288,6 +288,7 @@ namespace AssEmbly
         private bool instructionIsData;
         private bool instructionIsImport;
         private bool instructionIsString;
+        private bool instructionIsExecutable;
         private (FilePosition Position, string? MacroName, int MacroLineDepth)? entryPointDefinitionPosition = null;
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth)> dataInsertionLines = new();
         private readonly HashSet<ulong> executableAddresses = new();
@@ -303,12 +304,12 @@ namespace AssEmbly
         private bool lastInstructionWasTerminator;
         private bool lastInstructionWasData;
         private bool lastInstructionWasString;
+        private bool lastInstructionWasExecutable;
         private string lastMnemonic = "";
         private string[] lastOperands = Array.Empty<string>();
         private string? lastMacroName;
         private int lastMacroLineDepth;
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
-        private bool insertedAnyExecutable;
 
         private void PreAnalyzeStateUpdate()
         {
@@ -337,6 +338,7 @@ namespace AssEmbly
             instructionIsData = dataInsertionDirectives.Contains(mnemonic);
             instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
             instructionIsString = false;
+            instructionIsExecutable = false;
 
             if (instructionIsData)
             {
@@ -360,6 +362,7 @@ namespace AssEmbly
             {
                 lastExecutableLine[filePosition.File] = filePosition.Line;
                 _ = executableAddresses.Add(currentAddress);
+                instructionIsExecutable = true;
                 if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
                 {
                     jumpCallToLabels.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
@@ -393,15 +396,12 @@ namespace AssEmbly
             }
             lastInstructionWasData = instructionIsData;
             lastInstructionWasString = instructionIsString;
+            lastInstructionWasExecutable = instructionIsExecutable;
             lastMnemonic = mnemonic;
             lastOperands = operands;
             lastImportStack = importStack;
             lastMacroName = macroName;
             lastMacroLineDepth = macroLineDepth;
-            if (!instructionIsData && !instructionIsImport)
-            {
-                insertedAnyExecutable = true;
-            }
         }
 
         // Analyzer methods
@@ -461,7 +461,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0001()
         {
             // Warning 0001: Data insertion is not directly preceded by unconditional jump, return, or halt instruction.
-            return instructionIsData && insertedAnyExecutable && !lastInstructionWasTerminator && !lastInstructionWasData;
+            return instructionIsData && lastInstructionWasExecutable && !lastInstructionWasTerminator;
         }
 
         private List<Warning> Analyzer_Final_Warning_0002()
@@ -583,7 +583,7 @@ namespace AssEmbly
         private List<Warning> Analyzer_Final_Warning_0009()
         {
             // Warning 0009: Program runs to end of file without being terminated by unconditional jump, return, or halt.
-            if (!lastInstructionWasTerminator && !lastInstructionWasData && finalProgram.Length > 0)
+            if (!lastInstructionWasTerminator && lastInstructionWasExecutable && finalProgram.Length > 0)
             {
                 return new List<Warning>
                 {
@@ -596,7 +596,7 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0010()
         {
             // Warning 0010: File import is not directly preceded by unconditional jump, return, or halt instruction.
-            return !lastInstructionWasTerminator && !lastInstructionWasData && insertedAnyExecutable && instructionIsImport;
+            return !lastInstructionWasTerminator && lastInstructionWasExecutable && instructionIsImport;
         }
 
         private bool Analyzer_Rolling_Warning_0011()
