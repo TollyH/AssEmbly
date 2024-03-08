@@ -1121,6 +1121,7 @@ namespace AssEmbly
                             {
                                 throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Missing_Parameter, parsedParameterIndex));
                             }
+                            parsedParameterIndex = 0;
                             // Don't add literal ! character to replacement text
                             continue;
                         }
