@@ -1,4 +1,12 @@
-%MAC MAX_LINE_LEN, 32  ; Enough for all input tested, increase if necessary (note there needs to be room for a null terminator)
+; Don't define MAX_LINE_LEN if it already exists (i.e. it was defined through command line)
+%IF NDEF, MAX_LINE_LEN
+    %DEFINE MAX_LINE_LEN, 32  ; Enough for all input tested, increase if necessary (note there needs to be room for a null terminator)
+%ENDIF
+
+; Stop assembly if MAX_LINE_LEN is an unsupported value
+%IF LT, @MAX_LINE_LEN, 1
+    %STOP "Maximum line length must be 1 or more"
+%ENDIF
 
 ; Read contents of input file, putting both lines into separate buffers, cutting off line headers
 ; Trailing newline is required, as file end flag isn't checked due to there always being 2 lines
@@ -8,8 +16,8 @@ OFL :FILE_PATH
 ; rg2 - line 2 buffer
 ; rg3 - current write address
 ; rg4 - non-zero if on second line
-HEAP_ALC rg1, MAX_LINE_LEN
-HEAP_ALC rg2, MAX_LINE_LEN
+HEAP_ALC rg1, @MAX_LINE_LEN
+HEAP_ALC rg2, @MAX_LINE_LEN
 MVQ rg3, rg1
 :FILE_READ_LOOP
 RFC rg0
@@ -92,6 +100,35 @@ JMP :SKIP_LEADING_SPACES_LOOP
 HEAP_FRE rg1
 HEAP_FRE rg2
 
+; $0 - calculated sqrt component register
+; $1 - race time
+; $2 - record distance
+; $3 - temp register
+; $4 - lower hold time register
+; $5 - upper hold time register
+%MACRO CalculateHoldTime
+    ; (-b +- sqrt(b^2 - 4c)) / -2
+    ; Calculate sqrt component
+    MVQ $0!, $1!
+    FLPT_POW $0!, 2.0
+    MVQ $3!, $2!
+    FLPT_MUL $3!, 4.0
+    FLPT_SUB $0!, $3!
+    FLPT_POW $0!, 0.5
+    ; Calculate lowest hold time
+    MVQ $4!, $1!
+    FLPT_NEG $4!
+    FLPT_ADD $4!, $0!
+    FLPT_DIV $4!, -2.0
+    FLPT_FCS $4!
+    ; Calculate highest hold time
+    MVQ $5!, $1!
+    FLPT_NEG $5!
+    FLPT_SUB $5!, $0!
+    FLPT_DIV $5!, -2.0
+    FLPT_FFS $5!
+%ENDMACRO
+
 ; rg0 - temp value holding
 ; rg1 - race time (b)
 ; rg2 - record distance (+ 1 = c)
@@ -108,26 +145,7 @@ JZO :OUTPUT_PART_1
 FLPT_UTF rg1
 ICR rg2
 FLPT_UTF rg2
-; (-b +- sqrt(b^2 - 4c)) / -2
-; Calculate sqrt component
-MVQ rg3, rg1
-FLPT_POW rg3, 2.0
-MVQ rg0, rg2
-FLPT_MUL rg0, 4.0
-FLPT_SUB rg3, rg0
-FLPT_POW rg3, 0.5
-; Calculate lowest hold time
-MVQ rg4, rg1
-FLPT_NEG rg4
-FLPT_ADD rg4, rg3
-FLPT_DIV rg4, -2.0
-FLPT_FCS rg4
-; Calculate highest hold time
-MVQ rg5, rg1
-FLPT_NEG rg5
-FLPT_SUB rg5, rg3
-FLPT_DIV rg5, -2.0
-FLPT_FFS rg5
+CalculateHoldTime(rg3, rg1, rg2, rg0, rg4, rg5)
 ; Calculate difference and add to total
 SUB rg5, rg4
 ICR rg5
@@ -142,26 +160,7 @@ WCC '\n'
 FLPT_UTF rg8
 ICR rg9
 FLPT_UTF rg9
-; (-b +- sqrt(b^2 - 4c)) / -2
-; Calculate sqrt component
-MVQ rg3, rg8
-FLPT_POW rg3, 2.0
-MVQ rg0, rg9
-FLPT_MUL rg0, 4.0
-FLPT_SUB rg3, rg0
-FLPT_POW rg3, 0.5
-; Calculate lowest hold time
-MVQ rg4, rg8
-FLPT_NEG rg4
-FLPT_ADD rg4, rg3
-FLPT_DIV rg4, -2.0
-FLPT_FCS rg4
-; Calculate highest hold time
-MVQ rg5, rg8
-FLPT_NEG rg5
-FLPT_SUB rg5, rg3
-FLPT_DIV rg5, -2.0
-FLPT_FFS rg5
+CalculateHoldTime(rg3, rg8, rg9, rg0, rg4, rg5)
 ; Calculate difference and add to total
 SUB rg5, rg4
 ICR rg5

@@ -1,3 +1,11 @@
+; $0 = Address of function name string
+; $1 = Parameter (optional)
+%MACRO CallExternalFunction
+    ASMX_LDF $0!
+    ASMX_CAL $1
+    ASMX_CLF
+%ENDMACRO
+
 ; rg0 - Title buffer
 ; rg1 - Content buffer
 HEAP_ALC rg0, 64
@@ -14,24 +22,16 @@ CAL :FUNC_INPUT, rg1
 ASMX_LDA :EXT_ASSEMBLY_MSG_BOX
 
 ; Call the external set title method with the corresponding user input buffer
-ASMX_LDF :EXT_FUNC_MSG_BOX_SET_TITLE
-ASMX_CAL rg0
-ASMX_CLF
+CallExternalFunction(:EXT_FUNC_MSG_BOX_SET_TITLE, rg0)
 
 ; Call the external set content method with the corresponding user input buffer
-ASMX_LDF :EXT_FUNC_MSG_BOX_SET_CONTENT
-ASMX_CAL rg1
-ASMX_CLF
+CallExternalFunction(:EXT_FUNC_MSG_BOX_SET_CONTENT, rg1)
 
 ; Call the external set flags method with a preset value
-ASMX_LDF :EXT_FUNC_MSG_BOX_SET_FLAGS
-ASMX_CAL 0x00000044  ; MB_YESNO | MB_ICONINFORMATION
-ASMX_CLF
+CallExternalFunction(:EXT_FUNC_MSG_BOX_SET_FLAGS, 0x00000044)  ; MB_YESNO | MB_ICONINFORMATION
 
 ; Call the show method, which puts the clicked button value in rrv
-ASMX_LDF :EXT_FUNC_MSG_BOX_SHOW
-ASMX_CAL
-ASMX_CLF
+CallExternalFunction(:EXT_FUNC_MSG_BOX_SHOW)
 
 ; If the ID of the clicked button is 6 (Yes), print that the Yes button was clicked,
 ; otherwise print that the No button was clicked.
@@ -77,5 +77,11 @@ HLT
 :STR_NO_CLICK
 %DAT "You clicked No\0"
 
-%IMP "../input.ext.asm"
-%IMP "../print.ext.asm"
+%IF DEF, RUNNING_UNIT_TESTS
+    ; Unit tests run relative to the parent Example Programs directory
+    %IMP "input.ext.asm"
+    %IMP "print.ext.asm"
+%ELSE
+    %IMP "../input.ext.asm"
+    %IMP "../print.ext.asm"
+%ENDIF

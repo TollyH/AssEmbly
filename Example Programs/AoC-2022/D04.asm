@@ -1,4 +1,4 @@
-%MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MACRO _ffe, 0b100  ; Create a macro for the file end flag
 
 ; rg0 - range 1, 1st value
 ; rg1 - range 1, 2nd value

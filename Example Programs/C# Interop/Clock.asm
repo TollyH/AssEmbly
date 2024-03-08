@@ -1,15 +1,18 @@
+; $0 = Address of function name string
+; $1 = Parameter (optional)
+%MACRO CallExternalFunction
+    ASMX_LDF $0!
+    ASMX_CAL $1
+    ASMX_CLF
+%ENDMACRO
+
 CAL :FUNC_PRINT, :&PROGRAM_HEADER
 
 ASMX_LDA :ASSEMBLY_NAME
 
 :CLOCK_LOOP
-ASMX_LDF :CLOCK_METHOD_NAME
-ASMX_CAL :&DATETIME_FORMAT
-ASMX_CLF
-
-ASMX_LDF :SLEEP_METHOD_NAME
-ASMX_CAL 500  ; 500ms/0.5s
-ASMX_CLF
+CallExternalFunction(:CLOCK_METHOD_NAME, :&DATETIME_FORMAT)
+CallExternalFunction(:SLEEP_METHOD_NAME, 500)  ; 500ms/0.5s
 
 WCC '\r'  ; Return to start of line
 
@@ -30,4 +33,9 @@ JMP :CLOCK_LOOP
 :PROGRAM_HEADER
 %DAT "AssEmbly Clock Example\nPress CTRL+C to exit\n\n\0"
 
-%IMP "../print.ext.asm"
+%IF DEF, RUNNING_UNIT_TESTS
+    ; Unit tests run relative to the parent Example Programs directory
+    %IMP "print.ext.asm"
+%ELSE
+    %IMP "../print.ext.asm"
+%ENDIF

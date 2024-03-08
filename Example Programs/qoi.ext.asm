@@ -3,8 +3,10 @@
 ; https://qoiformat.org/qoi-specification.pdf (Specification)
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
-%MAC MagicBytes, 0x66696F71
-%MAC _ffe, 0b100  ; Create a macro for the file end flag
+%ASM_ONCE
+
+%MACRO MagicBytes, 0x66696F71
+%MACRO _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Pixel {
 ;   uint8 Red
@@ -190,21 +192,13 @@ CMP rg0, 0b11000000
 JEQ :QOI_DECODE_PIXELS_QOI_OP_RUN
 
 :QOI_DECODE_PIXELS_QOI_OP_RGB
-; Red
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
-; Green
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
-; Blue
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
+; Red, green, blue
+%REPEAT 3
+    ICR rfp
+    MVB rg0, *rfp
+    MVB *rg1, rg0
+    ICR rg1
+%ENDREPEAT
 ; Alpha
 MVQ rg0, rg3
 AND rg0, 0xFF000000
@@ -214,26 +208,13 @@ ICR rg1
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_RGBA
-; Red
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
-; Green
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
-; Blue
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
-; Alpha
-ICR rfp
-MVB rg0, *rfp
-MVB *rg1, rg0
-ICR rg1
+; Red, green, blue, alpha
+%REPEAT 4
+    ICR rfp
+    MVB rg0, *rfp
+    MVB *rg1, rg0
+    ICR rg1
+%ENDREPEAT
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_INDEX
@@ -435,7 +416,7 @@ PSH rg0
 PSH rg1
 
 MVD rg0, rfp
-AND rg0, 0x000000FF
+MVB rg0, rg0  ; Shorter version of: AND rg0, 0x000000FF
 MUL rg0, 3
 
 MVD rg1, rfp

@@ -1,5 +1,7 @@
 ; This file should not be assembled, it should only be imported into other AssEmbly files
 
+%ASM_ONCE
+
 :FUNC_PRINT
 ; Prints an entire 0-terminated string to the console
 ; Address of string given as parameter is in rfp

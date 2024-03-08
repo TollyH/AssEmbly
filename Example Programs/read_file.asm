@@ -1,4 +1,4 @@
-%MAC _ffe, 0b100  ; Create a macro for the file end flag
+%MACRO _ffe, 0b100  ; Create a macro for the file end flag
 
 ; Print input prompt
 CAL :FUNC_PRINT, :&PROMPT_STRING

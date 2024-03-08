@@ -1,16 +1,41 @@
-%MAC _ffe, 0b100
-%MAC EXPANSION_FACTOR_PART_1, 2
-%MAC EXPANSION_FACTOR_PART_2, 1000000
-%MAC MAX_EXPANDED, 20  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
-%MAC MAX_INPUT_LEN, 20000  ; Enough for all input tested, increase if necessary (note there needs to be room for a full line of null terminators)
-%MAC MAX_GALAXIES, 500  ; Enough for all input tested, increase if necessary
+%MACRO _ffe, 0b100
+
+%MACRO EXPANSION_FACTOR_PART_1, 2
+%MACRO EXPANSION_FACTOR_PART_2, 1000000
+
+; Don't define variables if they already exist (i.e. they were defined through command line)
+%IF NDEF, MAX_EXPANDED
+    %DEFINE MAX_EXPANDED, 20  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
+%ENDIF
+; Stop assembly if variables are an unsupported value
+%IF LT, @MAX_EXPANDED, 1
+    %STOP "MAX_EXPANDED must be 1 or more"
+%ENDIF
+
+; Don't define variables if they already exist (i.e. they were defined through command line)
+%IF NDEF, MAX_INPUT_LEN
+    %DEFINE MAX_INPUT_LEN, 20000  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
+%ENDIF
+; Stop assembly if variables are an unsupported value
+%IF LT, @MAX_INPUT_LEN, 1
+    %STOP "MAX_INPUT_LEN must be 1 or more"
+%ENDIF
+
+; Don't define variables if they already exist (i.e. they were defined through command line)
+%IF NDEF, MAX_GALAXIES
+    %DEFINE MAX_GALAXIES, 500  ; Enough for all input tested, increase if necessary (note there needs to be room for a single-byte terminator)
+%ENDIF
+; Stop assembly if variables are an unsupported value
+%IF LT, @MAX_GALAXIES, 1
+    %STOP "MAX_GALAXIES must be 1 or more"
+%ENDIF
 
 ; rg0 - read character
 ; rg1 - image pointer
 ; rg2 - current write pointer
 ; rg3 - read characters count
 ; rg7 - characters per line
-HEAP_ALC rg1, MAX_INPUT_LEN
+HEAP_ALC rg1, @MAX_INPUT_LEN
 MVQ rg2, rg1
 OFL :FILE_PATH
 :READ_LOOP
@@ -34,8 +59,8 @@ CFL
 ; rg2 - expanded rows pointer
 ; rg3 - expanded columns pointer
 ; Terminated with FF
-HEAP_ALC rg2, MAX_EXPANDED
-HEAP_ALC rg3, MAX_EXPANDED
+HEAP_ALC rg2, @MAX_EXPANDED
+HEAP_ALC rg3, @MAX_EXPANDED
 
 ; rg4 - current y
 ; rg5 - current x
@@ -97,7 +122,7 @@ MVB *rg9, 0xFF  ; Write terminator
 
 ; rg9 - current galaxy pointer
 ; galaxies are in the format (part_1_x, part_2_x, part_1_y, part_2_y)
-MVQ rg0, MAX_GALAXIES
+MVQ rg0, @MAX_GALAXIES
 ICR rg0
 MUL rg0, 32
 HEAP_ALC rg9, rg0
