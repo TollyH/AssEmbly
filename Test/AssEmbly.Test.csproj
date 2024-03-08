@@ -7,7 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-	<RootNamespace>AssEmbly.Test</RootNamespace>
+    <RootNamespace>AssEmbly.Test</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,6 +35,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="test.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\Example Programs\**\*.asm" Link="Example Programs\%(RecursiveDir)\%(Filename)%(Extension)">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
