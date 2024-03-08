@@ -1,9 +1,9 @@
 MVQ rg0, 69
 
 %MACRO Macro-d!
-ADD rg9, rg8
-SUB rg6, rg7
-MUL $0, $1
+    ADD rg9, rg8
+    SUB rg6, rg7
+    MUL $0, $1
 %ENDMACRO
 
 :LOOP  ; comment :)
