@@ -974,6 +974,11 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0011()
         {
             // Suggestion 0011: Remove leading 0 digits from denary number.
+            if (mnemonic.Equals("%ANALYZER", StringComparison.OrdinalIgnoreCase))
+            {
+                // Analyzer codes are usually given with leading zeros, so don't suggest removing them
+                return false;
+            }
             foreach (string operand in operands)
             {
                 string operandClean = operand.Replace("_", "");
