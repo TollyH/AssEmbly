@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json;
 using System.Web;
 using AssEmbly.Resources.Localization;
@@ -61,6 +62,9 @@ namespace AssEmbly
                     break;
                 case "help":
                     DisplayHelp();
+                    break;
+                case "license":
+                    DisplayLicense();
                     break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -489,6 +493,36 @@ namespace AssEmbly
         private static void DisplayHelp()
         {
             Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
+        }
+
+        private static void DisplayLicense()
+        {
+            try
+            {
+                Console.WriteLine(Strings.CLI_License_Header);
+                Console.WriteLine();
+                if (!Console.IsOutputRedirected)
+                {
+                    // Wait for user to press a key before printing actual license text
+                    Console.Write(Strings.Generic_Press_Any_Key_To_Continue);
+                    _ = Console.ReadKey(true);
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
+                using Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AssEmbly.LICENCE")
+                    ?? throw new NullReferenceException("Resource stream with name 'LICENSE' was missing");
+                using StreamReader resourceReader = new(resourceStream);
+                Console.WriteLine(resourceReader.ReadToEnd(), DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine(Strings.CLI_License_Error);
+                Console.ResetColor();
+#if DEBUG
+                throw;
+#endif
+            }
         }
     }
 }

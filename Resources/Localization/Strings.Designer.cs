@@ -2246,6 +2246,32 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There was an error accessing the LICENSE resource. Please go to &lt;https://www.gnu.org/licenses/gpl-3.0.html&gt; to see the license text..
+        /// </summary>
+        internal static string CLI_License_Error {
+            get {
+                return ResourceManager.GetString("CLI_License_Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AssEmbly is free software: you can redistribute it and/or modify
+        ///it under the terms of the GNU General Public License as published by
+        ///the Free Software Foundation, either version 3 of the License, or
+        ///(at your option) any later version.
+        ///
+        ///This program is distributed in the hope that it will be useful,
+        ///but WITHOUT ANY WARRANTY; without even the implied warranty of
+        ///MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+        ///GNU General Public License for more details..
+        /// </summary>
+        internal static string CLI_License_Header {
+            get {
+                return ResourceManager.GetString("CLI_License_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Warning: This program was assembled for a newer version of AssEmbly. It was built for version {0}.{1}.{2} - you have version {3}.{4}.{5}..
         /// </summary>
         internal static string CLI_Warning_Newer_Build_Version {
@@ -2878,7 +2904,8 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Copyright © 2022-2024  Ptolemy Hill.
+        ///   Looks up a localized string similar to Copyright © 2022-2024  Ptolemy Hill
+        ///Licensed under GPLv3; run the &quot;license&quot; operation for details..
         /// </summary>
         internal static string Generic_Copyright_Header {
             get {
@@ -2919,6 +2946,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Generic_Key_Value {
             get {
                 return ResourceManager.GetString("Generic_Key_Value", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Press any key to continue....
+        /// </summary>
+        internal static string Generic_Press_Any_Key_To_Continue {
+            get {
+                return ResourceManager.GetString("Generic_Press_Any_Key_To_Continue", resourceCulture);
             }
         }
         

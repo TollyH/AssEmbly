@@ -191,6 +191,10 @@ repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly
     --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+
+license - Print the full GPLv3 license text that this software is licensed under.
+
+help - Print this help text.
 </value>
     </data>
     <data name="CLI_Error_Invalid_AAP" xml:space="preserve">
@@ -1255,7 +1259,8 @@ Current extensions used: {0}</value>
     {1}</value>
     </data>
     <data name="Generic_Copyright_Header" xml:space="preserve">
-        <value>Copyright © 2022-2024  Ptolemy Hill</value>
+        <value>Copyright © 2022-2024  Ptolemy Hill
+Licensed under GPLv3; run the "license" operation for details.</value>
     </data>
     <data name="Assembler_Error_Invalid_Severity" xml:space="preserve">
         <value>Given severity is not valid.</value>
@@ -1510,5 +1515,22 @@ Assembler variable names may not contain symbols other than underscores.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0031" xml:space="preserve">
         <value>Both operands to this comparison are numeric literals, so the result will never change.</value>
+    </data>
+    <data name="CLI_License_Error" xml:space="preserve">
+        <value>There was an error accessing the LICENSE resource. Please go to &lt;https://www.gnu.org/licenses/gpl-3.0.html&gt; to see the license text.</value>
+    </data>
+    <data name="CLI_License_Header" xml:space="preserve">
+        <value>AssEmbly is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</value>
+    </data>
+    <data name="Generic_Press_Any_Key_To_Continue" xml:space="preserve">
+        <value>Press any key to continue...</value>
     </data>
 </root>

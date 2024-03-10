@@ -12,6 +12,7 @@
     <RepositoryUrl>https://github.com/TollyH/AssEmbly</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Version>3.2.0</Version>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +22,14 @@
     <EmbeddedResource Remove="Test\**" />
     <None Remove="Example Programs\C# Interop\**" />
     <None Remove="Test\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="LICENCE" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="LICENCE" />
   </ItemGroup>
 
   <ItemGroup>

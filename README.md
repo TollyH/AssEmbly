@@ -9,3 +9,5 @@ See the VSCode extension for AssEmbly here: <https://github.com/TollyH/AssEmbly-
 ---
 
 **Copyright © 2022–2024  Ptolemy Hill**
+
+**Licensed under GPLv3 - see the LICENSE file for more details**

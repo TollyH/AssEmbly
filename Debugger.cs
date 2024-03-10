@@ -298,7 +298,7 @@ namespace AssEmbly
                         Console.WriteLine(Strings.Debugger_Warning_HLT_Reached);
                         Console.ResetColor();
                         Console.Write(Strings.Debugger_Any_Key_Continue);
-                        _ = Console.ReadKey();
+                        _ = Console.ReadKey(true);
                         Console.WriteLine();
                         StepInstructions = true;
                     }
