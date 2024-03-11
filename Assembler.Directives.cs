@@ -20,6 +20,7 @@ namespace AssEmbly
 
         private static readonly string[] closingIfDirectives = new[] { "%ENDIF", "%ELSE", "%ELSE_IF" };
         private static readonly string[] openingIfDirectives = new[] { "%IF" };
+        private static readonly string[] ifTerminatingDirectives = new[] { "%ENDIF" };
 
         // Used to keep the dictionary definition within this file out of the constructor whilst keeping stateDirectives readonly
         private void InitializeStateDirectives(out Dictionary<string, StateDirective> dictionary)
@@ -601,7 +602,7 @@ namespace AssEmbly
                         currentMacro?.MacroName, macroLineDepth));
 
                     _ = GoToNextClosingDirective(
-                        closingIfDirectives, out string[] matchedLine, false, openingIfDirectives);
+                        closingIfDirectives, out string[] matchedLine, false, openingIfDirectives, ifTerminatingDirectives);
                     if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
                     {
                         currentlyOpenIfBlocks--;
@@ -638,7 +639,8 @@ namespace AssEmbly
                 throw new OperandException(string.Format(Strings.Assembler_Error_ELSE_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
-            _ = GoToNextClosingDirective("%ENDIF", false);
+            _ = GoToNextClosingDirective(
+                ifTerminatingDirectives, out _, false, openingIfDirectives, ifTerminatingDirectives);
         }
 
         private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands, string preVariableLine)
@@ -652,7 +654,8 @@ namespace AssEmbly
                 throw new OperandException(string.Format(Strings.Assembler_Error_ELSEIF_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
-            _ = GoToNextClosingDirective("%ENDIF", false);
+            _ = GoToNextClosingDirective(
+                ifTerminatingDirectives, out _, false, openingIfDirectives, ifTerminatingDirectives);
         }
 
         private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands, string preVariableLine)
