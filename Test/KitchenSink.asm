@@ -129,3 +129,40 @@ HLT
 %ELSE
     EmbeddedIf(@GREATER_THAN_5)
 %ENDIF
+
+; ASSEMBLER_VERSION_MAJOR < 3 || (ASSEMBLER_VERSION_MAJOR == 3 && ASSEMBLER_VERSION_MINOR < 2)
+%DEFINE _major_lt, @!ASSEMBLER_VERSION_MAJOR
+%VAROP CMP_LT, _major_lt, 3
+
+%DEFINE _major_eq, @!ASSEMBLER_VERSION_MAJOR
+%VAROP CMP_EQ, _major_eq, 3
+%DEFINE _minor_lt, @!ASSEMBLER_VERSION_MINOR
+%VAROP CMP_LT, _minor_lt, 2
+
+%VAROP AND, _minor_lt, @_major_eq
+%VAROP OR, _major_lt, @_minor_lt
+%IF NEQ, @_major_lt, 0
+    %STOP "Assembler version must be >=3.2.0 to support conditional assembly"
+%ENDIF
+
+%NUM @!CURRENT_ADDRESS
+
+:MORE_CODE
+MVQ rg0, :0x123456789
+HLT
+
+%NUM '🍭'
+%NUM '\U0001F36D'
+
+%NUM 'ト'
+%NUM '\u30C8'
+
+%DAT "\a\b\f⛩\t\v\\0\0"
+
+%MACRO CONCAT, $0!$1!
+
+CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
+
+%MACRO STRING, "$$0!"
+%DAT STRING
+%PAD 1
