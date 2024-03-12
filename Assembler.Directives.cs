@@ -474,6 +474,24 @@ namespace AssEmbly
                         assemblerVariables[variableName] = 0;
                     }
                     break;
+                case "CMP_EQ":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] == value ? 1UL : 0UL;
+                    break;
+                case "CMP_NEQ":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] != value ? 1UL : 0UL;
+                    break;
+                case "CMP_GT":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] > value ? 1UL : 0UL;
+                    break;
+                case "CMP_GTE":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] >= value ? 1UL : 0UL;
+                    break;
+                case "CMP_LT":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] < value ? 1UL : 0UL;
+                    break;
+                case "CMP_LTE":
+                    assemblerVariables[variableName] = assemblerVariables[variableName] <= value ? 1UL : 0UL;
+                    break;
                 default:
                     throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_First, operands[0]));
             }
