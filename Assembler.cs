@@ -1067,7 +1067,7 @@ namespace AssEmbly
                 }
 
                 _ = currentParameter.Append(c);
-                openBackslash = false;
+                openBackslash = !openBackslash && c == '\\';
             }
             startIndex = i;
 
