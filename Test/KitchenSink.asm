@@ -116,8 +116,12 @@ HLT
         %STOP "THIS_VARIABLE_DEFINITELY_DOES_NOT_EXIST"
     %ENDIF
     %STOP "THIS_VARIABLE_DOES_NOT_EXIST"
-%ELSE
+%ELSE_IF EQ, @!V1_CALL_STACK, 0
     %DAT 0x69
+%ELSE_IF EQ, @!V1_FORMAT, 0
+    %DAT 0x76
+%ELSE
+    %DAT 0x96
 %ENDIF
 
 %DEFINE GREATER_THAN_5, 6
@@ -149,6 +153,7 @@ HLT
 
 :MORE_CODE
 MVQ rg0, :0x123456789
+MVQ :0x123456789, 696969420
 HLT
 
 %NUM '🍭'
@@ -171,3 +176,6 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
 %IMP "KitchenSink.1.asm"
 
 %DAT 0x____________4__2___
+%DAT 0xFF
+
+%IBF "test-invalid.dll"
