@@ -303,6 +303,7 @@ namespace AssEmbly
         private ulong currentAddress;
         private bool lastInstructionWasTerminator;
         private bool lastInstructionWasData;
+        private bool lastInstructionWasImport;
         private bool lastInstructionWasString;
         private bool lastInstructionWasExecutable;
         private string lastMnemonic = "";
@@ -395,6 +396,7 @@ namespace AssEmbly
                 lastInstructionWasTerminator = terminators.Contains(instructionOpcode);
             }
             lastInstructionWasData = instructionIsData;
+            lastInstructionWasImport = instructionIsImport;
             lastInstructionWasString = instructionIsString;
             lastInstructionWasExecutable = instructionIsExecutable;
             lastMnemonic = mnemonic;
@@ -647,7 +649,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Warning_0015()
         {
             // Warning 0015: Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.
-            return importStack.Count < lastImportStack.Count && !lastInstructionWasTerminator && !lastInstructionWasData;
+            return importStack.Count < lastImportStack.Count && !lastInstructionWasTerminator && !lastInstructionWasData
+                && !lastInstructionWasImport && instructionIsExecutable;
         }
 
         private bool Analyzer_Rolling_Warning_0016()
