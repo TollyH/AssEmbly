@@ -166,3 +166,8 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
 %MACRO STRING, "$$0!"
 %DAT STRING
 %PAD 1
+
+%IMP "KitchenSink.1.asm"
+%IMP "KitchenSink.1.asm"
+
+%DAT 0x____________4__2___

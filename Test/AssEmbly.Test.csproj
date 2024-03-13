@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="KitchenSink.1.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="KitchenSink.2.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="KitchenSink.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
