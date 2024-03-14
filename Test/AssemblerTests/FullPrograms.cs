@@ -22,6 +22,11 @@
             Environment.CurrentDirectory = "Example Programs";
             foreach (string asmFile in Directory.EnumerateFiles(".", "*.asm", SearchOption.AllDirectories))
             {
+                if (asmFile.EndsWith(".ext.asm", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Skip files only intended to be imported
+                    continue;
+                }
                 Assembler asm = new();
                 asm.SetAssemblerVariable("RUNNING_UNIT_TESTS", 1);
                 asm.AssembleLines(File.ReadAllLines(asmFile));
