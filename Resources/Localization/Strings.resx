@@ -1533,4 +1533,7 @@ GNU General Public License for more details.</value>
     <data name="Generic_Press_Any_Key_To_Continue" xml:space="preserve">
         <value>Press any key to continue...</value>
     </data>
+    <data name="Assembler_Error_ASM_ONCE_Not_Imported" xml:space="preserve">
+        <value>The %ASM_ONCE directive cannot be used in the base file.</value>
+    </data>
 </root>

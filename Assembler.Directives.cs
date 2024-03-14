@@ -337,18 +337,19 @@ namespace AssEmbly
             {
                 throw new OperandException(string.Format(Strings.Assembler_Error_ASM_ONCE_Operand_Count, operands.Length));
             }
-            if (currentImport is not null)
+            if (currentImport is null)
             {
-                if (!currentImport.AnyAssembledLines)
+                throw new SyntaxError(Strings.Assembler_Error_ASM_ONCE_Not_Imported);
+            }
+            if (!currentImport.AnyAssembledLines)
+            {
+                _ = completeAsmOnceFiles.Add(currentImport.ImportPath);
+            }
+            if (timesSeenFile.TryGetValue(currentImport.ImportPath, out int times) && times > 1)
+            {
+                while (currentImport?.CurrentLine < currentImport?.TotalLines)
                 {
-                    _ = completeAsmOnceFiles.Add(currentImport.ImportPath);
-                }
-                if (timesSeenFile.TryGetValue(currentImport.ImportPath, out int times) && times > 1)
-                {
-                    while (currentImport?.CurrentLine < currentImport?.TotalLines)
-                    {
-                        _ = IncrementCurrentLine();
-                    }
+                    _ = IncrementCurrentLine();
                 }
             }
         }

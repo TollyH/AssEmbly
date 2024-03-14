@@ -306,6 +306,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The %ASM_ONCE directive cannot be used in the base file..
+        /// </summary>
+        internal static string Assembler_Error_ASM_ONCE_Not_Imported {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ASM_ONCE_Not_Imported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The %ASM_ONCE directive takes no operands. {0} were given..
         /// </summary>
         internal static string Assembler_Error_ASM_ONCE_Operand_Count {
