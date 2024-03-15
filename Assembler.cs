@@ -334,7 +334,7 @@ namespace AssEmbly
                     {
                         continue;
                     }
-                    
+
                     string mnemonic = line[0];
                     // Lines starting with ':' are label definitions
                     if (mnemonic.StartsWith(':'))
@@ -468,7 +468,7 @@ namespace AssEmbly
                         operandBytes.Add((byte)Enum.Parse<Register>(operands[i], true));
                         break;
                     case OperandType.Literal:
-                        if (operands[i].StartsWith(":&"))
+                        if (operands[i].StartsWith(":&", StringComparison.OrdinalIgnoreCase))
                         {
                             referencedLabels.Add((operands[i][2..], (uint)operandBytes.Count));
                             for (int j = 0; j < 8; j++)
@@ -503,7 +503,6 @@ namespace AssEmbly
                         // Convert register name to associated byte value
                         operandBytes.Add((byte)Enum.Parse<Register>(operands[i][1..], true));
                         break;
-                    default: break;
                 }
             }
             if (!Data.Mnemonics.TryGetValue((mnemonic, operandTypes), out Opcode opcode))
@@ -925,7 +924,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Parse an operand of literal type to its representation as bytes. 
+        /// Parse an operand of literal type to its representation as bytes.
         /// </summary>
         /// <remarks>
         /// Integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/>.
@@ -982,7 +981,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Parse an operand of literal type to its representation as bytes. 
+        /// Parse an operand of literal type to its representation as bytes.
         /// </summary>
         /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
@@ -1505,7 +1504,7 @@ namespace AssEmbly
                     text = text[..(i - 1)] + text[i..];
                     i--;
                 }
-                
+
                 openBackslash = false;
             }
 

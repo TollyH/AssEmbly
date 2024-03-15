@@ -18,7 +18,7 @@
             set => _consoleMessage = value;
         }
 
-        public AssEmblyException() : base() { }
+        public AssEmblyException() { }
         public AssEmblyException(string message) : base(message) { }
         public AssEmblyException(string message, Exception inner) : base(message, inner) { }
 
@@ -148,7 +148,7 @@
     /// </summary>
     public class DebuggerException : AssEmblyException
     {
-        public DebuggerException() : base() { }
+        public DebuggerException() { }
         public DebuggerException(string message) : base(message) { }
         public DebuggerException(string message, Exception inner) : base(message, inner) { }
         public DebuggerException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -160,7 +160,7 @@
     /// </summary>
     public class DebugFileException : DebuggerException
     {
-        public DebugFileException() : base() { }
+        public DebugFileException() { }
         public DebugFileException(string message) : base(message) { }
         public DebugFileException(string message, Exception inner) : base(message, inner) { }
         public DebugFileException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -174,7 +174,7 @@
     /// </summary>
     public class RuntimeException : AssEmblyException
     {
-        public RuntimeException() : base() { }
+        public RuntimeException() { }
         public RuntimeException(string message) : base(message) { }
         public RuntimeException(string message, Exception inner) : base(message, inner) { }
         public RuntimeException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -186,7 +186,7 @@
     /// </summary>
     public class InvalidOpcodeException : RuntimeException
     {
-        public InvalidOpcodeException() : base() { }
+        public InvalidOpcodeException() { }
         public InvalidOpcodeException(string message) : base(message) { }
         public InvalidOpcodeException(string message, Exception inner) : base(message, inner) { }
         public InvalidOpcodeException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -198,7 +198,7 @@
     /// </summary>
     public class ReadOnlyRegisterException : RuntimeException
     {
-        public ReadOnlyRegisterException() : base() { }
+        public ReadOnlyRegisterException() { }
         public ReadOnlyRegisterException(string message) : base(message) { }
         public ReadOnlyRegisterException(string message, Exception inner) : base(message, inner) { }
         public ReadOnlyRegisterException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -206,12 +206,12 @@
     }
 
     /// <summary>
-    /// The exception that is thrown when an instruction attempts to perform a file related operation that is 
+    /// The exception that is thrown when an instruction attempts to perform a file related operation that is
     /// invalid given the current state of the program's execution.
     /// </summary>
     public class FileOperationException : RuntimeException
     {
-        public FileOperationException() : base() { }
+        public FileOperationException() { }
         public FileOperationException(string message) : base(message) { }
         public FileOperationException(string message, Exception inner) : base(message, inner) { }
         public FileOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -223,7 +223,7 @@
     /// </summary>
     public class InvalidAssemblyException : RuntimeException
     {
-        public InvalidAssemblyException() : base() { }
+        public InvalidAssemblyException() { }
         public InvalidAssemblyException(string message) : base(message) { }
         public InvalidAssemblyException(string message, Exception inner) : base(message, inner) { }
         public InvalidAssemblyException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -235,7 +235,7 @@
     /// </summary>
     public class InvalidFunctionException : RuntimeException
     {
-        public InvalidFunctionException() : base() { }
+        public InvalidFunctionException() { }
         public InvalidFunctionException(string message) : base(message) { }
         public InvalidFunctionException(string message, Exception inner) : base(message, inner) { }
         public InvalidFunctionException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -248,7 +248,7 @@
     /// </summary>
     public class ExternalOperationException : RuntimeException
     {
-        public ExternalOperationException() : base() { }
+        public ExternalOperationException() { }
         public ExternalOperationException(string message) : base(message) { }
         public ExternalOperationException(string message, Exception inner) : base(message, inner) { }
         public ExternalOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -260,7 +260,7 @@
     /// </summary>
     public class MemoryAllocationException : RuntimeException
     {
-        public MemoryAllocationException() : base() { }
+        public MemoryAllocationException() { }
         public MemoryAllocationException(string message) : base(message) { }
         public MemoryAllocationException(string message, Exception inner) : base(message, inner) { }
         public MemoryAllocationException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -272,7 +272,7 @@
     /// </summary>
     public class StackSizeException : RuntimeException
     {
-        public StackSizeException() : base() { }
+        public StackSizeException() { }
         public StackSizeException(string message) : base(message) { }
         public StackSizeException(string message, Exception inner) : base(message, inner) { }
         public StackSizeException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -284,7 +284,7 @@
     /// </summary>
     public class InvalidMemoryBlockException : RuntimeException
     {
-        public InvalidMemoryBlockException() : base() { }
+        public InvalidMemoryBlockException() { }
         public InvalidMemoryBlockException(string message) : base(message) { }
         public InvalidMemoryBlockException(string message, Exception inner) : base(message, inner) { }
         public InvalidMemoryBlockException(string message, string consoleMessage) : base(message, consoleMessage) { }
@@ -297,7 +297,7 @@
     /// </summary>
     public class AAPFormatException : AssEmblyException
     {
-        public AAPFormatException() : base() { }
+        public AAPFormatException() { }
         public AAPFormatException(string message) : base(message) { }
         public AAPFormatException(string message, Exception inner) : base(message, inner) { }
         public AAPFormatException(string message, string consoleMessage) : base(message, consoleMessage) { }
