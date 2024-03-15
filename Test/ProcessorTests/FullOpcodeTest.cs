@@ -14802,7 +14802,7 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
             _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
                     "Instruction did not throw an exception when allocating more memory than available");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.Registers[(int)Register.rg3] = 8;
@@ -14841,7 +14841,7 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor.Registers[(int)Register.rg2] = testProcessor.AllocateMemory(16);
             _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
                     "Instruction did not throw an exception when allocating more memory than available");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.LoadProgram(new byte[]
@@ -14881,7 +14881,7 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor.WriteMemoryQWord(48, 1024);
             _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
                     "Instruction did not throw an exception when allocating more memory than available");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.LoadProgram(new byte[]
@@ -14925,7 +14925,7 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor.WriteMemoryQWord(48, 1024);
             _ = Assert.ThrowsException<MemoryAllocationException>(() => testProcessor.Execute(false),
                     "Instruction did not throw an exception when allocating more memory than available");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.Registers[(int)Register.rg3] = 48;
@@ -14971,7 +14971,7 @@ namespace AssEmbly.Test.ProcessorTests
             Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
             Assert.AreEqual(1024UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
             Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.Registers[(int)Register.rg3] = 8;
@@ -15015,7 +15015,7 @@ namespace AssEmbly.Test.ProcessorTests
             Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
             Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
             Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.LoadProgram(new byte[]
@@ -15059,7 +15059,7 @@ namespace AssEmbly.Test.ProcessorTests
             Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
             Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
             Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.LoadProgram(new byte[]
@@ -15108,7 +15108,7 @@ namespace AssEmbly.Test.ProcessorTests
             Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rg2], "Instruction did not produce correct result");
             Assert.AreEqual(48UL, testProcessor.Registers[(int)Register.rg3], "Instruction updated the second operand");
             Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
-                    
+
             testProcessor = new Processor(64);
             testProcessor.Registers[(int)Register.rg2] = 0;
             testProcessor.Registers[(int)Register.rg3] = 48;

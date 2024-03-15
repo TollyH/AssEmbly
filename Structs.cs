@@ -3,7 +3,7 @@
     public readonly struct Opcode(byte extensionSet, byte instructionCode) : IEquatable<Opcode>
     {
         public const byte FullyQualifiedMarker = 0xFF;
-        
+
         public readonly byte ExtensionSet = extensionSet;
         public readonly byte InstructionCode = instructionCode;
 

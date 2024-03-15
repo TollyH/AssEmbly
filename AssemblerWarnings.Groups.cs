@@ -329,7 +329,7 @@
 
             { new Opcode(0x04, 0x20), 1 },  // ASMX_AEX reg, adr
             { new Opcode(0x04, 0x22), 1 },  // ASMX_FEX reg, adr
-            
+
             { new Opcode(0x05, 0x02), 1 },  // HEAP_ALC reg, adr
             { new Opcode(0x05, 0x06), 1 },  // HEAP_TRY reg, adr
             { new Opcode(0x05, 0x12), 1 },  // HEAP_REA reg, adr

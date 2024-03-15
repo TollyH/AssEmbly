@@ -59,7 +59,7 @@ Total Program Size: .*
         {
             StringBuilder fileText = new();
             _ = fileText.AppendFormat(DebugInfoFileHeader, DateTime.Now, Environment.CommandLine, totalProgramSize);
-            
+
             _ = fileText.Append(AssembledInstructionsHeader);
             foreach ((ulong address, string instruction) in assembledInstructions)
             {

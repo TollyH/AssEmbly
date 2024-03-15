@@ -211,7 +211,6 @@ namespace AssEmbly
                         case WarningSeverity.Suggestion:
                             totalSuggestions++;
                             break;
-                        default: break;
                     }
                     string macroName = "";
                     if (warning.MacroName != "")
