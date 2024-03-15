@@ -1291,8 +1291,8 @@ namespace AssEmbly
 
         private void SetCurrentPosition(AssemblyPosition position)
         {
-            importStack.SetContentTo(position.ImportStack);
-            macroStack.SetContentTo(position.MacroStack);
+            importStack.SetContentTo(position.ImportStack.NestedCopy());
+            macroStack.SetContentTo(position.MacroStack.NestedCopy());
 
             dynamicLines.Clear();
             dynamicLines.AddRange(position.Lines);
