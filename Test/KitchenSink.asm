@@ -179,3 +179,14 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
 %DAT 0xFF
 
 %IBF "test-invalid.dll"
+
+%REPEAT 0Xf
+    %DAT 1
+    %REPEAT 3
+        %DAT 3
+        %REPEAT 1
+            %DAT 4
+        %ENDREPEAT
+    %ENDREPEAT
+    %DAT 2
+%ENDREPEAT
