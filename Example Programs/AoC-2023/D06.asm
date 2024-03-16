@@ -84,7 +84,6 @@ PSH rg7
 XOR rg7, rg7
 NOT rg6
 ; Alternate between lines
-TST rg6, rg6
 JZO :SWITCH_TO_LINE_1
 MVQ rg3, rg5
 MVQ rg5, rg4

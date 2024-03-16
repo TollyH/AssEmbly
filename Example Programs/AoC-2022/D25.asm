@@ -57,7 +57,6 @@ MUL rg5, rg6
 ADD rg0, rg5
 ICR rg2
 DCR rg1
-TST rg1, rg1
 JNZ :FROM_SNAFU_LOOP
 TST rsf, _ffe  ; End of file?
 JNZ :TO_SNAFU
@@ -73,7 +72,6 @@ XOR rg1, rg1
 :TO_SNAFU_LOOP
 MVQ rg7, rg0
 REM rg7, 5
-TST rg7, rg7
 JNZ :MOD_ONE_CHECK
 PSH '0'
 DIV rg0, 5
@@ -111,7 +109,6 @@ JMP :TO_SNAFU_LOOP
 
 :PRINT_RESULT
 DCR rg1
-TST rg1, rg1
 JNZ :WRITE
 HLT
 :WRITE
