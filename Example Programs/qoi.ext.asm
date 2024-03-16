@@ -348,14 +348,14 @@ POP rg0
 RET
 
 
-; +=====================FUNCTION=====================+
-; |             Decode a QOI image file.             |
-; +--------------------PARAMETERS--------------------+
-; | rfp      - Address of zero terminated path       |
-; | stack[0] - Address to destination for pixel data |
-; +---------------------RETURNS----------------------+
-; |        rrv - 0 if failed, 1+ if succeeded        |
-; +==================================================+
+; +=============================FUNCTION============================+
+; |                     Decode a QOI image file.                    |
+; +----------------------------PARAMETERS---------------------------+
+; | rfp - Address of zero terminated path                           |
+; +-----------------------------RETURNS-----------------------------+
+; | rrv - The newly allocated decoded data, must be freed by caller |
+; | rg9 - The length of the decoded data                            |
+; +=================================================================+
 :FUNC_QOI_DECODE_FILE
 ; rg0 - temp storage
 ; rg1 - data pointer
@@ -367,11 +367,6 @@ PSH rg1
 PSH rg2
 PSH rg3
 PSH rg4
-
-; Get stack parameters
-MVQ rg1, rsb
-ADD rg1, 16
-MVQ rg1, *rg1
 
 ; Allocate space in memory for file to be read to
 FSZ rg2, *rfp
@@ -390,10 +385,32 @@ JMP :FUNC_QOI_DECODE_FILE_READ_LOOP
 :FUNC_QOI_DECODE_FILE_READ_LOOP_END
 CFL
 
+; Calculate the size of and allocate memory for decoded image
+MVQ rg0, rg3
+ADD rg0, 4
+; Width
+MVD rg1, *rg0
+; Convert big endian to little endian
+SHL rg1, 32
+EXTD_BSW rg1
+; Height
+ADD rg0, 4
+MVD rg0, *rg0
+; Convert big endian to little endian
+SHL rg0, 32
+EXTD_BSW rg0
+MUL rg1, rg0  ; Total pixels
+MUL rg1, 4  ; Pixels are 4 bytes (RGBA)
+ADD rg1, 10  ; Header size
+MVQ rg9, rg1
+HEAP_ALC rg1, rg1
+
 PSH rg1
 PSH rg2
 CAL :FUNC_QOI_DECODE, rg3
 ADD rso, 16  ; Remove pushed parameters from stack
+
+MVQ rrv, rg1
 
 HEAP_FRE rg3
 POP rg4
@@ -401,6 +418,7 @@ POP rg3
 POP rg2
 POP rg1
 POP rg0
+
 RET
 
 

@@ -13,5 +13,6 @@ MVB *rfp, rg0  ; Otherwise, move the inputted character (rg0), to the destinatio
 ICR rfp  ; Increment the destination address by 1
 JMP :FUNC_INPUT_READ  ; Loop asking for character
 :FUNC_INPUT_RETURN
+MVB *rfp, 0 ; Terminate the inputted string with a null character
 POP rg0  ; Restore value of rg0 to what it was prior to function call
 RET  ; Return from function with no value, it is already in the provided destination address
