@@ -222,6 +222,21 @@ namespace AssEmbly
             try
             {
                 _ = processor.Execute(true);
+
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                if (processor.IsFileOpen)
+                {
+                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_File_Open);
+                }
+                if (processor.IsExternalOpen)
+                {
+                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_External_Open);
+                }
+                if (processor.AnyRegionsMapped)
+                {
+                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
+                }
+                Console.ResetColor();
             }
             catch (Exception e)
             {

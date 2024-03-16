@@ -28,6 +28,12 @@ namespace AssEmbly
 
         public bool ProgramLoaded { get; private set; }
 
+        public bool IsFileOpen => openFile is not null || fileRead is not null || fileWrite is not null;
+        public bool IsExternalOpen => openExtAssembly is not null || openExtFunction is not null || extLoadContext is not null;
+        public bool AnyRegionsMapped => _mappedMemoryRanges.Count > 2;
+
+        public bool IsClean => !IsFileOpen && !IsExternalOpen && !AnyRegionsMapped;
+
         private Stream? openFile;
         private BinaryReader? fileRead;
         private BinaryWriter? fileWrite;
@@ -70,10 +76,16 @@ namespace AssEmbly
         public void Dispose()
         {
             extLoadContext?.Unload();
+            extLoadContext = null;
+            openExtAssembly = null;
+            openExtFunction = null;
 
             openFile?.Dispose();
+            openFile = null;
             fileRead?.Dispose();
+            fileRead = null;
             fileWrite?.Dispose();
+            fileWrite = null;
 
             GC.SuppressFinalize(this);
         }

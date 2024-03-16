@@ -2290,6 +2290,36 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Warning: Processor halted with an external assembly still open. You should use the ASMX_CLA instruction to close the currently open assembly before the program halts..
+        /// </summary>
+        internal static string CLI_Warning_Processor_Exit_External_Open {
+            get {
+                return ResourceManager.GetString("CLI_Warning_Processor_Exit_External_Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Warning: Processor halted with a file still open. This may cause data to be incorrectly or only partially written. You should use the CFL instruction to close the currently open file before the program halts..
+        /// </summary>
+        internal static string CLI_Warning_Processor_Exit_File_Open {
+            get {
+                return ResourceManager.GetString("CLI_Warning_Processor_Exit_File_Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Warning: Processor halted with {0} memory region(s) still allocated. You should use the HEAP_FRE instruction to free all currently allocated regions before the program halts..
+        /// </summary>
+        internal static string CLI_Warning_Processor_Exit_Region_Mapped {
+            get {
+                return ResourceManager.GetString("CLI_Warning_Processor_Exit_Region_Mapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Press any key to continue, or CTRL+C to stop....
         /// </summary>
         internal static string Debugger_Any_Key_Continue {

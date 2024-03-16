@@ -1536,4 +1536,16 @@ GNU General Public License for more details.</value>
     <data name="Assembler_Error_ASM_ONCE_Not_Imported" xml:space="preserve">
         <value>The %ASM_ONCE directive cannot be used in the base file.</value>
     </data>
+    <data name="CLI_Warning_Processor_Exit_File_Open" xml:space="preserve">
+        <value>
+Warning: Processor halted with a file still open. This may cause data to be incorrectly or only partially written. You should use the CFL instruction to close the currently open file before the program halts.</value>
+    </data>
+    <data name="CLI_Warning_Processor_Exit_External_Open" xml:space="preserve">
+        <value>
+Warning: Processor halted with an external assembly still open. You should use the ASMX_CLA instruction to close the currently open assembly before the program halts.</value>
+    </data>
+    <data name="CLI_Warning_Processor_Exit_Region_Mapped" xml:space="preserve">
+        <value>
+Warning: Processor halted with {0} memory region(s) still allocated. You should use the HEAP_FRE instruction to free all currently allocated regions before the program halts.</value>
+    </data>
 </root>
