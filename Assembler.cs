@@ -64,10 +64,13 @@ namespace AssEmbly
         }
 
         public const int DefaultMacroExpansionLimit = 1024;
+        public const int DefaultWhileRepeatLimit = 16384;
 
         public bool Finalized { get; private set; }
 
         public int MacroExpansionLimit { get; set; } = DefaultMacroExpansionLimit;
+        // This limit is per program, not per loop
+        public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
         // The lines to assemble may change during assembly, for example importing a file
         // will extend the list of lines to assemble as and when the import is reached.
@@ -105,6 +108,9 @@ namespace AssEmbly
         // When %REPEAT is used, the current position of the assembler is cloned and added to this stack
         private readonly Stack<(AssemblyPosition StartPosition, ulong RemainingIterations)> currentRepeatSections = new();
 
+        // When %WHILE is used, the current position of the assembler is cloned and added to this stack
+        private readonly Stack<AssemblyPosition> currentWhileLoops = new();
+
         // Used to keep track of multi-line macros
         private readonly Stack<MacroStackFrame> macroStack = new();
         private MacroStackFrame? currentMacro = null;
@@ -118,6 +124,12 @@ namespace AssEmbly
         private int currentlyOpenIfBlocks = 0;
         // For generating an exception if an %ENDIF directive is missing
         private AssemblyPosition lastIfDefinedPosition;
+
+        // Used in combination with SetPosition() to start assembly from a given position instead of the line after it.
+        private bool skipNextLineIncrement = false;
+
+        // Used to enforce the program-wide while repeat limit
+        private int whileRepeats = 0;
 
         // Used for debug files
         private readonly List<(ulong Address, string Line)> assembledLines = new();
@@ -423,8 +435,19 @@ namespace AssEmbly
             {
                 // Rollback the current position of the assembler,
                 // so that the line that the repeat started on is shown in the error message
-                SetCurrentPosition(currentRepeatSections.Pop().StartPosition);
+                SetCurrentPosition(currentRepeatSections.Pop().StartPosition, false);
                 EndingDirectiveException e = new(Strings.Assembler_Error_ENDREPEAT_Missing);
+                HandleAssemblerException(e);
+                throw e;
+            }
+
+            // Check for missing %ENDWHILE directives
+            if (currentWhileLoops.Count > 0)
+            {
+                // Rollback the current position of the assembler,
+                // so that the line that the while loop started on is shown in the error message
+                SetCurrentPosition(currentWhileLoops.Pop(), false);
+                EndingDirectiveException e = new(Strings.Assembler_Error_ENDWHILE_Missing);
                 HandleAssemblerException(e);
                 throw e;
             }
@@ -432,7 +455,7 @@ namespace AssEmbly
             // Check for missing %ENDIF directives
             if (currentlyOpenIfBlocks > 0)
             {
-                SetCurrentPosition(lastIfDefinedPosition);
+                SetCurrentPosition(lastIfDefinedPosition, false);
                 EndingDirectiveException e = new(Strings.Assembler_Error_ENDIF_Missing);
                 HandleAssemblerException(e);
                 throw e;
@@ -1203,7 +1226,7 @@ namespace AssEmbly
                 {
                     // Rollback the current position of the assembler,
                     // so that the line that the label was defined on is shown in the error message
-                    SetCurrentPosition(position);
+                    SetCurrentPosition(position, false);
                     LabelNameException exc = new(
                         string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName));
                     HandleAssemblerException(exc);
@@ -1216,6 +1239,12 @@ namespace AssEmbly
 
         private bool IncrementCurrentLine()
         {
+            if (skipNextLineIncrement)
+            {
+                skipNextLineIncrement = false;
+                return lineIndex < dynamicLines.Count;
+            }
+
             lineIndex++;
             currentMacroExpansions = 0;
 
@@ -1288,8 +1317,19 @@ namespace AssEmbly
                 lineIndex, baseFileLine, macroLineDepth);
         }
 
-        private void SetCurrentPosition(AssemblyPosition position)
+        /// <summary>
+        /// Restore the current position of the assembler to a previous position captured by <see cref="GetCurrentPosition"/>.
+        /// </summary>
+        /// <param name="skipIncrement">
+        /// If <see langword="false"/>, assembly will continue from the line <i>after</i> the one in the specified position.
+        /// </param>
+        private void SetCurrentPosition(AssemblyPosition position, bool skipIncrement)
         {
+            if (skipIncrement)
+            {
+                skipNextLineIncrement = true;
+            }
+
             importStack.SetContentTo(position.ImportStack.NestedCopy());
             macroStack.SetContentTo(position.MacroStack.NestedCopy());
 
@@ -1702,7 +1742,7 @@ namespace AssEmbly
             {
                 // Rollback the state of the import stack to when loop started,
                 // so that error message shows that line instead of the end of the file
-                SetCurrentPosition(startPosition);
+                SetCurrentPosition(startPosition, false);
                 throw new EndingDirectiveException(Strings.Assembler_Error_Closing_Directive_Missing);
             }
 
@@ -1777,6 +1817,59 @@ namespace AssEmbly
             {
                 throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
             }
+        }
+
+        /// <summary>
+        /// Evaluates a conditional expression defined by the given operands in the form "[OPERATION], [VALUE], [COMPARISON]".
+        /// The [COMPARISON] operand must not be given for the DEF and NDEF operations.
+        /// </summary>
+        /// <exception cref="OperandException">The operands given were invalid.</exception>
+        private bool RunConditionalCheck(string mnemonic, string[] operands)
+        {
+            if (operands.Length < 1)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+            }
+
+            string operation = operands[0];
+            bool isDefinedCheck = operation is "DEF" or "NDEF";
+
+            if ((isDefinedCheck && operands.Length != 2)
+                || (!isDefinedCheck && operands.Length != 3))
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+            }
+
+            ulong value = 0;
+            ulong comparison = 0;
+            if (operands.Length == 3)
+            {
+                OperandType operandTypeSecond = DetermineOperandType(operands[1]);
+                OperandType operandTypeThird = DetermineOperandType(operands[2]);
+                if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Type, mnemonic));
+                }
+                if (operands[1][0] == ':' || operands[2][0] == ':')
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Label_Reference, mnemonic));
+                }
+                _ = ParseLiteral(operands[1], false, out value);
+                _ = ParseLiteral(operands[2], false, out comparison);
+            }
+
+            return operation.ToUpperInvariant() switch
+            {
+                "DEF" => assemblerVariables.ContainsKey(operands[1]),
+                "NDEF" => !assemblerVariables.ContainsKey(operands[1]),
+                "EQ" => value == comparison,
+                "NEQ" => value != comparison,
+                "GT" => value > comparison,
+                "GTE" => value >= comparison,
+                "LT" => value < comparison,
+                "LTE" => value <= comparison,
+                _ => throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_First, mnemonic, operation)),
+            };
         }
     }
 }

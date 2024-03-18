@@ -382,6 +382,42 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The {0} directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {1} were given..
+        /// </summary>
+        internal static string Assembler_Error_Conditional_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Conditional_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;{1}&quot; is not a recognised operation for the {0} directive..
+        /// </summary>
+        internal static string Assembler_Error_Conditional_Operand_First {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Conditional_Operand_First", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The second and third operands to the {0} directive cannot be a label reference..
+        /// </summary>
+        internal static string Assembler_Error_Conditional_Operand_Second_Third_Label_Reference {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Conditional_Operand_Second_Third_Label_Reference", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The second and third operands to the {0} directive must be literals..
+        /// </summary>
+        internal static string Assembler_Error_Conditional_Operand_Second_Third_Type {
+            get {
+                return ResourceManager.GetString("Assembler_Error_Conditional_Operand_Second_Third_Type", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Assembler constant names cannot be empty. To use an &apos;@&apos; sign in a string, escape it with a backslash..
         /// </summary>
         internal static string Assembler_Error_Constant_Empty_Name {
@@ -547,6 +583,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to End of file reached with a while block still open. Did you forget an %ENDWHILE directive?.
+        /// </summary>
+        internal static string Assembler_Error_ENDWHILE_Missing {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDWHILE_Missing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The %ENDWHILE directive takes no operands. {0} were given..
+        /// </summary>
+        internal static string Assembler_Error_ENDWHILE_Operand_Count {
+            get {
+                return ResourceManager.GetString("Assembler_Error_ENDWHILE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This assembler has already been finalized. No more lines can be assembled..
         /// </summary>
         internal static string Assembler_Error_Finalized {
@@ -588,42 +642,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Error_IBF_Operand_Type {
             get {
                 return ResourceManager.GetString("Assembler_Error_IBF_Operand_Type", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The %IF directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {0} were given..
-        /// </summary>
-        internal static string Assembler_Error_IF_Operand_Count {
-            get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_Count", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &quot;{0}&quot; is not a recognised operation for the %IF directive..
-        /// </summary>
-        internal static string Assembler_Error_IF_Operand_First {
-            get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_First", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The second and third operands to the %IF directive cannot be a label reference..
-        /// </summary>
-        internal static string Assembler_Error_IF_Operand_Second_Third_Label_Reference {
-            get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_Second_Third_Label_Reference", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The second and third operands to the %IF directive must be literals..
-        /// </summary>
-        internal static string Assembler_Error_IF_Operand_Second_Third_Type {
-            get {
-                return ResourceManager.GetString("Assembler_Error_IF_Operand_Second_Third_Type", resourceCulture);
             }
         }
         
@@ -1440,6 +1458,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to %WHILE loop repeat limit of {0} exceeded..
+        /// </summary>
+        internal static string Assembler_Error_WHILE_Limit_Exceeded {
+            get {
+                return ResourceManager.GetString("Assembler_Error_WHILE_Limit_Exceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted error..
         /// </summary>
         internal static string AssemblerWarnings_NonFatal_0000 {
@@ -2158,6 +2185,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string CLI_Error_Invalid_Variable_Value {
             get {
                 return ResourceManager.GetString("CLI_Error_Invalid_Variable_Value", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid maximum number of while iterations..
+        /// </summary>
+        internal static string CLI_Error_Invalid_While_Limit {
+            get {
+                return ResourceManager.GetString("CLI_Error_Invalid_While_Limit", resourceCulture);
             }
         }
         

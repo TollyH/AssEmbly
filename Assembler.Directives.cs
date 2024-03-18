@@ -21,6 +21,8 @@ namespace AssEmbly
         private static readonly string[] closingIfDirectives = new[] { "%ENDIF", "%ELSE", "%ELSE_IF" };
         private static readonly string[] openingIfDirectives = new[] { "%IF" };
         private static readonly string[] ifTerminatingDirectives = new[] { "%ENDIF" };
+        private static readonly string[] openingWhileDirectives = new[] { "%WHILE" };
+        private static readonly string[] whileTerminatingDirectives = new[] { "%ENDWHILE" };
 
         // Used to keep the dictionary definition within this file out of the constructor whilst keeping stateDirectives readonly
         private void InitializeStateDirectives(out Dictionary<string, StateDirective> dictionary)
@@ -45,6 +47,8 @@ namespace AssEmbly
                 { "%ELSE", StateDirective_DanglingElseCheck },
                 { "%ELSE_IF", StateDirective_DanglingElseIfCheck },
                 { "%ENDIF", StateDirective_DanglingEndifCheck },
+                { "%WHILE", StateDirective_ConditionalRepeatLines },
+                { "%ENDWHILE", StateDirective_EndConditionalLineRepeat },
                 { "%ENDMACRO", StateDirective_DanglingClosingDirective },
             };
         }
@@ -327,7 +331,7 @@ namespace AssEmbly
             {
                 currentRepeatSections.Push((position, iterationsRemaining - 1));
                 // Assembler will increment line by 1 after this set, which is what we want to skip repeating the initial %REPEAT directive
-                SetCurrentPosition(position);
+                SetCurrentPosition(position, false);
             }
         }
 
@@ -568,50 +572,7 @@ namespace AssEmbly
             {
                 lastIfDefinedPosition = GetCurrentPosition();
 
-                if (operands.Length < 1)
-                {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Count, operands.Length));
-                }
-
-                string operation = operands[0];
-                bool isDefinedCheck = operation is "DEF" or "NDEF";
-
-                if ((isDefinedCheck && operands.Length != 2)
-                    || (!isDefinedCheck && operands.Length != 3))
-                {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_Count, operands.Length));
-                }
-
-                ulong value = 0;
-                ulong comparison = 0;
-                if (operands.Length == 3)
-                {
-                    OperandType operandTypeSecond = DetermineOperandType(operands[1]);
-                    OperandType operandTypeThird = DetermineOperandType(operands[2]);
-                    if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
-                    {
-                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Second_Third_Type);
-                    }
-                    if (operands[1][0] == ':' || operands[2][0] == ':')
-                    {
-                        throw new OperandException(Strings.Assembler_Error_IF_Operand_Second_Third_Label_Reference);
-                    }
-                    _ = ParseLiteral(operands[1], false, out value);
-                    _ = ParseLiteral(operands[2], false, out comparison);
-                }
-
-                bool result = operation.ToUpperInvariant() switch
-                {
-                    "DEF" => assemblerVariables.ContainsKey(operands[1]),
-                    "NDEF" => !assemblerVariables.ContainsKey(operands[1]),
-                    "EQ" => value == comparison,
-                    "NEQ" => value != comparison,
-                    "GT" => value > comparison,
-                    "GTE" => value >= comparison,
-                    "LT" => value < comparison,
-                    "LTE" => value <= comparison,
-                    _ => throw new OperandException(string.Format(Strings.Assembler_Error_IF_Operand_First, operation)),
-                };
+                bool result = RunConditionalCheck(mnemonic, operands);
 
                 if (!result)
                 {
@@ -646,6 +607,39 @@ namespace AssEmbly
                     break;
                 }
             }
+        }
+
+        private void StateDirective_ConditionalRepeatLines(string mnemonic, string[] operands, string preVariableLine)
+        {
+            bool result = RunConditionalCheck(mnemonic, operands);
+
+            if (result)
+            {
+                if (++whileRepeats > WhileRepeatLimit)
+                {
+                    throw new WhileLimitExceededException(string.Format(Strings.Assembler_Error_WHILE_Limit_Exceeded, WhileRepeatLimit));
+                }
+                currentWhileLoops.Push(GetCurrentPosition());
+            }
+            else
+            {
+                _ = GoToNextClosingDirective(
+                    whileTerminatingDirectives, out _, false,
+                    openingWhileDirectives, whileTerminatingDirectives, true);
+            }
+        }
+
+        private void StateDirective_EndConditionalLineRepeat(string mnemonic, string[] operands, string preVariableLine)
+        {
+            if (operands.Length != 0)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_ENDWHILE_Operand_Count, operands.Length));
+            }
+            if (!currentWhileLoops.TryPop(out AssemblyPosition position))
+            {
+                throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
+            }
+            SetCurrentPosition(position, true);
         }
 
         private void StateDirective_DanglingElseCheck(string mnemonic, string[] operands, string preVariableLine)

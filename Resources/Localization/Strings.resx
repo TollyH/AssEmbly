@@ -147,9 +147,10 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
     --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.
     --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
+    --while-limit={2} - Set the limit of %WHILE loop iterations that can occur throughout the entire program. Limit will be {2} if parameter is not given.
     --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
     --compress - Apply GZip compression to the resulting executable.
-    --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports.
+    --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports. Be aware that the expanded source file will not produce functionally identical output to the original, and may not even be a valid assemble-able program.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
     --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
 
@@ -164,6 +165,7 @@ execute - Execute an already assembled executable file
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
     --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
+    --while-limit={2} - Set the limit of %WHILE loop iterations that can occur throughout the entire program. Limit will be {2} if parameter is not given.
     --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
@@ -1498,17 +1500,17 @@ Assembler variable names may not contain symbols other than underscores.</value>
     <data name="Assembler_Error_ELSEIF_Operand_Count" xml:space="preserve">
         <value>The %ELSEIF directive requires 2 or 3 operands. {0} were given.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_Count" xml:space="preserve">
-        <value>The %IF directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {0} were given.</value>
+    <data name="Assembler_Error_Conditional_Operand_Count" xml:space="preserve">
+        <value>The {0} directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {1} were given.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_First" xml:space="preserve">
-        <value>"{0}" is not a recognised operation for the %IF directive.</value>
+    <data name="Assembler_Error_Conditional_Operand_First" xml:space="preserve">
+        <value>"{1}" is not a recognised operation for the {0} directive.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_Second_Third_Type" xml:space="preserve">
-        <value>The second and third operands to the %IF directive must be literals.</value>
+    <data name="Assembler_Error_Conditional_Operand_Second_Third_Type" xml:space="preserve">
+        <value>The second and third operands to the {0} directive must be literals.</value>
     </data>
-    <data name="Assembler_Error_IF_Operand_Second_Third_Label_Reference" xml:space="preserve">
-        <value>The second and third operands to the %IF directive cannot be a label reference.</value>
+    <data name="Assembler_Error_Conditional_Operand_Second_Third_Label_Reference" xml:space="preserve">
+        <value>The second and third operands to the {0} directive cannot be a label reference.</value>
     </data>
     <data name="Assembler_Error_Literal_Underscore_Only" xml:space="preserve">
         <value>Numeric literals must contain at least one digit.</value>
@@ -1547,5 +1549,17 @@ Warning: Processor halted with an external assembly still open. You should use t
     <data name="CLI_Warning_Processor_Exit_Region_Mapped" xml:space="preserve">
         <value>
 Warning: Processor halted with {0} memory region(s) still allocated. You should use the HEAP_FRE instruction to free all currently allocated regions before the program halts.</value>
+    </data>
+    <data name="Assembler_Error_ENDWHILE_Operand_Count" xml:space="preserve">
+        <value>The %ENDWHILE directive takes no operands. {0} were given.</value>
+    </data>
+    <data name="Assembler_Error_WHILE_Limit_Exceeded" xml:space="preserve">
+        <value>%WHILE loop repeat limit of {0} exceeded.</value>
+    </data>
+    <data name="CLI_Error_Invalid_While_Limit" xml:space="preserve">
+        <value>"{0}" is not a valid maximum number of while iterations.</value>
+    </data>
+    <data name="Assembler_Error_ENDWHILE_Missing" xml:space="preserve">
+        <value>End of file reached with a while block still open. Did you forget an %ENDWHILE directive?</value>
     </data>
 </root>

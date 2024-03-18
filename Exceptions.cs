@@ -141,6 +141,15 @@
         public AssemblyStoppedException(string message, int line, string file) : base(message, line, file) { }
     }
 
+    /// <summary>
+    /// The exception that is thrown when the program exceeds the limit of allowed while repeats.
+    /// </summary>
+    public class WhileLimitExceededException : AssemblerException
+    {
+        public WhileLimitExceededException(string message) : base(message) { }
+        public WhileLimitExceededException(string message, int line, string file) : base(message, line, file) { }
+    }
+
     // DEBUGGER EXCEPTIONS
 
     /// <summary>

@@ -161,6 +161,27 @@ namespace AssEmbly
             return -1;
         }
 
+        public static int GetWhileLimit(string[] args)
+        {
+            foreach (string a in args)
+            {
+                if (a.StartsWith("--while-limit=", StringComparison.OrdinalIgnoreCase))
+                {
+                    string whileLimitString = a.Split("=")[1];
+                    if (!int.TryParse(whileLimitString, out int whileLimit))
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return -1;
+                    }
+                    return whileLimit;
+                }
+            }
+            return -1;
+        }
+
         public static List<(string Name, ulong Value)> GetVariableDefinitions(string[] args)
         {
             List<(string Name, ulong Value)> result = new();

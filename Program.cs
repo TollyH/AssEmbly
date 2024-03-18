@@ -91,6 +91,7 @@ namespace AssEmbly
             bool useV1Format = false;
             bool useV1Stack = false;
             int macroExpansionLimit = GetMacroLimit(args);
+            int whileRepeatLimit = GetWhileLimit(args);
             foreach (string a in args)
             {
                 if (a.StartsWith("--disable-error-", StringComparison.OrdinalIgnoreCase))
@@ -162,6 +163,10 @@ namespace AssEmbly
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
+                if (whileRepeatLimit >= 0)
+                {
+                    assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
@@ -330,11 +335,16 @@ namespace AssEmbly
             try
             {
                 int macroExpansionLimit = GetMacroLimit(args);
+                int whileRepeatLimit = GetWhileLimit(args);
 
                 Assembler assembler = new();
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
+                }
+                if (whileRepeatLimit >= 0)
+                {
+                    assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
@@ -491,7 +501,8 @@ namespace AssEmbly
 
         private static void DisplayHelp()
         {
-            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
+            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize,
+                Assembler.DefaultMacroExpansionLimit, Assembler.DefaultWhileRepeatLimit);
         }
 
         private static void DisplayLicense()
