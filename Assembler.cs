@@ -1617,10 +1617,17 @@ namespace AssEmbly
         /// <param name="nestedClosingDirectives">
         /// The directives that can fully close a block opened by <paramref name="reopeningDirectives"/>.
         /// </param>
+        /// <param name="parseLines">
+        /// Whether each skipped line should be validated and parsed.
+        /// <b>Must</b> be <see langword="true"/> for <paramref name="reopeningDirectives"/> and <paramref name="nestedClosingDirectives"/> to work.
+        /// Lines will be cleaned of comments and trailing whitespace, blank lines will be removed,
+        /// and any currently defined macros will be substituted and applied to the returned strings.
+        /// <paramref name="parsedMatchedLine"/> will group all operands into the same string at index 1 with the mnemonic at index 0 if this is <see langword="false"/>.
+        /// </param>
         /// <returns>An array of all the lines that were skipped</returns>
         /// <exception cref="EndingDirectiveException">There were no instances of the given closing directives found</exception>
         private string[] GoToNextClosingDirective(IEnumerable<string> directives, out string[] parsedMatchedLine, bool markProcessed,
-            IEnumerable<string> reopeningDirectives, IEnumerable<string> nestedClosingDirectives)
+            IEnumerable<string> reopeningDirectives, IEnumerable<string> nestedClosingDirectives, bool parseLines)
         {
             parsedMatchedLine = Array.Empty<string>();
 
@@ -1645,33 +1652,47 @@ namespace AssEmbly
                     _ = processedLines.Add(currentFilePosition);
                 }
                 string line = dynamicLines[lineIndex];
-                line = CleanLine(line);
-                if (line.Length == 0)
+                if (parseLines)
                 {
-                    continue;
+                    line = CleanLine(line);
+                    if (line.Length == 0)
+                    {
+                        continue;
+                    }
+                    if (ProcessLineMacros(ref line, dynamicLines, lineIndex))
+                    {
+                        continue;
+                    }
+                    parsedMatchedLine = ParseLine(line);
+                    if (nestedOpeningTags.Contains(parsedMatchedLine[0]))
+                    {
+                        nestedOpens++;
+                        continue;
+                    }
+                    if (closingTags.Contains(parsedMatchedLine[0]))
+                    {
+                        if (nestedOpens == 0)
+                        {
+                            foundEndTag = true;
+                            // Even if intermediate lines aren't being marked as processed, the closing tag still should be
+                            _ = processedLines.Add(currentFilePosition);
+                            break;
+                        }
+                        if (nestedClosingTags.Contains(parsedMatchedLine[0]))
+                        {
+                            nestedOpens--;
+                        }
+                    }
                 }
-                if (ProcessLineMacros(ref line, dynamicLines, lineIndex))
+                else
                 {
-                    continue;
-                }
-                parsedMatchedLine = ParseLine(line);
-                if (nestedOpeningTags.Contains(parsedMatchedLine[0]))
-                {
-                    nestedOpens++;
-                    continue;
-                }
-                if (closingTags.Contains(parsedMatchedLine[0]))
-                {
-                    if (nestedOpens == 0)
+                    parsedMatchedLine = CleanLine(line).Split(' ', 2);
+                    if (parsedMatchedLine.Length >= 1 && closingTags.Contains(parsedMatchedLine[0]))
                     {
                         foundEndTag = true;
                         // Even if intermediate lines aren't being marked as processed, the closing tag still should be
                         _ = processedLines.Add(currentFilePosition);
                         break;
-                    }
-                    if (nestedClosingTags.Contains(parsedMatchedLine[0]))
-                    {
-                        nestedOpens--;
                     }
                 }
                 lines.Add(line);
@@ -1692,7 +1713,7 @@ namespace AssEmbly
         {
             string[] lines = GoToNextClosingDirective(
                 new List<string>() { directive }, out string[] parsedMatchedLine, markProcessed,
-                Enumerable.Empty<string>(), Enumerable.Empty<string>());
+                Enumerable.Empty<string>(), Enumerable.Empty<string>(), false);
             if (parsedMatchedLine.Length != 1)
             {
                 throw new OperandException(

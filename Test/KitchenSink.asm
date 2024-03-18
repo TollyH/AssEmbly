@@ -11,8 +11,13 @@ MVQ rg0, 69
 
 %MACRO Macro-d!
     ADD rg9, rg8
-    SUB rg6, rg7
+    #**nes ted& &
+
     MUL $0, $1
+%ENDMACRO
+
+%MACRO #**nes ted& &
+    SUB rg6, rg7
 %ENDMACRO
 
 :LOOP  ; comment :)

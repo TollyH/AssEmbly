@@ -621,7 +621,8 @@ namespace AssEmbly
                         currentMacro?.MacroName, macroLineDepth));
 
                     _ = GoToNextClosingDirective(
-                        closingIfDirectives, out string[] matchedLine, false, openingIfDirectives, ifTerminatingDirectives);
+                        closingIfDirectives, out string[] matchedLine, false,
+                        openingIfDirectives, ifTerminatingDirectives, true);
                     if (matchedLine[0].Equals("%ENDIF", StringComparison.OrdinalIgnoreCase))
                     {
                         currentlyOpenIfBlocks--;
@@ -659,7 +660,8 @@ namespace AssEmbly
             }
             currentlyOpenIfBlocks--;
             _ = GoToNextClosingDirective(
-                ifTerminatingDirectives, out _, false, openingIfDirectives, ifTerminatingDirectives);
+                ifTerminatingDirectives, out _, false,
+                openingIfDirectives, ifTerminatingDirectives, true);
         }
 
         private void StateDirective_DanglingElseIfCheck(string mnemonic, string[] operands, string preVariableLine)
@@ -674,7 +676,8 @@ namespace AssEmbly
             }
             currentlyOpenIfBlocks--;
             _ = GoToNextClosingDirective(
-                ifTerminatingDirectives, out _, false, openingIfDirectives, ifTerminatingDirectives);
+                ifTerminatingDirectives, out _, false,
+                openingIfDirectives, ifTerminatingDirectives, true);
         }
 
         private void StateDirective_DanglingEndifCheck(string mnemonic, string[] operands, string preVariableLine)
