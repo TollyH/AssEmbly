@@ -10,7 +10,7 @@
 MVQ rg0, 69
 
 %MACRO Macro-d!
-    ADD rg9, rg8
+    ADD rg9, rG8
     #**nes ted& &
 
     MUL $0, $1
@@ -23,7 +23,7 @@ MVQ rg0, 69
 :LOOP  ; comment :)
 ; comment
 ICR rg0
-CMP rg0, 420  ; comment
+CMP Rg0, 420  ; comment
 JLT :LOOP
 ; JLE :LOOP
 
@@ -49,9 +49,9 @@ thisLineIsNowBlank()
 :NOR_THIS
 %LABEL_OVERRIDE :&NOR_DOES_THIS
 
-%NUM :&THIS_DOESNT_POINT_HERE
-%NUM :&NOR_DOES_THIS
-%NUM :&NOR_THIS
+%num :&THIS_DOESNT_POINT_HERE
+%nUm :&NOR_DOES_THIS
+%NuM :&NOR_THIS
 
 ; Final analyzers currently can't be re-enabled without them showing again
 ; This should hopefully be changed in a future version
@@ -77,7 +77,7 @@ NOP
 :labels_are_case_sensitive
 :LABELS_ARE_CASE_SENSITIVE
 :LABELS_ARE_CASE_SENSITIVE_AND_CAN_OVERLAP
-HLT
+hlt
 
 %DAT "\@THIS_ASSEMBLER_VARIABLE_DOESNT_EXIST\0"
 %DEFINE THIS_ONE_DOES, 0x0123456789ABCDEF
@@ -157,8 +157,8 @@ HLT
 %NUM @!CURRENT_ADDRESS
 
 :MORE_CODE
-MVQ rg0, :0x123456789
-MVQ :0x123456789, 696969420
+mvQ  RG0, :0x123456789
+MVq :0X123456789, 696969420
 HLT
 
 %NUM '🍭'
@@ -200,4 +200,43 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
 %DAT 0x00
 %DAT 0x01
 
+; Insert a value with only the number of bytes required to represent the whole value
+%MACRO InsertNoZeroPadding
+    %DEFINE _InsertNoZeroPadding_Value, $0!
+    %WHILE GT, @_InsertNoZeroPadding_Value, 0
+        %DEFINE _InsertNoZeroPadding_Value_Part, @_InsertNoZeroPadding_Value
+        %VAROP REM, _InsertNoZeroPadding_Value_Part, 256
+        %VAROP DIV, _InsertNoZeroPadding_Value, 256
+        %DAT @_InsertNoZeroPadding_Value_Part
+    %ENDWHILE
+    %UNDEFINE _InsertNoZeroPadding_Value
+    %IF DEF, _InsertNoZeroPadding_Value
+        %UNDEFINE _InsertNoZeroPadding_Value
+    %ENDIF
+%ENDMACRO
+
+InsertNoZeroPadding(42)
+InsertNoZeroPadding(0xF987654)
+InsertNoZeroPadding(0b1101101101001000101100111010111011011)
+
+%WHILE DEF, this_doesnt_exist
+    %STOP "%WHILE loop ran when condition wasn't satisfied"
+%ENDWHILE
+
+%DEFINE _counter, 0
+%WHILE NDEF, while_var_test
+    %DAT 0xFE
+    %IF GT, @_counter, 10
+        %DEFINE while_var_test, 0
+    %ELSE
+        %DEFINE _counter_2, 0
+        %WHILE LT, @_counter_2, @_counter
+            %DAT 0xFD
+            %VAROP ADD, _counter_2, 1
+        %ENDWHILE
+    %ENDIF
+    %VAROP ADD, _counter, 1
+%ENDWHILE
+
+; This MUST stay at the end for a disassembler test!
 %DAT 0xFF
