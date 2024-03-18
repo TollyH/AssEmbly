@@ -110,7 +110,7 @@ namespace AssEmbly
                 opcode = Opcode.ParseBytes(instruction, ref totalBytes);
                 totalBytes++;
             }
-            if (!allowFullyQualifiedBaseOpcodes && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
+            if (!fallbackToDat && !allowFullyQualifiedBaseOpcodes && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
             {
                 // Opcode is fully qualified but is for the base instruction set
                 // - technically valid but never done by the assembler, so interpret as data.
