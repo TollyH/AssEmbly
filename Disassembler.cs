@@ -63,7 +63,7 @@ namespace AssEmbly
             {
                 if (offsetToLine.TryGetValue(address, out int destLineIndex))
                 {
-                    result[destLineIndex] = $":ADDR_{address:X}\n" + result[destLineIndex];
+                    result[destLineIndex] = $":ADDR_{address:X}{Environment.NewLine}" + result[destLineIndex];
                 }
                 else
                 {
@@ -77,7 +77,7 @@ namespace AssEmbly
                 }
             }
 
-            return string.Join("\n", result);
+            return string.Join(Environment.NewLine, result);
         }
 
         /// <summary>
