@@ -195,3 +195,9 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
     %ENDREPEAT
     %DAT 2
 %ENDREPEAT
+
+%DAT 0xFF
+%DAT 0x00
+%DAT 0x01
+
+%DAT 0xFF

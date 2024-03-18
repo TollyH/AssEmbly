@@ -34,6 +34,18 @@
     <None Update="KitchenSink.bin">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="KitchenSink.Disassembled.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="KitchenSink.Disassembled.FullBase.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="KitchenSink.Disassembled.NoPads.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="KitchenSink.Disassembled.NoStrings.asm">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="test-empty.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
