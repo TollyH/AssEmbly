@@ -84,6 +84,9 @@ namespace AssEmbly
         /// Disassemble a single line of AssEmbly code from it's assembled bytecode.
         /// </summary>
         /// <param name="instruction">The instruction to disassemble. More bytes than needed may be given.</param>
+        /// <param name="useLabelNames">
+        /// Whether address references should be written as literal addresses, or as label names generated from those addresses.
+        /// </param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present], Used %DAT directive)</returns>
         public static (string Line, ulong AdditionalOffset, List<ulong> References, bool DatFallback) DisassembleInstruction(
             Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes, bool useLabelNames)
