@@ -1763,6 +1763,59 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Evaluates a conditional expression defined by the given operands in the form "[OPERATION], [VALUE], [COMPARISON]".
+        /// The [COMPARISON] operand must not be given for the DEF and NDEF operations.
+        /// </summary>
+        /// <exception cref="OperandException">The operands given were invalid.</exception>
+        private bool RunConditionalCheck(string mnemonic, string[] operands)
+        {
+            if (operands.Length < 1)
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+            }
+
+            string operation = operands[0];
+            bool isDefinedCheck = operation is "DEF" or "NDEF";
+
+            if ((isDefinedCheck && operands.Length != 2)
+                || (!isDefinedCheck && operands.Length != 3))
+            {
+                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+            }
+
+            ulong value = 0;
+            ulong comparison = 0;
+            if (operands.Length == 3)
+            {
+                OperandType operandTypeSecond = DetermineOperandType(operands[1]);
+                OperandType operandTypeThird = DetermineOperandType(operands[2]);
+                if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Type, mnemonic));
+                }
+                if (operands[1][0] == ':' || operands[2][0] == ':')
+                {
+                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Label_Reference, mnemonic));
+                }
+                _ = ParseLiteral(operands[1], false, out value);
+                _ = ParseLiteral(operands[2], false, out comparison);
+            }
+
+            return operation.ToUpperInvariant() switch
+            {
+                "DEF" => assemblerVariables.ContainsKey(operands[1]),
+                "NDEF" => !assemblerVariables.ContainsKey(operands[1]),
+                "EQ" => value == comparison,
+                "NEQ" => value != comparison,
+                "GT" => value > comparison,
+                "GTE" => value >= comparison,
+                "LT" => value < comparison,
+                "LTE" => value <= comparison,
+                _ => throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_First, mnemonic, operation)),
+            };
+        }
+
+        /// <summary>
         /// Determine if a given statement is a known data insertion assembler directive and process it if it is.
         /// </summary>
         /// <param name="mnemonic">The mnemonic for the directive, including the % prefix</param>
@@ -1817,59 +1870,6 @@ namespace AssEmbly
             {
                 throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
             }
-        }
-
-        /// <summary>
-        /// Evaluates a conditional expression defined by the given operands in the form "[OPERATION], [VALUE], [COMPARISON]".
-        /// The [COMPARISON] operand must not be given for the DEF and NDEF operations.
-        /// </summary>
-        /// <exception cref="OperandException">The operands given were invalid.</exception>
-        private bool RunConditionalCheck(string mnemonic, string[] operands)
-        {
-            if (operands.Length < 1)
-            {
-                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
-            }
-
-            string operation = operands[0];
-            bool isDefinedCheck = operation is "DEF" or "NDEF";
-
-            if ((isDefinedCheck && operands.Length != 2)
-                || (!isDefinedCheck && operands.Length != 3))
-            {
-                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
-            }
-
-            ulong value = 0;
-            ulong comparison = 0;
-            if (operands.Length == 3)
-            {
-                OperandType operandTypeSecond = DetermineOperandType(operands[1]);
-                OperandType operandTypeThird = DetermineOperandType(operands[2]);
-                if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
-                {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Type, mnemonic));
-                }
-                if (operands[1][0] == ':' || operands[2][0] == ':')
-                {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Label_Reference, mnemonic));
-                }
-                _ = ParseLiteral(operands[1], false, out value);
-                _ = ParseLiteral(operands[2], false, out comparison);
-            }
-
-            return operation.ToUpperInvariant() switch
-            {
-                "DEF" => assemblerVariables.ContainsKey(operands[1]),
-                "NDEF" => !assemblerVariables.ContainsKey(operands[1]),
-                "EQ" => value == comparison,
-                "NEQ" => value != comparison,
-                "GT" => value > comparison,
-                "GTE" => value >= comparison,
-                "LT" => value < comparison,
-                "LTE" => value <= comparison,
-                _ => throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_First, mnemonic, operation)),
-            };
         }
     }
 }
