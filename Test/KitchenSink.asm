@@ -135,8 +135,10 @@ hlt
 
     %IF NDEF, GREATER_THAN_5
     EmbeddedElse(46165465156468461)
-%ELSE
+
+                                %ELSE
     EmbeddedIf(@GREATER_THAN_5)
+
 %ENDIF
 
 ; ASSEMBLER_VERSION_MAJOR < 3 || (ASSEMBLER_VERSION_MAJOR == 3 && ASSEMBLER_VERSION_MINOR < 2)
