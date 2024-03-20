@@ -22,7 +22,7 @@ MVQ rg0, 69
 
 :LOOP  ; comment :)
 ; comment
-ICR rg0
+ADD rg0, :&LOOP
 CMP Rg0, 420  ; comment
 JLT :LOOP
 ; JLE :LOOP
@@ -196,9 +196,12 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
     %DAT 2
 %ENDREPEAT
 
-%DAT 0xFF
-%DAT 0x00
-%DAT 0x01
+%NUM 123.4
+%NUM .5
+%NUM 5.
+%NUM -.567
+%NUM -567.
+%NUM -45
 
 ; Insert a value with only the number of bytes required to represent the whole value
 %MACRO InsertNoZeroPadding
@@ -239,4 +242,8 @@ InsertNoZeroPadding(0b1101101101001000101100111010111011011)
 %ENDWHILE
 
 ; This MUST stay at the end for a disassembler test!
+%DAT 0xFF
+%DAT 0x00
+%DAT 0x01
+
 %DAT 0xFF

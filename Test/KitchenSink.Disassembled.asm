@@ -1,6 +1,6 @@
 MVQ rg0, 69
 :ADDR_A
-ICR rg0
+ADD rg0, 10
 CMP rg0, 420
 JLT :ADDR_A
 ADD rg9, rg8
@@ -42,7 +42,7 @@ JLT :0x8ABEED000005292C  ; Address does not align to a disassembled instruction
 %DAT ">"
 %DAT 3
 POP rpo
-%DAT 242
+%DAT 250
 HLT
 %PAD 6
 MVQ rg0, :0x123456789  ; Address does not align to a disassembled instruction
@@ -98,9 +98,30 @@ JMP *rrv
 JMP *rrv
 JMP *rrv
 JMP :0x204030403040301  ; Address does not align to a disassembled instruction
+%DAT 154
+%DAT 153
+%DAT 153
+%DAT 153
+%DAT 153
+WFX 16478
+OFL :0x140000000000003F  ; Address does not align to a disassembled instruction
+%DAT "\@"
+%DAT 190
+%DAT 159
+%DAT 26
+%DAT "/"
+WFC 12575268
+%DAT 184
+%DAT 129
+%DAT 192
+%DAT 211
 %DAT 255
-HLT
-NOP
+%DAT 255
+%DAT 255
+%DAT 255
+%DAT 255
+%DAT 255
+%DAT 255
 %DAT "*Tv"
 %DAT 152
 %DAT 15
@@ -176,4 +197,7 @@ NOP
 %DAT 253
 %DAT 253
 %DAT 254
+%DAT 255
+HLT
+NOP
 %DAT 255
