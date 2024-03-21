@@ -879,16 +879,16 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
         <value>Data insertion is not directly preceded by an unconditional jump, return, or halt instruction.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0002" xml:space="preserve">
-        <value>Jump/Call target label does not point to executable code.</value>
+        <value>Jump/Call target address does not point to executable code.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0003" xml:space="preserve">
-        <value>Jump/Call target label points to end of file, not executable code.</value>
+        <value>Jump/Call target address points to end of file, not executable code.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0004" xml:space="preserve">
-        <value>Instruction writes to a label pointing to executable code.</value>
+        <value>Instruction writes to an address pointing to executable code.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0005" xml:space="preserve">
-        <value>Instruction reads from a label pointing to executable code in a context that likely expects data.</value>
+        <value>Instruction reads from an address pointing to executable code in a context that likely expects data.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0006" xml:space="preserve">
         <value>String insertion is not immediately followed by a 0 (null) byte.</value>
@@ -912,7 +912,7 @@ Press ENTER to continue, or type a command ('help' for command list): </value>
         <value>Instruction writes to the rsb register.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0013" xml:space="preserve">
-        <value>Jump/Call target label points to itself, resulting in an unbreakable infinite loop.</value>
+        <value>Jump/Call target address points to itself, resulting in an unbreakable infinite loop.</value>
     </data>
     <data name="AssemblerWarnings_Warning_0014" xml:space="preserve">
         <value>Unlabelled executable code found after data insertion.</value>

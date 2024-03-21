@@ -1692,7 +1692,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Jump/Call target label does not point to executable code..
+        ///   Looks up a localized string similar to Jump/Call target address does not point to executable code..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0002 {
             get {
@@ -1701,7 +1701,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Jump/Call target label points to end of file, not executable code..
+        ///   Looks up a localized string similar to Jump/Call target address points to end of file, not executable code..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0003 {
             get {
@@ -1710,7 +1710,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Instruction writes to a label pointing to executable code..
+        ///   Looks up a localized string similar to Instruction writes to an address pointing to executable code..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0004 {
             get {
@@ -1719,7 +1719,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Instruction reads from a label pointing to executable code in a context that likely expects data..
+        ///   Looks up a localized string similar to Instruction reads from an address pointing to executable code in a context that likely expects data..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0005 {
             get {
@@ -1791,7 +1791,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Jump/Call target label points to itself, resulting in an unbreakable infinite loop..
+        ///   Looks up a localized string similar to Jump/Call target address points to itself, resulting in an unbreakable infinite loop..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0013 {
             get {

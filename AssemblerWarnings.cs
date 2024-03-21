@@ -295,9 +295,9 @@ namespace AssEmbly
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth)> endingStringInsertionLines = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth)> importLines = new();
         private readonly Dictionary<string, int> lastExecutableLine = new();
-        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpCallToLabels = new();
-        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> writesToLabels = new();
-        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> readsFromLabels = new();
+        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpCallToAddress = new();
+        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> writesToAddress = new();
+        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> readsFromAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpsCalls = new();
 
         private ulong currentAddress;
@@ -364,19 +364,19 @@ namespace AssEmbly
                 lastExecutableLine[filePosition.File] = filePosition.Line;
                 _ = executableAddresses.Add(currentAddress);
                 instructionIsExecutable = true;
-                if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
+                if (jumpCallToAddressOpcodes.Contains(instructionOpcode))
                 {
-                    jumpCallToLabels.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
+                    jumpCallToAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
                 }
                 if (writeToMemory.Contains(instructionOpcode))
                 {
-                    writesToLabels.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
+                    writesToAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
                 }
                 if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong addressOpcodeOffset))
                 {
-                    readsFromLabels.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart + addressOpcodeOffset));
+                    readsFromAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart + addressOpcodeOffset));
                 }
-                if (jumpCallToLabelOpcodes.Contains(instructionOpcode))
+                if (jumpCallToAddressOpcodes.Contains(instructionOpcode))
                 {
                     jumpsCalls.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
                 }
@@ -468,11 +468,11 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0002()
         {
-            // Warning 0002: Jump/Call target label does not point to executable code.
+            // Warning 0002: Jump/Call target address does not point to executable code.
             List<Warning> warnings = new();
-            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpCallToLabels)
+            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong jumpAddress) in jumpCallToAddress)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)jumpAddress..]);
                 if (!executableAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpPosition,
@@ -485,11 +485,11 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0003()
         {
-            // Warning 0003: Jump/Call target label points to end of file, not executable code.
+            // Warning 0003: Jump/Call target address points to end of file, not executable code.
             List<Warning> warnings = new();
-            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpCallToLabels)
+            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong jumpAddress) in jumpCallToAddress)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)jumpAddress..]);
                 if (address >= currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0003, jumpPosition,
@@ -502,11 +502,11 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0004()
         {
-            // Warning 0004: Instruction writes to a label pointing to executable code.
+            // Warning 0004: Instruction writes to an address pointing to executable code.
             List<Warning> warnings = new();
-            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, ulong labelAddress) in writesToLabels)
+            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, ulong writeAddress) in writesToAddress)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)writeAddress..]);
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0004, writePosition,
@@ -519,11 +519,11 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0005()
         {
-            // Warning 0005: Instruction reads from a label pointing to executable code in a context that likely expects data.
+            // Warning 0005: Instruction reads from an address pointing to executable code in a context that likely expects data.
             List<Warning> warnings = new();
-            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, ulong labelAddress) in readsFromLabels)
+            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, ulong writeAddress) in readsFromAddress)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)writeAddress..]);
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writePosition,
@@ -625,12 +625,12 @@ namespace AssEmbly
 
         private List<Warning> Analyzer_Final_Warning_0013()
         {
-            // Warning 0013: Jump/Call target label points to itself, resulting in an unbreakable infinite loop.
+            // Warning 0013: Jump/Call target address points to itself, resulting in an unbreakable infinite loop.
             List<Warning> warnings = new();
-            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong labelAddress) in jumpsCalls)
+            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong jumpAddress) in jumpsCalls)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)labelAddress..]);
-                if (address == labelAddress - 1)
+                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)jumpAddress..]);
+                if (address == jumpAddress - 1)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0013, jumpPosition,
                         lineMnemonics[(jumpPosition, jumpMacroLineDepth)], lineOperands[(jumpPosition, jumpMacroLineDepth)],

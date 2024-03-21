@@ -889,7 +889,7 @@ namespace AssEmbly
                 if (mnemonic[0] == ':')
                 {
                     // Will throw an error if label is not valid
-                    OperandType operandType = Assembler.DetermineOperandType(mnemonic);
+                    OperandType operandType = Assembler.DetermineOperandType(mnemonic, false);
                     if (operandType != OperandType.Address)
                     {
                         throw new SyntaxError(Strings.REPL_Error_Label_Ampersand);

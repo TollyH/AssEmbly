@@ -368,10 +368,10 @@
         /// </summary>
         internal static readonly HashSet<string> noNegativeVarop = new(StringComparer.OrdinalIgnoreCase) { "DIV", "REM", "SHL", "SHR", "GT", "GTE", "LT", "LTE" };
         /// <summary>
-        /// Every opcode that results in the location of execution being moved to the address of a label.
+        /// Every opcode that results in the location of execution being moved to an address in memory.
         /// As of current, the address to jump to is always the first operand to these opcodes.
         /// </summary>
-        internal static readonly HashSet<Opcode> jumpCallToLabelOpcodes = new()
+        internal static readonly HashSet<Opcode> jumpCallToAddressOpcodes = new()
         {
             // Jumps
             new Opcode(0x00, 0x02),
