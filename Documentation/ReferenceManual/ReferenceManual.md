@@ -2438,8 +2438,8 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `DIV`         | O                | X              | X              |
 | `DVR`         | O                | X              | X              |
 | `REM`         | O                | X              | X              |
-| `SHL`         | O                | O              | X              |
-| `SHR`         | O                | (1)            | X              |
+| `SHL`         | O                | (5)            | X              |
+| `SHR`         | O                | (1) (5)        | X              |
 | `AND`         | O                | (2)            | X              |
 | `ORR`         | O                | (2)            | X              |
 | `XOR`         | O                | (2)            | X              |
@@ -2464,7 +2464,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `SIGN_DIV`    | X                | O              | X              |
 | `SIGN_DVR`    | X                | O              | X              |
 | `SIGN_REM`    | X                | O              | X              |
-| `SIGN_SHR`    | X                | O              | X              |
+| `SIGN_SHR`    | X                | (5)            | X              |
 | `SIGN_MVB`    | X                | O              | X              |
 | `SIGN_MVW`    | X                | O              | X              |
 | `SIGN_MVD`    | X                | O              | X              |
@@ -2515,6 +2515,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 2. Bitwise operations on signed integers will treat the sign bit like any other, there is no special logic involving it.
 3. Using smaller-than-64-bit move instructions on signed integers if the target is a memory location will work as expected, truncating the upper bits. If the target is a register, however, you may wish to use the signed versions to automatically extend the smaller integer to a signed 64-bit one so it is correctly interpreted by other instructions.
 4. Reversing the byte order of a register can work on any data type, however, registers **must** be in little endian order *after* reversing to have their value correctly interpreted by other instructions (this does not apply to instructions where the format of the register's value is unimportant, such as with `MVQ`).
+5. Only the first operand to shift instructions (the value to shift) can be signed. The second operand (the number of bits to shift by) must be unsigned. Negative values will have the same effect as using a value of `64` or higher, simply setting the destination register to `0`.
 
 ## Status Flag Behaviour
 

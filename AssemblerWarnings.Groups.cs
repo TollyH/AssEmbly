@@ -555,8 +555,6 @@
             new Opcode(0x00, 0x11),  // ADD reg, lit
             new Opcode(0x00, 0x21),  // SUB reg, lit
             new Opcode(0x00, 0x31),  // MUL reg, lit
-            new Opcode(0x00, 0x51),  // SHL reg, lit
-            new Opcode(0x00, 0x55),  // SHR reg, lit
             new Opcode(0x00, 0x61),  // AND reg, lit
             new Opcode(0x00, 0x65),  // ORR reg, lit
             new Opcode(0x00, 0x69),  // XOR reg, lit
@@ -584,7 +582,6 @@
             new Opcode(0x01, 0x11),  // SIGN_DIV reg, lit
             new Opcode(0x01, 0x15),  // SIGN_DVR reg, lit
             new Opcode(0x01, 0x19),  // SIGN_REM reg, lit
-            new Opcode(0x01, 0x21),  // SIGN_SHR reg, lit
             new Opcode(0x01, 0x31),  // SIGN_MVB reg, lit
             new Opcode(0x01, 0x35),  // SIGN_MVW reg, lit
             new Opcode(0x01, 0x41),  // SIGN_MVD reg, lit
@@ -603,7 +600,6 @@
             new Opcode(0x01, 0x11),  // SIGN_DIV reg, lit
             new Opcode(0x01, 0x15),  // SIGN_DVR reg, lit
             new Opcode(0x01, 0x19),  // SIGN_REM reg, lit
-            new Opcode(0x01, 0x21),  // SIGN_SHR reg, lit
             new Opcode(0x01, 0x31),  // SIGN_MVB reg, lit
             new Opcode(0x01, 0x35),  // SIGN_MVW reg, lit
             new Opcode(0x01, 0x41),  // SIGN_MVD reg, lit
