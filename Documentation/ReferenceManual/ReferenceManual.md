@@ -1950,7 +1950,7 @@ As well as interfacing with the console, AssEmbly also has native support for ha
 
 ### Opening and Closing
 
-Files must be explicitly opened with the `OFL` instruction before they can read or written to, and only one file can be open at a time. You should close the currently open file with the `CFL` instruction when you have finished operating on it.
+Files must be explicitly opened with the `OFL` instruction before they can read or written to, and only one file can be open at a time. You should close the currently open file with the `CFL` instruction when you have finished operating on it. It is important that you ensure that any open file is closed with `CFL` before the processor halts, as if the program ends while there is a file still open, any data written to the open file may be incorrectly or only partially saved.
 
 Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes in memory, ending with at least one `0` byte. An example static filepath definition is as follows:
 
