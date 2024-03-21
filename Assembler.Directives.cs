@@ -516,6 +516,15 @@ namespace AssEmbly
             {
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header_Macro_Lines, macroLineDepth);
             }
+            if (insideMacroSkipBlock)
+            {
+                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Inside_Macro_Skip_Block);
+            }
+            if (currentlyOpenIfBlocks > 0)
+            {
+                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_If_Blocks, currentlyOpenIfBlocks);
+            }
+            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_While_Repeats, whileRepeats, WhileRepeatLimit);
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
             foreach ((string labelName, ulong address) in labels)
@@ -548,6 +557,40 @@ namespace AssEmbly
             foreach ((string variable, ulong value) in assemblerVariables)
             {
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Assembler_Variable_Line, variable, value);
+            }
+            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Repeat_Stack_Header);
+            foreach ((AssemblyPosition startPosition, ulong remainingIterations) in currentRepeatSections)
+            {
+                string filePath;
+                int line;
+                if (startPosition.ImportStack.TryPeek(out ImportStackFrame? result))
+                {
+                    filePath = result.ImportPath;
+                    line = result.CurrentLine;
+                }
+                else
+                {
+                    filePath = "base file";
+                    line = startPosition.BaseFileLine;
+                }
+                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Repeat_Stack_Line, filePath, line, remainingIterations);
+            }
+            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_While_Stack_Header);
+            foreach (AssemblyPosition startPosition in currentWhileLoops)
+            {
+                string filePath;
+                int line;
+                if (startPosition.ImportStack.TryPeek(out ImportStackFrame? result))
+                {
+                    filePath = result.ImportPath;
+                    line = result.CurrentLine;
+                }
+                else
+                {
+                    filePath = "base file";
+                    line = startPosition.BaseFileLine;
+                }
+                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_While_Stack_Line, filePath, line);
             }
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Header);
             foreach (MacroStackFrame macroFrame in macroStack)

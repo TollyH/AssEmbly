@@ -108,6 +108,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Currently inside {0} %IF block(s)..
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Current_If_Blocks {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Current_If_Blocks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} %WHILE repetitions toward limit of {1}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Current_While_Repeats {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Current_While_Repeats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 
         ///%DEBUG directive on line {0} in {1}
         ///Program is currently {2:N0} bytes long..
@@ -152,6 +170,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Debug_Directive_Import_Stack_Line {
             get {
                 return ResourceManager.GetString("Assembler_Debug_Directive_Import_Stack_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently inside macro skip block. Macros will not be expanded until it is closed..
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Inside_Macro_Skip_Block {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Inside_Macro_Skip_Block", resourceCulture);
             }
         }
         
@@ -252,6 +279,25 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
+        ///Current repeat stack (deepest repeat first):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Repeat_Stack_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Repeat_Stack_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to     {2} iterations remaining for repeat at line {1} of {0}.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_Repeat_Stack_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_Repeat_Stack_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
         ///{0} defined single-line macro(s):.
         /// </summary>
         internal static string Assembler_Debug_Directive_Single_Line_Macro_Header {
@@ -266,6 +312,25 @@ namespace AssEmbly.Resources.Localization {
         internal static string Assembler_Debug_Directive_Single_Line_Macro_Line {
             get {
                 return ResourceManager.GetString("Assembler_Debug_Directive_Single_Line_Macro_Line", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Current while stack (deepest while first):.
+        /// </summary>
+        internal static string Assembler_Debug_Directive_While_Stack_Header {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_While_Stack_Header", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Assembler_Debug_Directive_While_Stack_Line {
+            get {
+                return ResourceManager.GetString("Assembler_Debug_Directive_While_Stack_Line", resourceCulture);
             }
         }
         

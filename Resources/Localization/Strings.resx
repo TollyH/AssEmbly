@@ -1562,4 +1562,27 @@ Warning: Processor halted with {0} memory region(s) still allocated. You should 
     <data name="Assembler_Error_ENDWHILE_Missing" xml:space="preserve">
         <value>End of file reached with a while block still open. Did you forget an %ENDWHILE directive?</value>
     </data>
+    <data name="Assembler_Debug_Directive_Inside_Macro_Skip_Block" xml:space="preserve">
+        <value>Currently inside macro skip block. Macros will not be expanded until it is closed.</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Current_If_Blocks" xml:space="preserve">
+        <value>Currently inside {0} %IF block(s).</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Repeat_Stack_Header" xml:space="preserve">
+        <value>
+Current repeat stack (deepest repeat first):</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Repeat_Stack_Line" xml:space="preserve">
+        <value>    {2} iterations remaining for repeat at line {1} of {0}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_Current_While_Repeats" xml:space="preserve">
+        <value>{0} %WHILE repetitions toward limit of {1}</value>
+    </data>
+    <data name="Assembler_Debug_Directive_While_Stack_Header" xml:space="preserve">
+        <value>
+Current while stack (deepest while first):</value>
+    </data>
+    <data name="Assembler_Debug_Directive_While_Stack_Line" xml:space="preserve">
+        <value>    Condition at line {1} of {0}</value>
+    </data>
 </root>
