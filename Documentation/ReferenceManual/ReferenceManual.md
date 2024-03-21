@@ -1,8 +1,8 @@
 # AssEmbly Reference Manual
 
-Applies to versions: `3.1.0`
+Applies to versions: `3.2.0`
 
-Last revised: 2024-02-02
+Last revised: 2024-03-21
 
 ## Introduction
 
@@ -25,6 +25,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Literal](#literal)
       - [Character Literal](#character-literal)
     - [Address](#address)
+      - [Address Literals](#address-literals)
     - [Pointer](#pointer)
   - [Registers](#registers)
     - [Register Table](#register-table)
@@ -106,21 +107,21 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 
 ## Technical Information
 
-|                              |                                                                     |
-|------------------------------|---------------------------------------------------------------------|
-| Bits                         | 64 (registers, operands & addresses)                                |
-| Word Size                    | 8 bytes (64-bits – called a Quad Word for consistency with x86)     |
-| Minimum Addressable Unit     | Byte (8-bits)                                                       |
-| Register Count               | 16 (10 general purpose)                                             |
-| Architecture Type            | Register–memory                                                     |
-| Endianness                   | Little                                                              |
-| Signed Number Representation | Two's Complement                                                    |
-| Branching                    | Condition code (status register)                                    |
-| Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)            |
-| Operand Size                 | 1 byte (registers, pointers) / 8 bytes (literals, addresses/labels) |
-| Instruction Size             | 1 byte – 17 bytes (current) / unlimited (theoretical)               |
-| Instruction Count            | 329 opcodes (114 unique operations)                                 |
-| Text Encoding                | UTF-8                                                               |
+|                              |                                                                 |
+|------------------------------|-----------------------------------------------------------------|
+| Bits                         | 64 (registers, operands & addresses)                            |
+| Word Size                    | 8 bytes (64-bits – called a Quad Word for consistency with x86) |
+| Minimum Addressable Unit     | Byte (8-bits)                                                   |
+| Register Count               | 16 (10 general purpose)                                         |
+| Architecture Type            | Register–memory                                                 |
+| Endianness                   | Little                                                          |
+| Signed Number Representation | Two's Complement                                                |
+| Branching                    | Condition code (status register)                                |
+| Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)        |
+| Operand Size                 | 1 byte (registers, pointers) / 8 bytes (literals, addresses)    |
+| Instruction Size             | 1 byte – 17 bytes (current) / unlimited (theoretical)           |
+| Instruction Count            | 329 opcodes (114 unique operations)                             |
+| Text Encoding                | UTF-8                                                           |
 
 ## Basic Syntax
 
@@ -181,7 +182,7 @@ DCR rg0  ; :Area2 now points here
 HLT
 ```
 
-Labels will point to whatever is directly below them, **unless that is a comment**. Comments are not assembled and so cannot be pointed to.
+Labels store the **address** of whatever is next assembled after they are defined.
 
 For example:
 
@@ -192,7 +193,7 @@ For example:
 WCC 10
 ```
 
-Here `:NOT_COMMENT` will point to `WCC`, as it is the first thing that will be assembled after the definition was written.
+Here `:NOT_COMMENT` will point to `WCC`, as it is the first thing that will be assembled after the definition was written (comments are ignored by the assembler and do not contribute to the final assembled program).
 
 Labels can also be placed at the very end of a file to point to the first byte in memory that is not part of the program.
 
@@ -295,7 +296,7 @@ Escape sequences are explained in more detail and listed in full in a dedicated 
 
 ### Address
 
-An address is a value that is interpreted as a location to be read from, written to, or jumped to in a processor's main memory. In AssEmbly, an address is always specified by using a **label**. Once a label has been defined as seen earlier, they can be referenced by prefixing their name with a colon (`:`), similarly to how they are defined — only now it will be in the place of an operand. Like literals, they always occupy 8 bytes (64-bits) of memory after assembly.
+An address is a value that is interpreted as a location to be read from, written to, or jumped to in a processor's main memory. In AssEmbly, an address is usually specified by using a **label**. Once a label has been defined as seen earlier, they can be referenced by prefixing their name with a colon (`:`), similarly to how they are defined — only now it will be in the place of an operand. Like literals, they always occupy 8 bytes (64-bits) of memory after assembly.
 
 Consider the following example:
 
@@ -315,22 +316,37 @@ WCC 10
 WCX :AREA_1  ; Will write "CA" to the console
 ```
 
-`:AREA_1` will have a value of `9`, as `WCC 10` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
+`:AREA_1` will store the memory address `9`, as `WCC 10` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
 
-If, when writing an instruction, you want to utilise the address *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, before the label name.
+If, when referencing a label, you want to utilise the address of the label *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, and before the label name.
 
 For example:
 
 ```text
-:AREA_1
 WCC 10
-MVQ rg0, :&AREA_1  ; Move 0 (the address itself) to rg0
-WCX :&AREA_1  ; Will write "0" to the console
+:AREA_1
+MVQ rg0, :&AREA_1  ; Move 9 (the address itself) to rg0
+WCX :&AREA_1  ; Will write "9" to the console
 ```
+
+#### Address Literals
+
+While it is usually recommended to use a label to reference an address, it is also possible to directly reference a numerical address without necessarily having a label that points there. To do so, simply put the numerical value of the address after a colon instead of a label name. Hexadecimal and binary values can also used by prefixing the number with `0x` or `0b` respectively.
+
+For example:
+
+```text
+WCC 10
+WCX :9  ; Will write "CA" to the console
+WCX :0x09  ; Will write "CA" to the console
+WCX :0b1001  ; Will write "CA" to the console
+```
+
+The `WCX` instructions here are accessing the data in memory at address `9` (the opcode for `WCX <Address>` itself - `0xCA`), despite there not being any label that points there.
 
 ### Pointer
 
-So what if you've copied an address to a register? You now want to treat the value of a register as if it were an address in memory, not a number. This can be achieved with a **pointer**. Simply prefix a register name with an asterisk (`*`) to treat the register contents as a location to store to, read from, or jump to — instead of a number to operate on. Just like registers, they will occupy a single byte in memory after assembly.
+Memory can also be accessed by using the current value of a register as a memory address. In AssEmbly, this is called a **pointer**, though it is often also called **indirect addressing**. Simply prefix a register name with an asterisk (`*`) to treat the contents of the register as a location to store to, read from, or jump to — instead of a number to operate on. Just like registers, pointers occupy a single byte in memory after assembly.
 
 For example:
 
@@ -504,7 +520,7 @@ These 10 registers have no special purpose. They will never be changed unless yo
 
 There are four different instructions that are used to move data around without altering it in AssEmbly, each one moving a different number of bytes. `MVB` moves a single byte, `MVW` moves two (a.k.a. a word, 16-bits), `MVD` moves four (a.k.a. a double word, 32-bits), and `MVQ` moves eight (a.k.a. a quad word, 64-bits, a full number in AssEmbly).
 
-Data can either be moved between two registers, from a register to a memory location, or from a memory location to a register. You cannot move data between two memory locations, you must use a register as a midpoint instead. To move data to or from a memory location, you can use either a label or a pointer.
+Data can either be moved between two registers, from a register to a memory location, or from a memory location to a register. You cannot move data between two memory locations, you must use a register as a midpoint instead. To move data to or from a memory location, you can use either a label, address literal, or a pointer.
 
 The move instructions are also how the value of a register or memory location is set to a literal value. In a sense, they can be considered the equivalent of the `=` assignment operator in higher-level languages.
 
@@ -556,7 +572,7 @@ Similarly to literals, if a source register contains a number greater than what 
 
 ### Moving with Memory
 
-Unlike with registers, using different sizes of move instruction *will* affect how any bytes are read from memory. Bytes are read from or written to **starting** at the address in the given label or pointer, and only the required number for the given instruction are read or written (1 for `MVB`, 2 for `MVW`, 4 for `MVD`, 8 for `MVQ`). The instructions will *always* write these numbers of bytes, if a number to be moved takes up less, it will be padded with `0`s.
+Unlike with registers, using different sizes of move instruction *will* affect how any bytes are read from memory. Bytes are read from or written to **starting** at the given address, and only the required number for the given instruction are read or written (1 for `MVB`, 2 for `MVW`, 4 for `MVD`, 8 for `MVQ`). The instructions will *always* write these numbers of bytes, if a number to be moved takes up less, it will be padded with `0`s.
 
 Numbers are stored in memory in little endian encoding, meaning that the smallest byte is stored first, up to the largest. For example, the 32-bit number `2,356,895,874` is represented in hexadecimal as `0x8C7B6082`, which can be broken down into 4 bytes: `8C`, `7B`, `60`, and `82`. When stored in memory, this order will be *reversed*, as follows:
 
@@ -594,7 +610,7 @@ When using any move instruction larger than `MVB`, be careful to ensure that not
 
 Math and bitwise instructions operate **in-place** in AssEmbly, meaning the first operand for the operation is also used as the destination for the resulting value to be stored to. Destinations, and thus the first operand, must always be a **register**.
 
-Mathematical and bitwise operations are always done with 64-bits, therefore if an address (i.e. a label or pointer) is used as the second operand, 8 bytes will be read starting at that address for the operation in little endian encoding (see the "moving with memory" section above for more info on little endian).
+Mathematical and bitwise operations are always done with 64-bits, therefore if a memory location (e.g. a label or pointer) is used as the second operand, 8 bytes will be read starting at that address for the operation in little endian encoding (see the "moving with memory" section above for more info on little endian).
 
 ### Addition and Multiplication
 
@@ -1276,7 +1292,7 @@ ADD rg0, 5  ; This won't be executed
 
 `rg0` only ends up being 5 at the end of this example, as jumping to the `SKIP` label prevented the two other `ADD` instructions from being reached.
 
-Jumps can also be made to pointers, though you must be sure that the pointer will contain the address of a valid opcode before jumping there.
+Jumps can also be made to pointers and address literals, though you must be sure that the address is that of a valid opcode before jumping there.
 
 For example:
 
@@ -1886,7 +1902,7 @@ Manually emitted messages always have the code `0000`, regardless of severity. M
 
 AssEmbly has native support for reading and writing from the console. There are four types of write that can be performed: 64-bit number in decimal; byte in decimal; byte in hexadecimal; and a raw byte (character). There is only a single type of read: a single raw byte. There is no native support for reading numbers in any base, nor is there support for reading or writing multiple numbers/bytes at once.
 
-Writing can be done from registers, literals, labels, and pointers; reading must be done to a register. As with the move instructions, if a byte write instruction is used on a register or literal, only the lowest byte will be considered. If one is used on a label or a pointer, only a single byte of memory will be read, as an opposed to the 8 bytes that are read when writing a 64-bit number.
+Writing can be done from registers, literals, and memory locations; reading must be done to a register. As with the move instructions, if a byte write instruction is used on a register or literal, only the lowest byte will be considered. If one is used on a memory address (e.g. a label or a pointer), only a single byte of memory will be read, as an opposed to the 8 bytes that are read when writing a 64-bit number.
 
 An example of each type of write:
 
@@ -1964,7 +1980,7 @@ CFL
 
 ### Reading and Writing
 
-Reading and writing from files is almost identical to how it is done from the console. Registers, literals, labels, and pointers can all be written, and reading must be done to a register. When using byte writing instructions, only the lower byte of registers and literals is considered, and only a single byte of memory is read for labels and pointers. An open file can be both read from and written to while it is open, though changes written to the file will not be reflected in either the current AssEmbly program or other applications until the file is closed. If a file already has data in it when it is written to, the new data will start overwriting from the first byte in the file. Any remaining data that does not get overwritten will remain unchanged, and the size of the file will not change unless more bytes are written than were originally in the file. To clear a file before writing it, use the `DFL` instruction to delete the file beforehand.
+Reading and writing from files is almost identical to how it is done from the console. Registers, literals, and data in memory can all be written, and reading must be done to a register. When using byte writing instructions, only the lower byte of registers and literals is considered, and only a single byte of memory is read for memory locations. An open file can be both read from and written to while it is open, though changes written to the file will not be reflected in either the current AssEmbly program or other applications until the file is closed. If a file already has data in it when it is written to, the new data will start overwriting from the first byte in the file. Any remaining data that does not get overwritten will remain unchanged, and the size of the file will not change unless more bytes are written than were originally in the file. To clear a file before writing it, use the `DFL` instruction to delete the file beforehand.
 
 An example of writing to a file:
 
@@ -2026,7 +2042,7 @@ As well as reading and writing, there are also instructions for checking whether
 
 ## The Stack
 
-The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8 byte) values. Registers, literals, labels, and pointers can all be given as operands to the push (`PSH`) instruction.
+The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8 byte) values. Registers, literals, addresses, and pointers can all be given as operands to the push (`PSH`) instruction.
 
 Once items have been pushed to the stack, they can be removed (**popped**), starting with the most recently pushed item. As with most other instructions with a destination, items from the stack must be popped into registers with the `POP` instruction. Once an item is removed from the stack, the effective size of the stack shrinks back down, and the popped item will no longer be considered part of the stack until and unless it is pushed again.
 
@@ -2121,7 +2137,7 @@ Specifically, `RET` will cause `rpo` to be updated to the address storing the op
 
 ### Fast Calling
 
-The `CAL` instruction can also take an optional second operand: a value to pass to the subroutine. This is called **fast calling** or **fast passing**; the passed value gets stored in `rfp` and can be any one of a register, literal, label, or pointer. More info on the behaviour of the register itself and how it should be used can be found in its part of the registers section. Parameters are always 64-bit values, so when passing a label or a register, 8 bytes of memory will always be read.
+The `CAL` instruction can also take an optional second operand: a value to pass to the subroutine. This is called **fast calling** or **fast passing**; the passed value gets stored in `rfp` and can be any one of a register, literal, address, or pointer. More info on the behaviour of the register itself and how it should be used can be found in its part of the registers section. Parameters are always 64-bit values, so when passing a memory location, 8 bytes of memory will always be read.
 
 An example of subroutines utilising fast calling:
 
@@ -2144,7 +2160,7 @@ CAL :SUBROUTINE_TWO, 6  ; This will implicitly set rfp to 6
 
 ### Return Values
 
-The `RET` instruction can also take an optional operand to return a value. Return values can be registers, literals, labels, or pointers, and are stored in `rrv`. As with fast pass parameters, return values are always 64-bits/8 bytes. The exact behaviour and usage of the register can be found in its part of the registers section.
+The `RET` instruction can also take an optional operand to return a value. Return values can be registers, literals, or data in memory, and are stored in `rrv`. As with fast pass parameters, return values are always 64-bits/8 bytes. The exact behaviour and usage of the register can be found in its part of the registers section.
 
 Here is the above example for fast calling adapted to use return values:
 
@@ -2212,7 +2228,7 @@ The regions of memory occupied by the loaded program bytes and the stack are als
 
 ### Allocating a New Region
 
-There are two instructions that can be used to allocate a new region of memory: `HEAP_ALC` and `HEAP_TRY`. Both allocate an exact number of bytes given in the second operand as either a value in a register, a literal value, or a value in memory given by a label or pointer. After allocating, the instructions store the memory address of the first byte in the newly allocated block in a register given as the first operand. If an error occurs while allocating memory (for example if there is not enough free memory remaining), `HEAP_ALC` will throw an error, stopping execution of the program immediately, whereas `HEAP_TRY` will set the value of the destination register to `-1` (`0xFFFFFFFFFFFFFFFF`) and execution will continue.
+There are two instructions that can be used to allocate a new region of memory: `HEAP_ALC` and `HEAP_TRY`. Both allocate an exact number of bytes given in the second operand as either a value in a register, a literal value, or a value in memory. After allocating, the instructions store the memory address of the first byte in the newly allocated block in a register given as the first operand. If an error occurs while allocating memory (for example if there is not enough free memory remaining), `HEAP_ALC` will throw an error, stopping execution of the program immediately, whereas `HEAP_TRY` will set the value of the destination register to `-1` (`0xFFFFFFFFFFFFFFFF`) and execution will continue.
 
 For example, assuming memory is 8192 bytes in size:
 
@@ -2332,7 +2348,7 @@ In order to compile a single C# source file into a .NET DLL, you can use the `cs
 
 For AssEmbly to load a DLL and methods within it, their names need to be defined as null-terminated strings in memory, similarly to when performing file operations. DLL paths can either be relative (i.e. `MyAsm.dll` or `Folder/MyAsm.dll`), or absolute (i.e. `Drive:/Folder/Folder/MyAsm.dll`). Method names should not include the `AssEmblyInterop` class name. Only a single assembly can be loaded at once, and only a single method from that assembly can be loaded at a time.
 
-To load an assembly, use the `ASMX_LDA` instruction with either a label or a pointer to the null-terminated file path. Once an assembly is loaded, you can load a function from it with `ASMX_LDF`, with a label or pointer to the null-terminated method name. Once an assembly is loaded, you can load and unload methods from it as many times as you like. The current function must be closed with `ASMX_CLF` before you can load another, and the current assembly must be closed with `ASMX_CLA` before another can be opened. `ASMX_CLA` will automatically close the open function as well if one is still loaded when it is used.
+To load an assembly, use the `ASMX_LDA` instruction with the memory address of the null-terminated file path. Once an assembly is loaded, you can load a function from it with `ASMX_LDF`, with the memory address of the null-terminated method name. Once an assembly is loaded, you can load and unload methods from it as many times as you like. The current function must be closed with `ASMX_CLF` before you can load another, and the current assembly must be closed with `ASMX_CLA` before another can be opened. `ASMX_CLA` will automatically close the open function as well if one is still loaded when it is used.
 
 Once both an assembly and function are loaded, you can use the `ASMX_CAL` instruction with an optional operand to use as the passed value in order to call it.
 
@@ -2370,7 +2386,7 @@ Your value: 9000
 
 ### Testing if an Assembly or Function Exists
 
-The `ASMX_LDA` and `ASMX_LDF` instructions will throw an error, stopping execution, if the path/name they are given does not correspond to a valid target to load. If you wish to test whether or not this will happen without crashing the program, you can use the `ASMX_AEX` and `ASMX_FEX` instructions. They both take a register as their first operand, then the label or pointer to the null-terminated target string as their second. If the target assembly/function exists and is valid, the value of the first operand register will be set to `1`, otherwise it will be set to `0`. An assembly must already be loaded in order to check the validity of a function, as only the currently open assembly will be searched.
+The `ASMX_LDA` and `ASMX_LDF` instructions will throw an error, stopping execution, if the path/name they are given does not correspond to a valid target to load. If you wish to test whether or not this will happen without crashing the program, you can use the `ASMX_AEX` and `ASMX_FEX` instructions. They both take a register as their first operand, then the memory address of the null-terminated target string as their second. If the target assembly/function exists and is valid, the value of the first operand register will be set to `1`, otherwise it will be set to `0`. An assembly must already be loaded in order to check the validity of a function, as only the currently open assembly will be searched.
 
 ## Text Encoding
 
@@ -2497,7 +2513,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 
 1. Signed integers *can* still be used with `SHR`, though it will perform a logical shift, not an arithmetic one, which may or may not be what you desire. See the section on Arithmetic Right Shifting for the difference.
 2. Bitwise operations on signed integers will treat the sign bit like any other, there is no special logic involving it.
-3. Using smaller-than-64-bit move instructions on signed integers if the target is a label or pointer will work as expected, truncating the upper bits. If the target is a register, however, you may wish to use the signed versions to automatically extend the smaller integer to a signed 64-bit one so it is correctly interpreted by other instructions.
+3. Using smaller-than-64-bit move instructions on signed integers if the target is a memory location will work as expected, truncating the upper bits. If the target is a register, however, you may wish to use the signed versions to automatically extend the smaller integer to a signed 64-bit one so it is correctly interpreted by other instructions.
 4. Reversing the byte order of a register can work on any data type, however, registers **must** be in little endian order *after* reversing to have their value correctly interpreted by other instructions (this does not apply to instructions where the format of the register's value is unimportant, such as with `MVQ`).
 
 ## Status Flag Behaviour
@@ -2643,177 +2659,177 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | `HLT` | Halt | - | Stops the processor from executing the program | `0x00` |
 | `NOP` | No Operation | - | Do nothing | `0x01` |
 | **Jumping** |||||
-| `JMP` | Jump | Address | Jump unconditionally to an address in a label | `0x02` |
+| `JMP` | Jump | Address | Jump unconditionally to an address | `0x02` |
 | `JMP` | Jump | Pointer | Jump unconditionally to an address in a register | `0x03` |
-| `JEQ` / `JZO` | Jump if Equal / Jump if Zero | Address | Jump to an address in a label only if the zero status flag is set | `0x04` |
+| `JEQ` / `JZO` | Jump if Equal / Jump if Zero | Address | Jump to an address only if the zero status flag is set | `0x04` |
 | `JEQ` / `JZO` | Jump if Equal / Jump if Zero | Pointer | Jump to an address in a register only if the zero status flag is set | `0x05` |
-| `JNE` / `JNZ` | Jump if not Equal / Jump if not Zero | Address | Jump to an address in a label only if the zero status flag is unset | `0x06` |
+| `JNE` / `JNZ` | Jump if not Equal / Jump if not Zero | Address | Jump to an address only if the zero status flag is unset | `0x06` |
 | `JNE` / `JNZ` | Jump if not Equal / Jump if not Zero | Pointer | Jump to an address in a register only if the zero status flag is unset | `0x07` |
-| `JLT` / `JCA` | Jump if Less Than / Jump if Carry | Address | Jump to an address in a label only if the carry status flag is set | `0x08` |
+| `JLT` / `JCA` | Jump if Less Than / Jump if Carry | Address | Jump to an address only if the carry status flag is set | `0x08` |
 | `JLT` / `JCA` | Jump if Less Than / Jump if Carry | Pointer | Jump to an address in a register only if the carry status flag is set | `0x09` |
-| `JLE` | Jump if Less Than or Equal To | Address | Jump to an address in a label only if either the carry or zero flags are set | `0x0A` |
+| `JLE` | Jump if Less Than or Equal To | Address | Jump to an address only if either the carry or zero flags are set | `0x0A` |
 | `JLE` | Jump if Less Than or Equal To | Pointer | Jump to an address in a register only if either the carry or zero flags are set | `0x0B` |
-| `JGT` | Jump if Greater Than | Address | Jump to an address in a label only if both the carry and zero flags are unset | `0x0C` |
+| `JGT` | Jump if Greater Than | Address | Jump to an address only if both the carry and zero flags are unset | `0x0C` |
 | `JGT` | Jump if Greater Than | Pointer | Jump to an address in a register only if both the carry and zero flags are unset | `0x0D` |
-| `JGE` / `JNC` | Jump if Greater Than or Equal To / Jump if no Carry | Address | Jump to an address in a label only if the carry status flag is unset | `0x0E` |
+| `JGE` / `JNC` | Jump if Greater Than or Equal To / Jump if no Carry | Address | Jump to an address only if the carry status flag is unset | `0x0E` |
 | `JGE` / `JNC` | Jump if Greater Than or Equal To / Jump if no Carry | Pointer | Jump to an address in a register only if the carry status flag is unset | `0x0F` |
 | **Math** |||||
 | `ADD` | Add | Register, Register | Add the contents of one register to another | `0x10` |
 | `ADD` | Add | Register, Literal | Add a literal value to the contents of a register | `0x11` |
-| `ADD` | Add | Register, Address | Add the contents of memory at an address in a label to a register | `0x12` |
+| `ADD` | Add | Register, Address | Add the contents of memory at an address to a register | `0x12` |
 | `ADD` | Add | Register, Pointer | Add the contents of memory at an address in a register to a register | `0x13` |
 | `ICR` | Increment | Register | Increment the contents of a register by 1 | `0x14` |
 | `SUB` | Subtract | Register, Register | Subtract the contents of one register from another | `0x20` |
 | `SUB` | Subtract | Register, Literal | Subtract a literal value from the contents of a register | `0x21` |
-| `SUB` | Subtract | Register, Address | Subtract the contents of memory at an address in a label from a register | `0x22` |
+| `SUB` | Subtract | Register, Address | Subtract the contents of memory at an address from a register | `0x22` |
 | `SUB` | Subtract | Register, Pointer | Subtract the contents of memory at an address in a register from a register | `0x23` |
 | `DCR` | Decrement | Register | Decrement the contents of a register by 1 | `0x24` |
 | `MUL` | Multiply | Register, Register | Multiply the contents of one register by another | `0x30` |
 | `MUL` | Multiply | Register, Literal | Multiply the contents of a register by a literal value | `0x31` |
-| `MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address in a label | `0x32` |
+| `MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address | `0x32` |
 | `MUL` | Multiply | Register, Pointer | Multiply a register by the contents of memory at an address in a register | `0x33` |
 | `DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x40` |
 | `DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x41` |
-| `DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address in a label, discarding the remainder | `0x42` |
+| `DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address, discarding the remainder | `0x42` |
 | `DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x43` |
 | `DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x44` |
 | `DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x45` |
-| `DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address in a label, storing the remainder | `0x46` |
+| `DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address, storing the remainder | `0x46` |
 | `DVR` | Divide With Remainder | Register, Register, Pointer | Divide a register by the contents of memory at an address in a register, storing the remainder | `0x47` |
 | `REM` | Remainder Only | Register, Register | Divide the contents of one register by another, storing only the remainder | `0x48` |
 | `REM` | Remainder Only | Register, Literal | Divide the contents of a register by a literal value, storing only the remainder | `0x49` |
-| `REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address in a label, storing only the remainder | `0x4A` |
+| `REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address, storing only the remainder | `0x4A` |
 | `REM` | Remainder Only | Register, Pointer | Divide a register by the contents of memory at an address in a register, storing only the remainder | `0x4B` |
 | `SHL` | Shift Left | Register, Register | Shift the bits of one register left by another register | `0x50` |
 | `SHL` | Shift Left | Register, Literal | Shift the bits of a register left by a literal value | `0x51` |
-| `SHL` | Shift Left | Register, Address | Shift the bits of a register left by the contents of memory at an address in a label | `0x52` |
+| `SHL` | Shift Left | Register, Address | Shift the bits of a register left by the contents of memory at an address | `0x52` |
 | `SHL` | Shift Left | Register, Pointer | Shift the bits of a register left by the contents of memory at an address in a register | `0x53` |
 | `SHR` | Shift Right | Register, Register | Shift the bits of one register right by another register | `0x54` |
 | `SHR` | Shift Right | Register, Literal | Shift the bits of a register right by a literal value | `0x55` |
-| `SHR` | Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address in a label | `0x56` |
+| `SHR` | Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address | `0x56` |
 | `SHR` | Shift Right | Register, Pointer | Shift the bits of a register right by the contents of memory at an address in a register | `0x57` |
 | **Bitwise** |||||
 | `AND` | Bitwise And | Register, Register | Bitwise and one register by another | `0x60` |
 | `AND` | Bitwise And | Register, Literal | Bitwise and a register by a literal value | `0x61` |
-| `AND` | Bitwise And | Register, Address | Bitwise and a register by the contents of memory at an address in a label | `0x62` |
+| `AND` | Bitwise And | Register, Address | Bitwise and a register by the contents of memory at an address | `0x62` |
 | `AND` | Bitwise And | Register, Pointer | Bitwise and a register by the contents of memory at an address in a register | `0x63` |
 | `ORR` | Bitwise Or | Register, Register | Bitwise or one register by another | `0x64` |
 | `ORR` | Bitwise Or | Register, Literal | Bitwise or a register by a literal value | `0x65` |
-| `ORR` | Bitwise Or | Register, Address | Bitwise or a register by the contents of memory at an address in a label | `0x66` |
+| `ORR` | Bitwise Or | Register, Address | Bitwise or a register by the contents of memory at an address | `0x66` |
 | `ORR` | Bitwise Or | Register, Pointer | Bitwise or a register by the contents of memory at an address in a register | `0x67` |
 | `XOR` | Bitwise Exclusive Or | Register, Register | Bitwise exclusive or one register by another | `0x68` |
 | `XOR` | Bitwise Exclusive Or | Register, Literal | Bitwise exclusive or a register by a literal value | `0x69` |
-| `XOR` | Bitwise Exclusive Or | Register, Address | Bitwise exclusive or a register by the contents of memory at an address in a label | `0x6A` |
+| `XOR` | Bitwise Exclusive Or | Register, Address | Bitwise exclusive or a register by the contents of memory at an address | `0x6A` |
 | `XOR` | Bitwise Exclusive Or | Register, Pointer | Bitwise exclusive or a register by the contents of memory at an address in a register | `0x6B` |
 | `NOT` | Bitwise Not | Register | Invert each bit of a register | `0x6C` |
 | `RNG` | Random Number Generator | Register | Randomise each bit of a register | `0x6D` |
 | **Comparison** |||||
 | `TST` | Test | Register, Register | Bitwise and two registers, discarding the result whilst still updating status flags | `0x70` |
 | `TST` | Test | Register, Literal | Bitwise and a register and a literal value, discarding the result whilst still updating status flags | `0x71` |
-| `TST` | Test | Register, Address | Bitwise and a register and the contents of memory at an address in a label, discarding the result whilst still updating status flags | `0x72` |
+| `TST` | Test | Register, Address | Bitwise and a register and the contents of memory at an address, discarding the result whilst still updating status flags | `0x72` |
 | `TST` | Test | Register, Pointer | Bitwise and a register and the contents of memory at an address in a register, discarding the result whilst still updating status flags | `0x73` |
 | `CMP` | Compare | Register, Register | Subtract a register from another, discarding the result whilst still updating status flags | `0x74` |
 | `CMP` | Compare | Register, Literal | Subtract a literal value from a register, discarding the result whilst still updating status flags | `0x75` |
-| `CMP` | Compare | Register, Address | Subtract the contents of memory at an address in a label from a register, discarding the result whilst still updating status flags | `0x76` |
+| `CMP` | Compare | Register, Address | Subtract the contents of memory at an address from a register, discarding the result whilst still updating status flags | `0x76` |
 | `CMP` | Compare | Register, Pointer | Subtract the contents of memory at an address in a register from a register, discarding the result whilst still updating status flags | `0x77` |
 | **Data Moving** |||||
 | `MVB` | Move Byte | Register, Register | Move the lower 8-bits of one register to another | `0x80` |
 | `MVB` | Move Byte | Register, Literal | Move the lower 8-bits of a literal value to a register | `0x81` |
-| `MVB` | Move Byte | Register, Address | Move 8-bits of the contents of memory starting at an address in a label to a register | `0x82` |
+| `MVB` | Move Byte | Register, Address | Move 8-bits of the contents of memory starting at an address to a register | `0x82` |
 | `MVB` | Move Byte | Register, Pointer | Move 8-bits of the contents of memory starting at an address in a register to a register | `0x83` |
-| `MVB` | Move Byte | Address, Register | Move the lower 8-bits of a register to the contents of memory at an address in a label | `0x84` |
-| `MVB` | Move Byte | Address, Literal | Move the lower 8-bits of a literal to the contents of memory at an address in a label | `0x85` |
+| `MVB` | Move Byte | Address, Register | Move the lower 8-bits of a register to the contents of memory at an address | `0x84` |
+| `MVB` | Move Byte | Address, Literal | Move the lower 8-bits of a literal to the contents of memory at an address | `0x85` |
 | `MVB` | Move Byte | Pointer, Register | Move the lower 8-bits of a register to the contents of memory at an address in a register | `0x86` |
 | `MVB` | Move Byte | Pointer, Literal | Move the lower 8-bits of a literal to the contents of memory at an address in a register | `0x87` |
 | `MVW` | Move Word | Register, Register | Move the lower 16-bits (2 bytes) of one register to another | `0x88` |
 | `MVW` | Move Word | Register, Literal | Move the lower 16-bits (2 bytes) of a literal value to a register | `0x89` |
-| `MVW` | Move Word | Register, Address | Move 16-bits (2 bytes) of the contents of memory starting at an address in a label to a register | `0x8A` |
+| `MVW` | Move Word | Register, Address | Move 16-bits (2 bytes) of the contents of memory starting at an address to a register | `0x8A` |
 | `MVW` | Move Word | Register, Pointer | Move 16-bits (2 bytes) of the contents of memory starting at an address in a register to a register | `0x8B` |
-| `MVW` | Move Word | Address, Register | Move the lower 16-bits (2 bytes) of a register to the contents of memory at an address in a label | `0x8C` |
-| `MVW` | Move Word | Address, Literal | Move the lower 16-bits (2 bytes) of a literal to the contents of memory at an address in a label | `0x8D` |
+| `MVW` | Move Word | Address, Register | Move the lower 16-bits (2 bytes) of a register to the contents of memory at an address | `0x8C` |
+| `MVW` | Move Word | Address, Literal | Move the lower 16-bits (2 bytes) of a literal to the contents of memory at an address | `0x8D` |
 | `MVW` | Move Word | Pointer, Register | Move the lower 16-bits (2 bytes) of a register to the contents of memory at an address in a register | `0x8E` |
 | `MVW` | Move Word | Pointer, Literal | Move the lower 16-bits (2 bytes) of a literal to the contents of memory at an address in a register | `0x8F` |
 | `MVD` | Move Double Word | Register, Register | Move the lower 32-bits (4 bytes) of one register to another | `0x90` |
 | `MVD` | Move Double Word | Register, Literal | Move the lower 32-bits (4 bytes) of a literal value to a register | `0x91` |
-| `MVD` | Move Double Word | Register, Address | Move 32-bits (4 bytes) of the contents of memory starting at an address in a label to a register | `0x92` |
+| `MVD` | Move Double Word | Register, Address | Move 32-bits (4 bytes) of the contents of memory starting at an address to a register | `0x92` |
 | `MVD` | Move Double Word | Register, Pointer | Move 32-bits (4 bytes) of the contents of memory starting at an address in a register to a register | `0x93` |
-| `MVD` | Move Double Word | Address, Register | Move the lower 32-bits (4 bytes) of a register to the contents of memory at an address in a label | `0x94` |
-| `MVD` | Move Double Word | Address, Literal | Move the lower 32-bits (4 bytes) of a literal to the contents of memory at an address in a label | `0x95` |
+| `MVD` | Move Double Word | Address, Register | Move the lower 32-bits (4 bytes) of a register to the contents of memory at an address | `0x94` |
+| `MVD` | Move Double Word | Address, Literal | Move the lower 32-bits (4 bytes) of a literal to the contents of memory at an address | `0x95` |
 | `MVD` | Move Double Word | Pointer, Register | Move the lower 32-bits (4 bytes) of a register to the contents of memory at an address in a register | `0x96` |
 | `MVD` | Move Double Word | Pointer, Literal | Move the lower 32-bits (4 bytes) of a literal to the contents of memory at an address in a register | `0x97` |
 | `MVQ` | Move Quad Word | Register, Register | Move all 64-bits (8 bytes) of one register to another | `0x98` |
 | `MVQ` | Move Quad Word | Register, Literal | Move all 64-bits (8 bytes) of a literal value to a register | `0x99` |
-| `MVQ` | Move Quad Word | Register, Address | Move 64-bits (8 bytes) of the contents of memory starting at an address in a label to a register | `0x9A` |
+| `MVQ` | Move Quad Word | Register, Address | Move 64-bits (8 bytes) of the contents of memory starting at an address to a register | `0x9A` |
 | `MVQ` | Move Quad Word | Register, Pointer | Move 64-bits (8 bytes) of the contents of memory starting at an address in a register to a register | `0x9B` |
-| `MVQ` | Move Quad Word | Address, Register | Move all 64-bits (8 bytes) of a register to the contents of memory at an address in a label | `0x9C` |
-| `MVQ` | Move Quad Word | Address, Literal | Move all 64-bits (8 bytes) of a literal to the contents of memory at an address in a label | `0x9D` |
+| `MVQ` | Move Quad Word | Address, Register | Move all 64-bits (8 bytes) of a register to the contents of memory at an address | `0x9C` |
+| `MVQ` | Move Quad Word | Address, Literal | Move all 64-bits (8 bytes) of a literal to the contents of memory at an address | `0x9D` |
 | `MVQ` | Move Quad Word | Pointer, Register | Move all 64-bits (8 bytes) of a register to the contents of memory at an address in a register | `0x9E` |
 | `MVQ` | Move Quad Word | Pointer, Literal | Move all 64-bits (8 bytes) of a literal to the contents of memory at an address in a register | `0x9F` |
 | **Stack** |||||
 | `PSH` | Push to Stack | Register | Insert the value in a register to the top of the stack | `0xA0` |
 | `PSH` | Push to Stack | Literal | Insert a literal value to the top of the stack | `0xA1` |
-| `PSH` | Push to Stack | Address | Insert the contents of memory at an address in a label to the top of the stack | `0xA2` |
+| `PSH` | Push to Stack | Address | Insert the contents of memory at an address to the top of the stack | `0xA2` |
 | `PSH` | Push to Stack | Pointer | Insert the contents of memory at an address in a register to the top of the stack | `0xA3` |
 | `POP` | Pop from Stack | Register | Remove the value from the top of the stack and store it in a register | `0xA4` |
 | **Subroutines** |||||
-| `CAL` | Call Subroutine | Address | Call the subroutine at an address in a label, pushing `rpo` and `rsb` to the stack | `0xB0` |
+| `CAL` | Call Subroutine | Address | Call the subroutine at an address, pushing `rpo` and `rsb` to the stack | `0xB0` |
 | `CAL` | Call Subroutine | Pointer | Call the subroutine at an address in a register, pushing `rpo` and `rsb` to the stack | `0xB1` |
-| `CAL` | Call Subroutine | Address, Register | Call the subroutine at an address in a label, moving the value in a register to `rfp` | `0xB2` |
-| `CAL` | Call Subroutine | Address, Literal | Call the subroutine at an address in a label, moving a literal value to `rfp` | `0xB3` |
-| `CAL` | Call Subroutine | Address, Address | Call the subroutine at an address in a label, moving the contents of memory at an address in a label to `rfp` | `0xB4` |
-| `CAL` | Call Subroutine | Address, Pointer | Call the subroutine at an address in a label, moving the contents of memory at an address in a register to `rfp` | `0xB5` |
+| `CAL` | Call Subroutine | Address, Register | Call the subroutine at an address, moving the value in a register to `rfp` | `0xB2` |
+| `CAL` | Call Subroutine | Address, Literal | Call the subroutine at an address, moving a literal value to `rfp` | `0xB3` |
+| `CAL` | Call Subroutine | Address, Address | Call the subroutine at an address, moving the contents of memory at an address to `rfp` | `0xB4` |
+| `CAL` | Call Subroutine | Address, Pointer | Call the subroutine at an address, moving the contents of memory at an address in a register to `rfp` | `0xB5` |
 | `CAL` | Call Subroutine | Pointer, Register | Call the subroutine at an address in a register, moving the value in a register to `rfp` | `0xB6` |
 | `CAL` | Call Subroutine | Pointer, Literal | Call the subroutine at an address in a register, moving a literal value to `rfp` | `0xB7` |
-| `CAL` | Call Subroutine | Pointer, Address | Call the subroutine at an address in a register, moving the contents of memory at an address in a label to `rfp` | `0xB8` |
+| `CAL` | Call Subroutine | Pointer, Address | Call the subroutine at an address in a register, moving the contents of memory at an address to `rfp` | `0xB8` |
 | `CAL` | Call Subroutine | Pointer, Pointer | Call the subroutine at an address in a register, moving the contents of memory at an address in a register to `rfp` | `0xB9` |
 | `RET` | Return from Subroutine | - | Pop the previous states of `rsb` and `rpo` off the stack | `0xBA` |
 | `RET` | Return from Subroutine | Register | Pop the previous states of `rsb` and `rpo` off the stack, moving the value in a register to `rrv` | `0xBB` |
 | `RET` | Return from Subroutine | Literal | Pop the previous states of `rsb` and `rpo` off the stack, moving a literal value to `rrv` | `0xBC` |
-| `RET` | Return from Subroutine | Address | Pop the previous states off the stack, moving the contents of memory at an address in a label to `rrv` | `0xBD` |
+| `RET` | Return from Subroutine | Address | Pop the previous states off the stack, moving the contents of memory at an address to `rrv` | `0xBD` |
 | `RET` | Return from Subroutine | Pointer | Pop the previous states off the stack, moving the contents of memory at an address in a register to `rrv` | `0xBE` |
 | **Console Writing** |||||
 | `WCN` | Write Number to Console | Register | Write a register value as a decimal number to the console | `0xC0` |
 | `WCN` | Write Number to Console | Literal | Write a literal value as a decimal number to the console | `0xC1` |
-| `WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a decimal number to the console | `0xC2` |
+| `WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a decimal number to the console | `0xC2` |
 | `WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the console | `0xC3` |
 | `WCB` | Write Numeric Byte to Console | Register | Write the lower 8-bits of a register value as a decimal number to the console | `0xC4` |
 | `WCB` | Write Numeric Byte to Console | Literal | Write the lower 8-bits of a literal value as a decimal number to the console | `0xC5` |
-| `WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address in a label as a decimal number to the console | `0xC6` |
+| `WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address as a decimal number to the console | `0xC6` |
 | `WCB` | Write Numeric Byte to Console | Pointer | Write contents of memory at the address in a register as a decimal number to the console | `0xC7` |
 | `WCX` | Write Hexadecimal to Console | Register | Write the lower 8-bits of a register value as a hexadecimal number to the console | `0xC8` |
 | `WCX` | Write Hexadecimal to Console | Literal | Write the lower 8-bits of a literal value as a hexadecimal number to the console | `0xC9` |
-| `WCX` | Write Hexadecimal to Console | Address | Write contents of memory at the address in a label as a hexadecimal number to the console | `0xCA` |
+| `WCX` | Write Hexadecimal to Console | Address | Write contents of memory at the address as a hexadecimal number to the console | `0xCA` |
 | `WCX` | Write Hexadecimal to Console | Pointer | Write contents of memory at the address in a register as a hexadecimal number to the console | `0xCB` |
 | `WCC` | Write Raw Byte to Console | Register | Write the lower 8-bits of a register value as a raw byte to the console | `0xCC` |
 | `WCC` | Write Raw Byte to Console | Literal | Write the lower 8-bits of a literal value as a raw byte to the console | `0xCD` |
-| `WCC` | Write Raw Byte to Console | Address | Write contents of memory at the address in a label as a raw byte to the console | `0xCE` |
+| `WCC` | Write Raw Byte to Console | Address | Write contents of memory at the address as a raw byte to the console | `0xCE` |
 | `WCC` | Write Raw Byte to Console | Pointer | Write contents of memory at the address in a register as a raw byte to the console | `0xCF` |
 | **File Writing** |||||
 | `WFN` | Write Number to File | Register | Write a register value as a decimal number to the opened file | `0xD0` |
 | `WFN` | Write Number to File | Literal | Write a literal value as a decimal number to the opened file | `0xD1` |
-| `WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a decimal number to the opened file | `0xD2` |
+| `WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a decimal number to the opened file | `0xD2` |
 | `WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the opened file | `0xD3` |
 | `WFB` | Write Numeric Byte to File | Register | Write the lower 8-bits of a register value as a decimal number to the opened file | `0xD4` |
 | `WFB` | Write Numeric Byte to File | Literal | Write the lower 8-bits of a literal value as a decimal number to the opened file | `0xD5` |
-| `WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address in a label as a decimal number to the opened file | `0xD6` |
+| `WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address as a decimal number to the opened file | `0xD6` |
 | `WFB` | Write Numeric Byte to File | Pointer | Write contents of memory at the address in a register as a decimal number to the opened file | `0xD7` |
 | `WFX` | Write Hexadecimal to File | Register | Write the lower 8-bits of a register value as a hexadecimal number to the opened file | `0xD8` |
 | `WFX` | Write Hexadecimal to File | Literal | Write the lower 8-bits of a literal value as a hexadecimal number to the opened file | `0xD9` |
-| `WFX` | Write Hexadecimal to File | Address | Write contents of memory at the address in a label as a hexadecimal number to the opened file | `0xDA` |
+| `WFX` | Write Hexadecimal to File | Address | Write contents of memory at the address as a hexadecimal number to the opened file | `0xDA` |
 | `WFX` | Write Hexadecimal to File | Pointer | Write contents of memory at the address in a register as a hexadecimal number to the opened file | `0xDB` |
 | `WFC` | Write Raw Byte to File | Register | Write the lower 8-bits of a register value as a raw byte to the opened file | `0xDC` |
 | `WFC` | Write Raw Byte to File | Literal | Write the lower 8-bits of a literal value as a raw byte to the opened file | `0xDD` |
-| `WFC` | Write Raw Byte to File | Address | Write contents of memory at the address in a label as a raw byte to the opened file | `0xDE` |
+| `WFC` | Write Raw Byte to File | Address | Write contents of memory at the address as a raw byte to the opened file | `0xDE` |
 | `WFC` | Write Raw Byte to File | Pointer | Write contents of memory at the address in a register as a raw byte to the opened file | `0xDF` |
 | **File Operations** |||||
-| `OFL` | Open File | Address | Open the file at the path specified by a `0x00` terminated string in memory starting at an address in a label | `0xE0` |
+| `OFL` | Open File | Address | Open the file at the path specified by a `0x00` terminated string in memory starting at an address | `0xE0` |
 | `OFL` | Open File | Pointer | Open the file at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0xE1` |
 | `CFL` | Close File | - | Close the currently open file | `0xE2` |
-| `DFL` | Delete File | Address | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address in a label | `0xE3` |
+| `DFL` | Delete File | Address | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address | `0xE3` |
 | `DFL` | Delete File | Pointer | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0xE4` |
-| `FEX` | File Exists | Register, Address | Store `1` in a register if the filepath specified in memory starting at an address in a label exists, else `0` | `0xE5` |
+| `FEX` | File Exists | Register, Address | Store `1` in a register if the filepath specified in memory starting at an address exists, else `0` | `0xE5` |
 | `FEX` | File Exists | Register, Pointer | Store `1` in a register if the filepath specified in memory starting at an address in a register exists, else `0` | `0xE6` |
-| `FSZ` | Get File Size | Register, Address | In a register, store the byte size of the file at the path specified in memory starting at an address in a label | `0xE7` |
+| `FSZ` | Get File Size | Register, Address | In a register, store the byte size of the file at the path specified in memory starting at an address | `0xE7` |
 | `FSZ` | Get File Size | Register, Pointer | In a register, store the byte size of the file at the path specified in memory starting at an address in a register | `0xE8` |
 | **Reading** |||||
 | `RCC` | Read Raw Byte from Console | Register | Read a raw byte from the console, storing it in a register | `0xF0` |
@@ -2826,69 +2842,69 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`. Contains instructi
 | Mnemonic | Full Name | Operands | Function | Instruction Code |
 |----------|-----------|----------|----------|------------------|
 | **Signed Conditional Jumps** |||||
-| `SIGN_JLT` | Jump if Less Than | Address | Jump to an address in a label only if the sign and overflow status flags are different | `0x00` |
+| `SIGN_JLT` | Jump if Less Than | Address | Jump to an address only if the sign and overflow status flags are different | `0x00` |
 | `SIGN_JLT` | Jump if Less Than | Pointer | Jump to an address in a register only if the sign and overflow status flags are different | `0x01` |
-| `SIGN_JLE` | Jump if Less Than or Equal To | Address | Jump to an address in a label only if the sign and overflow status flags are different or the zero status flag is set | `0x02` |
+| `SIGN_JLE` | Jump if Less Than or Equal To | Address | Jump to an address only if the sign and overflow status flags are different or the zero status flag is set | `0x02` |
 | `SIGN_JLE` | Jump if Less Than or Equal To | Pointer | Jump to an address in a register only if the sign and overflow status flags are different or the zero status flag is set | `0x03` |
-| `SIGN_JGT` | Jump if Greater Than | Address | Jump to an address in a label only if the sign and overflow status flags are the same and the zero status flag is unset | `0x04` |
+| `SIGN_JGT` | Jump if Greater Than | Address | Jump to an address only if the sign and overflow status flags are the same and the zero status flag is unset | `0x04` |
 | `SIGN_JGT` | Jump if Greater Than | Pointer | Jump to an address in a register only if the sign and overflow status flags are the same and the zero status flag is unset | `0x05` |
-| `SIGN_JGE` | Jump if Greater Than or Equal To | Address | Jump to an address in a label only if the sign and overflow status flags are the same | `0x06` |
+| `SIGN_JGE` | Jump if Greater Than or Equal To | Address | Jump to an address only if the sign and overflow status flags are the same | `0x06` |
 | `SIGN_JGE` | Jump if Greater Than or Equal To | Pointer | Jump to an address in a register only if the sign and overflow status flags are the same | `0x07` |
-| `SIGN_JSI` | Jump if Signed | Address | Jump to an address in a label only if the sign status flag is set | `0x08` |
+| `SIGN_JSI` | Jump if Signed | Address | Jump to an address only if the sign status flag is set | `0x08` |
 | `SIGN_JSI` | Jump if Signed | Pointer | Jump to an address in a register only if the sign status flag is set | `0x09` |
-| `SIGN_JNS` | Jump if not Sign | Address | Jump to an address in a label only if the sign status flag is unset | `0x0A` |
+| `SIGN_JNS` | Jump if not Sign | Address | Jump to an address only if the sign status flag is unset | `0x0A` |
 | `SIGN_JNS` | Jump if not Sign | Pointer | Jump to an address in a register only the sign status flag is unset | `0x0B` |
-| `SIGN_JOV` | Jump if Overflow | Address | Jump to an address in a label only if the overflow status flag is set | `0x0C` |
+| `SIGN_JOV` | Jump if Overflow | Address | Jump to an address only if the overflow status flag is set | `0x0C` |
 | `SIGN_JOV` | Jump if Overflow | Pointer | Jump to an address in a register only if the overflow status flag is set | `0x0D` |
-| `SIGN_JNO` | Jump if not Overflow | Address | Jump to an address in a label only if the overflow status flag is unset | `0x0E` |
+| `SIGN_JNO` | Jump if not Overflow | Address | Jump to an address only if the overflow status flag is unset | `0x0E` |
 | `SIGN_JNO` | Jump if not Overflow | Pointer | Jump to an address in a register only if the overflow status flag is unset | `0x0F` |
 | **Math** |||||
 | `SIGN_DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x10` |
 | `SIGN_DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x11` |
-| `SIGN_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address in a label, discarding the remainder | `0x12` |
+| `SIGN_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address, discarding the remainder | `0x12` |
 | `SIGN_DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x13` |
 | `SIGN_DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x14` |
 | `SIGN_DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x15` |
-| `SIGN_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address in a label, storing the remainder | `0x16` |
+| `SIGN_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address, storing the remainder | `0x16` |
 | `SIGN_DVR` | Divide With Remainder | Register, Register, Pointer | Divide a register by the contents of memory at an address in a register, storing the remainder | `0x17` |
 | `SIGN_REM` | Remainder Only | Register, Register | Divide the contents of one register by another, storing only the remainder | `0x18` |
 | `SIGN_REM` | Remainder Only | Register, Literal | Divide the contents of a register by a literal value, storing only the remainder | `0x19` |
-| `SIGN_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address in a label, storing only the remainder | `0x1A` |
+| `SIGN_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address, storing only the remainder | `0x1A` |
 | `SIGN_REM` | Remainder Only | Register, Pointer | Divide a register by the contents of memory at an address in a register, storing only the remainder | `0x1B` |
 | `SIGN_SHR` | Arithmetic Shift Right | Register, Register | Shift the bits of one register right by another register, preserving the sign of the original value | `0x20` |
 | `SIGN_SHR` | Arithmetic Shift Right | Register, Literal | Shift the bits of a register right by a literal value, preserving the sign of the original value | `0x21` |
-| `SIGN_SHR` | Arithmetic Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address in a label, preserving the sign of the original value | `0x22` |
+| `SIGN_SHR` | Arithmetic Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address, preserving the sign of the original value | `0x22` |
 | `SIGN_SHR` | Arithmetic Shift Right | Register, Pointer | Shift the bits of a register right by the contents of memory at an address in a register, preserving the sign of the original value | `0x23` |
 | **Sign-Extending Data Moves** |||||
 | `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Register | Move the lower 8-bits of one register to another, extending the resulting value to a signed 64-bit value | `0x30` |
 | `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Literal | Move the lower 8-bits of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x31` |
-| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Address | Move 8-bits of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x32` |
+| `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Address | Move 8-bits of the contents of memory starting at an address to a register, extending the resulting value to a signed 64-bit value | `0x32` |
 | `SIGN_MVB` | Move Byte, Extend to Quad Word | Register, Pointer | Move 8-bits of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x33` |
 | `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Register | Move the lower 16-bits (2 bytes) of one register to another, extending the resulting value to a signed 64-bit value | `0x34` |
 | `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Literal | Move the lower 16-bits (2 bytes) of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x35` |
-| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Address | Move 16-bits (2 bytes) of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x36` |
+| `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Address | Move 16-bits (2 bytes) of the contents of memory starting at an address to a register, extending the resulting value to a signed 64-bit value | `0x36` |
 | `SIGN_MVW` | Move Word, Extend to Quad Word | Register, Pointer | Move 16-bits (2 bytes) of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x37` |
 | `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Register | Move the lower 32-bits (4 bytes) of one register to another, extending the resulting value to a signed 64-bit value | `0x40` |
 | `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Literal | Move the lower 32-bits (4 bytes) of a literal value to a register, extending the resulting value to a signed 64-bit value | `0x41` |
-| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Address | Move 32-bits (4 bytes) of the contents of memory starting at an address in a label to a register, extending the resulting value to a signed 64-bit value | `0x42` |
+| `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Address | Move 32-bits (4 bytes) of the contents of memory starting at an address to a register, extending the resulting value to a signed 64-bit value | `0x42` |
 | `SIGN_MVD` | Move Double Word, Extend to Quad Word | Register, Pointer | Move 32-bits (4 bytes) of the contents of memory starting at an address in a register to a register, extending the resulting value to a signed 64-bit value | `0x43` |
 | **Console Writing** |||||
 | `SIGN_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x50` |
 | `SIGN_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x51` |
-| `SIGN_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the console | `0x52` |
+| `SIGN_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the console | `0x52` |
 | `SIGN_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x53` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Register | Write the lower 8-bits of a register value as a signed decimal number to the console | `0x54` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the console | `0x55` |
-| `SIGN_WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address in a label as a signed decimal number to the console | `0x56` |
+| `SIGN_WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address as a signed decimal number to the console | `0x56` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Pointer | Write contents of memory at the address in a register as a signed decimal number to the console | `0x57` |
 | **File Writing** |||||
 | `SIGN_WFN` | Write Number to File | Register | Write a register value as a signed decimal number to the opened file | `0x60` |
 | `SIGN_WFN` | Write Number to File | Literal | Write a literal value as a signed decimal number to the opened file | `0x61` |
-| `SIGN_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the opened file | `0x62` |
+| `SIGN_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the opened file | `0x62` |
 | `SIGN_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the opened file | `0x63` |
 | `SIGN_WFB` | Write Numeric Byte to File | Register | Write the lower 8-bits of a register value as a signed decimal number to the opened file | `0x64` |
 | `SIGN_WFB` | Write Numeric Byte to File | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the opened file | `0x65` |
-| `SIGN_WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address in a label as a signed decimal number to the opened file | `0x66` |
+| `SIGN_WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address as a signed decimal number to the opened file | `0x66` |
 | `SIGN_WFB` | Write Numeric Byte to File | Pointer | Write contents of memory at the address in a register as a signed decimal number to the opened file | `0x67` |
 | **Sign Extension** |||||
 | `SIGN_EXB` | Extend Signed Byte to Signed Quad Word | Register | Convert the signed value in the lower 8-bits of a register to its equivalent representation as a signed 64-bit number  | `0x70` |
@@ -2906,27 +2922,27 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructi
 | **Math** |||||
 | `FLPT_ADD` | Add | Register, Register | Add the contents of one register to another | `0x00` |
 | `FLPT_ADD` | Add | Register, Literal | Add a literal value to the contents of a register | `0x01` |
-| `FLPT_ADD` | Add | Register, Address | Add the contents of memory at an address in a label to a register | `0x02` |
+| `FLPT_ADD` | Add | Register, Address | Add the contents of memory at an address to a register | `0x02` |
 | `FLPT_ADD` | Add | Register, Pointer | Add the contents of memory at an address in a register to a register | `0x03` |
 | `FLPT_SUB` | Subtract | Register, Register | Subtract the contents of one register from another | `0x10` |
 | `FLPT_SUB` | Subtract | Register, Literal | Subtract a literal value from the contents of a register | `0x11` |
-| `FLPT_SUB` | Subtract | Register, Address | Subtract the contents of memory at an address in a label from a register | `0x12` |
+| `FLPT_SUB` | Subtract | Register, Address | Subtract the contents of memory at an address from a register | `0x12` |
 | `FLPT_SUB` | Subtract | Register, Pointer | Subtract the contents of memory at an address in a register from a register | `0x13` |
 | `FLPT_MUL` | Multiply | Register, Register | Multiply the contents of one register by another | `0x20` |
 | `FLPT_MUL` | Multiply | Register, Literal | Multiply the contents of a register by a literal value | `0x21` |
-| `FLPT_MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address in a label | `0x22` |
+| `FLPT_MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address | `0x22` |
 | `FLPT_MUL` | Multiply | Register, Pointer | Multiply a register by the contents of memory at an address in a register | `0x23` |
 | `FLPT_DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x30` |
 | `FLPT_DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x31` |
-| `FLPT_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address in a label, discarding the remainder | `0x32` |
+| `FLPT_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address, discarding the remainder | `0x32` |
 | `FLPT_DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x33` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x34` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x35` |
-| `FLPT_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address in a label, storing the remainder | `0x36` |
+| `FLPT_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address, storing the remainder | `0x36` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Pointer | Divide a register by the contents of memory at an address in a register, storing the remainder | `0x37` |
 | `FLPT_REM` | Remainder Only | Register, Register | Divide the contents of one register by another, storing only the remainder | `0x38` |
 | `FLPT_REM` | Remainder Only | Register, Literal | Divide the contents of a register by a literal value, storing only the remainder | `0x39` |
-| `FLPT_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address in a label, storing only the remainder | `0x3A` |
+| `FLPT_REM` | Remainder Only | Register, Address | Divide a register by the contents of memory at an address, storing only the remainder | `0x3A` |
 | `FLPT_REM` | Remainder Only | Register, Pointer | Divide a register by the contents of memory at an address in a register, storing only the remainder | `0x3B` |
 | `FLPT_SIN` | Sine | Register | Calculate the sine of the value in a register in radians | `0x40` |
 | `FLPT_ASN` | Inverse Sine | Register | Calculate the inverse sine of the value in a register in radians | `0x41` |
@@ -2936,25 +2952,25 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructi
 | `FLPT_ATN` | Inverse Tangent | Register | Calculate the inverse tangent of the value in a register in radians | `0x45` |
 | `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Register | Calculate the 2 argument inverse tangent between 2 registers in the order y, x | `0x46` |
 | `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Literal | Calculate the 2 argument inverse tangent between a register and a literal in the order y, x | `0x47` |
-| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Address | Calculate the 2 argument inverse tangent between a register and the contents of memory at an address in a label in the order y, x | `0x48` |
+| `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Address | Calculate the 2 argument inverse tangent between a register and the contents of memory at an address in the order y, x | `0x48` |
 | `FLPT_PTN` | 2 Argument Inverse Tangent | Register, Pointer | Calculate the 2 argument inverse tangent between a register and the contents of memory at an address in a register in the order y, x | `0x49` |
 | `FLPT_POW` | Exponentiation | Register, Register | Calculate the value of a register raised to the power of another register | `0x50` |
 | `FLPT_POW` | Exponentiation | Register, Literal | Calculate the value of a register raised to the power of a literal | `0x51` |
-| `FLPT_POW` | Exponentiation | Register, Address | Calculate the value of a register raised to the power of the contents of memory at an address in a label | `0x52` |
+| `FLPT_POW` | Exponentiation | Register, Address | Calculate the value of a register raised to the power of the contents of memory at an address | `0x52` |
 | `FLPT_POW` | Exponentiation | Register, Pointer | Calculate the value of a register raised to the power of the contents of memory at an address in a register | `0x53` |
 | `FLPT_LOG` | Logarithm | Register, Register | Calculate the logarithm of a register with the base from another register | `0x60` |
 | `FLPT_LOG` | Logarithm | Register, Literal | Calculate the logarithm of a register with the base from a literal | `0x61` |
-| `FLPT_LOG` | Logarithm | Register, Address | Calculate the logarithm of a register with the base from the contents of memory at an address in a label | `0x62` |
+| `FLPT_LOG` | Logarithm | Register, Address | Calculate the logarithm of a register with the base from the contents of memory at an address | `0x62` |
 | `FLPT_LOG` | Logarithm | Register, Pointer | Calculate the logarithm of a register with the base from the contents of memory at an address in a register | `0x63` |
 | **Console Writing** |||||
 | `FLPT_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x70` |
 | `FLPT_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x71` |
-| `FLPT_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a signed decimal number to the console | `0x72` |
+| `FLPT_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the console | `0x72` |
 | `FLPT_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x73` |
 | **File Writing** |||||
 | `FLPT_WFN` | Write Number to File | Register | Write a register value as a floating point decimal number to the opened file | `0x80` |
 | `FLPT_WFN` | Write Number to File | Literal | Write a literal value as a floating point decimal number to the opened file | `0x81` |
-| `FLPT_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address in a label as a floating point decimal number to the opened file | `0x82` |
+| `FLPT_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a floating point decimal number to the opened file | `0x82` |
 | `FLPT_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a floating point decimal number to the opened file | `0x83` |
 | **Conversions** |||||
 | `FLPT_EXH` | Extend Half Precision Float to Double Precision Float | Register | Convert the value in a register from a half-precision float (16-bits) to a double-precision float (64-bits) | `0x90` |
@@ -2971,7 +2987,7 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructi
 | **Comparison** |||||
 | `FLPT_CMP` | Compare | Register, Register | Subtract a register from another, discarding the result whilst still updating status flags | `0xD0` |
 | `FLPT_CMP` | Compare | Register, Literal | Subtract a literal value from a register, discarding the result whilst still updating status flags | `0xD1` |
-| `FLPT_CMP` | Compare | Register, Address | Subtract the contents of memory at an address in a label from a register, discarding the result whilst still updating status flags | `0xD2` |
+| `FLPT_CMP` | Compare | Register, Address | Subtract the contents of memory at an address from a register, discarding the result whilst still updating status flags | `0xD2` |
 | `FLPT_CMP` | Compare | Register, Pointer | Subtract the contents of memory at an address in a register from a register, discarding the result whilst still updating status flags | `0xD3` |
 
 ### Extended Base Set
@@ -2990,23 +3006,23 @@ Extension set number `0x04`, opcodes start with `0xFF, 0x04`. Contains instructi
 | Mnemonic | Full Name | Operands | Function | Instruction Code |
 |----------|-----------|----------|----------|------------------|
 | **Loading** |||||
-| `ASMX_LDA` | Load Assembly | Address | Open the .NET Assembly at the path specified by a `0x00` terminated string in memory starting at an address in a label | `0x00` |
+| `ASMX_LDA` | Load Assembly | Address | Open the .NET Assembly at the path specified by a `0x00` terminated string in memory starting at an address | `0x00` |
 | `ASMX_LDA` | Load Assembly | Pointer | Open the .NET Assembly at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x01` |
-| `ASMX_LDF` | Load Function | Address | Open the function in the open .NET assembly with the name specified by a `0x00` terminated string in memory starting at an address in a label | `0x02` |
+| `ASMX_LDF` | Load Function | Address | Open the function in the open .NET assembly with the name specified by a `0x00` terminated string in memory starting at an address | `0x02` |
 | `ASMX_LDF` | Load Function | Pointer | Open the function in the open .NET assembly with the name specified by a `0x00` terminated string in memory starting at an address in a register | `0x03` |
 | **Closing** |||||
 | `ASMX_CLA` | Close Assembly | - | Close the currently open .NET Assembly, as well as any open function | `0x10` |
 | `ASMX_CLF` | Close Function | - | Close the currently open function, the assembly stays open | `0x11` |
 | **Validity Check** |||||
-| `ASMX_AEX` | Assembly Valid | Address | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a label exists and is valid, else `0` | `0x20` |
+| `ASMX_AEX` | Assembly Valid | Address | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address exists and is valid, else `0` | `0x20` |
 | `ASMX_AEX` | Assembly Valid | Pointer | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a register exists and is valid, else `0` | `0x21` |
-| `ASMX_FEX` | Function Valid | Address | Store `1` in a register if the function with the name specified in memory starting at an address in a label exists in the open .NET Assembly and is valid, else `0` | `0x22` |
+| `ASMX_FEX` | Function Valid | Address | Store `1` in a register if the function with the name specified in memory starting at an address exists in the open .NET Assembly and is valid, else `0` | `0x22` |
 | `ASMX_FEX` | Function Valid | Pointer | Store `1` in a register if the function with the name specified in memory starting at an address in a register exists in the open .NET Assembly and is valid, else `0` | `0x23` |
 | **Calling** |||||
 | `ASMX_CAL` | Call External Function | - | Call the loaded external function, giving `null` as the passed value | `0x30` |
 | `ASMX_CAL` | Call External Function | Register | Call the loaded external function, giving the value of a register as the passed value | `0x31` |
 | `ASMX_CAL` | Call External Function | Literal | Call the loaded external function, giving a literal value as the passed value | `0x32` |
-| `ASMX_CAL` | Call External Function | Address | Call the loaded external function, giving the contents of memory at an address in a label as the passed value | `0x33` |
+| `ASMX_CAL` | Call External Function | Address | Call the loaded external function, giving the contents of memory at an address as the passed value | `0x33` |
 | `ASMX_CAL` | Call External Function | Pointer | Call the loaded external function, giving the contents of memory at an address in a register as the passed value | `0x34` |
 
 ### Memory Allocation Extension Set
@@ -3018,20 +3034,20 @@ Extension set number `0x05`, opcodes start with `0xFF, 0x05`. Contains instructi
 | **Allocation** |||||
 | `HEAP_ALC` | Allocate Memory | Register, Register | Allocate a block of memory with the value of a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x00` |
 | `HEAP_ALC` | Allocate Memory | Register, Literal | Allocate a block of memory with a literal value as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x01` |
-| `HEAP_ALC` | Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x02` |
+| `HEAP_ALC` | Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x02` |
 | `HEAP_ALC` | Allocate Memory | Register, Pointer | Allocate a block of memory with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x03` |
 | `HEAP_TRY` | Try Allocate Memory | Register, Register | Allocate a block of memory with the value of a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails  | `0x04` |
 | `HEAP_TRY` | Try Allocate Memory | Register, Literal | Allocate a block of memory with a literal value as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x05` |
-| `HEAP_TRY` | Try Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x06` |
+| `HEAP_TRY` | Try Allocate Memory | Register, Address | Allocate a block of memory with the contents of memory at an address as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x06` |
 | `HEAP_TRY` | Try Allocate Memory | Register, Pointer | Allocate a block of memory with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x07` |
 | **Re-allocation** |||||
 | `HEAP_REA` | Re-allocate Memory | Register, Register | Re-allocate a block of memory starting at the address in a register with the value of a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x10` |
 | `HEAP_REA` | Re-allocate Memory | Register, Literal | Re-allocate a block of memory starting at the address in a register with a literal value as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x11` |
-| `HEAP_REA` | Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x12` |
+| `HEAP_REA` | Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x12` |
 | `HEAP_REA` | Re-allocate Memory | Register, Pointer | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, throwing an error if the operation fails | `0x13` |
 | `HEAP_TRE` | Try Re-allocate Memory | Register, Register | Re-allocate a block of memory starting at the address in a register with the value of a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails  | `0x14` |
 | `HEAP_TRE` | Try Re-allocate Memory | Register, Literal | Re-allocate a block of memory starting at the address in a register with a literal value as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x15` |
-| `HEAP_TRE` | Try Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a label as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x16` |
+| `HEAP_TRE` | Try Re-allocate Memory | Register, Address | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x16` |
 | `HEAP_TRE` | Try Re-allocate Memory | Register, Pointer | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x17` |
 | **Freeing** |||||
 | `HEAP_FRE` | Free Memory | Register | Free a block of memory starting at the address in a register | `0x20` |
