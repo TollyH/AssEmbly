@@ -1391,8 +1391,8 @@ namespace AssEmbly
                             parameters = Array.Empty<string>();
                         }
                         text = text[..i] + InsertMacroParameters(singleLineMacros[macro], parameters) + text[paramIndex..];
-                        // If a replacement occured, stay on the current character and try every macro again
-                        i--;
+                        // If a replacement occured, go back to beginning of line and try every macro again
+                        i = -1;
                         break;
                     }
                 }
