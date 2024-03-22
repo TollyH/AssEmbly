@@ -120,6 +120,10 @@ namespace AssEmbly
                 singleLineMacros[newMacroName] = operands[1];
                 singleLineMacroNames.Add(newMacroName);
                 singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).ToList();
+                if (multiLineMacros.Remove(newMacroName))
+                {
+                    _ = multiLineMacroNames.Remove(newMacroName);
+                }
             }
             else if (operands.Length == 1)
             {
@@ -128,6 +132,10 @@ namespace AssEmbly
                 multiLineMacros[newMacroName] = replacement.ToArray();
                 multiLineMacroNames.Add(newMacroName);
                 multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
+                if (singleLineMacros.Remove(newMacroName))
+                {
+                    _ = singleLineMacroNames.Remove(newMacroName);
+                }
             }
         }
 
