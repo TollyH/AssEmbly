@@ -72,6 +72,9 @@ namespace AssEmbly
         // This limit is per program, not per loop
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
+        // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion
+        private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO" };
+
         // The lines to assemble may change during assembly, for example importing a file
         // will extend the list of lines to assemble as and when the import is reached.
         private readonly List<string> dynamicLines = new();
@@ -1436,8 +1439,8 @@ namespace AssEmbly
                 // Remove the '!' prefix and skip macro processing for this line
                 rawLine = CleanLine(rawLine[1..]);
             }
-            // We can't do macro replacement on the %DELMACRO directive else it won't be possible to un-define a single-line macro
-            else if (!insideMacroSkipBlock && !rawLine.Split(' ')[0].Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase))
+            // Don't do macro replacement on the %DELMACRO and %MACRO directives to make it easier to un-define/redefine existing macros
+            else if (!insideMacroSkipBlock && !automaticMacroExcludedMnemonics.Contains(rawLine.Split(' ')[0]))
             {
                 rawLine = ExpandSingleLineMacros(rawLine);
 
