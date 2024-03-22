@@ -7,6 +7,9 @@ ADD rg9, rg8
 SUB rg6, rg7
 MUL rg4, 104144243
 HLT
+%DAT "8"
+HLT
+%PAD 6
 %DAT "Hello, world"
 SUB rg4, 8367799640999031621
 %DAT "est complete\"Still string"
@@ -25,6 +28,11 @@ NOP
 NOP
 NOP
 NOT rg0
+MVW rg1, 10
+PSH rg0
+POP rg1
+PSH rg9
+DVR rg6, rg7, 96
 HLT
 %DAT "\@THIS_ASSEMBLER_VARIABLE_DOESNT_EXIST"
 HLT
@@ -42,9 +50,6 @@ JLT :0x8ABEED000005292C  ; Address does not align to a disassembled instruction
 %DAT ">"
 %DAT 3
 POP rpo
-%DAT 250
-HLT
-%PAD 6
 MVQ rg0, :0x123456789  ; Address does not align to a disassembled instruction
 MVQ :0x123456789, 696969420  ; Address does not align to a disassembled instruction
 HLT

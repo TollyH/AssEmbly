@@ -31,6 +31,8 @@ Macro-d!(rg4, 0b110001101010001110101110011)
 
 HLT
 
+%NUM @!CURRENT_ADDRESS
+
 %ANALYZER suggestion, 0004, 0
 
 %DAT "Hello, world!\nEscape test complete\"Still string\0",
@@ -73,6 +75,42 @@ NOP
 <!
 NOP
 %ANALYZER suggestion, 0001, r
+
+%MACRO my_mac, MVQ rg0, 9
+%MACRO my_macro, MVW rg1, 10
+
+my_macro
+
+%DELMACRO my_mac
+%DELMACRO my_macro
+
+%MACRO NEST_TEST, %STOP "Multi-line macro should not coincide with single-line macro"
+%MACRO NEST_TEST
+PSH rg0
+POP rg1
+%ENDMACRO
+
+%MACRO first,ST
+%MACRO second,ES
+
+NEfirst_TsecondT
+
+%DELMACRO NEST_TEST
+
+%MACRO NEST_TEST, PSH rg9
+
+%MACRO first,ST
+%MACRO second,ES
+
+NEfirst_TsecondT
+
+%MACRO 45,9
+%MACRO 56,8
+
+DVR rg6, rg7, 456
+
+%DELMACRO 45
+%DELMACRO 56
 
 :labels_are_case_sensitive
 :LABELS_ARE_CASE_SENSITIVE
@@ -155,8 +193,6 @@ hlt
 %IF NEQ, @_major_lt, 0
     %STOP "Assembler version must be >=3.2.0 to support conditional assembly"
 %ENDIF
-
-%NUM @!CURRENT_ADDRESS
 
 :MORE_CODE
 mvQ  RG0, :0x123456789
@@ -242,6 +278,9 @@ InsertNoZeroPadding(0b1101101101001000101100111010111011011)
     %ENDIF
     %VAROP ADD, _counter, 1
 %ENDWHILE
+
+; Don't close this
+!>
 
 ; This MUST stay at the end for a disassembler test!
 %DAT 0xFF
