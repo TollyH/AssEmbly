@@ -1705,7 +1705,7 @@ As with other operations in AssEmbly, `%NUM` stores numbers in memory using litt
 
 ### %MACRO - Macro Definition
 
-The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one.
+The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Single-line and multi-line macros with the same name cannot exist simultaneously, and defining a new single-line macro with the same name as an existing multi-line macro or vice versa will result in the existing macro being replaced.
 
 Macro names can contain almost any character, with the exception of opening and closing brackets (`(` and `)`). They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Almost all lines are subject to macro expansion, with the automatic exception of lines that start with `%MACRO` or `%DELMACRO` before macro expansion begins. You can also manually exclude any line from being processed for macros, as explained in the section on disabling macro expansion.
 
@@ -1923,7 +1923,166 @@ another_macro
 
 #### Macro Parameters
 
+Both single-line and multi-line macros are also capable of inserting text that varies between usages of the macro. This is achieved through the use of **parameters**. Macros can take multiple distinct parameters, which can be accessed many times and in any order.
+
+To use parameters within a macro definition, type a dollar sign (`$`) followed by the desired 0-based index of the parameter within the list of parameters. Each time the macro is expanded, these characters will then be removed and replaced with the given parameter text in the same position. The parameter indices can be more than one digit long, though they must not be separated by any characters.
+
+To give parameters to either a single-line or multi-line macro, type an opening bracket (`(`) directly after the macro name. There must be no extra whitespace between the macro name and the opening bracket. After the bracket, give all the desired parameters separated by commas (`,`), then type a closing bracket (`)`). The commas themselves will be removed and will not become a part of the parameter, however any surrounding whitespace will. All the text within the brackets, as well as the brackets themselves, will be removed when the macro is replaced with its replacement text. For single-line macros, text after the closing bracket will continue to be assembles as part of the line as normal. For multi-line macros, there must be no further text after the closing bracket - the macro name and its parameters must be the only thing on the respective line.
+
+For example:
+
+```text
+%MACRO register, rg$0
+
+DVR register(0), register(1), rg2
+
+%MACRO instruction
+    ADD $0, $1
+    SUB $1, 5
+%ENDMACRO
+
+instruction(rg2,rg3)
+```
+
+Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. The `register` name itself, along with the surrounding brackets, are also removed. `instruction(rg2,rg3)` gets expanded to the following lines:
+
+```text
+    ADD rg2, rg3
+    SUB rg3, 5
+```
+
+It is possible to give parameters to a macro even if it never references them, and it is even possible to give parameters to a macro that doesn't reference any parameters at all. In both cases the extraneous parameters will simply be ignored. For example, if instead of `instruction(rg2, rg3)`, `instruction(rg2, rg3, rg4)` were written in the above example, it would make no difference to the final output, as the parameter `$2` is never referenced.
+
+Macro parameters and macro names do not need to be separated by any characters, for example, the following is perfectly valid:
+
+```text
+%MACRO surround,$0$1$0
+
+MVQ rg0, surround(1,2)surround(3,4)
+```
+
+This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. For many macros, this doesn't make a difference, however it is something to be aware of.
+
+The individual separated parameters of both single-line and multi-line macros are, themselves, also subjected to single-line macro expansion. This makes it possible to nest single-line macro usages within parameters. These nested macros can even be given parameters themselves, to a theoretically infinite depth.
+
+For example:
+
+```text
+%MACRO register, rg$0
+
+%MACRO instruction
+    ADD $0, $1
+%ENDMACRO
+
+instruction(register(2), register(3))
+```
+
+By default, if a parameter is referenced by a macro but it is not given when the macro is used, the parameter reference (i.e. the `$` sign and the following index) will still be removed, however no text will be inserted in its place. If this is not desired, you can mark a parameter as *required* by appending an exclamation mark (`!`) directly after the parameter index. The assembler will stop and throw an error if a required parameter is not provided when a macro is used.
+
+For example:
+
+```text
+%MACRO my_macro, 12$0
+
+ADD rg0, my_macro
+```
+
+In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text. To instead throw an error, the example should instead be written like this:
+
+```text
+%MACRO my_macro, 12$0!
+
+ADD rg0, my_macro
+```
+
+The assembler detects that `my_macro` is attempting to access a parameter at index `0`, but finds that one doesn't exist. Because the parameter has been suffixed with an `!`, the assembler now stops assembly and throws an error instead of replacing it with empty text.
+
+If the same parameter is used multiple times within a macro, only one instance of the parameter needs to be suffixed with an `!` for that parameter to become required. Be aware that a required parameter **can** still be empty without an error being thrown if it is explicitly made so when the macro is used.
+
+For example, all of the parameters in the following examples are empty text but will not throw an error, even if the parameter was marked as required:
+
+```text
+macro-use()  ; $0 is given but empty, all other parameters are not given
+macro-use(,)  ; $0 and $1 are given but empty, all other parameters are not given
+macro-use(,,)  ; $0, $1, and $2 are given but empty, all other parameters are not given
+; etc.
+```
+
+As seen above, an opening bracket followed immediately by a closing bracket (`()`) is interpreted by the assembler as passing a **single, empty** parameter. You should **not** add these opening and closing brackets after a macro name if your intention is to pass zero parameters.
+
+It is **not** possible for a macro nested inside another macro to access the parent macro's parameters. They must be explicitly passed on to the nested macro by the parent macro if this access is desired.
+
+For example:
+
+```text
+%MACRO my_macro1
+    MVQ rg0, $0!
+    ADD rg0, $1!
+%ENDMACRO
+
+%MACRO my_macro2
+    MVQ rg1, $0!
+    SUB rg1, $1!
+    my_macro1
+%ENDMACRO
+
+my_macro2(123,456)
+```
+
+Here, an error is thrown by the assembler, as `my_macro1` has been used by `my_macro2` without giving it its required parameters. `my_macro1` does not automatically get access to `my_macro2`'s parameters.
+
+The program must instead be written like so:
+
+```text
+%MACRO my_macro1
+    MVQ rg0, $0!
+    ADD rg0, $1!
+%ENDMACRO
+
+%MACRO my_macro2
+    MVQ rg1, $0!
+    SUB rg1, $1!
+    my_macro1($0,$1)
+%ENDMACRO
+
+my_macro2(123,456)
+```
+
+Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid. Parameter references can be contained within the parameters of a nested macro, and they will be expanded just as they would be anywhere else within the containing macro - before they are inserted into the contents of the macro being nested.
+
+Because commas and brackets have special meanings within macro parameters, if you want to provide a comma or bracket character as a literal part of a parameter's content, you must precede each one with a backslash. These backslashes will not be included as a part of the inserted parameter text. Backslashes themselves must be doubled up (i.e. having one backslash preceded by another: `\\`) in order to treat them as literal text.
+
+For example:
+
+```text
+%MACRO instruction, $0 $1
+
+instruction(MVQ,rg0\,rg1)
+```
+
+Here `instruction(MVQ,rg0\,rg1)` expands to MVQ rg0,rg1. The first comma was treated as normal, separating the first and second parameters and being removed from the final parameter, however the second comma became part of the second parameter's contents itself, with the backslash being removed instead.
+
+These backslashes are distinct from those found in string escape sequences, as they are processed as part of the macro expansion, before strings even begin being parsed. As a result of this, backslashes being used as string escape sequences must also be double up.
+
+For example:
+
+```text
+%MACRO insert_string, %DAT "$0"
+
+insert_string(a\\nb\\nc)
+```
+
+`insert_string(a\\nb\\nc)` expands to `%DAT "a\nb\nc"`, as each backslash has another backslash to escape it so that it becomes a part of the final string. The final string inserted into the program will be the bytes `61 0A 62 0A 63`.
+
 #### Deleting Macros
+
+Macros can be deleted after being defined by using the **`%DELMACRO`** directive. It takes a single operand, the name of the macro to delete. Both single-line and multi-line macros are deleted the same way.
+
+Deletion of a macro takes effect immediately. Any subsequent uses of the macro after the `%DELMACRO` directive will not be replaced. Deleted macros can be defined again by using the `%MACRO` directive as normal. You do not *need* to delete a macro in order to redefine it, however.
+
+The `%DELMACRO` directive can be used from within a macro, however, as with everything else inside macros, it will not be executed until the macro is used, and will be executed *every* time the macro is used.
+
+Using the `%DELMACRO` directive with a macro name that does not exist will immediately stop assembly and cause an error to be thrown. This will happen even if the macro *used* to exist, meaning you cannot delete the same macro twice (unless it has been redefined in the meantime).
 
 ### %IMP - Import AssEmbly Source File
 
@@ -2634,6 +2793,7 @@ There are some sequences of characters that have special meanings when found ins
 | `\"`            | Double quote               | Used to insert a double quote into a string without causing the string to end. Not required in single character literals.                                             |
 | `\'`            | Single quote               | Used to insert a single quote into a single character literal without causing the literal to end. Not required in string literals.                                    |
 | `\\`            | Backslash                  | For a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                                       |
+| `\@`            | At Sign                    | For a string to contain an at sign, you must escape it so it isn't treated as an assembler variable/constant.                                                         |
 | `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
 | `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
 | `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
