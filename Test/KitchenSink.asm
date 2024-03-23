@@ -73,7 +73,12 @@ CFL
 CFL
 
 %ANALYZER suggestion, 0001, 0
-%MACRO NOP, NOT rg0
+%MACRO single-in-multi
+    %MACRO NOP, NOT rg0
+%ENDMACRO
+NOP
+single-in-multi
+NOP
 start disable block
 NOP
 NOP

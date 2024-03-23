@@ -25,6 +25,8 @@ JEQ :0x4FF000000000000  ; Address does not align to a disassembled instruction
 CFL
 CFL
 NOP
+NOT rg0
+NOP
 NOP
 NOP
 NOT rg0
