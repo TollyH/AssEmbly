@@ -2,7 +2,7 @@
 
 Applies to versions: `3.2.0`
 
-Last revised: 2024-03-21
+Last revised: 2024-03-23
 
 ## Introduction
 
@@ -63,14 +63,29 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [Testing Bits](#testing-bits)
     - [Checking the Carry, Overflow, Zero, and Sign Flags](#checking-the-carry-overflow-zero-and-sign-flags)
   - [Assembler Directives](#assembler-directives)
-    - [PAD - Byte Padding](#pad---byte-padding)
-    - [DAT - Byte Insertion](#dat---byte-insertion)
-    - [NUM - Number Insertion](#num---number-insertion)
-    - [MAC - Macro Definition](#mac---macro-definition)
-    - [IMP - Import AssEmbly Source File](#imp---import-assembly-source-file)
-    - [IBF - Import Binary File Contents](#ibf---import-binary-file-contents)
-    - [ANALYZER - Toggling Assembler Warnings](#analyzer---toggling-assembler-warnings)
-    - [MESSAGE - Manually Emit Assembler Warning](#message---manually-emit-assembler-warning)
+    - [%PAD - Byte Padding](#pad---byte-padding)
+    - [%DAT - Byte Insertion](#dat---byte-insertion)
+    - [%NUM - Number Insertion](#num---number-insertion)
+    - [%MACRO - Macro Definition](#macro---macro-definition)
+      - [Single-line Macros](#single-line-macros)
+      - [Multi-line Macros](#multi-line-macros)
+      - [Disabling Macro Expansion](#disabling-macro-expansion)
+      - [Macro Parameters](#macro-parameters)
+      - [Deleting Macros](#deleting-macros)
+    - [%IMP - Import AssEmbly Source File](#imp---import-assembly-source-file)
+    - [%IBF - Import Binary File Contents](#ibf---import-binary-file-contents)
+    - [%ANALYZER - Toggling Assembler Warnings](#analyzer---toggling-assembler-warnings)
+    - [%MESSAGE - Manually Emit Assembler Warning](#message---manually-emit-assembler-warning)
+    - [%LABEL\_OVERRIDE - Manual Label Address Assignment](#label_override---manual-label-address-assignment)
+    - [%REPEAT - Repeat Lines of Source Code](#repeat---repeat-lines-of-source-code)
+    - [%ASM\_ONCE - Guard a File from Being Assembled Multiple Times](#asm_once---guard-a-file-from-being-assembled-multiple-times)
+    - [%DEFINE - Assembler Variable Definition](#define---assembler-variable-definition)
+      - [Deleting Assembler Variables](#deleting-assembler-variables)
+      - [Assembler Constants](#assembler-constants)
+    - [%VAROP - Assembler Variable Operation](#varop---assembler-variable-operation)
+    - [%IF / %ELSE / %ELSE\_IF - Conditional Assembly](#if--else--else_if---conditional-assembly)
+    - [%WHILE - Conditional Source Code Repetition](#while---conditional-source-code-repetition)
+    - [%STOP - End Assembly](#stop---end-assembly)
   - [Console Input and Output](#console-input-and-output)
   - [File Handling](#file-handling)
     - [Opening and Closing](#opening-and-closing)
@@ -1498,11 +1513,13 @@ WCN 20
 
 ## Assembler Directives
 
-Assembler directives follow the same format as standard instructions, however, instead of being assembled to an opcode for the processor to execute, they tell the assembler itself to do something to modify either the final binary file or the lines of the source file as its being assembled.
+Assembler directives follow the same format as standard instructions, however, instead of being assembled to an opcode for the processor to execute, they instead instruct the assembler itself to do something. They may insert data into the final program file, affect the lines of source code being assembled, or change the state of the assembler itself.
 
-### PAD - Byte Padding
+Directives are all prefixed with a percent sign (`%`) to distinguish them from regular instructions.
 
-The `PAD` directive tells the assembler to insert a certain number of `0` bytes wherever the directive is placed in the file. This is most often used just after a label definition to allocate a certain amount of guaranteed free and available memory to store data.
+### %PAD - Byte Padding
+
+The `%PAD` directive tells the assembler to insert a certain number of `0` bytes wherever the directive is placed in the file. This is most often used just after a label definition to allocate a certain amount of guaranteed free and available memory to store data.
 
 For example, consider the following program:
 
@@ -1511,7 +1528,7 @@ MVQ rg0, :&PADDING  ; Store the address of the padding in rg0
 JMP :PROGRAM  ; Jump to the next part of the program, skipping over the padding
 
 :PADDING
-PAD 16  ; Insert 16 empty bytes
+%PAD 16  ; Insert 16 empty bytes
 
 :PROGRAM
 MVQ *rg0, 765  ; Set the first 8 bytes of the padding to represent 765
@@ -1536,7 +1553,7 @@ Address | Bytes
         | JMP | :PROGRAM (address 0x23)
 --------+----------------------------------------------------
  0x13   | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-        | PAD 16
+        | %PAD 16
 --------+----------------------------------------------------
  0x23   | 9F             | 06   | FD 02 00 00 00 00 00 00
         | MVQ (ptr, lit) | *rg0 | 765 (0x2FD)
@@ -1545,21 +1562,21 @@ Address | Bytes
         | ADD | rg0 | 8
 ```
 
-Note that usually, to reduce the number of jumps required, `PAD`s would be placed after all program instructions. It was put in the middle of the program here for demonstration purposes.
+Note that usually, to reduce the number of jumps required, `%PAD`s would be placed after all program instructions. It was put in the middle of the program here for demonstration purposes.
 
-### DAT - Byte Insertion
+### %DAT - Byte Insertion
 
-The `DAT` directive inserts either a single byte, or a string of UTF-8 character bytes, into a program wherever the directive is located. As with `PAD`, it can be directly preceded by a label definition to point to the byte or string of bytes. If not being used with a string, `DAT` can only insert single bytes at once, meaning the maximum value is 255. It is also not suitable for inserting numbers to be used in 64-bit expecting operations (such as maths and bitwise), see the following section on the `NUM` directive for inserting 64-bit numbers.
+The `%DAT` directive inserts either a single byte, or a string of UTF-8 character bytes, into a program wherever the directive is located. As with `%PAD`, it can be directly preceded by a label definition to point to the byte or string of bytes. If not being used with a string, `%DAT` can only insert single bytes at once, meaning the maximum value is 255. It is also not suitable for inserting numbers to be used in 64-bit expecting operations (such as maths and bitwise), see the following section on the `%NUM` directive for inserting 64-bit numbers.
 
 An example of single byte insertion:
 
 ```text
-MVB rg0, :BYTE  ; MVB must be used, as DAT will not insert a full 64-bit number
+MVB rg0, :BYTE  ; MVB must be used, as %DAT will not insert a full 64-bit number
 ; rg0 is now 54
-HLT  ; Stop the program executing into the DAT insertion (important!)
+HLT  ; Stop the program executing into the %DAT insertion (important!)
 
 :BYTE
-DAT 54  ; Insert a single 54 byte (0x36)
+%DAT 54  ; Insert a single 54 byte (0x36)
 ```
 
 This program assembles into the following bytes:
@@ -1580,10 +1597,10 @@ Address | Bytes
         | HLT
 --------+----------------------------------------------------
  0x0B   | 36
-        | DAT 54
+        | %DAT 54
 ```
 
-To insert a string using `DAT`, the desired characters must be surrounded by double quote marks (`"`) and be given as the sole operand to the directive. For example:
+To insert a string using `%DAT`, the desired characters must be surrounded by double quote marks (`"`) and be given as the sole operand to the directive. For example:
 
 ```text
 MVQ rg0, :&STRING  ; Move literal address of string to rg0
@@ -1599,11 +1616,11 @@ JMP :STRING_LOOP  ; Loop back to print next character
 HLT  ; End execution to stop processor running into string data
 
 :STRING
-DAT "Hello!\0"  ; Store a string of character bytes after program data.
+%DAT "Hello!\0"  ; Store a string of character bytes after program data.
 ; Note that the string ends with '\0' (a 0 or "null" byte)
 ```
 
-This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained toward the end of the document along with a table listing all of the possible sequences.
+This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `%DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained toward the end of the document along with a table listing all of the possible sequences.
 
 The example program assembles down to the following bytes:
 
@@ -1641,12 +1658,12 @@ Address | Bytes
         | HLT
 --------+----------------------------------------------------
  0x2E   | 48 65 6C 6C 6F 21 00
-        | DAT "Hello!\0"
+        | %DAT "Hello!\0"
 ```
 
-### NUM - Number Insertion
+### %NUM - Number Insertion
 
-The `NUM` directive is similar to `DAT`, except it always inserts 8 bytes exactly, so can be used to represent 64-bit numbers for use in instructions which always work on 64-bit values, like maths and bitwise operations. `NUM` cannot be used to insert strings, only single 64-bit numerical values (including unsigned, signed, and floating point).
+The `%NUM` directive is similar to `%DAT`, except it always inserts 8 bytes exactly, so can be used to represent 64-bit numbers for use in instructions which always work on 64-bit values, like maths and bitwise operations. `%NUM` cannot be used to insert strings, only single 64-bit numerical values (including unsigned, signed, and floating point).
 
 An example:
 
@@ -1657,7 +1674,7 @@ ADD rg0, :NUMBER  ; Add the number stored in memory to rg0
 HLT  ; End execution to stop processor running into number data
 
 :NUMBER
-NUM 100_015  ; Insert the number 100015 with 8 bytes
+%NUM 100_015  ; Insert the number 100015 with 8 bytes
 ```
 
 Which will produce the following bytes:
@@ -1681,44 +1698,236 @@ Address | Bytes
         | HLT
 --------+----------------------------------------------------
  0x15   | AF 86 01 00 00 00 00 00
-        | NUM 100_015 (0x186AF)
+        | %NUM 100_015 (0x186AF)
 ```
 
-As with other operations in AssEmbly, `NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works. You can also use `NUM` to insert the resolved address of a label as an 8-byte value in memory. The label must use the ampersand prefix syntax (i.e. `:&LABEL_NAME`).
+As with other operations in AssEmbly, `%NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works. You can also use `%NUM` to insert the resolved address of a label as an 8-byte value in memory. The label must use the ampersand prefix syntax (i.e. `:&LABEL_NAME`).
 
-### MAC - Macro Definition
+### %MACRO - Macro Definition
 
-The `MAC` directive defines a **macro**, a piece of text that the assembler will replace with another on every line where the text is present. The directive takes the text to replace as the first operand, then the text for it to be replaced with as the second. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Unlike other instructions, the operands to the `MAC` directive don't have to be a standard valid format of operand, both will automatically be interpreted as literal text.
+The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one.
+
+Macro names can contain almost any character, with the exception of opening and closing brackets (`(` and `)`). They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Almost all lines are subject to macro expansion, with the automatic exception of lines that start with `%MACRO` or `%DELMACRO` before macro expansion begins. You can also manually exclude any line from being processed for macros, as explained in the section on disabling macro expansion.
+
+#### Single-line Macros
+
+To define a single-line macro, the `%MACRO` directive should be given two operands. The first is the text to replace, and the second is the text for it to be replaced with. Unlike other instructions, the operands to the `%MACRO` directive don't have to be a standard valid format of operand, both will automatically be interpreted as literal text.
+
+During the assembly process, for every line in the source code (with some exceptions as explained later), the assembler will search to see if the name of an existing single-line macro is present on the line. If one is, the macro name is removed from the line and replaced with the macro's replacement text in the same position. The surrounding text is unaffected. This then becomes the new content of the line, and the search process restarts, now including the text that was just inserted. The assembler will continue replacing the names of single-line macros on the line until there are no more matches. This means that the *replacement* content of a macro, or even the combination of the replacement text and the text already on the line, can itself also contain the name of a macro that will be replaced.
+
+In the event that there are multiple single-line macros present on the line at the same time, the macro closest to the start of the line (the left) will be expanded first. If multiple macros match starting at the same character (i.e. there are multiple macros with names that start with the same character/characters), the macro with the **longest** name takes priority.
 
 For example:
 
 ```text
 MVQ rg0, Number  ; Results in an error
 
-MAC Number, 345
+%MACRO Number, 345
 MVQ rg0, Number
 ; rg0 is now 345
 
-MAC Number, 678
+%MACRO Num, 123
+%MACRO Number, 678  ; (lines starting with %MACRO are exempt from macro expansion
+                    ;  - so we can define "Number" here without the "Num" part being replaced)
 MVQ rg1, Number
-; rg1 is now 678
+; rg1 is now 678 (the longer macro name takes priority)
 
-MAC Inst, ICR rg1
+%MACRO Inst, ICR rg1
 Inst
 ; rg1 is now 679
 
-MAC Inst, ADD rg1, 6
+%MACRO Inst, OtherMacro
+%MACRO OtherMacro, ADD rg1, 6
 Inst
-; rg1 is now 685
+; rg1 is now 685 ("Inst" was replaced with "OtherMacro", which was then replaced with "ADD rg1, 6")
 ```
 
-The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example).
+The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example). Because macro contents isn't processed until the macro is used, `Inst` was able to contain `OtherMacro` even though `OtherMacro` didn't exist when it was defined.
 
-Note that macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. They are case sensitive, and macros with the same name but different capitalisations can exist simultaneously. Be aware that aside from a **single** space character separating the `MAC` mnemonic from its operands, leading and trailing whitespace in either of the operands will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
+Note that single-line macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. Be aware that aside from a **single** space character separating the `%MACRO` mnemonic from its operands, leading and trailing whitespace in the first operand, and leading whitespace in the second operand, will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
 
-### IMP - Import AssEmbly Source File
+#### Multi-line Macros
 
-The `IMP` directive inserts lines of AssEmbly source code from another file into wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
+Multi-line macros are defined by only giving a single operand to `%MACRO` - the text to replace. Every line after the directive is then treated as the contents of the macro, up until the next detected instance of the **`%ENDMACRO`** directive. As with single-line macros, the name of a multi-line macro does not need to be in any standard format, and is automatically interpreted as literal text. The contents of the macro itself will not contain the opening `%MACRO` directive or the closing `%ENDMACRO` directive. None of the instructions or directives inside the macro contents will be assembled until the macro is used.
+
+To use a multi-line macro, the name of the macro must be the sole contents of the line, not including surrounding whitespace. The entire multi-line contents of the macro will then be inserted, and assembly will continue from the first line in the macro. Once the end of the macro's contents is reached, assembly will then carry on assembling the lines after the macro's use.
+
+For example:
+
+```text
+%MACRO multi-line
+    ICR rg0
+    DCR rg1
+%ENDMACRO
+
+MVQ rg0, 5
+MVQ rg1, 5
+multi-line
+multi-line
+multi-line
+WCN rg0
+WCC '\n'  ; Newline
+WCN rg1
+```
+
+When executed, this program will print `8` (the value of `rg0`) and `2` (the value of `rg1`) to the console, as each instance of `multi-line` was replaced with both the `ICR` *and* `DCR` instructions. The fully expanded program is equivalent to the following:
+
+```text
+MVQ rg0, 5
+MVQ rg1, 5
+ICR rg0
+DCR rg1
+ICR rg0
+DCR rg1
+ICR rg0
+DCR rg1
+WCN rg0
+WCC '\n'  ; Newline
+WCN rg1
+```
+
+Both of the above examples result in the same program bytes after being assembled, as macros are expanded by the assembler, not the processor. The *definition* of a macro does not itself insert any bytes into the program - the macro must be used for its contents to be inserted.
+
+Keep in mind that the leading whitespace on each line inside the macro definition (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+
+The assembler does not attempt to search for multi-line macros until every possible single-line macro replacement has been completed on the line. This means that a single-line macro, or a combination of single-line macros, can contain the name of a multi-line macro to expand, as long as the multi-line macro name ends up as the only thing on the line.
+
+Because the contents of a multi-line macro is terminated as soon as the first instance of `%ENDMACRO` is found, it is not possible to nest a multi-line macro definition within another multi-line macro definition. It is, however, possible to define *single-line* macros inside a multi-line macro.
+
+Both single-line and multi-line macros can be used inside multi-line macros, however they will not be expanded until the macro is used. This means that the `%ENDMACRO` directive cannot itself be contained within a single-line or multi-line macro. It also means that macros that aren't defined until *after* the definition of the multi-line macro can still be referenced from within it, as long as they are defined before each usage of the macro. Macro expansions that occur within the inserted contents of a multi-line macro do not affect the original content of the macro, so the contents of referenced macros can change between usages of the same multi-line macro.
+
+Multi-line macros cannot reference themselves, even indirectly through another macro. If at any point during the assembly of a multi-line macro's contents the assembler detects any multi-line macro it is already currently in the process of expanding, it will stop and throw an error. This detection does not occur until the *usage* of the macro. If the macro is defined but never used, the error will not be thrown.
+
+For example, this program is invalid and will throw an error:
+
+```text
+%MACRO my_macro1
+    MVQ rg0, 123
+    ADD rg0, 456
+    my_macro2
+%ENDMACRO
+
+%MACRO my_macro2
+    MVQ rg1, 654
+    SUB rg1, 321
+    my_macro1
+%ENDMACRO
+
+my_macro1
+```
+
+Even though neither `my_macro1` nor ``my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
+
+This program, however, is valid, and will assemble without failure:
+
+```text
+%MACRO my_macro1
+    MVQ rg0, 123
+    ADD rg0, 456
+    my_macro2
+    my_macro2
+    my_macro3
+    my_macro3
+%ENDMACRO
+
+%MACRO my_macro2
+    MVQ rg1, 654
+    SUB rg1, 321
+    my_macro3
+%ENDMACRO
+
+%MACRO my_macro3
+    MVQ rg2, 246
+    MUL rg2, 810
+%ENDMACRO
+
+my_macro1
+```
+
+Throughout the expansion of `my_macro1`, `my_macro3` gets expanded multiple times, both directly and indirectly. However, this never occurs while another instance of `my_macro3` is still in the process of being expanded, so it is valid. As long as the expansion of a multi-line macro has finished by the time it is referenced again, it is perfectly valid to reference it multiple times from within the same macro.
+
+It is not valid to have an `%ENDMACRO` directive in the source code without a paired multi-line `%MACRO` directive, and all multi-line `%MACRO` directives *must* end with an `%ENDMACRO` directive. It is not valid to have a multi-line `%MACRO` directive reach the end of the program without an `%ENDMACRO` directive.
+
+#### Disabling Macro Expansion
+
+It is possible to disable the expansion of both single-line and multi-line macros on a line. This can be done for individual lines by prefixing them with a single exclamation mark (`!`), or to an entire block of lines by surrounding them with the `!>` and `<!` characters respectively.
+
+For example:
+
+```text
+%MACRO rg0, rg1  ; Would replace all instances of "rg0" with "rg1" if matched
+
+!MVQ rg0, rg2  ; Macro does not match - instruction stays as "MVQ rg0, rg2"
+MVQ rg0, rg2  ; Macro matches - instruction becomes "MVQ rg1, rg2"
+!>
+MVQ rg0, rg2  ; Macro does not match - instruction stays as "MVQ rg0, rg2"
+MVQ rg0, rg2  ; Macro does not match - instruction stays as "MVQ rg0, rg2"
+<!
+MVQ rg0, rg2  ; Macro matches - instruction becomes "MVQ rg1, rg2"
+```
+
+The beginning and ending markers for a macro disabling block **must** be the only thing on their respective lines.
+
+For example, this is **not** valid and will result in an error:
+
+```text
+!>MVQ rg0, rg1
+MVQ rg2, rg3<!
+```
+
+Unlike multi-line macro definitions, macro disabling blocks *can* run to the end of the program without being closed (i.e. you can have `!>` in a program without ever having `<!`). This will effectively disable macro expansion for the entire rest of the program after the block is opened, so care should be taken to ensure you don't accidentally forget a `<!` closing marker. It is not valid to use a `<!` closing marker when a macro disabling block is not currently open. Every `<!` closing marker must be paired with a corresponding `!>` opening marker. It is also not valid to use a `!>` opening marker when a macro disabling block is already open, meaning you cannot nest macro disabling blocks within each other.
+
+Neither the `!` line prefix nor the `!>` and `<!` markers can be inserted as the result of a single-line macro expansion, however the `!>` and `<!` markers *can* be used within the contents of a multi-line macro, as long as they are still the sole thing on their respective lines. Lines within a multi-line macro can also use the `!` prefix. Macro disabling blocks inside a multi-line macro will take effect on each *usage* of a multi-line macro, not on the macro's definition, and whether or not a macro disabling block is currently open or not will persist in to and out of the lines inserted by the multi-line macro. Surrounding the *definition* of a multi-line macro in a macro disabling block has no effect, and will **not** disable macro expansion within the macro's content when the macro is used.
+
+Some examples:
+
+```text
+%MACRO start disable block
+    !>
+    ; This line WILL BE inside a macro disabling block when it is inserted by the macro
+%ENDMACRO
+
+; This line is NOT inside a macro disabling block
+
+start disable block
+
+; This line IS inside a macro disabling block
+
+<!
+
+; This line is NOT inside a macro disabling block
+```
+
+```text
+%MACRO my_macro
+    !>
+    ; This line WILL BE inside a macro disabling block when it is inserted by the macro
+    <!
+    ; This line WILL NOT be inside a macro disabling block when it is inserted by the macro
+%ENDMACRO
+```
+
+```text
+%MACRO another_macro
+    ...
+%ENDMACRO
+
+!>
+another_macro
+; The open macro disabling block will also affect the lines inserted by the above macro 
+<!
+
+another_macro
+; Despite being the same macro - the lines inserted by the above macro are now not part of a macro disabling block
+```
+
+#### Macro Parameters
+
+#### Deleting Macros
+
+### %IMP - Import AssEmbly Source File
+
+The `%IMP` directive inserts lines of AssEmbly source code from another file into wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
 
@@ -1729,39 +1938,39 @@ MVQ rg0, :NUMBER_ONE
 MVQ rg1, :NUMBER_TWO
 HLT  ; Prevent program executing into number data
 
-IMP "numbers.asm"
+%IMP "numbers.asm"
 ```
 
 Contents of `numbers.asm`:
 
 ```text
 :NUMBER_ONE
-NUM 123
+%NUM 123
 
 :NUMBER_TWO
-NUM 456
+%NUM 456
 ```
 
-When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `IMP` directive, resulting in the file looking like so:
+When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
 
 ```text
 MVQ rg0, :NUMBER_ONE
 MVQ rg1, :NUMBER_TWO
 HLT  ; Prevent program executing into number data
 
-IMP "numbers.asm"
+%IMP "numbers.asm"
 :NUMBER_ONE
-NUM 123
+%NUM 123
 
 :NUMBER_TWO
-NUM 456
+%NUM 456
 ```
 
 Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
 
-The `IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
+The `%IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
 
-Files given to the `IMP` directive are assembled as AssEmbly source code, so **must** be AssEmbly source files, not already assembled binaries. To insert the raw binary contents of a file into the assembled program, use the `IBF` directive. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
+Files given to the `%IMP` directive are assembled as AssEmbly source code, so **must** be AssEmbly source files, not already assembled binaries. To insert the raw binary contents of a file into the assembled program, use the `%IBF` directive. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
 
 Care should be taken to ensure that a file does not end up depending on itself, even if it is through other files, as this will result in an infinite loop of imports (also known as a circular dependency). The AssEmbly assembler will detect these and throw an error should one occur.
 
@@ -1770,26 +1979,26 @@ An example of a circular dependency:
 `file_one.asm`:
 
 ```text
-IMP "file_two.asm"
+%IMP "file_two.asm"
 ```
 
 `file_two.asm`:
 
 ```text
-IMP "file_three.asm"
+%IMP "file_three.asm"
 ```
 
 `file_three.asm`:
 
 ```text
-IMP "file_one.asm"
+%IMP "file_one.asm"
 ```
 
 Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
 
-### IBF - Import Binary File Contents
+### %IBF - Import Binary File Contents
 
-The `IBF` directive inserts the raw binary contents of a file into a program wherever the directive is located. It differs from the `IMP` directive in that the contents of the file is neither assembled nor otherwise manipulated in any way by the assembler, it is simply inserted as-is into the final assembled program. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.bin`) or a path relative to the directory of the source file being assembled (i.e. `file.bin`, `Folder/file.bin`, or `../Folder/file.bin`).
+The `%IBF` directive inserts the raw binary contents of a file into a program wherever the directive is located. It differs from the `%IMP` directive in that the contents of the file is neither assembled nor otherwise manipulated in any way by the assembler, it is simply inserted as-is into the final assembled program. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.bin`) or a path relative to the directory of the source file being assembled (i.e. `file.bin`, `Folder/file.bin`, or `../Folder/file.bin`).
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `string.txt`.
 
@@ -1808,8 +2017,8 @@ JMP :LOOP
 HLT  ; Prevent program executing into string data
 
 :STRING
-IBF "string.txt"
-DAT 0
+%IBF "string.txt"
+%DAT 0
 ```
 
 Contents of `string.txt`:
@@ -1859,14 +2068,14 @@ Address | Bytes
         | H  e  l  l  o  ,     W  o  r  l  d  !
 --------+----------------------------------------------------
  0x34   | 00
-        | DAT 0
+        | %DAT 0
 ```
 
-Note that the file given to the `IBF` directive does not need to contain plain text; any data can be inserted.
+Note that the file given to the `%IBF` directive does not need to contain plain text; any data can be inserted.
 
-### ANALYZER - Toggling Assembler Warnings
+### %ANALYZER - Toggling Assembler Warnings
 
-The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
+The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `%ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
 
 After using the directive, its effect remains active until assembly ends, or the same warning is toggled again with the directive further on in the code.
 
@@ -1875,28 +2084,48 @@ For example:
 ```text
 CMP rg0, 0  ; generates suggestion 0005
 
-ANALYZER suggestion, 0005, 0
+%ANALYZER suggestion, 0005, 0
 CMP rg0, 0  ; generates no suggestion
 CMP rg0, 0  ; still generates no suggestion
-ANALYZER suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
+%ANALYZER suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
 
 CMP rg0, 0  ; generates suggestion 0005 again
 ```
 
-Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
+Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `%ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
 
-### MESSAGE - Manually Emit Assembler Warning
+### %MESSAGE - Manually Emit Assembler Warning
 
-The `MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
+The `%MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
 
 Two examples of the directive being used:
 
 ```text
-MESSAGE suggestion
-MESSAGE warning, "This needs changing"
+%MESSAGE suggestion
+%MESSAGE warning, "This needs changing"
 ```
 
 Manually emitted messages always have the code `0000`, regardless of severity. Messages, even with the error severity, will not cause the assembly process to fail and have no effect on the final program output.
+
+### %LABEL_OVERRIDE - Manual Label Address Assignment
+
+### %REPEAT - Repeat Lines of Source Code
+
+### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
+
+### %DEFINE - Assembler Variable Definition
+
+#### Deleting Assembler Variables
+
+#### Assembler Constants
+
+### %VAROP - Assembler Variable Operation
+
+### %IF / %ELSE / %ELSE_IF - Conditional Assembly
+
+### %WHILE - Conditional Source Code Repetition
+
+### %STOP - End Assembly
 
 ## Console Input and Output
 
@@ -1956,7 +2185,7 @@ Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes
 
 ```text
 :FILE_PATH
-DAT "file.txt\0"
+%DAT "file.txt\0"
 ```
 
 This would normally be placed after all program code and a `HLT` instruction to prevent it accidentally being executed as if it were part of the program. The file can be opened with the following line anywhere in the program:
@@ -2012,7 +2241,7 @@ CFL  ; Close the file, saving newly written contents
 HLT  ; Prevent executing into string data
 
 :FILE_PATH
-DAT "file.txt\0"
+%DAT "file.txt\0"
 ```
 
 Executing this program will create a file called `file.txt` with the following contents:
@@ -2368,10 +2597,10 @@ ASMX_CLA  ; Close the assembly
 HLT  ; Halt the processor before it reaches data
 
 :DLL_PATH
-DAT "MyAsm.dll\0"
+%DAT "MyAsm.dll\0"
 
 :FUNC_PATH
-DAT "YourMethod\0"
+%DAT "YourMethod\0"
 ```
 
 Executing this program results in the following console output:
@@ -2390,7 +2619,7 @@ The `ASMX_LDA` and `ASMX_LDF` instructions will throw an error, stopping executi
 
 ## Text Encoding
 
-All text in AssEmbly (input from/output to the console; strings inserted by `DAT`; strings given to `OFL`, `DFL`, `FEX`, etc.) is encoded in UTF-8. This means that all characters that are a part of the ASCII character set only take up a single byte, though some characters may take as many as 4 bytes to store fully.
+All text in AssEmbly (input from/output to the console; strings inserted by `%DAT`; strings given to `OFL`, `DFL`, `FEX`, etc.) is encoded in UTF-8. This means that all characters that are a part of the ASCII character set only take up a single byte, though some characters may take as many as 4 bytes to store fully.
 
 Be aware that when working with characters that require multiple bytes, instructions like `RCC`, `RFC`, `WCC`, and `WFC` still only work on single bytes at a time. As long as you read/write all of the UTF-8 bytes in the correct order, they should be stored and displayed correctly.
 
