@@ -25,11 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="LICENCE" />
+    <None Remove="LICENSE" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="LICENCE" />
+    <EmbeddedResource Include="LICENSE" />
   </ItemGroup>
 
   <ItemGroup>

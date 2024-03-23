@@ -1850,7 +1850,7 @@ It is not valid to have an `%ENDMACRO` directive in the source code without a pa
 
 #### Disabling Macro Expansion
 
-It is possible to disable the expansion of both single-line and multi-line macros on a line. This can be done for individual lines by prefixing them with a single exclamation mark (`!`), or to an entire block of lines by surrounding them with the `!>` and `<!` characters respectively.
+It is possible to disable the expansion of both single-line and multi-line macros on a line. This can be done for individual lines by prefixing them with a single exclamation mark (`!`), or for an entire block of lines by surrounding them with the `!>` and `<!` characters respectively.
 
 For example:
 
@@ -3389,3 +3389,5 @@ The following is a list of common characters and their corresponding byte value 
 ---
 
 **Copyright © 2022–2024  Ptolemy Hill**
+
+**Licensed under CC BY-SA 4.0. To view a copy of this license, visit <http://creativecommons.org/licenses/by-sa/4.0/>**

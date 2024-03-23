@@ -519,7 +519,7 @@ namespace AssEmbly
                     Console.WriteLine();
                 }
                 Console.WriteLine();
-                using Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AssEmbly.LICENCE")
+                using Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AssEmbly.LICENSE")
                     ?? throw new NullReferenceException("Resource stream with name 'LICENSE' was missing");
                 using StreamReader resourceReader = new(resourceStream);
                 Console.WriteLine(resourceReader.ReadToEnd(), DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);

@@ -25,7 +25,7 @@ foreach ($folder in $subFolders) {
     $zipName = "AssEmbly-" + $folder.Name + ".zip"
     Write-Output "Compressing into $zipName..."
     $zipPath = Join-Path $publishFolder $zipName
-    Get-ChildItem -Path $folder -Exclude "*.pdb" |
+    Get-ChildItem -Path $folder, "LICENSE" -Exclude "*.pdb" |
         Compress-Archive -DestinationPath $zipPath -CompressionLevel Optimal
 }
 
@@ -33,6 +33,6 @@ Write-Output "`nBuilding documentation..."
 .\build-docs.ps1
 $docsZipPath = Join-Path $publishFolder "ReferenceManual.zip"
 Write-Output "`nCompressing documentation..."
-Compress-Archive -Path "Documentation\ReferenceManual\ReferenceManual.*" -DestinationPath $docsZipPath -CompressionLevel Optimal
+Compress-Archive -Path "Documentation\ReferenceManual\ReferenceManual.*", "Documentation\LICENSE" -DestinationPath $docsZipPath -CompressionLevel Optimal
 
 Write-Output "Done."
