@@ -138,6 +138,7 @@ namespace AssEmbly
         private readonly List<(ulong Address, string Line)> assembledLines = new();
         private readonly Dictionary<ulong, List<string>> addressLabelNames = new();
         private readonly List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
+        private readonly List<(ulong Address, FilePosition Position)> fileLineMap = new();
 
         private readonly AssemblerWarnings warningGenerator;
         private readonly List<Warning> warnings = new();
@@ -292,7 +293,7 @@ namespace AssEmbly
             string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
-                resolvedImports);
+                resolvedImports, fileLineMap);
             return new AssemblyResult(
                 programBytes, debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
                 entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
@@ -408,14 +409,16 @@ namespace AssEmbly
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
                         AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures);
 
-                    usedExtensions |= newFeatures;
-
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count, GetCurrentPosition()));
                     }
 
-                    assembledLines.Add(((uint)program.Count, rawLine));
+                    usedExtensions |= newFeatures;
+
+                    assembledLines.Add(((uint)program.Count, preVariableLine));
+                    fileLineMap.Add(((uint)program.Count, currentFilePosition));
+
                     program.AddRange(newBytes);
 
                     warnings.AddRange(warningGenerator.NextInstruction(

@@ -1585,4 +1585,7 @@ Current while stack (deepest while first):</value>
     <data name="Assembler_Debug_Directive_While_Stack_Line" xml:space="preserve">
         <value>    Condition at line {1} of {0}</value>
     </data>
+    <data name="Debugger_Execution_Position" xml:space="preserve">
+        <value>This instruction was assembled from {0} at line {1}</value>
+    </data>
 </root>

@@ -326,7 +326,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to     Condition at line {1} of {0}.
         /// </summary>
         internal static string Assembler_Debug_Directive_While_Stack_Line {
             get {
@@ -2625,6 +2625,16 @@ namespace AssEmbly.Resources.Localization {
         internal static string Debugger_Error_Unrecognised_Command {
             get {
                 return ResourceManager.GetString("Debugger_Error_Unrecognised_Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This instruction was assembled from:
+        ///    .
+        /// </summary>
+        internal static string Debugger_Execution_Position {
+            get {
+                return ResourceManager.GetString("Debugger_Execution_Position", resourceCulture);
             }
         }
         
