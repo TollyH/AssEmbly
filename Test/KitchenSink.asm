@@ -45,8 +45,8 @@ HLT
 %DAT                     0x42
 %NUM 1189998819991197253
 
-%MACRO thisLineIsNowBlank,$1
-thisLineIsNowBlank()
+%MACRO this@LineIsNowBlank,$1
+this@LineIsNowBlank()
 
      :THIS_DOESNT_POINT_HERE     
 %LABEL_OVERRIDE   1234    ,

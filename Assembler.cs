@@ -73,6 +73,7 @@ namespace AssEmbly
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
         // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion
+        // or assembler variable insertion
         private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO" };
 
         // The lines to assemble may change during assembly, for example importing a file
@@ -1499,7 +1500,7 @@ namespace AssEmbly
             bool openBackslash = false;
             bool parsingName = false;
 
-            if (text.TrimStart().StartsWith("%MACRO ", StringComparison.OrdinalIgnoreCase))
+            if (automaticMacroExcludedMnemonics.Contains(text.Split(' ')[0]))
             {
                 // Assembler variables in macro definitions should not be replaced
                 return text;
