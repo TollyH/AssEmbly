@@ -22,6 +22,10 @@ MVQ rg0, 69
     SUB rg6, rg7
 %ENDMACRO
 
+%MACRO start disable block
+    !>
+%ENDMACRO
+
 :LOOP  ; comment :)
 ; comment
 ADD rg0, :&LOOP
@@ -32,6 +36,10 @@ JLT :LOOP
             Macro-d!(rg4, 0b110001101010001110101110011)
 
 HLT
+
+%MACRO end disable block
+    <!
+%ENDMACRO
 
 %NUM @!CURRENT_ADDRESS
 
@@ -70,11 +78,11 @@ CFL
 
 %ANALYZER suggestion, 0001, 0
 %MACRO NOP, NOT rg0
-!>
+start disable block
 NOP
 NOP
 NOP
-<!
+end disable block
 NOP
 %ANALYZER suggestion, 0001, r
 
