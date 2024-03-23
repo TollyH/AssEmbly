@@ -37,10 +37,6 @@ JLT :LOOP
 
 HLT
 
-%MACRO end disable block
-    <!
-%ENDMACRO
-
 %NUM @!CURRENT_ADDRESS
 
 %ANALYZER suggestion, 0004, 0
@@ -82,7 +78,7 @@ start disable block
 NOP
 NOP
 NOP
-end disable block
+<!
 NOP
 %ANALYZER suggestion, 0001, r
 
