@@ -1813,7 +1813,7 @@ For example, this program is invalid and will throw an error:
     my_macro1
 %ENDMACRO
 
-my_macro1
+my_macro1  ; Throws error
 ```
 
 Even though neither `my_macro1` nor ``my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
@@ -1841,7 +1841,7 @@ This program, however, is valid, and will assemble without failure:
     MUL rg2, 810
 %ENDMACRO
 
-my_macro1
+my_macro1  ; No error thrown
 ```
 
 Throughout the expansion of `my_macro1`, `my_macro3` gets expanded multiple times, both directly and indirectly. However, this never occurs while another instance of `my_macro3` is still in the process of being expanded, so it is valid. As long as the expansion of a multi-line macro has finished by the time it is referenced again, it is perfectly valid to reference it multiple times from within the same macro.
@@ -1927,7 +1927,7 @@ Both single-line and multi-line macros are also capable of inserting text that v
 
 To use parameters within a macro definition, type a dollar sign (`$`) followed by the desired 0-based index of the parameter within the list of parameters. Each time the macro is expanded, these characters will then be removed and replaced with the given parameter text in the same position. The parameter indices can be more than one digit long, though they must not be separated by any characters.
 
-To give parameters to either a single-line or multi-line macro, type an opening bracket (`(`) directly after the macro name. There must be no extra whitespace between the macro name and the opening bracket. After the bracket, give all the desired parameters separated by commas (`,`), then type a closing bracket (`)`). The commas themselves will be removed and will not become a part of the parameter, however any surrounding whitespace will. All the text within the brackets, as well as the brackets themselves, will be removed when the macro is replaced with its replacement text. For single-line macros, text after the closing bracket will continue to be assembles as part of the line as normal. For multi-line macros, there must be no further text after the closing bracket - the macro name and its parameters must be the only thing on the respective line.
+To give parameters while using either a single-line or multi-line macro, type an opening bracket (`(`) directly after the macro name. There must be no extra whitespace between the macro name and the opening bracket. After the bracket, give all the desired parameters separated by commas (`,`), then type a closing bracket (`)`). The commas themselves will be removed and will not become a part of the parameter, however any surrounding whitespace will not be removed. All the text within the brackets, as well as the brackets themselves, will be removed when the macro is replaced with its replacement text. For single-line macros, text after the closing bracket will continue to be assembled as part of the line as normal. For multi-line macros, there must be no further text after the closing bracket - the macro name and its parameters must be the only thing on the respective line.
 
 For example:
 
@@ -1944,14 +1944,14 @@ DVR register(0), register(1), rg2
 instruction(rg2,rg3)
 ```
 
-Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. The `register` name itself, along with the surrounding brackets, are also removed. `instruction(rg2,rg3)` gets expanded to the following lines:
+Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. `instruction(rg2,rg3)` gets expanded to the following lines:
 
 ```text
     ADD rg2, rg3
     SUB rg3, 5
 ```
 
-It is possible to give parameters to a macro even if it never references them, and it is even possible to give parameters to a macro that doesn't reference any parameters at all. In both cases the extraneous parameters will simply be ignored. For example, if instead of `instruction(rg2, rg3)`, `instruction(rg2, rg3, rg4)` were written in the above example, it would make no difference to the final output, as the parameter `$2` is never referenced.
+It is possible to give parameters to a macro even if it never references them, and it is even possible to give parameters to a macro that doesn't reference any parameters at all. In both cases the extraneous parameters will simply be ignored. For example, if instead of `instruction(rg2,rg3)`, `instruction(rg2,rg3,rg4)` were written in the above example, it would make no difference to the final output, as the parameter `$2` is never referenced.
 
 Macro parameters and macro names do not need to be separated by any characters, for example, the following is perfectly valid:
 
@@ -1961,7 +1961,7 @@ Macro parameters and macro names do not need to be separated by any characters, 
 MVQ rg0, surround(1,2)surround(3,4)
 ```
 
-This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. For many macros, this doesn't make a difference, however it is something to be aware of.
+This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. Leading whitespace in macro replacement text is *never* trimmed, so it should be removed if it is not desired.
 
 The individual separated parameters of both single-line and multi-line macros are, themselves, also subjected to single-line macro expansion. This makes it possible to nest single-line macro usages within parameters. These nested macros can even be given parameters themselves, to a theoretically infinite depth.
 
@@ -1977,6 +1977,8 @@ For example:
 instruction(register(2), register(3))
 ```
 
+Here `instruction(register(2), register(3))` expands to `ADD rg2, rg3`, as the `register(2)` macro was expanded, followed by the `register(3)` macro, which then became parameters to the final expansion of `instruction`. A single parameter can also contain multiple single-line macros if desired, as they follow the same single-line macro expansion logic as regular lines.
+
 By default, if a parameter is referenced by a macro but it is not given when the macro is used, the parameter reference (i.e. the `$` sign and the following index) will still be removed, however no text will be inserted in its place. If this is not desired, you can mark a parameter as *required* by appending an exclamation mark (`!`) directly after the parameter index. The assembler will stop and throw an error if a required parameter is not provided when a macro is used.
 
 For example:
@@ -1984,15 +1986,15 @@ For example:
 ```text
 %MACRO my_macro, 12$0
 
-ADD rg0, my_macro
+ADD rg0, my_macro  ; No error thrown
 ```
 
-In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text. To instead throw an error, the example should instead be written like this:
+In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text. To instead throw an error, the example should be written like this:
 
 ```text
 %MACRO my_macro, 12$0!
 
-ADD rg0, my_macro
+ADD rg0, my_macro  ; Throws error
 ```
 
 The assembler detects that `my_macro` is attempting to access a parameter at index `0`, but finds that one doesn't exist. Because the parameter has been suffixed with an `!`, the assembler now stops assembly and throws an error instead of replacing it with empty text.
@@ -2002,9 +2004,9 @@ If the same parameter is used multiple times within a macro, only one instance o
 For example, all of the parameters in the following examples are empty text but will not throw an error, even if the parameter was marked as required:
 
 ```text
-macro-use()  ; $0 is given but empty, all other parameters are not given
-macro-use(,)  ; $0 and $1 are given but empty, all other parameters are not given
-macro-use(,,)  ; $0, $1, and $2 are given but empty, all other parameters are not given
+uses-1-param()  ; $0 is given but empty, all other parameters are not given
+uses-2-params(,)  ; $0 and $1 are given but empty, all other parameters are not given
+uses-3-params(,,)  ; $0, $1, and $2 are given but empty, all other parameters are not given
 ; etc.
 ```
 
@@ -2026,7 +2028,7 @@ For example:
     my_macro1
 %ENDMACRO
 
-my_macro2(123,456)
+my_macro2(123,456)  ; Throws error
 ```
 
 Here, an error is thrown by the assembler, as `my_macro1` has been used by `my_macro2` without giving it its required parameters. `my_macro1` does not automatically get access to `my_macro2`'s parameters.
@@ -2045,12 +2047,12 @@ The program must instead be written like so:
     my_macro1($0,$1)
 %ENDMACRO
 
-my_macro2(123,456)
+my_macro2(123,456)  ; No error thrown
 ```
 
-Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid. Parameter references can be contained within the parameters of a nested macro, and they will be expanded just as they would be anywhere else within the containing macro - before they are inserted into the contents of the macro being nested.
+Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid. Parameter references can be contained within the parameters of a nested macro, and they will be replaced just as they would be anywhere else within the containing macro. The replacement happens before the parameter text is inserted into the contents of the macro being nested.
 
-Because commas and brackets have special meanings within macro parameters, if you want to provide a comma or bracket character as a literal part of a parameter's content, you must precede each one with a backslash. These backslashes will not be included as a part of the inserted parameter text. Backslashes themselves must be doubled up (i.e. having one backslash preceded by another: `\\`) in order to treat them as literal text.
+Because commas and brackets have special meanings within macro parameters, if you want to provide a comma or bracket character as a literal part of a parameter's content, you must precede each instance of one with a backslash. These backslashes will not be included as a part of the inserted parameter text. Backslashes themselves must be doubled up (i.e. having one backslash preceded by another: `\\`) in order to treat them as literal text.
 
 For example:
 
@@ -2060,9 +2062,9 @@ For example:
 instruction(MVQ,rg0\,rg1)
 ```
 
-Here `instruction(MVQ,rg0\,rg1)` expands to MVQ rg0,rg1. The first comma was treated as normal, separating the first and second parameters and being removed from the final parameter, however the second comma became part of the second parameter's contents itself, with the backslash being removed instead.
+Here `instruction(MVQ,rg0\,rg1)` expands to `MVQ rg0,rg1`. The first comma was treated as normal, separating the first and second parameters and being removed from the final text, however the second comma became part of the second parameter's contents itself, with the backslash being removed instead.
 
-These backslashes are distinct from those found in string escape sequences, as they are processed as part of the macro expansion, before strings even begin being parsed. As a result of this, backslashes being used as string escape sequences must also be double up.
+These backslashes are distinct from those found in string escape sequences, as they are processed as part of the macro expansion, before strings even begin being parsed. As a result of this, backslashes being used as string escape sequences must also be doubled up.
 
 For example:
 
@@ -2074,11 +2076,25 @@ insert_string(a\\nb\\nc)
 
 `insert_string(a\\nb\\nc)` expands to `%DAT "a\nb\nc"`, as each backslash has another backslash to escape it so that it becomes a part of the final string. The final string inserted into the program will be the bytes `61 0A 62 0A 63`.
 
+Similarly, if you wish to have a literal `$` character within the contents of a macro definition, you must instead use two directly adjacent to each other (`$$`) to prevent the dollar sign being interpreted as the start of a parameter.
+
+For example:
+
+```text
+%MACRO balance, %DAT "Your balance is $$$0"
+
+balance(1.23)
+```
+
+The final string inserted by `balance(1.23)` will be `"Your balance is $1.23"`, as the first two `$` signs became a literal dollar sign character, and the third was simply interpreted as the start of a parameter reference as normal.
+
+Keep in mind that this is only required within a macro *definition*. You should only use a single `$` character if you wish to have a literal dollar sign as a part of a parameter to a macro being used outside a macro definition.
+
 #### Deleting Macros
 
-Macros can be deleted after being defined by using the **`%DELMACRO`** directive. It takes a single operand, the name of the macro to delete. Both single-line and multi-line macros are deleted the same way.
+Macros can be deleted at any point after being defined by using the **`%DELMACRO`** directive. It takes a single operand, the name of the macro to delete. Both single-line and multi-line macros are deleted the same way.
 
-Deletion of a macro takes effect immediately. Any subsequent uses of the macro after the `%DELMACRO` directive will not be replaced. Deleted macros can be defined again by using the `%MACRO` directive as normal. You do not *need* to delete a macro in order to redefine it, however.
+Deletion of a macro takes effect immediately. Any subsequent uses of the macro after the `%DELMACRO` directive is used will not be replaced. This includes macros nested within other macros, even if the now deleted macro existed when the containing macros were defined. Deleted macros can be defined again by using the `%MACRO` directive as normal, however you do not *need* to delete a macro in order to redefine it.
 
 The `%DELMACRO` directive can be used from within a macro, however, as with everything else inside macros, it will not be executed until the macro is used, and will be executed *every* time the macro is used.
 
