@@ -320,8 +320,14 @@ namespace AssEmbly
                 throw new InvalidOperationException(Strings.Assembler_Error_Finalized);
             }
 
+            List<string> newLines = lines.ToList();
+            if (newLines.Count == 0)
+            {
+                return;
+            }
+
             dynamicLines.Clear();
-            dynamicLines.AddRange(lines.ToList());
+            dynamicLines.AddRange(newLines);
 
             importStack.Clear();
             baseFileLine = 1;
