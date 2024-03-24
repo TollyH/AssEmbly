@@ -66,12 +66,6 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [%PAD - Byte Padding](#pad---byte-padding)
     - [%DAT - Byte Insertion](#dat---byte-insertion)
     - [%NUM - Number Insertion](#num---number-insertion)
-    - [%MACRO - Macro Definition](#macro---macro-definition)
-      - [Single-line Macros](#single-line-macros)
-      - [Multi-line Macros](#multi-line-macros)
-      - [Disabling Macro Expansion](#disabling-macro-expansion)
-      - [Macro Parameters](#macro-parameters)
-      - [Deleting Macros](#deleting-macros)
     - [%IMP - Import AssEmbly Source File](#imp---import-assembly-source-file)
     - [%IBF - Import Binary File Contents](#ibf---import-binary-file-contents)
     - [%ANALYZER - Toggling Assembler Warnings](#analyzer---toggling-assembler-warnings)
@@ -79,13 +73,22 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [%LABEL\_OVERRIDE - Manual Label Address Assignment](#label_override---manual-label-address-assignment)
     - [%REPEAT - Repeat Lines of Source Code](#repeat---repeat-lines-of-source-code)
     - [%ASM\_ONCE - Guard a File from Being Assembled Multiple Times](#asm_once---guard-a-file-from-being-assembled-multiple-times)
-    - [%DEFINE - Assembler Variable Definition](#define---assembler-variable-definition)
-      - [Deleting Assembler Variables](#deleting-assembler-variables)
-      - [Assembler Constants](#assembler-constants)
     - [%VAROP - Assembler Variable Operation](#varop---assembler-variable-operation)
     - [%IF / %ELSE / %ELSE\_IF - Conditional Assembly](#if--else--else_if---conditional-assembly)
     - [%WHILE - Conditional Source Code Repetition](#while---conditional-source-code-repetition)
     - [%STOP - End Assembly](#stop---end-assembly)
+    - [%DEFINE - Assembler Variable Definition](#define---assembler-variable-definition)
+      - [Deleting Assembler Variables](#deleting-assembler-variables)
+      - [Assembler Constants](#assembler-constants)
+    - [%MACRO - Macro Definition](#macro---macro-definition)
+      - [Single-line Macros](#single-line-macros)
+      - [Multi-line Macros](#multi-line-macros)
+      - [Disabling Macro Expansion](#disabling-macro-expansion)
+      - [Macro Parameters](#macro-parameters)
+        - [Nesting Macros Inside Parameters](#nesting-macros-inside-parameters)
+        - [Making Parameters Required](#making-parameters-required)
+        - [Escaping Macro-Specific Special Characters](#escaping-macro-specific-special-characters)
+      - [Deleting Macros](#deleting-macros)
   - [Console Input and Output](#console-input-and-output)
   - [File Handling](#file-handling)
     - [Opening and Closing](#opening-and-closing)
@@ -1703,6 +1706,208 @@ Address | Bytes
 
 As with other operations in AssEmbly, `%NUM` stores numbers in memory using little endian encoding. See the section on moving with memory for more info on how this encoding works. You can also use `%NUM` to insert the resolved address of a label as an 8-byte value in memory. The label must use the ampersand prefix syntax (i.e. `:&LABEL_NAME`).
 
+### %IMP - Import AssEmbly Source File
+
+The `%IMP` directive inserts lines of AssEmbly source code from another file into wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
+
+For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
+
+Contents of `program.asm`:
+
+```text
+MVQ rg0, :NUMBER_ONE
+MVQ rg1, :NUMBER_TWO
+HLT  ; Prevent program executing into number data
+
+%IMP "numbers.asm"
+```
+
+Contents of `numbers.asm`:
+
+```text
+:NUMBER_ONE
+%NUM 123
+
+:NUMBER_TWO
+%NUM 456
+```
+
+When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
+
+```text
+MVQ rg0, :NUMBER_ONE
+MVQ rg1, :NUMBER_TWO
+HLT  ; Prevent program executing into number data
+
+%IMP "numbers.asm"
+:NUMBER_ONE
+%NUM 123
+
+:NUMBER_TWO
+%NUM 456
+```
+
+Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
+
+The `%IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
+
+Files given to the `%IMP` directive are assembled as AssEmbly source code, so **must** be AssEmbly source files, not already assembled binaries. To insert the raw binary contents of a file into the assembled program, use the `%IBF` directive. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
+
+Care should be taken to ensure that a file does not end up depending on itself, even if it is through other files, as this will result in an infinite loop of imports (also known as a circular dependency). The AssEmbly assembler will detect these and throw an error should one occur.
+
+An example of a circular dependency:
+
+`file_one.asm`:
+
+```text
+%IMP "file_two.asm"
+```
+
+`file_two.asm`:
+
+```text
+%IMP "file_three.asm"
+```
+
+`file_three.asm`:
+
+```text
+%IMP "file_one.asm"
+```
+
+Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
+
+### %IBF - Import Binary File Contents
+
+The `%IBF` directive inserts the raw binary contents of a file into a program wherever the directive is located. It differs from the `%IMP` directive in that the contents of the file is neither assembled nor otherwise manipulated in any way by the assembler, it is simply inserted as-is into the final assembled program. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.bin`) or a path relative to the directory of the source file being assembled (i.e. `file.bin`, `Folder/file.bin`, or `../Folder/file.bin`).
+
+For example, suppose you had two files in the same folder, one called `program.asm`, and one called `string.txt`.
+
+Contents of `program.asm`:
+
+```text
+MVQ rg0, :&STRING
+:LOOP
+MVQ rg1, *rg0
+TST rg1, rg1
+JZO :END
+WCC rg1
+ICR rg0
+JMP :LOOP
+:END
+HLT  ; Prevent program executing into string data
+
+:STRING
+%IBF "string.txt"
+%DAT 0
+```
+
+Contents of `string.txt`:
+
+```text
+Hello, world!
+```
+
+This program will print `Hello, world!` to the console when executed, with the string "Hello, world!" now being contained within the program itself.
+
+Assembling the program produces the following bytes:
+
+```text
+99 06 27 00 00 00 00 00 00 00 9B 07 06 70 07 07 04 26 00 00 00 00 00 00 00 CC 07 14 06 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 00
+```
+
+Breaking down into:
+
+```text
+Address | Bytes
+--------+----------------------------------------------------
+ 0x00   | 99             | 06  | 27 00 00 00 00 00 00 00
+        | MVQ (reg, lit) | rg0 | 39 (0x27)
+--------+----------------------------------------------------
+ 0x0A   | 9B             | 07  | 06
+        | MVQ (reg, ptr) | rg1 | rg0
+--------+----------------------------------------------------
+ 0x0D   | 70             | 07  | 07
+        | TST (reg, reg) | rg1 | rg1
+--------+----------------------------------------------------
+ 0x10   | 04             | 26 00 00 00 00 00 00 00
+        | JZO (adr)      | 38 (0x26)
+--------+----------------------------------------------------
+ 0x19   | CC             | 07
+        | WCC (reg)      | rg1
+--------+----------------------------------------------------
+ 0x1B   | 14             | 06
+        | ICR (reg)      | rg0
+--------+----------------------------------------------------
+ 0x1D   | 04             | 0A 00 00 00 00 00 00 00 00
+        | JMP (adr)      | 10 (0x0A)
+--------+----------------------------------------------------
+ 0x26   | 00
+        | HLT
+--------+----------------------------------------------------
+ 0x27   | 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
+        | H  e  l  l  o  ,     W  o  r  l  d  !
+--------+----------------------------------------------------
+ 0x34   | 00
+        | %DAT 0
+```
+
+Note that the file given to the `%IBF` directive does not need to contain plain text; any data can be inserted.
+
+### %ANALYZER - Toggling Assembler Warnings
+
+The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `%ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
+
+After using the directive, its effect remains active until assembly ends, or the same warning is toggled again with the directive further on in the code.
+
+For example:
+
+```text
+CMP rg0, 0  ; generates suggestion 0005
+
+%ANALYZER suggestion, 0005, 0
+CMP rg0, 0  ; generates no suggestion
+CMP rg0, 0  ; still generates no suggestion
+%ANALYZER suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
+
+CMP rg0, 0  ; generates suggestion 0005 again
+```
+
+Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `%ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
+
+### %MESSAGE - Manually Emit Assembler Warning
+
+The `%MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
+
+Two examples of the directive being used:
+
+```text
+%MESSAGE suggestion
+%MESSAGE warning, "This needs changing"
+```
+
+Manually emitted messages always have the code `0000`, regardless of severity. Messages, even with the error severity, will not cause the assembly process to fail and have no effect on the final program output.
+
+### %LABEL_OVERRIDE - Manual Label Address Assignment
+
+### %REPEAT - Repeat Lines of Source Code
+
+### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
+
+### %VAROP - Assembler Variable Operation
+
+### %IF / %ELSE / %ELSE_IF - Conditional Assembly
+
+### %WHILE - Conditional Source Code Repetition
+
+### %STOP - End Assembly
+
+### %DEFINE - Assembler Variable Definition
+
+#### Deleting Assembler Variables
+
+#### Assembler Constants
+
 ### %MACRO - Macro Definition
 
 The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Single-line and multi-line macros with the same name cannot exist simultaneously, and defining a new single-line macro with the same name as an existing multi-line macro or vice versa will result in the existing macro being replaced.
@@ -1963,6 +2168,8 @@ MVQ rg0, surround(1,2)surround(3,4)
 
 This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. Leading whitespace in macro replacement text is *never* trimmed, so it should be removed if it is not desired.
 
+##### Nesting Macros Inside Parameters
+
 The individual separated parameters of both single-line and multi-line macros are, themselves, also subjected to single-line macro expansion. This makes it possible to nest single-line macro usages within parameters. These nested macros can even be given parameters themselves, to a theoretically infinite depth.
 
 For example:
@@ -1978,6 +2185,8 @@ instruction(register(2), register(3))
 ```
 
 Here `instruction(register(2), register(3))` expands to `ADD rg2, rg3`, as the `register(2)` macro was expanded, followed by the `register(3)` macro, which then became parameters to the final expansion of `instruction`. A single parameter can also contain multiple single-line macros if desired, as they follow the same single-line macro expansion logic as regular lines.
+
+##### Making Parameters Required
 
 By default, if a parameter is referenced by a macro but it is not given when the macro is used, the parameter reference (i.e. the `$` sign and the following index) will still be removed, however no text will be inserted in its place. If this is not desired, you can mark a parameter as *required* by appending an exclamation mark (`!`) directly after the parameter index. The assembler will stop and throw an error if a required parameter is not provided when a macro is used.
 
@@ -2052,6 +2261,8 @@ my_macro2(123,456)  ; No error thrown
 
 Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid. Parameter references can be contained within the parameters of a nested macro, and they will be replaced just as they would be anywhere else within the containing macro. The replacement happens before the parameter text is inserted into the contents of the macro being nested.
 
+##### Escaping Macro-Specific Special Characters
+
 Because commas and brackets have special meanings within macro parameters, if you want to provide a comma or bracket character as a literal part of a parameter's content, you must precede each instance of one with a backslash. These backslashes will not be included as a part of the inserted parameter text. Backslashes themselves must be doubled up (i.e. having one backslash preceded by another: `\\`) in order to treat them as literal text.
 
 For example:
@@ -2099,208 +2310,6 @@ Deletion of a macro takes effect immediately. Any subsequent uses of the macro a
 The `%DELMACRO` directive can be used from within a macro, however, as with everything else inside macros, it will not be executed until the macro is used, and will be executed *every* time the macro is used.
 
 Using the `%DELMACRO` directive with a macro name that does not exist will immediately stop assembly and cause an error to be thrown. This will happen even if the macro *used* to exist, meaning you cannot delete the same macro twice (unless it has been redefined in the meantime).
-
-### %IMP - Import AssEmbly Source File
-
-The `%IMP` directive inserts lines of AssEmbly source code from another file into wherever the directive is placed. It allows a program to be split across multiple files, as well as allowing code to be reused across multiple source files without having to copy the code into each file. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.asm`) or a path relative to the directory of the source file being assembled (i.e. `file.asm`, `Folder/file.asm`, or `../Folder/file.asm`).
-
-For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
-
-Contents of `program.asm`:
-
-```text
-MVQ rg0, :NUMBER_ONE
-MVQ rg1, :NUMBER_TWO
-HLT  ; Prevent program executing into number data
-
-%IMP "numbers.asm"
-```
-
-Contents of `numbers.asm`:
-
-```text
-:NUMBER_ONE
-%NUM 123
-
-:NUMBER_TWO
-%NUM 456
-```
-
-When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
-
-```text
-MVQ rg0, :NUMBER_ONE
-MVQ rg1, :NUMBER_TWO
-HLT  ; Prevent program executing into number data
-
-%IMP "numbers.asm"
-:NUMBER_ONE
-%NUM 123
-
-:NUMBER_TWO
-%NUM 456
-```
-
-Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
-
-The `%IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
-
-Files given to the `%IMP` directive are assembled as AssEmbly source code, so **must** be AssEmbly source files, not already assembled binaries. To insert the raw binary contents of a file into the assembled program, use the `%IBF` directive. It is recommended, though not a strict requirement, that import statements are placed at the end of a file, as that will make it easier to ensure that the imported contents of a file aren't executed by mistake as part of the main program.
-
-Care should be taken to ensure that a file does not end up depending on itself, even if it is through other files, as this will result in an infinite loop of imports (also known as a circular dependency). The AssEmbly assembler will detect these and throw an error should one occur.
-
-An example of a circular dependency:
-
-`file_one.asm`:
-
-```text
-%IMP "file_two.asm"
-```
-
-`file_two.asm`:
-
-```text
-%IMP "file_three.asm"
-```
-
-`file_three.asm`:
-
-```text
-%IMP "file_one.asm"
-```
-
-Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
-
-### %IBF - Import Binary File Contents
-
-The `%IBF` directive inserts the raw binary contents of a file into a program wherever the directive is located. It differs from the `%IMP` directive in that the contents of the file is neither assembled nor otherwise manipulated in any way by the assembler, it is simply inserted as-is into the final assembled program. The directive takes a single string operand (which must be enclosed in quotes), which can either be a full path (i.e. `Drive:/Folder/Folder/file.bin`) or a path relative to the directory of the source file being assembled (i.e. `file.bin`, `Folder/file.bin`, or `../Folder/file.bin`).
-
-For example, suppose you had two files in the same folder, one called `program.asm`, and one called `string.txt`.
-
-Contents of `program.asm`:
-
-```text
-MVQ rg0, :&STRING
-:LOOP
-MVQ rg1, *rg0
-TST rg1, rg1
-JZO :END
-WCC rg1
-ICR rg0
-JMP :LOOP
-:END
-HLT  ; Prevent program executing into string data
-
-:STRING
-%IBF "string.txt"
-%DAT 0
-```
-
-Contents of `string.txt`:
-
-```text
-Hello, world!
-```
-
-This program will print `Hello, world!` to the console when executed, with the string "Hello, world!" now being contained within the program itself.
-
-Assembling the program produces the following bytes:
-
-```text
-99 06 27 00 00 00 00 00 00 00 9B 07 06 70 07 07 04 26 00 00 00 00 00 00 00 CC 07 14 06 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 00
-```
-
-Breaking down into:
-
-```text
-Address | Bytes
---------+----------------------------------------------------
- 0x00   | 99             | 06  | 27 00 00 00 00 00 00 00
-        | MVQ (reg, lit) | rg0 | 39 (0x27)
---------+----------------------------------------------------
- 0x0A   | 9B             | 07  | 06
-        | MVQ (reg, ptr) | rg1 | rg0
---------+----------------------------------------------------
- 0x0D   | 70             | 07  | 07
-        | TST (reg, reg) | rg1 | rg1
---------+----------------------------------------------------
- 0x10   | 04             | 26 00 00 00 00 00 00 00
-        | JZO (adr)      | 38 (0x26)
---------+----------------------------------------------------
- 0x19   | CC             | 07
-        | WCC (reg)      | rg1
---------+----------------------------------------------------
- 0x1B   | 14             | 06
-        | ICR (reg)      | rg0
---------+----------------------------------------------------
- 0x1D   | 04             | 0A 00 00 00 00 00 00 00 00
-        | JMP (adr)      | 10 (0x0A)
---------+----------------------------------------------------
- 0x26   | 00
-        | HLT
---------+----------------------------------------------------
- 0x27   | 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21
-        | H  e  l  l  o  ,     W  o  r  l  d  !
---------+----------------------------------------------------
- 0x34   | 00
-        | %DAT 0
-```
-
-Note that the file given to the `%IBF` directive does not need to contain plain text; any data can be inserted.
-
-### %ANALYZER - Toggling Assembler Warnings
-
-The AssEmbly assembler checks for common issues with your source code when you assemble it in order to alert you of potential issues and improvements that can be made. There may be some situations, however, where you want to suppress these issues from being detected. This can be done within the source code using the `%ANALYZER` directive. The directive takes three operands: the severity of the warning (either `error`, `warning`, or `suggestion`); the numerical code for the warning (this is a 4-digit number printed alongside the message); and whether to enable (`1`), disable (`0`) or restore the warning to its state as it was at the beginning of assembly (`r`).
-
-After using the directive, its effect remains active until assembly ends, or the same warning is toggled again with the directive further on in the code.
-
-For example:
-
-```text
-CMP rg0, 0  ; generates suggestion 0005
-
-%ANALYZER suggestion, 0005, 0
-CMP rg0, 0  ; generates no suggestion
-CMP rg0, 0  ; still generates no suggestion
-%ANALYZER suggestion, 0005, 1  ; 'r' would also work if the suggestion isn't disabled via a CLI argument
-
-CMP rg0, 0  ; generates suggestion 0005 again
-```
-
-Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `%ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
-
-### %MESSAGE - Manually Emit Assembler Warning
-
-The `%MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
-
-Two examples of the directive being used:
-
-```text
-%MESSAGE suggestion
-%MESSAGE warning, "This needs changing"
-```
-
-Manually emitted messages always have the code `0000`, regardless of severity. Messages, even with the error severity, will not cause the assembly process to fail and have no effect on the final program output.
-
-### %LABEL_OVERRIDE - Manual Label Address Assignment
-
-### %REPEAT - Repeat Lines of Source Code
-
-### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
-
-### %DEFINE - Assembler Variable Definition
-
-#### Deleting Assembler Variables
-
-#### Assembler Constants
-
-### %VAROP - Assembler Variable Operation
-
-### %IF / %ELSE / %ELSE_IF - Conditional Assembly
-
-### %WHILE - Conditional Source Code Repetition
-
-### %STOP - End Assembly
 
 ## Console Input and Output
 
