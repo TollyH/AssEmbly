@@ -17,7 +17,7 @@ This document describes version `0.2` of the ADI file format, used up through ve
 
 ## File Layout
 
-ADI files are UTF-8 encoded and follow a strict standard layout. Newlines should be represented with a single `LF` (`0x0A`) byte on all platforms.
+ADI files are UTF-8 encoded and follow a strict standard layout. Newlines should be represented with a single `CR LF` (`0x0D 0x0A`) byte pair on all platforms.
 
 The general layout of the file is as follows:
 
