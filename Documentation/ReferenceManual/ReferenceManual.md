@@ -73,13 +73,15 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
     - [%LABEL\_OVERRIDE - Manual Label Address Assignment](#label_override---manual-label-address-assignment)
     - [%REPEAT - Repeat Lines of Source Code](#repeat---repeat-lines-of-source-code)
     - [%ASM\_ONCE - Guard a File from Being Assembled Multiple Times](#asm_once---guard-a-file-from-being-assembled-multiple-times)
-    - [%VAROP - Assembler Variable Operation](#varop---assembler-variable-operation)
-    - [%IF / %ELSE / %ELSE\_IF - Conditional Assembly](#if--else--else_if---conditional-assembly)
-    - [%WHILE - Conditional Source Code Repetition](#while---conditional-source-code-repetition)
-    - [%STOP - End Assembly](#stop---end-assembly)
     - [%DEFINE - Assembler Variable Definition](#define---assembler-variable-definition)
       - [Deleting Assembler Variables](#deleting-assembler-variables)
       - [Assembler Constants](#assembler-constants)
+    - [%VAROP - Assembler Variable Operation](#varop---assembler-variable-operation)
+    - [%IF / %ELSE / %ELSE\_IF - Conditional Assembly](#if--else--else_if---conditional-assembly)
+      - [Checking Variable Existence](#checking-variable-existence)
+      - [Comparing Values](#comparing-values)
+    - [%WHILE - Conditional Source Code Repetition](#while---conditional-source-code-repetition)
+    - [%STOP - End Assembly](#stop---end-assembly)
     - [%MACRO - Macro Definition](#macro---macro-definition)
       - [Single-line Macros](#single-line-macros)
       - [Multi-line Macros](#multi-line-macros)
@@ -1890,23 +1892,54 @@ Manually emitted messages always have the code `0000`, regardless of severity. M
 
 ### %LABEL_OVERRIDE - Manual Label Address Assignment
 
+By default, labels store the address of the instruction that they are directly followed by. It is, however, possible to store a custom address within a label. To do so, define one or more labels as normal, then follow them directly with a single `%LABEL_OVERRIDE` directive. The directive takes one operand, the address to assign to all the directly preceding labels.
+
+For example:
+
+```text
+:MY_LABEL
+:MY_OTHER_LABEL
+%LABEL_OVERRIDE 1234
+```
+
+This program defines two labels (`MY_LABEL` and `MY_OTHER_LABEL`) that will point to the address `1234` (`0x4D2`) when used, despite the labels not being defined at a line with that address.
+
+The address given can also be a reference to another label. The label should be in ampersand-prefixed form. For example:
+
+```text
+:POINTS_TO_SOME_CODE
+%LABEL_OVERRIDE :&SOME_CODE
+
+MVQ rg2, rg4
+MVQ rg5, rg3
+
+:SOME_CODE
+MVQ rg0, rg3
+```
+
+Both `SOME_CODE` and `POINTS_TO_SOME_CODE` will store the same address here, despite `POINTS_TO_SOME_CODE` being defined before `SOME_CODE` and not being directly above the target code. It is possible to reference labels that are not yet defined, as long as they are defined by the time assembly finishes.
+
 ### %REPEAT - Repeat Lines of Source Code
 
 ### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
-
-### %VAROP - Assembler Variable Operation
-
-### %IF / %ELSE / %ELSE_IF - Conditional Assembly
-
-### %WHILE - Conditional Source Code Repetition
-
-### %STOP - End Assembly
 
 ### %DEFINE - Assembler Variable Definition
 
 #### Deleting Assembler Variables
 
 #### Assembler Constants
+
+### %VAROP - Assembler Variable Operation
+
+### %IF / %ELSE / %ELSE_IF - Conditional Assembly
+
+#### Checking Variable Existence
+
+#### Comparing Values
+
+### %WHILE - Conditional Source Code Repetition
+
+### %STOP - End Assembly
 
 ### %MACRO - Macro Definition
 
