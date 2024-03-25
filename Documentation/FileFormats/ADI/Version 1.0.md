@@ -161,11 +161,11 @@ For example:
 
 The format version of ADI files is contained in plain-text in the file header.
 
-| Format version | First AssEmbly Version | Last AssEmbly Version | Changes                                                                    |
-|----------------|------------------------|-----------------------|----------------------------------------------------------------------------|
-| `0.1`          | `pre-1.0.0`            | `pre-1.0.0`           | -                                                                          |
-| `0.2`          | `pre-1.0.0`            | `3.1.0`               | Added the address that each import starts on in section 3                  |
-| `1.0`          | `3.2.0`                | *current*             | Added a fourth section mapping addresses to a line number in a source file |
+| Format version | First AssEmbly Version | Last AssEmbly Version | Changes                                                                                                                        |
+|----------------|------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| `0.1`          | `pre-1.0.0`            | `pre-1.0.0`           | -                                                                                                                              |
+| `0.2`          | `pre-1.0.0`            | `3.1.0`               | Added the address that each import starts on in section 3                                                                      |
+| `1.0`          | `3.2.0`                | *current*             | Added a fourth section mapping addresses to a line number in a source file. Changed the newline sequence to `LF` from `CR LF`. |
 
 ---
 
