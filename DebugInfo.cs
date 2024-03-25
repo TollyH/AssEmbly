@@ -89,7 +89,7 @@ namespace AssEmbly
             }
 
             _ = fileText.Append($"\n{Separator}\n{ResolvedImportsHeader}");
-            foreach ((string sourceName, string resolvedName, ulong address) in resolvedImports)
+            foreach ((string sourceName, string resolvedName, ulong address) in resolvedImports.DistinctBy(x => x.Address))
             {
                 _ = fileText.Append($"\n{address:X16} @ \"{sourceName}\" -> \"{resolvedName}\"");
             }
