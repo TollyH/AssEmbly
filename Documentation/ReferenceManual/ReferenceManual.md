@@ -1921,6 +1921,103 @@ Both `SOME_CODE` and `POINTS_TO_SOME_CODE` will store the same address here, des
 
 ### %REPEAT - Repeat Lines of Source Code
 
+The `%REPEAT` directive is used to assemble a block of lines multiple times, without needing to duplicate the lines within the source code. The directive takes a single operand, the number of times to repeat the lines. This number cannot be zero. The lines to repeat start immediately after the `%REPEAT` directive, and are ended by using the **`%ENDREPEAT`** directive. Each repetition is assembled immediately after the last.
+
+For example:
+
+```text
+SUB rfp, 8
+%REPEAT 3
+    ICR rfp
+    MVB rg0, *rfp
+    MVB *rg1, rg0
+    ICR rg1
+%ENDREPEAT
+ADD rg1, 16
+```
+
+The above example is equivalent to the following program and will produce the same program bytes when assembled:
+
+```text
+SUB rfp, 8
+ICR rfp
+MVB rg0, *rfp
+MVB *rg1, rg0
+ICR rg1
+ICR rfp
+MVB rg0, *rfp
+MVB *rg1, rg0
+ICR rg1
+ICR rfp
+MVB rg0, *rfp
+MVB *rg1, rg0
+ICR rg1
+ADD rg1, 16
+```
+
+The lines within the `%REPEAT` block are now present 3 times within the program (the number of repeats given to the directive includes the initial instance). Assembler directives can also be present within `%REPEAT` blocks and will be processed multiple times by the assembler, just like regular instructions.
+
+Keep in mind that the leading whitespace on each line inside the repeat block (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+
+`%REPEAT` blocks can be nested within each other, with nested `%REPEAT` blocks themselves being repeated along with any surrounding lines.
+
+For example:
+
+```text
+SUB rfp, 8
+
+%REPEAT 4
+    ICR rfp
+    MVB rg0, *rfp
+    %REPEAT 3
+        DCR rg2
+    %ENDREPEAT
+    MVB *rg1, rg0
+    ICR rg1
+%ENDREPEAT
+
+ADD rg1, 16
+```
+
+The above example is equivalent to the following program and will produce the same program bytes when assembled:
+
+```text
+SUB rfp, 8
+
+ICR rfp
+MVB rg0, *rfp
+DCR rg2
+DCR rg2
+DCR rg2
+MVB *rg1, rg0
+ICR rg1
+ICR rfp
+MVB rg0, *rfp
+DCR rg2
+DCR rg2
+DCR rg2
+MVB *rg1, rg0
+ICR rg1
+ICR rfp
+MVB rg0, *rfp
+DCR rg2
+DCR rg2
+DCR rg2
+MVB *rg1, rg0
+ICR rg1
+ICR rfp
+MVB rg0, *rfp
+DCR rg2
+DCR rg2
+DCR rg2
+MVB *rg1, rg0
+ICR rg1
+
+ADD rg1, 16
+```
+
+Lines within the first `%REPEAT` block are all repeated 4 times. The line within the second `%REPEAT` block is repeated 3 times *for every repeat of the outer `%REPEAT` block*, meaning the line within the second block is repeated a total of 12 (`4 * 3`) times.
+
 ### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
 
 ### %DEFINE - Assembler Variable Definition
@@ -2851,7 +2948,7 @@ There are some sequences of characters that have special meanings when found ins
 | `\"`            | Double quote               | Used to insert a double quote into a string without causing the string to end. Not required in single character literals.                                             |
 | `\'`            | Single quote               | Used to insert a single quote into a single character literal without causing the literal to end. Not required in string literals.                                    |
 | `\\`            | Backslash                  | For a string to contain a backslash, you must escape it so it isn't treated as the start of an escape sequence.                                                       |
-| `\@`            | At Sign                    | For a string to contain an at sign, you must escape it so it isn't treated as an assembler variable/constant.                                                         |
+| `\@`            | At sign                    | For a string to contain an at sign, you must escape it so it isn't treated as an assembler variable/constant.                                                         |
 | `\0`            | Null                       | ASCII 0x00. Should be used to terminate every string.                                                                                                                 |
 | `\a`            | Alert                      | ASCII 0x07.                                                                                                                                                           |
 | `\b`            | Backspace                  | ASCII 0x08.                                                                                                                                                           |
