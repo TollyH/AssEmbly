@@ -3,7 +3,6 @@
 ; Print input prompt
 CAL :FUNC_PRINT, :&PROMPT_STRING
 
-:END_WRITE
 CAL :FUNC_INPUT, :&FILE_PATH  ; Call input function to get file path from user
 FEX rg1, :FILE_PATH  ; Check if file exists, storing 1 in rg1 if it does, 0 otherwise
 TST rg1, rg1
@@ -17,7 +16,7 @@ RFC rg0  ; Read a single character from the file
 WCC rg0  ; Write the character to the console
 TST rsf, _ffe  ; Check if the "file end" status bit is set
 JZO :READ_PRINT_CHAR  ; If bit isn't set, continue looping
-:END
+
 CFL  ; Close the file
 HLT  ; Stop execution
 

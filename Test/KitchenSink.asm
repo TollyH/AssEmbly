@@ -7,6 +7,9 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
+; Disable unused label suggestion
+%ANALYZER suggestion, 0018, 0
+
 MVQ rg0, 69
 
 !>

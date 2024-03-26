@@ -1588,4 +1588,7 @@ Current while stack (deepest while first):</value>
     <data name="Debugger_Execution_Position" xml:space="preserve">
         <value>This instruction was assembled from {0} at line {1}</value>
     </data>
+    <data name="AssemblerWarnings_Suggestion_0018" xml:space="preserve">
+        <value>Label "{0}" is defined but never used.</value>
+    </data>
 </root>

@@ -284,7 +284,13 @@ namespace AssEmbly
             {
                 ResolveLabelReferences();
                 programBytes = program.ToArray();
-                warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint));
+
+                IEnumerable<string> labelNameReferences = labelReferences.Select(l => l.LabelName);
+                IEnumerable<string> labelNameLinks = labelLinks.Values.Select(l => l.Target);
+
+                warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint,
+                    labelNameReferences.Union(labelNameLinks).ToHashSet()));
+
                 Finalized = true;
             }
             else
@@ -383,6 +389,8 @@ namespace AssEmbly
                             lineIsEntry = true;
                         }
                         labels[labelName] = (uint)program.Count;
+
+                        warningGenerator.NewLabel(labelName, currentFilePosition, currentMacro?.MacroName);
 
                         lineIsLabelled = true;
                         continue;

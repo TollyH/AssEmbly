@@ -76,8 +76,11 @@ namespace AssEmbly
 
         private readonly Dictionary<(FilePosition Position, int MacroDepth), string> lineText = new();
 
+        private readonly Dictionary<string, (FilePosition Position, string? MacroName)> labelDefinitionPositions = new();
+
         private byte[] finalProgram = Array.Empty<byte>();
         private ulong entryPoint = 0;
+        private HashSet<string> referencedLabels = new();
 
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
@@ -162,16 +165,28 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Call this whenever a new label is defined.
+        /// </summary>
+        /// <param name="filePosition">The line and file that the instruction was assembled from.</param>
+        /// <param name="macroName">The name of the current macro being expanded, or <see langword="null"/> if no macro is.</param>
+        public void NewLabel(string labelName, FilePosition filePosition, string? macroName)
+        {
+            labelDefinitionPositions[labelName] = (filePosition, macroName);
+        }
+
+        /// <summary>
         /// Call this after all program instructions have been given to <see cref="NextInstruction"/>
         /// to run analyzers that need the entire program to work.
         /// </summary>
         /// <param name="finalProgram">The fully assembled program, with all label locations inserted.</param>
         /// <param name="entryPoint">The address that the program will start executing from.</param>
+        /// <param name="referencedLabels">A set of all label names referenced at any point by the program.</param>
         /// <returns>An array of any warnings caused by final analysis.</returns>
-        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint)
+        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint, HashSet<string> referencedLabels)
         {
             this.finalProgram = finalProgram;
             this.entryPoint = entryPoint;
+            this.referencedLabels = referencedLabels;
 
             List<Warning> warnings = new();
 
@@ -275,6 +290,7 @@ namespace AssEmbly
             {
                 { 0003, Analyzer_Final_Suggestion_0003 },
                 { 0004, Analyzer_Final_Suggestion_0004 },
+                { 0018, Analyzer_Final_Suggestion_0018 },
             };
         }
 
@@ -1042,6 +1058,21 @@ namespace AssEmbly
             // Suggestion 0017: Use `MVD {reg}, {reg}` instead of `AND {reg}, 0xFFFFFFFF`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
                 && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFFFFFF;
+        }
+
+        private List<Warning> Analyzer_Final_Suggestion_0018()
+        {
+            // Suggestion 0018: Label "{label}" is defined but never used.
+            List<Warning> warnings = new();
+            // Iterate label definitions that are not present in the referenced labels set
+            foreach ((string labelName, (FilePosition labelPosition, string? labelMacroName))
+                in labelDefinitionPositions.ExceptBy(referencedLabels, kv => kv.Key))
+            {
+                string labelDefinitionText = ':' + labelName;
+                warnings.Add(new Warning(WarningSeverity.Suggestion, 0018, labelPosition,
+                    labelDefinitionText, Array.Empty<string>(), labelDefinitionText, labelMacroName));
+            }
+            return warnings;
         }
     }
 }
