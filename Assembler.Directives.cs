@@ -9,6 +9,7 @@ namespace AssEmbly
         private delegate byte[] DataDirective(string[] operands, List<(string, ulong)> referencedLabels);
 
         private readonly Dictionary<string, StateDirective> stateDirectives;
+        private readonly Dictionary<string, StateDirective> obsoleteStateDirectives;
 
         private static readonly Dictionary<string, DataDirective> dataDirectives = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -18,6 +19,14 @@ namespace AssEmbly
             { "%IBF", DataDirective_RawFileInsertion },
         };
 
+        private static readonly Dictionary<string, DataDirective> obsoleteDataDirectives = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "DAT", DataDirective_ByteAndStringInsertion },
+            { "PAD", DataDirective_ZeroPadding },
+            { "NUM", DataDirective_NumberInsertion },
+            { "IBF", DataDirective_RawFileInsertion },
+        };
+
         private static readonly string[] closingIfDirectives = new[] { "%ENDIF", "%ELSE", "%ELSE_IF" };
         private static readonly string[] openingIfDirectives = new[] { "%IF" };
         private static readonly string[] ifTerminatingDirectives = new[] { "%ENDIF" };
@@ -25,7 +34,8 @@ namespace AssEmbly
         private static readonly string[] whileTerminatingDirectives = new[] { "%ENDWHILE" };
 
         // Used to keep the dictionary definition within this file out of the constructor whilst keeping stateDirectives readonly
-        private void InitializeStateDirectives(out Dictionary<string, StateDirective> dictionary)
+        private void InitializeStateDirectives(out Dictionary<string, StateDirective> dictionary,
+            out Dictionary<string, StateDirective> obsoleteDictionary)
         {
             dictionary = new Dictionary<string, StateDirective>(StringComparer.OrdinalIgnoreCase)
             {
@@ -50,6 +60,17 @@ namespace AssEmbly
                 { "%WHILE", StateDirective_ConditionalRepeatLines },
                 { "%ENDWHILE", StateDirective_EndConditionalLineRepeat },
                 { "%ENDMACRO", StateDirective_DanglingClosingDirective },
+            };
+
+            // These directives were replaced with new %-prefixed forms in 3.2.0 but are kept for backwards compatibility.
+            // New directives should not be added here.
+            obsoleteDictionary = new Dictionary<string, StateDirective>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "IMP", StateDirective_ImportSourceFile },
+                { "MAC", StateDirective_DefineMacro },
+                { "ANALYZER", StateDirective_SetAnalyzerState },
+                { "MESSAGE", StateDirective_EmitAssemblerMessage },
+                { "DEBUG", StateDirective_PrintAssemblerState },
             };
         }
 

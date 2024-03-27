@@ -356,7 +356,8 @@ namespace AssEmbly
             lineOperands[(filePosition, macroLineDepth)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic);
-            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
+            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("IMP", StringComparison.OrdinalIgnoreCase);
             instructionIsAsmOnce = mnemonic.Equals("%ASM_ONCE", StringComparison.OrdinalIgnoreCase);
 
             instructionIsString = false;
@@ -365,7 +366,9 @@ namespace AssEmbly
             if (instructionIsData)
             {
                 dataInsertionLines.Add((filePosition, macroName, macroLineDepth));
-                if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
+                if (operands[0][0] == '"' && (
+                    mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase)))
                 {
                     instructionIsString = true;
                     if (lastInstructionWasString)
@@ -824,7 +827,10 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0002()
         {
             // Suggestion 0002: Use the `%PAD` directive instead of chaining `%DAT 0` directives.
-            if (mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase) && lastMnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
+            if ((mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase))
+                && (lastMnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || lastMnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase)))
             {
                 if (operands[0][0] is ':' or '"' || lastOperands[0][0] is ':' or '"')
                 {
@@ -1003,7 +1009,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0011()
         {
             // Suggestion 0011: Remove leading 0 digits from denary number.
-            if (mnemonic.Equals("%ANALYZER", StringComparison.OrdinalIgnoreCase))
+            if (mnemonic.Equals("%ANALYZER", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("ANALYZER", StringComparison.OrdinalIgnoreCase))
             {
                 // Analyzer codes are usually given with leading zeros, so don't suggest removing them
                 return false;
@@ -1023,7 +1030,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0012()
         {
             // Suggestion 0012: Remove useless `%PAD 0` directive.
-            if (mnemonic.Equals("%PAD", StringComparison.OrdinalIgnoreCase))
+            if (mnemonic.Equals("%PAD", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("PAD", StringComparison.OrdinalIgnoreCase))
             {
                 if (operands[0][0] == ':')
                 {

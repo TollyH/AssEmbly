@@ -339,7 +339,11 @@
         /// <summary>
         /// Directives that result in data (non-code bytes) being inserted into the assembly.
         /// </summary>
-        internal static readonly HashSet<string> dataInsertionDirectives = new(StringComparer.OrdinalIgnoreCase) { "%DAT", "%PAD", "%NUM", "%IBF" };
+        internal static readonly HashSet<string> dataInsertionDirectives = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "%DAT", "%PAD", "%NUM", "%IBF",
+            "DAT", "PAD", "NUM", "IBF"
+        };
         /// <summary>
         /// Directives that take a literal name of an assembler variable as an operand, without the '@' prefix.
         /// Mapped to the 0-based index of the operand that is an unprefixed variable name.

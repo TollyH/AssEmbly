@@ -90,6 +90,7 @@ namespace AssEmbly
             HashSet<int> disabledSuggestions = new();
             bool useV1Format = false;
             bool useV1Stack = false;
+            bool enableObsoleteDirectives = false;
             int macroExpansionLimit = GetMacroLimit(args);
             int whileRepeatLimit = GetWhileLimit(args);
             foreach (string a in args)
@@ -151,6 +152,10 @@ namespace AssEmbly
                 {
                     useV1Stack = true;
                 }
+                else if (a.Equals("--allow-old-directives", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableObsoleteDirectives = true;
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -168,6 +173,7 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
+                assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -346,6 +352,7 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
+                assembler.EnableObsoleteDirectives = args.Contains("--allow-old-directives");
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);

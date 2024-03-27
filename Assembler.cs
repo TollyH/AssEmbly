@@ -72,9 +72,11 @@ namespace AssEmbly
         // This limit is per program, not per loop
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
-        // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion
-        // or assembler variable insertion
-        private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO" };
+        public bool EnableObsoleteDirectives { get; set; } = false;
+
+        // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion,
+        // assembler variable insertion, or operand syntax validation
+        private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO", "MAC" };
 
         // The lines to assemble may change during assembly, for example importing a file
         // will extend the list of lines to assemble as and when the import is reached.
@@ -189,7 +191,7 @@ namespace AssEmbly
                 { "CURRENT_ADDRESS", () => (ulong)program.Count },
             };
 
-            InitializeStateDirectives(out stateDirectives);
+            InitializeStateDirectives(out stateDirectives, out obsoleteStateDirectives);
         }
 
         public Assembler() : this(false, false,
@@ -422,7 +424,7 @@ namespace AssEmbly
                     }
 
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
-                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures);
+                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures, EnableObsoleteDirectives);
 
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
@@ -490,14 +492,15 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands, out AAPFeatures usedExtensions)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
+            out AAPFeatures usedExtensions, bool enableObsoleteDirectives = false)
         {
             OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string LabelName, ulong AddressOffset)> referencedLabels = new();
             usedExtensions = AAPFeatures.None;
 
-            if (mnemonic[0] == '%' && ProcessDataDirective(mnemonic, operands, referencedLabels, out byte[]? newBytes))
+            if (ProcessDataDirective(mnemonic, operands, referencedLabels, out byte[]? newBytes, enableObsoleteDirectives))
             {
                 // Directive found and processed, move onto next statement
                 return (newBytes, referencedLabels);
@@ -584,9 +587,10 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
+            bool enableObsoleteDirectives = false)
         {
-            return AssembleStatement(mnemonic, operands, out _);
+            return AssembleStatement(mnemonic, operands, out _, enableObsoleteDirectives);
         }
 
         /// <summary>
@@ -664,8 +668,7 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.Equals("%MACRO", StringComparison.OrdinalIgnoreCase)
-                            || mnemonic.Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase);
+                        isMacro = automaticMacroExcludedMnemonics.Contains(mnemonic);
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -1657,7 +1660,8 @@ namespace AssEmbly
         /// </returns>
         private bool ProcessStateDirective(string mnemonic, string[] operands, string preVariableLine)
         {
-            if (stateDirectives.TryGetValue(mnemonic, out StateDirective? directiveFunc))
+            if (stateDirectives.TryGetValue(mnemonic, out StateDirective? directiveFunc)
+                || (EnableObsoleteDirectives && obsoleteStateDirectives.TryGetValue(mnemonic, out directiveFunc)))
             {
                 directiveFunc(mnemonic, operands, preVariableLine);
                 return true;
@@ -1848,9 +1852,12 @@ namespace AssEmbly
         /// <item><see langword="false"/> - Directive was not recognised and assembly of the statement should continue</item>
         /// </list>
         /// </returns>
-        private static bool ProcessDataDirective(string mnemonic, string[] operands, List<(string, ulong)> referencedLabels, [MaybeNullWhen(false)] out byte[] newBytes)
+        private static bool ProcessDataDirective(string mnemonic, string[] operands,
+            List<(string, ulong)> referencedLabels, [MaybeNullWhen(false)] out byte[] newBytes,
+            bool enableObsolete = false)
         {
-            if (dataDirectives.TryGetValue(mnemonic, out DataDirective? directiveFunc))
+            if (dataDirectives.TryGetValue(mnemonic, out DataDirective? directiveFunc)
+                || (enableObsolete && obsoleteDataDirectives.TryGetValue(mnemonic, out directiveFunc)))
             {
                 newBytes = directiveFunc(operands, referencedLabels);
                 return true;
