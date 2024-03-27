@@ -272,6 +272,7 @@ namespace AssEmbly
                 { 0015, Analyzer_Rolling_Suggestion_0015 },
                 { 0016, Analyzer_Rolling_Suggestion_0016 },
                 { 0017, Analyzer_Rolling_Suggestion_0017 },
+                { 0019, Analyzer_Rolling_Suggestion_0019 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -305,6 +306,7 @@ namespace AssEmbly
         private bool instructionIsImport;
         private bool instructionIsString;
         private bool instructionIsExecutable;
+        private bool instructionIsAsmOnce;
         private (FilePosition Position, string? MacroName, int MacroLineDepth)? entryPointDefinitionPosition = null;
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth)> dataInsertionLines = new();
         private readonly HashSet<ulong> executableAddresses = new();
@@ -315,6 +317,7 @@ namespace AssEmbly
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> writesToAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> readsFromAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpsCalls = new();
+        private readonly Dictionary<string, int> firstAsmOnceLineInFiles = new();
 
         private ulong currentAddress;
         private bool lastInstructionWasTerminator;
@@ -354,6 +357,8 @@ namespace AssEmbly
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic);
             instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
+            instructionIsAsmOnce = mnemonic.Equals("%ASM_ONCE", StringComparison.OrdinalIgnoreCase);
+
             instructionIsString = false;
             instructionIsExecutable = false;
 
@@ -401,6 +406,11 @@ namespace AssEmbly
             if (isEntry)
             {
                 entryPointDefinitionPosition = (filePosition, macroName, macroLineDepth);
+            }
+
+            if (instructionIsAsmOnce)
+            {
+                firstAsmOnceLineInFiles.TryAdd(filePosition.File, filePosition.Line);
             }
         }
 
@@ -1073,6 +1083,13 @@ namespace AssEmbly
                     labelDefinitionText, Array.Empty<string>(), labelDefinitionText, labelMacroName));
             }
             return warnings;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0019()
+        {
+            // Suggestion 0019: Uses of %ASM_ONCE beyond the first in a file will never be reached.
+            return instructionIsAsmOnce &&
+                firstAsmOnceLineInFiles.TryGetValue(filePosition.File, out int firstAsmOnceLine) && firstAsmOnceLine < filePosition.Line;
         }
     }
 }

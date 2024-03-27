@@ -1748,6 +1748,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to %ASM_ONCE directive is unreachable, as it is not the first one in the file..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0019 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0019", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0000 {
