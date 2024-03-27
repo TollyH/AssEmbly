@@ -2020,6 +2020,14 @@ Lines within the first `%REPEAT` block are all repeated 4 times. The line within
 
 ### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
 
+Due to the restriction that all label definitions must be unique, it is usually not possible to import a file that defines any labels multiple times. This can pose an issue, especially for files belonging to re-usable libraries, which may end up being depended on by multiple different files in the same project. Importing the same file many times also takes up unnecessary program memory, and may result in the inadvertent multiple execution of certain directives. These issues can be mitigated by using the `%ASM_ONCE` directive. When the assembler encounters an instance of this directive, it checks if it has already assembled the current imported file before. If it has, it immediately skips to the end of the file, thereby resuming assembly of the parent file. Any instructions located before the `%ASM_ONCE` directive in the file will still be assembled multiple times. The directive doesn't take any operands.
+
+In the specific case that the `%ASM_ONCE` directive is the first instruction in a file, it will prevent a circular import error being thrown if that file ends up importing itself. The assembler will simply skip over the entire contents of the file instead, preventing any infinite loops in the process.
+
+It is not possible to use the `%ASM_ONCE` directive in the initial (base) file, and doing so will result in the assembler throwing an error, immediately stopping the assembly process.
+
+Whether or not a file has been assembled before is determined by a case-sensitive check of the file's path. The `%ASM_ONCE` directive will **not** prevent a file with identical contents but located within a different file from being assembled. Furthermore, symbolic links will **not** be considered to be the same file as the file that they link to.
+
 ### %DEFINE - Assembler Variable Definition
 
 #### Deleting Assembler Variables
