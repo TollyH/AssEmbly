@@ -321,7 +321,7 @@ namespace AssEmbly
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
                 args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
-                !args.Contains("--unmapped-stack"));
+                !args.Contains("--unmapped-stack"), args.Contains("--auto-echo"));
 
             ExecuteProcessor(processor);
         }
@@ -372,7 +372,8 @@ namespace AssEmbly
             }
 
             Processor processor = new(
-                memSize, assemblyResult.EntryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"));
+                memSize, assemblyResult.EntryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"),
+                autoEcho: args.Contains("--auto-echo"));
             LoadProgramIntoProcessor(processor, assemblyResult.Program);
             ExecuteProcessor(processor);
         }
@@ -390,7 +391,7 @@ namespace AssEmbly
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
                 args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
-                !args.Contains("--unmapped-stack"));
+                !args.Contains("--unmapped-stack"), args.Contains("--auto-echo"));
 
             Debugger debugger = new(false, processor);
             if (args.Length >= 3 && !args[2].StartsWith('-'))
@@ -448,7 +449,7 @@ namespace AssEmbly
         {
             ulong memSize = GetMemorySize(args);
             Debugger debugger = new(true, memorySize: memSize, useV1CallStack: args.Contains("--v1-call-stack"),
-                mapStack: !args.Contains("--unmapped-stack"));
+                mapStack: !args.Contains("--unmapped-stack"), autoEcho: args.Contains("--auto-echo"));
             // Some program needs to be loaded or the processor won't run
             debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
             debugger.StartDebugger();

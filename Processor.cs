@@ -18,8 +18,10 @@ namespace AssEmbly
 
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
+
         public readonly bool UseV1CallStack;
         public readonly bool MapStack;
+        public readonly bool AutoEcho;
 
         private readonly ulong stackCallSize;
 
@@ -52,7 +54,8 @@ namespace AssEmbly
 
         public const ulong SignBit = unchecked((ulong)long.MinValue);
 
-        public Processor(ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false, bool mapStack = true)
+        public Processor(ulong memorySize, ulong entryPoint = 0,
+            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
         {
             Memory = new byte[memorySize];
             Registers = new ulong[Enum.GetNames(typeof(Register)).Length];
@@ -66,6 +69,7 @@ namespace AssEmbly
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
             MapStack = mapStack;
+            AutoEcho = autoEcho;
         }
 
         ~Processor()
@@ -1532,8 +1536,11 @@ namespace AssEmbly
                                                     }
                                                 }
                                             }
-                                            // Echo byte to console
-                                            stdout.WriteByte(currentByte);
+                                            if (AutoEcho)
+                                            {
+                                                // Echo byte to console
+                                                stdout.WriteByte(currentByte);
+                                            }
 
                                             WriteMemoryRegister(operandStart, currentByte);
                                             Registers[(int)Register.rpo]++;

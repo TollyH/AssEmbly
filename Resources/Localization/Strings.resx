@@ -162,6 +162,7 @@ execute - Execute an already assembled executable file
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    --auto-echo - Automatically write inputted characters back to the console.
 
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
@@ -172,6 +173,7 @@ run - Assemble then execute a source file written in AssEmbly. The assembled pro
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    --auto-echo - Automatically write inputted characters back to the console.
 
 debug - Step through an assembled executable file, pausing before each instruction begins execution.
     Usage: 'AssEmbly debug &lt;file-path&gt; [debug-info-file-path] [options]'
@@ -181,6 +183,7 @@ debug - Step through an assembled executable file, pausing before each instructi
     --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
     --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    --auto-echo - Automatically write inputted characters back to the console.
 
 disassemble - Generate an AssEmbly program listing from an already assembled executable.
     Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
@@ -195,6 +198,7 @@ repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly
     --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    --auto-echo - Automatically write inputted characters back to the console.
 
 license - Print the full GPLv3 license text that this software is licensed under.
 

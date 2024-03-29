@@ -28,17 +28,19 @@ namespace AssEmbly
         private readonly Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
         private ulong nextFreeRpoAddress;
 
-        public Debugger(bool inReplMode, ulong entryPoint = 0, bool useV1CallStack = false, bool mapStack = true)
+        public Debugger(bool inReplMode, ulong entryPoint = 0,
+            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
         {
             InReplMode = inReplMode;
-            DebuggingProcessor = new Processor(Program.DefaultMemorySize, entryPoint, useV1CallStack, mapStack);
+            DebuggingProcessor = new Processor(Program.DefaultMemorySize, entryPoint, useV1CallStack, mapStack, autoEcho);
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
-        public Debugger(bool inReplMode, ulong memorySize, ulong entryPoint = 0, bool useV1CallStack = false, bool mapStack = true)
+        public Debugger(bool inReplMode, ulong memorySize, ulong entryPoint = 0,
+            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
         {
             InReplMode = inReplMode;
-            DebuggingProcessor = new Processor(memorySize, entryPoint, useV1CallStack, mapStack);
+            DebuggingProcessor = new Processor(memorySize, entryPoint, useV1CallStack, mapStack, autoEcho);
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
         }
 
