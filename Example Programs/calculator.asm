@@ -60,6 +60,7 @@ SIGN_NEG rg1
 :NUM_2_NO_NEGATE
 CAL :FUNC_PRINT, :&STR_OPERATOR_PROMPT
 RCC rg4
+WCC rg4  ; Echo typed character
 WCC '\n'  ; Write newline after input
 
 CMP rg4, '+'
