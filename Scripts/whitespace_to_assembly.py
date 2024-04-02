@@ -1,6 +1,8 @@
 """
 This script converts a program written in the whitespace esoteric programming
 language to an equivalent AssEmbly program.
+
+Usage: whitespace_to_assembly.py <file_path>
 """
 import os
 import sys
