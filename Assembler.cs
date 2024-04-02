@@ -72,7 +72,12 @@ namespace AssEmbly
         // This limit is per program, not per loop
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
+        // Backwards compatibility
+        // <= 3.1.0
         public bool EnableObsoleteDirectives { get; set; } = false;
+        public bool EnableVariableExpansion { get; set; } = true;
+        // <= 1.1.0
+        public bool EnableEscapeSequences { get; set; } = true;
 
         // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion,
         // assembler variable insertion, or operand syntax validation
@@ -360,7 +365,7 @@ namespace AssEmbly
                     string preVariableLine = rawLine;
                     rawLine = ProcessAssemblerVariables(rawLine);
 
-                    string[] line = ParseLine(rawLine);
+                    string[] line = ParseLine(rawLine, EnableEscapeSequences);
                     if (line.Length == 0)
                     {
                         continue;
@@ -642,7 +647,7 @@ namespace AssEmbly
         /// If not empty, the first item will be the mnemonic.
         /// </returns>
         /// <exception cref="SyntaxError">The given line contains invalid formatting.</exception>
-        public static string[] ParseLine(string line)
+        public static string[] ParseLine(string line, bool enableEscapeSequences = true)
         {
             List<string> elements = new();
 
@@ -722,7 +727,7 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings.Assembler_Error_Quoted_Literal_Line_Length_One);
                     }
-                    _ = sb.Append(PreParseStringLiteral(line, ref i));
+                    _ = sb.Append(PreParseStringLiteral(line, ref i, enableEscapeSequences));
                     stringEnd = i;
                     continue;
                 }
@@ -757,7 +762,7 @@ namespace AssEmbly
         /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
         /// <exception cref="ArgumentException">The given line is invalid.</exception>
         /// <exception cref="SyntaxError">The string in the line is invalid.</exception>
-        public static string PreParseStringLiteral(string line, ref int startIndex)
+        public static string PreParseStringLiteral(string line, ref int startIndex, bool enableEscapeSequences = true)
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
@@ -798,7 +803,7 @@ namespace AssEmbly
                 {
                     containsHighSurrogate = true;
                 }
-                if (c == '\\')
+                if (c == '\\' && enableEscapeSequences)
                 {
                     if (++i >= line.Length)
                     {
@@ -1512,16 +1517,16 @@ namespace AssEmbly
         /// </summary>
         private string ProcessAssemblerVariables(string text)
         {
-            StringBuilder currentName = new();
-            int currentStartIndex = 0;
-            bool openBackslash = false;
-            bool parsingName = false;
-
-            if (automaticMacroExcludedMnemonics.Contains(text.Split(' ')[0]))
+            if (!EnableVariableExpansion || automaticMacroExcludedMnemonics.Contains(text.Split(' ')[0]))
             {
                 // Assembler variables in macro definitions should not be replaced
                 return text;
             }
+
+            StringBuilder currentName = new();
+            int currentStartIndex = 0;
+            bool openBackslash = false;
+            bool parsingName = false;
 
             for (int i = 0; i <= text.Length; i++)
             {
@@ -1728,7 +1733,7 @@ namespace AssEmbly
                     {
                         continue;
                     }
-                    parsedMatchedLine = ParseLine(line);
+                    parsedMatchedLine = ParseLine(line, EnableEscapeSequences);
                     if (nestedOpeningTags.Contains(parsedMatchedLine[0]))
                     {
                         nestedOpens++;

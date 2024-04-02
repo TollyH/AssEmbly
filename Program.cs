@@ -91,6 +91,8 @@ namespace AssEmbly
             bool useV1Format = false;
             bool useV1Stack = false;
             bool enableObsoleteDirectives = false;
+            bool enableVariableExpansion = true;
+            bool enableEscapeSequences = true;
             int macroExpansionLimit = GetMacroLimit(args);
             int whileRepeatLimit = GetWhileLimit(args);
             foreach (string a in args)
@@ -156,6 +158,14 @@ namespace AssEmbly
                 {
                     enableObsoleteDirectives = true;
                 }
+                else if (a.Equals("--disable-variables", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableVariableExpansion = false;
+                }
+                else if (a.Equals("--disable-escapes", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableEscapeSequences = false;
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -174,6 +184,8 @@ namespace AssEmbly
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
                 assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
+                assembler.EnableVariableExpansion = enableVariableExpansion;
+                assembler.EnableEscapeSequences = enableEscapeSequences;
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -357,6 +369,10 @@ namespace AssEmbly
                 }
                 assembler.EnableObsoleteDirectives = args.Contains(
                     "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableVariableExpansion = !args.Contains(
+                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableEscapeSequences = !args.Contains(
+                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
