@@ -2046,6 +2046,20 @@ Whether or not a file has been assembled before is determined by a case-sensitiv
 
 ### %STOP - End Assembly
 
+The `%STOP` directive is used to immediately end the assembly process. As soon as the assembler reaches the directive, it stops and throws a guaranteed error. The assembly will not be considered successful, and no executable file will be produced. The `%STOP` directive optionally takes a single string operand to use as the message to display when assembly stops.
+
+`%STOP` directives are most useful when combined with conditional assembly to guarantee that a particular condition is met before continuing with assembly.
+
+For example:
+
+```text
+%IF NDEF, MY_VARIABLE
+    %STOP "@MY_VARIABLE is a required variable. Please define it."
+%ENDIF
+```
+
+This example immediately ends assembly if a variable with the name `MY_VARIABLE` does not exist, thereby ensuring that `MY_VARIABLE` *will* be defined for anything after this `%IF` block.
+
 ### %MACRO - Macro Definition
 
 The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Single-line and multi-line macros with the same name cannot exist simultaneously, and defining a new single-line macro with the same name as an existing multi-line macro or vice versa will result in the existing macro being replaced.
