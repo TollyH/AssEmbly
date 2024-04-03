@@ -123,9 +123,9 @@
             {
                 EnableEscapeSequences = false
             };
-            asm.AssembleLines(new[] { "%DAT \"C:\\This\\is\\a\\raw\\file\\path \\\\ \\u \\U \\0 \\n\"" });
+            asm.AssembleLines(new[] { "%DAT \"C:\\This\\is\\a\\raw\\file\\path \\\" \\\\ \\u \\U \\0 \\n\"" });
             result = asm.GetAssemblyResult(true);
-            CollectionAssert.AreEqual(@"C:\This\is\a\raw\file\path \\ \u \U \0 \n"u8.ToArray(), result.Program,
+            CollectionAssert.AreEqual(@"C:\This\is\a\raw\file\path "" \\ \u \U \0 \n"u8.ToArray(), result.Program,
                 "Escape sequence was expanded when the feature was disabled.");
         }
     }

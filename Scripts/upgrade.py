@@ -22,8 +22,11 @@ def escape_backslashes(program: str) -> str:
             if line.find(';', 0, index) != -1:
                 # This is a comment, don't replace
                 break
-            if line.count('"', 0, index) != 1:
+            if len(re.findall(r'(?<!\\)"', line[:index])) != 1:
                 # This isn't a string, don't replace
+                continue
+            if index + 1 < len(line) and line[index + 1] == '"':
+                # This is an escaped quote, don't replace
                 continue
             chars[index] = "\\\\"
         lines[i] = "".join(chars)

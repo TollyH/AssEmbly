@@ -803,90 +803,105 @@ namespace AssEmbly
                 {
                     containsHighSurrogate = true;
                 }
-                if (c == '\\' && enableEscapeSequences)
+                if (c == '\\')
                 {
-                    if (++i >= line.Length)
+                    if (!enableEscapeSequences && !singleCharacterLiteral)
                     {
-                        throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
-                    }
-                    char escape = line[i];
-                    switch (escape)
-                    {
-                        // Escapes that keep the same character
-                        case '\'':
-                        case '"':
-                        case '\\':
-                            break;
-                        // Escapes that map to another character
-                        case '0':
-                            escape = '\0';
-                            break;
-                        case 'a':
-                            escape = '\a';
-                            break;
-                        case 'b':
-                            escape = '\b';
-                            break;
-                        case 'f':
-                            escape = '\f';
-                            break;
-                        case 'n':
-                            escape = '\n';
-                            break;
-                        case 'r':
-                            escape = '\r';
-                            break;
-                        case 't':
-                            escape = '\t';
-                            break;
-                        case 'v':
-                            escape = '\v';
-                            break;
-                        case 'u':
-                            if (i + 4 >= line.Length)
-                            {
-                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
-                            }
-                            string rawCodePoint = line[(i + 1)..(i + 5)];
-                            try
-                            {
-                                escape = (char)Convert.ToUInt16(rawCodePoint, 16);
-                            }
-                            catch (FormatException)
-                            {
-                                throw new SyntaxError(
-                                    string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
-                            }
-                            i += 4;
-                            break;
-                        case 'U':
-                            if (i + 8 >= line.Length)
-                            {
-                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
-                            }
-                            rawCodePoint = line[(i + 1)..(i + 9)];
-                            try
-                            {
-                                string encodedChar = char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16));
-                                if (char.IsHighSurrogate(encodedChar[0]))
-                                {
-                                    containsHighSurrogate = true;
-                                }
-                                _ = sb.Append(encodedChar);
-                            }
-                            catch
-                            {
-                                throw new SyntaxError(
-                                    string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
-                            }
-                            i += 8;
+                        // Quotes should still be escapable with escape sequences disabled.
+                        // Escape sequences are always allowed in single character literals - they didn't exist in 1.0.0
+                        if (i + 1 < line.Length && line[i + 1] == '"')
+                        {
+                            _ = sb.Append('"');
+                            i++;
                             continue;
-                        default:
-                            throw new SyntaxError(
-                                string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
+                        }
+                        _ = sb.Append('\\');
                     }
-                    _ = sb.Append(escape);
+                    else
+                    {
+                        if (++i >= line.Length)
+                        {
+                            throw new SyntaxError(
+                                string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
+                        }
+                        char escape = line[i];
+                        switch (escape)
+                        {
+                            // Escapes that keep the same character
+                            case '\'':
+                            case '"':
+                            case '\\':
+                                break;
+                            // Escapes that map to another character
+                            case '0':
+                                escape = '\0';
+                                break;
+                            case 'a':
+                                escape = '\a';
+                                break;
+                            case 'b':
+                                escape = '\b';
+                                break;
+                            case 'f':
+                                escape = '\f';
+                                break;
+                            case 'n':
+                                escape = '\n';
+                                break;
+                            case 'r':
+                                escape = '\r';
+                                break;
+                            case 't':
+                                escape = '\t';
+                                break;
+                            case 'v':
+                                escape = '\v';
+                                break;
+                            case 'u':
+                                if (i + 4 >= line.Length)
+                                {
+                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                }
+                                string rawCodePoint = line[(i + 1)..(i + 5)];
+                                try
+                                {
+                                    escape = (char)Convert.ToUInt16(rawCodePoint, 16);
+                                }
+                                catch (FormatException)
+                                {
+                                    throw new SyntaxError(
+                                        string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
+                                }
+                                i += 4;
+                                break;
+                            case 'U':
+                                if (i + 8 >= line.Length)
+                                {
+                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                }
+                                rawCodePoint = line[(i + 1)..(i + 9)];
+                                try
+                                {
+                                    string encodedChar = char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16));
+                                    if (char.IsHighSurrogate(encodedChar[0]))
+                                    {
+                                        containsHighSurrogate = true;
+                                    }
+                                    _ = sb.Append(encodedChar);
+                                }
+                                catch
+                                {
+                                    throw new SyntaxError(
+                                        string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
+                                }
+                                i += 8;
+                                continue;
+                            default:
+                                throw new SyntaxError(
+                                    string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
+                        }
+                        _ = sb.Append(escape);
+                    }
                     continue;
                 }
                 if ((singleCharacterLiteral && c == '\'') || (!singleCharacterLiteral && c == '"'))
