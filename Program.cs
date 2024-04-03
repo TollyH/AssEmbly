@@ -508,12 +508,23 @@ namespace AssEmbly
             try
             {
                 int macroExpansionLimit = GetMacroLimit(args);
+                int whileRepeatLimit = GetWhileLimit(args);
 
                 Assembler assembler = new();
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
                 }
+                if (whileRepeatLimit >= 0)
+                {
+                    assembler.WhileRepeatLimit = whileRepeatLimit;
+                }
+                assembler.EnableObsoleteDirectives = args.Contains(
+                    "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableVariableExpansion = !args.Contains(
+                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableEscapeSequences = !args.Contains(
+                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
