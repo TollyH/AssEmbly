@@ -1,0 +1,3 @@
+[submodule "Scripts/whitespace"]
+	path = Scripts/whitespace
+	url = https://github.com/TollyH/whitespace

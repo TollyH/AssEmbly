@@ -326,7 +326,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to     Condition at line {1} of {0}.
         /// </summary>
         internal static string Assembler_Debug_Directive_While_Stack_Line {
             get {
@@ -1739,6 +1739,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Label &quot;{0}&quot; is defined but never used..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0018 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0018", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to %ASM_ONCE directive is unreachable, as it is not the first one in the file..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0019 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0019", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0000 {
@@ -2625,6 +2643,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Debugger_Error_Unrecognised_Command {
             get {
                 return ResourceManager.GetString("Debugger_Error_Unrecognised_Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This instruction was assembled from {0} at line {1}.
+        /// </summary>
+        internal static string Debugger_Execution_Position {
+            get {
+                return ResourceManager.GetString("Debugger_Execution_Position", resourceCulture);
             }
         }
         

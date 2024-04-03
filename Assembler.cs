@@ -72,8 +72,16 @@ namespace AssEmbly
         // This limit is per program, not per loop
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
-        // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion
-        private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO" };
+        // Backwards compatibility
+        // <= 3.1.0
+        public bool EnableObsoleteDirectives { get; set; } = false;
+        public bool EnableVariableExpansion { get; set; } = true;
+        // <= 1.1.0
+        public bool EnableEscapeSequences { get; set; } = true;
+
+        // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion,
+        // assembler variable insertion, or operand syntax validation
+        private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO", "MAC" };
 
         // The lines to assemble may change during assembly, for example importing a file
         // will extend the list of lines to assemble as and when the import is reached.
@@ -138,6 +146,7 @@ namespace AssEmbly
         private readonly List<(ulong Address, string Line)> assembledLines = new();
         private readonly Dictionary<ulong, List<string>> addressLabelNames = new();
         private readonly List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
+        private readonly List<(ulong Address, FilePosition Position)> fileLineMap = new();
 
         private readonly AssemblerWarnings warningGenerator;
         private readonly List<Warning> warnings = new();
@@ -187,7 +196,7 @@ namespace AssEmbly
                 { "CURRENT_ADDRESS", () => (ulong)program.Count },
             };
 
-            InitializeStateDirectives(out stateDirectives);
+            InitializeStateDirectives(out stateDirectives, out obsoleteStateDirectives);
         }
 
         public Assembler() : this(false, false,
@@ -282,7 +291,13 @@ namespace AssEmbly
             {
                 ResolveLabelReferences();
                 programBytes = program.ToArray();
-                warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint));
+
+                IEnumerable<string> labelNameReferences = labelReferences.Select(l => l.LabelName);
+                IEnumerable<string> labelNameLinks = labelLinks.Values.Select(l => l.Target);
+
+                warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint,
+                    labelNameReferences.Union(labelNameLinks).ToHashSet()));
+
                 Finalized = true;
             }
             else
@@ -292,7 +307,7 @@ namespace AssEmbly
             string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
-                resolvedImports);
+                resolvedImports, fileLineMap);
             return new AssemblyResult(
                 programBytes, debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
                 entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
@@ -318,8 +333,14 @@ namespace AssEmbly
                 throw new InvalidOperationException(Strings.Assembler_Error_Finalized);
             }
 
+            List<string> newLines = lines.ToList();
+            if (newLines.Count == 0)
+            {
+                return;
+            }
+
             dynamicLines.Clear();
-            dynamicLines.AddRange(lines.ToList());
+            dynamicLines.AddRange(newLines);
 
             importStack.Clear();
             baseFileLine = 1;
@@ -344,7 +365,7 @@ namespace AssEmbly
                     string preVariableLine = rawLine;
                     rawLine = ProcessAssemblerVariables(rawLine);
 
-                    string[] line = ParseLine(rawLine);
+                    string[] line = ParseLine(rawLine, EnableEscapeSequences);
                     if (line.Length == 0)
                     {
                         continue;
@@ -376,6 +397,8 @@ namespace AssEmbly
                         }
                         labels[labelName] = (uint)program.Count;
 
+                        warningGenerator.NewLabel(labelName, currentFilePosition, currentMacro?.MacroName);
+
                         lineIsLabelled = true;
                         continue;
                     }
@@ -406,16 +429,18 @@ namespace AssEmbly
                     }
 
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
-                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures);
-
-                    usedExtensions |= newFeatures;
+                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures, EnableObsoleteDirectives);
 
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
                         labelReferences.Add((label, relativeOffset + (uint)program.Count, GetCurrentPosition()));
                     }
 
-                    assembledLines.Add(((uint)program.Count, rawLine));
+                    usedExtensions |= newFeatures;
+
+                    assembledLines.Add(((uint)program.Count, preVariableLine));
+                    fileLineMap.Add(((uint)program.Count, currentFilePosition));
+
                     program.AddRange(newBytes);
 
                     warnings.AddRange(warningGenerator.NextInstruction(
@@ -472,14 +497,15 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands, out AAPFeatures usedExtensions)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
+            out AAPFeatures usedExtensions, bool enableObsoleteDirectives = false)
         {
             OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
             List<(string LabelName, ulong AddressOffset)> referencedLabels = new();
             usedExtensions = AAPFeatures.None;
 
-            if (mnemonic[0] == '%' && ProcessDataDirective(mnemonic, operands, referencedLabels, out byte[]? newBytes))
+            if (ProcessDataDirective(mnemonic, operands, referencedLabels, out byte[]? newBytes, enableObsoleteDirectives))
             {
                 // Directive found and processed, move onto next statement
                 return (newBytes, referencedLabels);
@@ -566,9 +592,10 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
-        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands)
+        public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
+            bool enableObsoleteDirectives = false)
         {
-            return AssembleStatement(mnemonic, operands, out _);
+            return AssembleStatement(mnemonic, operands, out _, enableObsoleteDirectives);
         }
 
         /// <summary>
@@ -620,7 +647,7 @@ namespace AssEmbly
         /// If not empty, the first item will be the mnemonic.
         /// </returns>
         /// <exception cref="SyntaxError">The given line contains invalid formatting.</exception>
-        public static string[] ParseLine(string line)
+        public static string[] ParseLine(string line, bool enableEscapeSequences = true)
         {
             List<string> elements = new();
 
@@ -646,8 +673,7 @@ namespace AssEmbly
                         string mnemonic = sb.ToString();
                         elements.Add(mnemonic);
                         sb = new StringBuilder();
-                        isMacro = mnemonic.Equals("%MACRO", StringComparison.OrdinalIgnoreCase)
-                            || mnemonic.Equals("%DELMACRO", StringComparison.OrdinalIgnoreCase);
+                        isMacro = automaticMacroExcludedMnemonics.Contains(mnemonic);
                         continue;
                     }
                     if (sb.Length != 0 && elements.Count > 0)
@@ -701,7 +727,7 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings.Assembler_Error_Quoted_Literal_Line_Length_One);
                     }
-                    _ = sb.Append(PreParseStringLiteral(line, ref i));
+                    _ = sb.Append(PreParseStringLiteral(line, ref i, enableEscapeSequences));
                     stringEnd = i;
                     continue;
                 }
@@ -736,7 +762,7 @@ namespace AssEmbly
         /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
         /// <exception cref="ArgumentException">The given line is invalid.</exception>
         /// <exception cref="SyntaxError">The string in the line is invalid.</exception>
-        public static string PreParseStringLiteral(string line, ref int startIndex)
+        public static string PreParseStringLiteral(string line, ref int startIndex, bool enableEscapeSequences = true)
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
@@ -779,88 +805,103 @@ namespace AssEmbly
                 }
                 if (c == '\\')
                 {
-                    if (++i >= line.Length)
+                    if (!enableEscapeSequences && !singleCharacterLiteral)
                     {
-                        throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
-                    }
-                    char escape = line[i];
-                    switch (escape)
-                    {
-                        // Escapes that keep the same character
-                        case '\'':
-                        case '"':
-                        case '\\':
-                            break;
-                        // Escapes that map to another character
-                        case '0':
-                            escape = '\0';
-                            break;
-                        case 'a':
-                            escape = '\a';
-                            break;
-                        case 'b':
-                            escape = '\b';
-                            break;
-                        case 'f':
-                            escape = '\f';
-                            break;
-                        case 'n':
-                            escape = '\n';
-                            break;
-                        case 'r':
-                            escape = '\r';
-                            break;
-                        case 't':
-                            escape = '\t';
-                            break;
-                        case 'v':
-                            escape = '\v';
-                            break;
-                        case 'u':
-                            if (i + 4 >= line.Length)
-                            {
-                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
-                            }
-                            string rawCodePoint = line[(i + 1)..(i + 5)];
-                            try
-                            {
-                                escape = (char)Convert.ToUInt16(rawCodePoint, 16);
-                            }
-                            catch (FormatException)
-                            {
-                                throw new SyntaxError(
-                                    string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
-                            }
-                            i += 4;
-                            break;
-                        case 'U':
-                            if (i + 8 >= line.Length)
-                            {
-                                throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
-                            }
-                            rawCodePoint = line[(i + 1)..(i + 9)];
-                            try
-                            {
-                                string encodedChar = char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16));
-                                if (char.IsHighSurrogate(encodedChar[0]))
-                                {
-                                    containsHighSurrogate = true;
-                                }
-                                _ = sb.Append(encodedChar);
-                            }
-                            catch
-                            {
-                                throw new SyntaxError(
-                                    string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
-                            }
-                            i += 8;
+                        // Quotes should still be escapable with escape sequences disabled.
+                        // Escape sequences are always allowed in single character literals - they didn't exist in 1.0.0
+                        if (i + 1 < line.Length && line[i + 1] == '"')
+                        {
+                            _ = sb.Append('"');
+                            i++;
                             continue;
-                        default:
-                            throw new SyntaxError(
-                                string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
+                        }
+                        _ = sb.Append('\\');
                     }
-                    _ = sb.Append(escape);
+                    else
+                    {
+                        if (++i >= line.Length)
+                        {
+                            throw new SyntaxError(
+                                string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
+                        }
+                        char escape = line[i];
+                        switch (escape)
+                        {
+                            // Escapes that keep the same character
+                            case '\'':
+                            case '"':
+                            case '\\':
+                                break;
+                            // Escapes that map to another character
+                            case '0':
+                                escape = '\0';
+                                break;
+                            case 'a':
+                                escape = '\a';
+                                break;
+                            case 'b':
+                                escape = '\b';
+                                break;
+                            case 'f':
+                                escape = '\f';
+                                break;
+                            case 'n':
+                                escape = '\n';
+                                break;
+                            case 'r':
+                                escape = '\r';
+                                break;
+                            case 't':
+                                escape = '\t';
+                                break;
+                            case 'v':
+                                escape = '\v';
+                                break;
+                            case 'u':
+                                if (i + 4 >= line.Length)
+                                {
+                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                }
+                                string rawCodePoint = line[(i + 1)..(i + 5)];
+                                try
+                                {
+                                    escape = (char)Convert.ToUInt16(rawCodePoint, 16);
+                                }
+                                catch (FormatException)
+                                {
+                                    throw new SyntaxError(
+                                        string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
+                                }
+                                i += 4;
+                                break;
+                            case 'U':
+                                if (i + 8 >= line.Length)
+                                {
+                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                }
+                                rawCodePoint = line[(i + 1)..(i + 9)];
+                                try
+                                {
+                                    string encodedChar = char.ConvertFromUtf32(Convert.ToInt32(rawCodePoint, 16));
+                                    if (char.IsHighSurrogate(encodedChar[0]))
+                                    {
+                                        containsHighSurrogate = true;
+                                    }
+                                    _ = sb.Append(encodedChar);
+                                }
+                                catch
+                                {
+                                    throw new SyntaxError(
+                                        string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
+                                }
+                                i += 8;
+                                continue;
+                            default:
+                                throw new SyntaxError(
+                                    string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
+                        }
+                        _ = sb.Append(escape);
+                    }
                     continue;
                 }
                 if ((singleCharacterLiteral && c == '\'') || (!singleCharacterLiteral && c == '"'))
@@ -1491,16 +1532,16 @@ namespace AssEmbly
         /// </summary>
         private string ProcessAssemblerVariables(string text)
         {
-            StringBuilder currentName = new();
-            int currentStartIndex = 0;
-            bool openBackslash = false;
-            bool parsingName = false;
-
-            if (text.TrimStart().StartsWith("%MACRO ", StringComparison.OrdinalIgnoreCase))
+            if (!EnableVariableExpansion || automaticMacroExcludedMnemonics.Contains(text.Split(' ')[0]))
             {
                 // Assembler variables in macro definitions should not be replaced
                 return text;
             }
+
+            StringBuilder currentName = new();
+            int currentStartIndex = 0;
+            bool openBackslash = false;
+            bool parsingName = false;
 
             for (int i = 0; i <= text.Length; i++)
             {
@@ -1639,7 +1680,8 @@ namespace AssEmbly
         /// </returns>
         private bool ProcessStateDirective(string mnemonic, string[] operands, string preVariableLine)
         {
-            if (stateDirectives.TryGetValue(mnemonic, out StateDirective? directiveFunc))
+            if (stateDirectives.TryGetValue(mnemonic, out StateDirective? directiveFunc)
+                || (EnableObsoleteDirectives && obsoleteStateDirectives.TryGetValue(mnemonic, out directiveFunc)))
             {
                 directiveFunc(mnemonic, operands, preVariableLine);
                 return true;
@@ -1706,7 +1748,7 @@ namespace AssEmbly
                     {
                         continue;
                     }
-                    parsedMatchedLine = ParseLine(line);
+                    parsedMatchedLine = ParseLine(line, EnableEscapeSequences);
                     if (nestedOpeningTags.Contains(parsedMatchedLine[0]))
                     {
                         nestedOpens++;
@@ -1830,9 +1872,12 @@ namespace AssEmbly
         /// <item><see langword="false"/> - Directive was not recognised and assembly of the statement should continue</item>
         /// </list>
         /// </returns>
-        private static bool ProcessDataDirective(string mnemonic, string[] operands, List<(string, ulong)> referencedLabels, [MaybeNullWhen(false)] out byte[] newBytes)
+        private static bool ProcessDataDirective(string mnemonic, string[] operands,
+            List<(string, ulong)> referencedLabels, [MaybeNullWhen(false)] out byte[] newBytes,
+            bool enableObsolete = false)
         {
-            if (dataDirectives.TryGetValue(mnemonic, out DataDirective? directiveFunc))
+            if (dataDirectives.TryGetValue(mnemonic, out DataDirective? directiveFunc)
+                || (enableObsolete && obsoleteDataDirectives.TryGetValue(mnemonic, out directiveFunc)))
             {
                 newBytes = directiveFunc(operands, referencedLabels);
                 return true;

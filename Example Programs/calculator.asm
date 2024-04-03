@@ -1,3 +1,5 @@
+%MACRO INPUT_BUFFER_SIZE, 24
+
 ; rg0 - first number
 ; rg1 - second number
 ; rg2 - loop address
@@ -5,10 +7,13 @@
 ; rg4 - operator
 ; rg5 - remainder (if dividing)
 ; rg6 - non-zero if negative
-CAL :FUNC_PRINT, :&STR_NUM_1_PROMPT
-CAL :FUNC_INPUT, :&INPUT_BUFFER_1
+; rg7 - input buffer address
+HEAP_ALC rg7, INPUT_BUFFER_SIZE  ; Allocate a free region in memory to store input
 
-MVQ rg2, :&INPUT_BUFFER_1
+CAL :FUNC_PRINT, :&STR_NUM_1_PROMPT
+CAL :FUNC_INPUT, rg7
+
+MVQ rg2, rg7
 :NUM_1_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
@@ -32,10 +37,10 @@ JZO :NUM_1_NO_NEGATE
 SIGN_NEG rg0
 :NUM_1_NO_NEGATE
 CAL :FUNC_PRINT, :&STR_NUM_2_PROMPT
-CAL :FUNC_INPUT, :&INPUT_BUFFER_2
+CAL :FUNC_INPUT, rg7
 
 XOR rg6, rg6
-MVQ rg2, :&INPUT_BUFFER_2
+MVQ rg2, rg7
 :NUM_2_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
 MVB rg3, *rg2
@@ -60,6 +65,7 @@ SIGN_NEG rg1
 :NUM_2_NO_NEGATE
 CAL :FUNC_PRINT, :&STR_OPERATOR_PROMPT
 RCC rg4
+WCC rg4  ; Echo typed character
 WCC '\n'  ; Write newline after input
 
 CMP rg4, '+'
@@ -100,12 +106,8 @@ JZO :END
 CAL :FUNC_PRINT, :&STR_REMAINDER
 SIGN_WCN rg5
 :END
+HEAP_FRE rg7  ; Free the memory allocated for input before the program halts
 HLT  ; Stop program to prevent execution of data as executable code
-
-:INPUT_BUFFER_1
-%PAD 64
-:INPUT_BUFFER_2
-%PAD 64
 
 :STR_NUM_1_PROMPT
 %DAT "Enter first number > \0"

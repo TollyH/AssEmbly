@@ -7,6 +7,9 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
+; Disable unused label suggestion
+%ANALYZER suggestion, 0018, 0
+
 MVQ rg0, 69
 
 !>
@@ -45,14 +48,14 @@ HLT
 %DAT                     0x42
 %NUM 1189998819991197253
 
-%MACRO thisLineIsNowBlank,$1
-thisLineIsNowBlank()
-
-     :THIS_DOESNT_POINT_HERE     
-%LABEL_OVERRIDE   1234    ,
+%MACRO this@LineIsNowBlank,$1
+this@LineIsNowBlank()
 
 :NOR_DOES_THIS
 %LABEL_OVERRIDE   :&THIS_DOESNT_POINT_HERE
+
+     :THIS_DOESNT_POINT_HERE     
+%LABEL_OVERRIDE   1234    ,
 
 :NOR_THIS
 %LABEL_OVERRIDE :&NOR_DOES_THIS
@@ -73,7 +76,12 @@ CFL
 CFL
 
 %ANALYZER suggestion, 0001, 0
-%MACRO NOP, NOT rg0
+%MACRO single-in-multi
+    %MACRO NOP, NOT rg0
+%ENDMACRO
+NOP
+single-in-multi
+NOP
 start disable block
 NOP
 NOP

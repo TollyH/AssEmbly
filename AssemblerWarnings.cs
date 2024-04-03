@@ -76,8 +76,11 @@ namespace AssEmbly
 
         private readonly Dictionary<(FilePosition Position, int MacroDepth), string> lineText = new();
 
+        private readonly Dictionary<string, (FilePosition Position, string? MacroName)> labelDefinitionPositions = new();
+
         private byte[] finalProgram = Array.Empty<byte>();
         private ulong entryPoint = 0;
+        private HashSet<string> referencedLabels = new();
 
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
@@ -162,16 +165,28 @@ namespace AssEmbly
         }
 
         /// <summary>
+        /// Call this whenever a new label is defined.
+        /// </summary>
+        /// <param name="filePosition">The line and file that the instruction was assembled from.</param>
+        /// <param name="macroName">The name of the current macro being expanded, or <see langword="null"/> if no macro is.</param>
+        public void NewLabel(string labelName, FilePosition filePosition, string? macroName)
+        {
+            labelDefinitionPositions[labelName] = (filePosition, macroName);
+        }
+
+        /// <summary>
         /// Call this after all program instructions have been given to <see cref="NextInstruction"/>
         /// to run analyzers that need the entire program to work.
         /// </summary>
         /// <param name="finalProgram">The fully assembled program, with all label locations inserted.</param>
         /// <param name="entryPoint">The address that the program will start executing from.</param>
+        /// <param name="referencedLabels">A set of all label names referenced at any point by the program.</param>
         /// <returns>An array of any warnings caused by final analysis.</returns>
-        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint)
+        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint, HashSet<string> referencedLabels)
         {
             this.finalProgram = finalProgram;
             this.entryPoint = entryPoint;
+            this.referencedLabels = referencedLabels;
 
             List<Warning> warnings = new();
 
@@ -257,6 +272,7 @@ namespace AssEmbly
                 { 0015, Analyzer_Rolling_Suggestion_0015 },
                 { 0016, Analyzer_Rolling_Suggestion_0016 },
                 { 0017, Analyzer_Rolling_Suggestion_0017 },
+                { 0019, Analyzer_Rolling_Suggestion_0019 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -275,6 +291,7 @@ namespace AssEmbly
             {
                 { 0003, Analyzer_Final_Suggestion_0003 },
                 { 0004, Analyzer_Final_Suggestion_0004 },
+                { 0018, Analyzer_Final_Suggestion_0018 },
             };
         }
 
@@ -289,6 +306,7 @@ namespace AssEmbly
         private bool instructionIsImport;
         private bool instructionIsString;
         private bool instructionIsExecutable;
+        private bool instructionIsAsmOnce;
         private (FilePosition Position, string? MacroName, int MacroLineDepth)? entryPointDefinitionPosition = null;
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth)> dataInsertionLines = new();
         private readonly HashSet<ulong> executableAddresses = new();
@@ -299,6 +317,7 @@ namespace AssEmbly
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> writesToAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> readsFromAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpsCalls = new();
+        private readonly Dictionary<string, int> firstAsmOnceLineInFiles = new();
 
         private ulong currentAddress;
         private bool lastInstructionWasTerminator;
@@ -337,14 +356,19 @@ namespace AssEmbly
             lineOperands[(filePosition, macroLineDepth)] = operands;
 
             instructionIsData = dataInsertionDirectives.Contains(mnemonic);
-            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase);
+            instructionIsImport = mnemonic.Equals("%IMP", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("IMP", StringComparison.OrdinalIgnoreCase);
+            instructionIsAsmOnce = mnemonic.Equals("%ASM_ONCE", StringComparison.OrdinalIgnoreCase);
+
             instructionIsString = false;
             instructionIsExecutable = false;
 
             if (instructionIsData)
             {
                 dataInsertionLines.Add((filePosition, macroName, macroLineDepth));
-                if (operands[0][0] == '"' && mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
+                if (operands[0][0] == '"' && (
+                    mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase)))
                 {
                     instructionIsString = true;
                     if (lastInstructionWasString)
@@ -385,6 +409,11 @@ namespace AssEmbly
             if (isEntry)
             {
                 entryPointDefinitionPosition = (filePosition, macroName, macroLineDepth);
+            }
+
+            if (instructionIsAsmOnce)
+            {
+                firstAsmOnceLineInFiles.TryAdd(filePosition.File, filePosition.Line);
             }
         }
 
@@ -798,7 +827,10 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0002()
         {
             // Suggestion 0002: Use the `%PAD` directive instead of chaining `%DAT 0` directives.
-            if (mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase) && lastMnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase))
+            if ((mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase))
+                && (lastMnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || lastMnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase)))
             {
                 if (operands[0][0] is ':' or '"' || lastOperands[0][0] is ':' or '"')
                 {
@@ -977,7 +1009,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0011()
         {
             // Suggestion 0011: Remove leading 0 digits from denary number.
-            if (mnemonic.Equals("%ANALYZER", StringComparison.OrdinalIgnoreCase))
+            if (mnemonic.Equals("%ANALYZER", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("ANALYZER", StringComparison.OrdinalIgnoreCase))
             {
                 // Analyzer codes are usually given with leading zeros, so don't suggest removing them
                 return false;
@@ -997,7 +1030,8 @@ namespace AssEmbly
         private bool Analyzer_Rolling_Suggestion_0012()
         {
             // Suggestion 0012: Remove useless `%PAD 0` directive.
-            if (mnemonic.Equals("%PAD", StringComparison.OrdinalIgnoreCase))
+            if (mnemonic.Equals("%PAD", StringComparison.OrdinalIgnoreCase)
+                || mnemonic.Equals("PAD", StringComparison.OrdinalIgnoreCase))
             {
                 if (operands[0][0] == ':')
                 {
@@ -1042,6 +1076,28 @@ namespace AssEmbly
             // Suggestion 0017: Use `MVD {reg}, {reg}` instead of `AND {reg}, 0xFFFFFFFF`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
                 && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFFFFFF;
+        }
+
+        private List<Warning> Analyzer_Final_Suggestion_0018()
+        {
+            // Suggestion 0018: Label "{label}" is defined but never used.
+            List<Warning> warnings = new();
+            // Iterate label definitions that are not present in the referenced labels set
+            foreach ((string labelName, (FilePosition labelPosition, string? labelMacroName))
+                in labelDefinitionPositions.ExceptBy(referencedLabels, kv => kv.Key))
+            {
+                string labelDefinitionText = ':' + labelName;
+                warnings.Add(new Warning(WarningSeverity.Suggestion, 0018, labelPosition,
+                    labelDefinitionText, Array.Empty<string>(), labelDefinitionText, labelMacroName));
+            }
+            return warnings;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0019()
+        {
+            // Suggestion 0019: Uses of %ASM_ONCE beyond the first in a file will never be reached.
+            return instructionIsAsmOnce &&
+                firstAsmOnceLineInFiles.TryGetValue(filePosition.File, out int firstAsmOnceLine) && firstAsmOnceLine < filePosition.Line;
         }
     }
 }

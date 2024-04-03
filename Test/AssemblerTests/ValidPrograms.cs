@@ -77,7 +77,7 @@
             Assert.AreEqual(0, result.Warnings[2].Code);
             Assert.AreEqual(WarningSeverity.NonFatalError, result.Warnings[2].Severity);
 
-            asm = new();
+            asm = new Assembler();
             asm.AssembleLines(new[] { "%MESSAGE WarNing, \"test warning\"", "%MESSAGE suGGestIon, \"test suggestion\"", "%MESSAGE erroR, \"test error\"" });
             result = asm.GetAssemblyResult(true);
 
@@ -94,6 +94,39 @@
             Assert.AreEqual("test error", result.Warnings[2].Message);
             Assert.AreEqual(0, result.Warnings[2].Code);
             Assert.AreEqual(WarningSeverity.NonFatalError, result.Warnings[2].Severity);
+        }
+
+        [TestMethod]
+        public void CompatibilityOptions()
+        {
+            Assembler asm = new()
+            {
+                EnableObsoleteDirectives = true
+            };
+            asm.AssembleLines(new[] { "DAT 123", "PAD 4", "NUM 42", "MESSAGE warning" });
+            AssemblyResult result = asm.GetAssemblyResult(true);
+            Assert.AreEqual(1, result.Warnings.Length,
+                "Obsolete MESSAGE directive did not produce a warning.");
+            CollectionAssert.AreEqual(new byte[] { 123, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0 }, result.Program,
+                "Obsolete directives did not produce correct program.");
+
+            asm = new Assembler()
+            {
+                EnableVariableExpansion = false
+            };
+            asm.AssembleLines(new[] { "%DAT \"Test @VARIABLE_TEST @ test @anotherTest@\"" });
+            result = asm.GetAssemblyResult(true);
+            CollectionAssert.AreEqual("Test @VARIABLE_TEST @ test @anotherTest@"u8.ToArray(), result.Program,
+                "Variable was expanded when the feature was disabled.");
+
+            asm = new Assembler()
+            {
+                EnableEscapeSequences = false
+            };
+            asm.AssembleLines(new[] { "%DAT \"C:\\This\\is\\a\\raw\\file\\path \\\" \\\\ \\u \\U \\0 \\n\"" });
+            result = asm.GetAssemblyResult(true);
+            CollectionAssert.AreEqual(@"C:\This\is\a\raw\file\path "" \\ \u \U \0 \n"u8.ToArray(), result.Program,
+                "Escape sequence was expanded when the feature was disabled.");
         }
     }
 }

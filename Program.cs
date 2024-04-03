@@ -12,12 +12,12 @@ namespace AssEmbly
 
         private static void Main(string[] args)
         {
-            if (args.Contains("--version"))
+            if (args.Contains("--version", StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine(version?.ToString());
                 return;
             }
-            if (!args.Contains("--no-header"))
+            if (!args.Contains("--no-header", StringComparer.OrdinalIgnoreCase))
             {
                 // Write to stderr to prevent header being included in redirected stdout streams
                 Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} {(Environment.Is64BitProcess ? "64-bit" : "32-bit")}" +
@@ -90,6 +90,9 @@ namespace AssEmbly
             HashSet<int> disabledSuggestions = new();
             bool useV1Format = false;
             bool useV1Stack = false;
+            bool enableObsoleteDirectives = false;
+            bool enableVariableExpansion = true;
+            bool enableEscapeSequences = true;
             int macroExpansionLimit = GetMacroLimit(args);
             int whileRepeatLimit = GetWhileLimit(args);
             foreach (string a in args)
@@ -151,6 +154,18 @@ namespace AssEmbly
                 {
                     useV1Stack = true;
                 }
+                else if (a.Equals("--allow-old-directives", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableObsoleteDirectives = true;
+                }
+                else if (a.Equals("--disable-variables", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableVariableExpansion = false;
+                }
+                else if (a.Equals("--disable-escapes", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableEscapeSequences = false;
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -168,6 +183,9 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
+                assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
+                assembler.EnableVariableExpansion = enableVariableExpansion;
+                assembler.EnableEscapeSequences = enableEscapeSequences;
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -259,7 +277,7 @@ namespace AssEmbly
                 {
                     features |= AAPFeatures.V1CallStack;
                 }
-                if (args.Contains("--compress"))
+                if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
                 {
                     features |= AAPFeatures.GZipCompressed;
                 }
@@ -269,11 +287,11 @@ namespace AssEmbly
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
-            if (!args.Contains("--no-debug-file"))
+            if (!args.Contains("--no-debug-file", StringComparer.OrdinalIgnoreCase))
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
-            if (args.Contains("--output-expanded"))
+            if (args.Contains("--output-expanded", StringComparer.OrdinalIgnoreCase))
             {
                 File.WriteAllLines(filename + ".exp.asm", assemblyResult.ExpandedSourceFile);
             }
@@ -284,7 +302,7 @@ namespace AssEmbly
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(Strings.CLI_Assemble_Result_Header_Success);
             Console.ResetColor();
-            if (args.Contains("--compress"))
+            if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine(Strings.CLI_Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
                     useV1Format ? assemblyResult.Program.LongLength : programSize,
@@ -314,8 +332,11 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
-                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
-                !args.Contains("--unmapped-stack"));
+                args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
+                !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
 
             ExecuteProcessor(processor);
         }
@@ -346,6 +367,12 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
+                assembler.EnableObsoleteDirectives = args.Contains(
+                    "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableVariableExpansion = !args.Contains(
+                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableEscapeSequences = !args.Contains(
+                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -365,7 +392,10 @@ namespace AssEmbly
             }
 
             Processor processor = new(
-                memSize, assemblyResult.EntryPoint, useV1CallStack: args.Contains("--v1-call-stack"), mapStack: !args.Contains("--unmapped-stack"));
+                memSize, assemblyResult.EntryPoint,
+                useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
+                autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
             LoadProgramIntoProcessor(processor, assemblyResult.Program);
             ExecuteProcessor(processor);
         }
@@ -382,8 +412,11 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
-                args.Contains("--v1-format"), args.Contains("--v1-call-stack"), args.Contains("--ignore-newer-version"),
-                !args.Contains("--unmapped-stack"));
+                args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
+                !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
+                args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
 
             Debugger debugger = new(false, processor);
             if (args.Length >= 3 && !args[2].StartsWith('-'))
@@ -405,20 +438,23 @@ namespace AssEmbly
 
             string disassembledProgram;
             byte[] program;
-            if (args.Contains("--v1-format"))
+            if (args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase))
             {
                 program = File.ReadAllBytes(sourcePath);
             }
             else
             {
-                AAPFile file = LoadAAPFile(sourcePath, args.Contains("--ignore-newer-version"));
+                AAPFile file = LoadAAPFile(sourcePath,
+                    args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase));
                 program = file.Program;
             }
 
             try
             {
                 disassembledProgram = Disassembler.DisassembleProgram(
-                    program, !args.Contains("--no-strings"), !args.Contains("--no-pads"), args.Contains("--allow-full-base-opcodes"));
+                    program, !args.Contains("--no-strings", StringComparer.OrdinalIgnoreCase),
+                    !args.Contains("--no-pads", StringComparer.OrdinalIgnoreCase),
+                    args.Contains("--allow-full-base-opcodes", StringComparer.OrdinalIgnoreCase));
             }
             catch (Exception e)
             {
@@ -440,8 +476,10 @@ namespace AssEmbly
         private static void RunRepl(string[] args)
         {
             ulong memSize = GetMemorySize(args);
-            Debugger debugger = new(true, memorySize: memSize, useV1CallStack: args.Contains("--v1-call-stack"),
-                mapStack: !args.Contains("--unmapped-stack"));
+            Debugger debugger = new(true, memorySize: memSize,
+                useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
+                autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
             // Some program needs to be loaded or the processor won't run
             debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
             debugger.StartDebugger();
@@ -470,12 +508,23 @@ namespace AssEmbly
             try
             {
                 int macroExpansionLimit = GetMacroLimit(args);
+                int whileRepeatLimit = GetWhileLimit(args);
 
                 Assembler assembler = new();
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
                 }
+                if (whileRepeatLimit >= 0)
+                {
+                    assembler.WhileRepeatLimit = whileRepeatLimit;
+                }
+                assembler.EnableObsoleteDirectives = args.Contains(
+                    "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableVariableExpansion = !args.Contains(
+                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableEscapeSequences = !args.Contains(
+                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
