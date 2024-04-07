@@ -2,7 +2,7 @@
 
 Applies to versions: `3.2.0`
 
-Last revised: 2024-04-06
+Last revised: 2024-04-07
 
 ## Introduction
 
@@ -1913,38 +1913,6 @@ It is not possible to use the `%ASM_ONCE` directive in the initial (base) file, 
 
 Whether or not a file has been assembled before is determined by a case-sensitive check of the file's path. The `%ASM_ONCE` directive will **not** prevent a file with identical contents but located within a different file from being assembled. Furthermore, symbolic links will **not** be considered to be the same file as the file that they link to.
 
-### %DEFINE - Assembler Variable Definition
-
-#### Deleting Assembler Variables
-
-#### Assembler Constants
-
-### %VAROP - Assembler Variable Operation
-
-### %IF / %ELSE / %ELSE_IF - Conditional Assembly
-
-#### Checking Variable Existence
-
-#### Comparing Values
-
-### %WHILE - Conditional Source Code Repetition
-
-### %STOP - End Assembly
-
-The `%STOP` directive is used to immediately end the assembly process. As soon as the assembler reaches the directive, it stops and throws a guaranteed error. The assembly will not be considered successful, and no executable file will be produced. The `%STOP` directive optionally takes a single string operand to use as the message to display when assembly stops.
-
-`%STOP` directives are most useful when combined with conditional assembly to guarantee that a particular condition is met before continuing with assembly.
-
-For example:
-
-```text
-%IF NDEF, MY_VARIABLE
-    %STOP "@MY_VARIABLE is a required variable. Please define it."
-%ENDIF
-```
-
-This example immediately ends assembly if a variable with the name `MY_VARIABLE` does not exist, thereby ensuring that `MY_VARIABLE` *will* be defined for anything after this `%IF` block.
-
 ### %MACRO - Macro Definition
 
 The `%MACRO` directive defines a **macro**, a piece of text that the assembler will replace (**expand**) on every line where the text is present. The text that a macro replaces can also be referred to as the macro's **name**. There are two distinct types of macro: **single-line** macros and **multi-line** macros. Both are defined with the `%MACRO` directive. Single-line macros replace portions of text *within* a line, whereas multi-line macros replace an entire line with multiple new lines of AssEmbly code. Macros only take effect on lines after the one where they are defined, and they can be overwritten to change the replacement text by defining a new macro with the same name as a previous one. Single-line and multi-line macros with the same name cannot exist simultaneously, and defining a new single-line macro with the same name as an existing multi-line macro or vice versa will result in the existing macro being replaced.
@@ -2347,6 +2315,348 @@ Deletion of a macro takes effect immediately. Any subsequent uses of the macro a
 The `%DELMACRO` directive can be used from within a macro, however, as with everything else inside macros, it will not be executed until the macro is used, and will be executed *every* time the macro is used.
 
 Using the `%DELMACRO` directive with a macro name that does not exist will immediately stop assembly and cause an error to be thrown. This will happen even if the macro *used* to exist, meaning you cannot delete the same macro twice (unless it has been redefined in the meantime).
+
+### %DEFINE - Assembler Variable Definition
+
+The `%DEFINE` directive creates an **assembler variable**, a named storage location that exists for the duration of the assembly process. The directive takes two operands: the name of the variable to define, and the value to assign to it. You can also assign a new value to an existing variable by giving the existing name as the first operand. Assembler variables are always 64-bit integers, and can be inserted into a program as a literal number by writing their name prefixed with an at sign (`@`) at the desired location in the program. Variable names follow the same restrictions as label names: they are case sensitive, and can only contain letters, numbers, and underscores. Unlike labels, the first character in a variable name *can* be a number.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 123
+
+MVQ rg0, @MY_VARIABLE
+```
+
+When assembled `MVQ rg0, @MY_VARIABLE` becomes `MVQ rg0, 123`, meaning `rg0` will be given a value of `123` when the program is executed.
+
+Assembler variables can be inserted anywhere in the program, including inside strings. When encountered by the assembler, the name and `@` sign are replaced with the literal base-10 value of the variable at the time it was encountered. This substitution occurs after all macros on the line have been expanded. The name of the assembler variable to insert is determined by scanning every character after the `@` sign until the first character that is not a valid name character is found, or the end of the line is reached. All of the valid characters are then treated as part of the variable name. Attempting to insert a variable that does not exist will result in the assembler throwing an error, stopping the assembly process. Scanned variable names will **never** be truncated, therefore *all* valid label name characters directly after an `@` sign *must* be a part of the desired variable name. For example, if only a variable with the name `VAR` exists, then typing `@VARIABLE` would result in an error, as a variable with the name `VARIABLE` does not exist, even though a variable with the name `VAR` does.
+
+To use a literal `@` sign within a string and not have it interpreted as the start of an assembler variable, prefix it with a backslash (`\`) like any other escape sequence.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0xFF_FF
+
+:STRING
+%DAT "This is the value of \@MY_VARIABLE: @MY_VARIABLE"
+
+%DEFINE MY_VARIABLE, 123
+```
+
+The string in this example will result in the literal text `This is the value of @MY_VARIABLE: 65535` being assembled. It does not matter what formatting what used to define the variable, the inserted value will always be in plain base-10. It also does not matter that `MY_VARIABLE` was redefined later on, as only the current value of the variable is taken into account when inserting it.
+
+Assembler variables are not replaced on lines that begin with `%MACRO` or `%DELMACRO` to allow `@` signs to be used as a part of macro names. Variables *are* still replaced on lines prefixed with `!` and within macro disabling blocks, however.
+
+#### Assembler Constants
+
+Assembler constants are special, predefined variables that have values set by the assembler itself. You cannot manipulate these variables in any way, only read from them. Their names are all prefixed with an exclamation mark to distinguish them from regular variables.
+
+The following table is a list of all assembler constants and their purpose:
+
+| Constant                    | Static? | Description                                                                                                                                                               |
+|-----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `@!ASSEMBLER_VERSION_MAJOR` | Yes     | The major version of AssEmbly being used to assemble the program (the first number in a version formatted as `x.x.x`)                                                     |
+| `@!ASSEMBLER_VERSION_MINOR` | Yes     | The minor version of AssEmbly being used to assemble the program (the second number in a version formatted as `x.x.x`)                                                    |
+| `@!ASSEMBLER_VERSION_PATCH` | Yes     | The patch version of AssEmbly being used to assemble the program (the third number in a version formatted as `x.x.x`)                                                     |
+| `@!V1_FORMAT`               | Yes     | Has a value of `1` if the program is being assembled into the header-less AAP format used by AssEmbly version 1, otherwise has a value of `0`                             |
+| `@!V1_CALL_STACK`           | Yes     | Has a value of `1` if the program will be executed using the "3 registers pushed" calling convention used by AssEmbly version 1, otherwise has a value of `0`             |
+| `@!IMPORT_DEPTH`            | No      | The current size of the import stack. Starts at `0` when used within the base file, then increments for every import statement, and decrements when an imported file ends |
+| `@!CURRENT_ADDRESS`         | No      | The current number of bytes that have been inserted into the program so far. Equivalent to the address that the current instruction will start at when assembled          |
+| `@!OBSOLETE_DIRECTIVES`     | Yes     | Has a value of `1` if the use of pre-3.2 directives is enabled, otherwise has a value of `0`                                                                              |
+| `@!ESCAPE_SEQUENCES`        | Yes     | Has a value of `1` if post-1.1 string escape sequences are enabled, otherwise has a value of `0`                                                                          |
+
+"Static" assembler constants will retain the same value throughout the entire assembly process. Other assembler constants may change throughout assembly depending on where they are used.
+
+#### Deleting Assembler Variables
+
+To delete an assembler variable after it has been defined, use the **`%UNDEFINE`** directive. It takes a single operand, the name of the assembler variable to delete. For example, `%UNDEFINE MY_VARIABLE` will delete an assembler variable with the name `MY_VARIABLE`. Assembler constants cannot be deleted.
+
+Deletion of a variable takes effect immediately and the variable will no longer be usable until and unless it is re-defined. To re-define a deleted variable, simply use the `%DEFINE` directive as normal. You do not *need* to delete a variable in order to redefine it, however.
+
+The name of the variable given to the `%UNDEFINE` directive must already exist. It is not valid to give a non-existent variable to the directive, even if the variable *used* to exist but was deleted.
+
+### %VAROP - Assembler Variable Operation
+
+The `%VAROP` directive is used to perform mathematical and logical operations on assembler variables. These operations are performed by the assembler at assembly-time, not assembled into the program (recall the processor has no concept of "variables", only memory and registers). The directive takes three operands: the operation to perform, the name of the assembler variable to operate on, and the numeric value to operate with. The variable to operate on cannot be an assembler constant.
+
+The first operand can be any one of the following:
+
+| Operation | Name                          | Purpose                                                                                     |
+|-----------|-------------------------------|---------------------------------------------------------------------------------------------|
+| `ADD`     | Addition                      | Add a value to the variable                                                                 |
+| `SUB`     | Subtraction                   | Subtract a value from the variable                                                          |
+| `MUL`     | Multiplication                | Multiply the variable by a value                                                            |
+| `DIV`     | Division                      | Divide the variable by a value                                                              |
+| `REM`     | Remainder                     | Divide the variable by a value, then store the remainder in the variable                    |
+| `BIT_AND` | Bitwise AND                   | Store the bitwise AND of a variable and a value in the variable                             |
+| `BIT_OR`  | Bitwise OR                    | Store the bitwise OR of a variable and a value in the variable                              |
+| `BIT_XOR` | Bitwise XOR                   | Store the bitwise XOR of a variable and a value in the variable                             |
+| `BIT_NOT` | Bitwise NOT                   | Store the bitwise NOT of a value in a variable                                              |
+| `AND`     | Logical AND                   | Store `1` in a variable if both the variable and a value are non-zero, else store `0`       |
+| `OR`      | Logical OR                    | Store `1` in a variable if either the variable or a value are non-zero, else store `0`      |
+| `XOR`     | Logical XOR                   | Store `1` in a variable if only one of the variable or a value are non-zero, else store `0` |
+| `NOT`     | Logical NOT                   | Store `0` in a variable if a value is non-zero, else store `1`                              |
+| `SHL`     | Bit Shift Left                | Shift the bits in a variable left by a given number of places                               |
+| `SHR`     | Bit Shift Right               | Shift the bits in a variable right by a given number of places                              |
+| `CMP_EQ`  | Compare Equal                 | Store `1` in a variable if both the variable and a value are equal, else store `0`          |
+| `CMP_NEQ` | Compare Not Equal             | Store `1` in a variable if both the variable and a value are not equal, else store `0`      |
+| `CMP_GT`  | Compare Greater Than          | Store `1` in a variable the variable is greater than a value, else store `0`                |
+| `CMP_GTE` | Compare Greater Than or Equal | Store `1` in a variable the variable is greater than or equal to a value, else store `0`    |
+| `CMP_LT`  | Compare Less Than             | Store `1` in a variable the variable is less than a value, else store `0`                   |
+| `CMP_LTE` | Compare Less Than or Equal    | Store `1` in a variable the variable is less than or equal to a value, else store `0`       |
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 5
+
+%VAROP ADD, MY_VARIABLE, 6
+; MY_VARIABLE is now 11
+
+%VAROP MUL, MY_VARIABLE, 4
+; MY_VARIABLE is now 44
+
+%VAROP CMP_GT, MY_VARIABLE, 55
+; MY_VARIABLE is now 0
+```
+
+As with anywhere else, the numeric literal for the value to operate with can also be a reference to an assembler variable or assembler constant.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 5
+%DEFINE MY_OTHER_VARIABLE, 10
+
+%VAROP ADD, MY_VARIABLE, @MY_OTHER_VARIABLE
+; MY_VARIABLE is now 15
+
+%VAROP DIV, MY_VARIABLE, @MY_VARIABLE
+; MY_VARIABLE is now 1
+```
+
+Note that if an assembler variable is being used as the third operand, it must be prefixed with an `@` sign so that it is replaced with a numeric literal by the assembler.
+
+### %IF - Conditional Assembly
+
+The `%IF` directive is used to start a **conditional assembly** block, a block of code that will only be assembled if a given condition is met. When the assembler encounters an `%IF` directive, it will check if the condition given in the directive is met. If it is, the assembler will continue to assemble the following lines as normal. If it is not, the assembler will skip ahead to the end of the conditional block (marked by the **`%ENDIF`** directive) and continue from there, resulting in none of the lines within the block being processed. All conditional blocks **must** end with a single `%ENDIF` directive. Having a conditional block run to the end of the program without one will result in an error and the assembly process failing. An error will also be thrown if the `%ENDIF` directive is used outside of an existing conditional block.
+
+There are two types of check an `%IF` condition can perform: assembler variable existence and literal value comparison. For both, the first operand to the `%IF` directive is always the conditional operation to perform.
+
+#### Checking Variable Existence
+
+To check for the existence of an assembler variable, either the `DEF` (defined) or `NDEF` (not defined) operation should be given as the first operand to the `%IF` directive. A second operand then must be given, the name of the variable to check for. For the `DEF` operation, the condition passes if the variable *does* exist. The opposite is true for `NDEF`.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0
+
+%IF DEF, MY_VARIABLE
+    ; Code here WILL be assembled
+%ENDIF
+
+%IF NDEF, MY_VARIABLE
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF DEF, SOME_OTHER_VARIABLE
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF NDEF, SOME_OTHER_VARIABLE
+    ; Code here WILL be assembled
+%ENDIF
+```
+
+#### Comparing Values
+
+There are six literal value comparisons available for use with the `%IF` directive: `EQ` (equal), `NEQ` (not equal), `GT` (greater than), `GTE` (greater than or equal), `LT` (less than), and `LTE` (less than or equal). After the comparison operation, two additional operands are required, the literal values to compare. Usually one or both of these will be a reference to an assembler variable, which must be prefixed with an `@` sign to replace it with its literal value.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0
+%DEFINE MY_OTHER_VARIABLE, 5
+
+%IF EQ, @MY_VARIABLE, 0
+    ; Code here WILL be assembled
+%ENDIF
+
+%IF NEQ, @MY_VARIABLE, 0
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF GT, @MY_VARIABLE, 5
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF LTE, @MY_VARIABLE, @MY_OTHER_VARIABLE
+    ; Code here WILL be assembled
+%ENDIF
+```
+
+#### %ELSE / %ELSE_IF
+
+The `%ELSE` and `%ELSE_IF` directives can be used to assemble a block of code in the case that the condition for an `%IF` block *doesn't* succeed. `%ELSE_IF` directives behave almost identically to `%IF` blocks and take the same operands, however are only evaluated if the condition for the prior conditional block failed. The `%ELSE` directive takes no operands, with `%ELSE` blocks always being assembled if the condition of the conditional directive they follow failed. Any `%ELSE` and `%ELSE_IF` directives must be located *before* the `%ENDIF` directive that closes the conditional block.
+
+An `%IF` block can be followed by any number of `%ELSE_IF` blocks, with each `%ELSE_IF` directive only being evaluated if the last one failed. Once a successful `%ELSE_IF` condition is reached, or if the initial `%IF` condition was successful, none of the following `%ELSE_IF` conditions will be evaluated. `%ELSE_IF` blocks can also be followed by a single `%ELSE` block which will only be assembled if *all* of the above `%ELSE_IF` conditions failed.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0
+%DEFINE MY_OTHER_VARIABLE, 5
+
+%IF EQ, @MY_VARIABLE, 0
+    ; Code here WILL be assembled
+%ELSE
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF GT, @MY_VARIABLE, @MY_OTHER_VARIABLE
+    ; Code here will NOT be assembled
+%ELSE_IF LT, @MY_VARIABLE, 10
+    ; Code here WILL be assembled
+%ELSE_IF LT, @MY_VARIABLE, 20
+    ; Code here will NOT be assembled
+%ELSE
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF DEF, MY_VARIABLE
+    ; Code here WILL be assembled
+%ELSE_IF DEF, MY_OTHER_VARIABLE
+    ; Code here will NOT be assembled
+%ELSE
+    ; Code here will NOT be assembled
+%ENDIF
+
+%IF NDEF, MY_VARIABLE
+    ; Code here will NOT be assembled
+%ELSE_IF NDEF, NON_EXISTENT_VARIABLE
+    ; Code here WILL be assembled
+%ENDIF
+```
+
+Note that `%ELSE` and `%ELSE_IF` blocks automatically close the conditional block above them, they do not warrant the use of an additional `%ENDIF` directive.
+
+#### Nesting Conditional Blocks
+
+Conditional blocks can be located within other conditional blocks. Inner blocks will only be evaluated if all the outer blocks that they are contained within pass their condition.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0
+%DEFINE MY_OTHER_VARIABLE, 5
+
+%IF EQ, @MY_VARIABLE, 0
+    ; Code here WILL be assembled
+
+    %IF NEQ, @MY_VARIABLE, 0
+        ; Code here will NOT be assembled
+    %ELSE
+        ; Code here WILL be assembled
+    %ENDIF
+%ENDIF
+
+%IF GT, @MY_OTHER_VARIABLE, 20
+    ; Code here will NOT be assembled
+
+    %IF GT, @MY_OTHER_VARIABLE, 1
+        ; Code here will NOT be assembled
+    %ELSE
+        ; Code here will NOT be assembled
+    %ENDIF
+%ENDIF
+```
+
+Keep in mind that the leading whitespace on each line inside the conditional blocks (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+
+### %WHILE - Conditional Source Code Repetition
+
+The `%WHILE` directive continually repeats a block of source code as long as a condition remains true, making it effectively a combination of the `%REPEAT` and `%IF` directives. The available condition operations and operands to the directive are the same as those to the `%IF` directive. Similarly to the repeat directive, the repeated lines are terminated with the **`%ENDWHILE`** directive, and `%WHILE` blocks can be nested within each other.
+
+The condition for the block is re-evaluated before each insertion. If it fails, the repetition immediately stops and the assembler skips straight to the `%ENDWHILE` directive. If the condition for the `%WHILE` block is not met when the block is first encountered, no instructions from within the block will be inserted.
+
+For example:
+
+```text
+%DEFINE MY_VARIABLE, 0
+
+%WHILE LT, @MY_VARIABLE, 30
+    MVQ rg0, @MY_VARIABLE
+    %VAROP ADD, MY_VARIABLE, 5
+%ENDWHILE
+
+%WHILE LT, @MY_VARIABLE, 60
+    MVQ rg3, @MY_VARIABLE
+    %DEFINE MY_OTHER_VARIABLE, 4
+    %WHILE GT, @MY_OTHER_VARIABLE, 0
+        MVQ rg1, @MY_OTHER_VARIABLE
+        %VAROP SUB, MY_OTHER_VARIABLE, 1
+    %ENDWHILE
+    MVQ rg2, @MY_VARIABLE
+    %VAROP ADD, MY_VARIABLE, 10
+%ENDWHILE
+
+%WHILE EQ, @MY_VARIABLE, 0
+    ADD rg0, rg1
+%ENDWHILE
+```
+
+This program is effectively equivalent to the following example and will assemble to the same bytes:
+
+```text
+MVQ rg0, @MY_VARIABLE
+MVQ rg0, @MY_VARIABLE
+MVQ rg0, @MY_VARIABLE
+MVQ rg0, @MY_VARIABLE
+MVQ rg0, @MY_VARIABLE
+MVQ rg0, @MY_VARIABLE
+
+MVQ rg3, @MY_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg2, @MY_VARIABLE
+
+MVQ rg3, @MY_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg2, @MY_VARIABLE
+
+MVQ rg3, @MY_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg1, @MY_OTHER_VARIABLE
+MVQ rg2, @MY_VARIABLE
+```
+
+The first `%WHILE` block is repeated six times, as `5` can only be added to `0` six times before it becomes greater than or equal to `30`. The second `%WHILE` block is repeated three times, as `10` can only be added to `30` three times before it becomes greater than or equal to `60`. The nested `%WHILE` block is repeated four times **every time the outer `%WHILE` block repeats**, as `MY_OTHER_VARIABLE` is reset for every outer repetition, and `1` can only be subtracted from `4` four times before it becomes less than or equal to `0`. The final `%WHILE` block is never assembled as its condition is never met.
+
+### %STOP - End Assembly
+
+The `%STOP` directive is used to immediately end the assembly process. As soon as the assembler reaches the directive, it stops and throws a guaranteed error. The assembly will not be considered successful, and no executable file will be produced. The `%STOP` directive optionally takes a single string operand to use as the message to display when assembly stops.
+
+`%STOP` directives are most useful when combined with conditional assembly to guarantee that a particular condition is met before continuing with assembly.
+
+For example:
+
+```text
+%IF NDEF, MY_VARIABLE
+    %STOP "@MY_VARIABLE is a required variable. Please define it."
+%ENDIF
+```
+
+This example immediately ends assembly if a variable with the name `MY_VARIABLE` does not exist, thereby ensuring that `MY_VARIABLE` *will* be defined for anything after this `%IF` block.
 
 ## Console Input and Output
 
