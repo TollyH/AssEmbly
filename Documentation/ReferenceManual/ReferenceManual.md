@@ -10,6 +10,37 @@ AssEmbly is a custom processor architecture and assembly language implemented in
 
 AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://github.com/TollyH).
 
+<!-- Insert table of contents for Word documents -->
+```{=openxml}
+<w:sdt>
+    <w:sdtPr>
+        <w:docPartObj>
+            <w:docPartGallery w:val="Table of Contents" />
+            <w:docPartUnique />
+        </w:docPartObj>
+    </w:sdtPr>
+    <w:sdtContent>
+        <w:p>
+            <w:pPr>
+                <w:pStyle w:val="TOCHeading" />
+            </w:pPr>
+            <w:r>
+                <w:t>Table of Contents</w:t>
+            </w:r>
+        </w:p>
+        <w:p>
+            <w:r>
+                <w:fldChar w:fldCharType="begin" w:dirty="true" />
+                <w:instrText xml:space="preserve"> TOC \h \u </w:instrText>
+                <w:fldChar w:fldCharType="separate" />
+                <w:fldChar w:fldCharType="end" />
+            </w:r>
+        </w:p>
+    </w:sdtContent>
+</w:sdt>
+<w:p><w:r><w:br w:type="page"/></w:r></w:p>
+```
+
 ## Technical Information
 
 |                              |                                                                 |
@@ -789,7 +820,7 @@ SIGN_NEG rg0  ; Performs the equivalent of "NOT rg0" then "ICR rg0" in one instr
 
 Stored values can be interpreted as either **unsigned** or **signed**. Unsigned values are always positive and use all 64 bits to store their value, giving a range of `0` to `18,446,744,073,709,551,615`. Signed values can be either positive *or* negative and, while still stored using 64-bits, the highest bit is instead to store the sign. This gives a range of `-9,223,372,036,854,775,808` to `9,223,372,036,854,775,807` for signed operations. The number of distinct values is the same as unsigned values, but now half of the values are negative.
 
-To check if the limits of a signed number have been exceeded after an operation instead of the limits of an unsigned number, the **overflow flag** should be used instead of the carry flag. This is explained in detail in the dedicated section on the overflow flag vs. the carry flag.
+To check if the limits of a signed number have been exceeded after an operation instead of the limits of an unsigned number, the **overflow flag** should be used instead of the carry flag. This is explained in detail in the dedicated section on the overflow flag vs the carry flag.
 
 Numeric literals can be made negative by prepending the `-` sign onto them. Much of the base instruction set can take negative numbers as operands and work exactly as expected, though there are some exceptions. A full table of which instructions work as expected with negative values and which ones do not can be found toward the end of the document, though as a general rule, if an instruction has an equivalent that begins with `SIGN_`, you should use the signed one instead if negative values are expected.
 
@@ -930,7 +961,7 @@ The second example here caused part of the number to be lost as `SIGN_EXB` was u
 
 Converting from a larger size of signed integer to a smaller one is as simple as taking only the desired number of lower bits. Assuming the value can fit within the target signed integer size's limits, no specific operation needs to be used.
 
-### The Overflow Flag vs. the Carry Flag
+### The Overflow Flag vs the Carry Flag
 
 As explained earlier, during most mathematical operations the carry flag is set whenever a subtraction goes below `0`, or an addition goes above `18446744073709551615`. This is useful in unsigned arithmetic, as it will inform you when the result of an operation is not mathematically correct, however in signed arithmetic, it cannot be used for this purpose. To overcome this, the status flag register also contains an **overflow flag**. This flag is set specifically when the result of an operation is incorrect when interpreted as a *signed* value. It has no useful meaning during unsigned arithmetic.
 
@@ -2026,7 +2057,7 @@ For example, this program is invalid and will throw an error:
 my_macro1  ; Throws error
 ```
 
-Even though neither `my_macro1` nor ``my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
+Even though neither `my_macro1` nor `my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
 
 This program, however, is valid, and will assemble without failure:
 

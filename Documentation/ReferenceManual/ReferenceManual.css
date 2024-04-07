@@ -1,0 +1,15 @@
+#TOC {
+    position: fixed;
+    width: 20em;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background-color: #EEE;
+    overflow-y: scroll;
+    padding: 1em;
+}
+
+body {
+    padding-right: 4em;
+    padding-left: 24em;
+}

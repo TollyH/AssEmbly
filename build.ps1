@@ -33,6 +33,6 @@ Write-Output "`nBuilding documentation..."
 .\build-docs.ps1
 $docsZipPath = Join-Path $publishFolder "ReferenceManual.zip"
 Write-Output "`nCompressing documentation..."
-Compress-Archive -Path "Documentation\ReferenceManual\ReferenceManual.*", "Documentation\LICENSE" -DestinationPath $docsZipPath -CompressionLevel Optimal
+Compress-Archive -Path "Documentation\ReferenceManual\Build\ReferenceManual.*", "Documentation\LICENSE" -DestinationPath $docsZipPath -CompressionLevel Optimal
 
 Write-Output "Done."

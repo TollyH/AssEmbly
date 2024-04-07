@@ -1,0 +1,13 @@
+<script lang="text/javascript">
+    // Collapse table of contents if page gets too narrow
+    addEventListener("resize", (event) => {
+        const table = document.getElementById("TOC");
+        if (window.innerWidth < 750) {
+            table.style.display = "none";
+            document.body.style.paddingLeft = "4em";
+        } else {
+            table.style.display = null;
+            document.body.style.paddingLeft = "24em";
+        }
+    });
+</script>
