@@ -335,7 +335,7 @@ DCR rg0
 
 When the program starts, `rpo` will have a value of `0` — the address of the first item in memory. After the first instruction has finished executing, `rpo` will have a value of `10`: its previous value `0`, plus `1` byte for the mnemonic's opcode, `1` byte for the register operand, and `8` bytes for the literal operand. `rpo` is now pointing to the opcode of the next instruction (`DCR`).
 
-**Note:** `rpo` is incremented by 1 ***before*** an instruction begins execution, therefore when used as an operand in an instruction, it will point to the address of the **first operand**, **not to the address of the opcode**. It will not be incremented again until *after* the instruction has completed.
+**Note:** `rpo` is incremented past the opcode ***before*** an instruction begins execution, therefore when used as an operand in an instruction, it will point to the address of the **first operand**, **not to the address of the opcode**. It will not be incremented again until *after* the instruction has completed.
 
 For example, in the instruction:
 
@@ -360,8 +360,8 @@ The 5 bits currently in use are:
 Z = Zero flag
 C = Carry flag
 F = File end flag
-S = Sign Flag
-O = Overflow Flag
+S = Sign flag
+O = Overflow flag
 ```
 
 Each bit of this number can be considered as a `true` (`1`) or `false` (`0`) value as to whether the flag is "set" or not.
@@ -708,7 +708,7 @@ Bitwise operations consider each bit of the operands individually instead of as 
 
 Here are tables of how each two-operand operation will affect each bit
 
-Bitwise And (`AND`):
+Bitwise AND (`AND`):
 
 ```text
     +---+---+
@@ -728,7 +728,7 @@ AND rg0, 0b10100
 ; rg0 now has a value of 0b00100
 ```
 
-Bitwise Or (`ORR`):
+Bitwise OR (`ORR`):
 
 ```text
     +---+---+
@@ -748,7 +748,7 @@ ORR rg0, 0b10100
 ; rg0 now has a value of 0b10101
 ```
 
-Bitwise Exclusive Or (`XOR`):
+Bitwise XOR (Exclusive OR - `XOR`):
 
 ```text
     +---+---+
@@ -1379,7 +1379,7 @@ JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
 This program will keep looping until the third bit of `rsf` becomes `1`. meaning that the end of the file has been reached.
 
-Similarly to `CMP`, `TST` works by performing a bitwise and on the two operands, discarding the result, but still updating the status flags. A bitwise and will ensure that only the bit you want to check remains as `1`, but only if it started as `1`. If a bit is not one that you are checking, or it wasn't `1` to start with, it will end up as `0`. If the resulting number isn't zero, leaving the zero flag unset, the bit must've been `1`, and vice versa.
+Similarly to `CMP`, `TST` works by performing a bitwise AND on the two operands, discarding the result, but still updating the status flags. A bitwise AND will ensure that only the bit you want to check remains as `1`, but only if it started as `1`. If a bit is not one that you are checking, or it wasn't `1` to start with, it will end up as `0`. If the resulting number isn't zero, leaving the zero flag unset, the bit must've been `1`, and vice versa.
 
 ### Checking the Carry, Overflow, Zero, and Sign Flags
 
@@ -3502,25 +3502,25 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | `SHR` | Shift Right | Register, Address | Shift the bits of a register right by the contents of memory at an address | `0x56` | `pre-v1` |
 | `SHR` | Shift Right | Register, Pointer | Shift the bits of a register right by the contents of memory at an address in a register | `0x57` | `pre-v1` |
 | **Bitwise** ||||||
-| `AND` | Bitwise And | Register, Register | Bitwise and one register by another | `0x60` | `pre-v1` |
-| `AND` | Bitwise And | Register, Literal | Bitwise and a register by a literal value | `0x61` | `pre-v1` |
-| `AND` | Bitwise And | Register, Address | Bitwise and a register by the contents of memory at an address | `0x62` | `pre-v1` |
-| `AND` | Bitwise And | Register, Pointer | Bitwise and a register by the contents of memory at an address in a register | `0x63` | `pre-v1` |
-| `ORR` | Bitwise Or | Register, Register | Bitwise or one register by another | `0x64` | `pre-v1` |
-| `ORR` | Bitwise Or | Register, Literal | Bitwise or a register by a literal value | `0x65` | `pre-v1` |
-| `ORR` | Bitwise Or | Register, Address | Bitwise or a register by the contents of memory at an address | `0x66` | `pre-v1` |
-| `ORR` | Bitwise Or | Register, Pointer | Bitwise or a register by the contents of memory at an address in a register | `0x67` | `pre-v1` |
-| `XOR` | Bitwise Exclusive Or | Register, Register | Bitwise exclusive or one register by another | `0x68` | `pre-v1` |
-| `XOR` | Bitwise Exclusive Or | Register, Literal | Bitwise exclusive or a register by a literal value | `0x69` | `pre-v1` |
-| `XOR` | Bitwise Exclusive Or | Register, Address | Bitwise exclusive or a register by the contents of memory at an address | `0x6A` | `pre-v1` |
-| `XOR` | Bitwise Exclusive Or | Register, Pointer | Bitwise exclusive or a register by the contents of memory at an address in a register | `0x6B` | `pre-v1` |
-| `NOT` | Bitwise Not | Register | Invert each bit of a register | `0x6C` | `pre-v1` |
+| `AND` | Bitwise AND | Register, Register | Bitwise AND one register by another | `0x60` | `pre-v1` |
+| `AND` | Bitwise AND | Register, Literal | Bitwise AND a register by a literal value | `0x61` | `pre-v1` |
+| `AND` | Bitwise AND | Register, Address | Bitwise AND a register by the contents of memory at an address | `0x62` | `pre-v1` |
+| `AND` | Bitwise AND | Register, Pointer | Bitwise AND a register by the contents of memory at an address in a register | `0x63` | `pre-v1` |
+| `ORR` | Bitwise OR | Register, Register | Bitwise OR one register by another | `0x64` | `pre-v1` |
+| `ORR` | Bitwise OR | Register, Literal | Bitwise OR a register by a literal value | `0x65` | `pre-v1` |
+| `ORR` | Bitwise OR | Register, Address | Bitwise OR a register by the contents of memory at an address | `0x66` | `pre-v1` |
+| `ORR` | Bitwise OR | Register, Pointer | Bitwise OR a register by the contents of memory at an address in a register | `0x67` | `pre-v1` |
+| `XOR` | Bitwise XOR | Register, Register | Bitwise XOR one register by another | `0x68` | `pre-v1` |
+| `XOR` | Bitwise XOR | Register, Literal | Bitwise XOR a register by a literal value | `0x69` | `pre-v1` |
+| `XOR` | Bitwise XOR | Register, Address | Bitwise XOR a register by the contents of memory at an address | `0x6A` | `pre-v1` |
+| `XOR` | Bitwise XOR | Register, Pointer | Bitwise XOR a register by the contents of memory at an address in a register | `0x6B` | `pre-v1` |
+| `NOT` | Bitwise NOT | Register | Invert each bit of a register | `0x6C` | `pre-v1` |
 | `RNG` | Random Number Generator | Register | Randomise each bit of a register | `0x6D` | `pre-v1` |
 | **Comparison** ||||||
-| `TST` | Test | Register, Register | Bitwise and two registers, discarding the result whilst still updating status flags | `0x70` | `pre-v1` |
-| `TST` | Test | Register, Literal | Bitwise and a register and a literal value, discarding the result whilst still updating status flags | `0x71` | `pre-v1` |
-| `TST` | Test | Register, Address | Bitwise and a register and the contents of memory at an address, discarding the result whilst still updating status flags | `0x72` | `pre-v1` |
-| `TST` | Test | Register, Pointer | Bitwise and a register and the contents of memory at an address in a register, discarding the result whilst still updating status flags | `0x73` | `pre-v1` |
+| `TST` | Test | Register, Register | Bitwise AND two registers, discarding the result whilst still updating status flags | `0x70` | `pre-v1` |
+| `TST` | Test | Register, Literal | Bitwise AND a register and a literal value, discarding the result whilst still updating status flags | `0x71` | `pre-v1` |
+| `TST` | Test | Register, Address | Bitwise AND a register and the contents of memory at an address, discarding the result whilst still updating status flags | `0x72` | `pre-v1` |
+| `TST` | Test | Register, Pointer | Bitwise AND a register and the contents of memory at an address in a register, discarding the result whilst still updating status flags | `0x73` | `pre-v1` |
 | `CMP` | Compare | Register, Register | Subtract a register from another, discarding the result whilst still updating status flags | `0x74` | `pre-v1` |
 | `CMP` | Compare | Register, Literal | Subtract a literal value from a register, discarding the result whilst still updating status flags | `0x75` | `pre-v1` |
 | `CMP` | Compare | Register, Address | Subtract the contents of memory at an address from a register, discarding the result whilst still updating status flags | `0x76` | `pre-v1` |
