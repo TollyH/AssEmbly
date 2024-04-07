@@ -13,3 +13,11 @@ body {
     padding-right: 4em;
     padding-left: 24em;
 }
+
+table, th, td {
+    border: 1px solid;
+}
+
+td {
+    padding: 0.2em;
+}
