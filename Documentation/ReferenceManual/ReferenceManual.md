@@ -2,7 +2,7 @@
 
 Applies to versions: `3.2.0`
 
-Last revised: 2024-04-07
+Last revised: 2024-04-08
 
 ## Introduction
 
@@ -129,7 +129,7 @@ For example:
 WCC 10
 ```
 
-Here `:NOT_COMMENT` will point to `WCC`, as it is the first thing that will be assembled after the definition was written (comments are ignored by the assembler and do not contribute to the final assembled program).
+> Here `:NOT_COMMENT` will point to `WCC`, as it is the first thing that will be assembled after the definition was written (comments are ignored by the assembler and do not contribute to the final assembled program).
 
 Labels can also be placed at the very end of a file to point to the first byte in memory that is not part of the program.
 
@@ -141,7 +141,7 @@ MVQ rg1, 10
 :END
 ```
 
-`:END` here will have a value of `20` when referenced, as each instruction prior will take up `10` bytes (more on this later).
+> `:END` here will have a value of `20` when referenced, as each instruction prior will take up `10` bytes (more on this later).
 
 The label name `:ENTRY` (case insensitive) has a special meaning. If it is present in a file, execution will start from wherever the entry label points to. If it is not present, execution will start from the first line.
 
@@ -154,7 +154,7 @@ MVQ rg1, 10
 HLT
 ```
 
-When this program is executed, only the `MVQ rg1, 10` line will run. `MVQ rg0, 5` will never be executed.
+> When this program is executed, only the `MVQ rg1, 10` line will run. `MVQ rg0, 5` will never be executed.
 
 ## Operand Types
 
@@ -242,7 +242,7 @@ WCC 10
 MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0
 ```
 
-Here `:AREA_1` will point to the **first byte** (i.e. the start of the **opcode**) of the **directly subsequent assemble-able line** — in this case `WCC`. The second operand to `MVQ` will become the address that `WCC` is stored at in memory, `0` if it is the first instruction in the file. As `MVQ` is the instruction to move to a destination from a source, `rg0` will contain `0xCD` after the instruction executes (`0xCD` being the opcode for `WCC <Literal>`).
+> Here `:AREA_1` will point to the **first byte** (i.e. the start of the **opcode**) of the **directly subsequent assemble-able line** — in this case `WCC`. The second operand to `MVQ` will become the address that `WCC` is stored at in memory, `0` if it is the first instruction in the file. As `MVQ` is the instruction to move to a destination from a source, `rg0` will contain `0xCD` after the instruction executes (`0xCD` being the opcode for `WCC <Literal>`).
 
 Another example, assuming these are the very first lines in a file:
 
@@ -252,7 +252,7 @@ WCC 10
 WCX :AREA_1  ; Will write "CA" to the console
 ```
 
-`:AREA_1` will store the memory address `9`, as `WCC 10` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
+> `:AREA_1` will store the memory address `9`, as `WCC 10` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
 
 If, when referencing a label, you want to utilise the address of the label *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, and before the label name.
 
@@ -278,7 +278,7 @@ WCX :0x09  ; Will write "CA" to the console
 WCX :0b1001  ; Will write "CA" to the console
 ```
 
-The `WCX` instructions here are accessing the data in memory at address `9` (the opcode for `WCX <Address>` itself - `0xCA`), despite there not being any label that points there.
+> The `WCX` instructions here are accessing the data in memory at address `9` (the opcode for `WCX <Address>` itself - `0xCA`), despite there not being any label that points there.
 
 ### Pointer
 
@@ -293,7 +293,7 @@ MVQ rg0, :&AREA_1  ; Move 0 (the address itself) to rg0
 MVQ rg1, *rg0  ; Move the item in memory (0xCD) at the address (0) in rg0 to rg1
 ```
 
-`rg1` will contain `0xCD` after the third instruction finishes.
+> `rg1` will contain `0xCD` after the third instruction finishes.
 
 ## Registers
 
@@ -333,7 +333,7 @@ MVQ rg0, 10
 DCR rg0
 ```
 
-When the program starts, `rpo` will have a value of `0` — the address of the first item in memory. After the first instruction has finished executing, `rpo` will have a value of `10`: its previous value `0`, plus `1` byte for the mnemonic's opcode, `1` byte for the register operand, and `8` bytes for the literal operand. `rpo` is now pointing to the opcode of the next instruction (`DCR`).
+> When the program starts, `rpo` will have a value of `0` — the address of the first item in memory. After the first instruction has finished executing, `rpo` will have a value of `10`: its previous value `0`, plus `1` byte for the mnemonic's opcode, `1` byte for the register operand, and `8` bytes for the literal operand. `rpo` is now pointing to the opcode of the next instruction (`DCR`).
 
 **Note:** `rpo` is incremented past the opcode ***before*** an instruction begins execution, therefore when used as an operand in an instruction, it will point to the address of the **first operand**, **not to the address of the opcode**. It will not be incremented again until *after* the instruction has completed.
 
@@ -343,7 +343,7 @@ For example, in the instruction:
 MVQ rg0, rpo
 ```
 
-Before execution of the instruction begins, `rpo` will point to the opcode corresponding to `MVQ` with a register and literal. Once the processor reads this, it increments `rpo` by `1`. `rpo` now points to the first operand: `rg0`. This value will be retained until after the instruction has completed, when `rpo` will be increased by `2` (`1` for each register operand). This means there was an increase of `3` overall when including the initial increment by `1` for the opcode.
+> Before execution of the instruction begins, `rpo` will point to the opcode corresponding to `MVQ` with a register and literal. Once the processor reads this, it increments `rpo` by `1`. `rpo` now points to the first operand: `rg0`. This value will be retained until after the instruction has completed, when `rpo` will be increased by `2` (`1` for each register operand). This means there was an increase of `3` overall when including the initial increment by `1` for the opcode.
 
 ### rsf - Status Flags
 
@@ -490,7 +490,7 @@ For example:
 MVB rg0, 9874
 ```
 
-`MVB` can only take a single byte, or 8 bits, but in binary `9874` is `10011010010010`, requiring 14 bits at minimum to store. The lower 8 bits will be kept: `10010010` — the remaining 6 (`100110`) will be discarded. After this instruction has been executed, `rg0` will have a value of `146`.
+> `MVB` can only take a single byte, or 8 bits, but in binary `9874` is `10011010010010`, requiring 14 bits at minimum to store. The lower 8 bits will be kept: `10010010` — the remaining 6 (`100110`) will be discarded. After this instruction has been executed, `rg0` will have a value of `146`.
 
 ### Moving with Registers
 
@@ -502,7 +502,7 @@ For example, assume that before the `MVD` instruction, `rg1` has a value of `14,
 MVW rg1, 65535
 ```
 
-`14,879,176,506,051,693,048` in binary is `1100111001111101011101000011001011110001100011001000100111111000`, a full 64-bits, and `65535` is `1111111111111111`, requiring only 16 bits. `MVW` will only consider these 16 bits (if there were more they would have been truncated, see above section). Instead of altering only the lowest 16 bits of `rg1`, `MVW` will instead set all the remaining 48 bits to `0`, resulting in a final value of `0000000000000000000000000000000000000000000000001111111111111111` — `65535` perfectly.
+> `14,879,176,506,051,693,048` in binary is `1100111001111101011101000011001011110001100011001000100111111000`, a full 64-bits, and `65535` is `1111111111111111`, requiring only 16 bits. `MVW` will only consider these 16 bits (if there were more they would have been truncated, see above section). Instead of altering only the lowest 16 bits of `rg1`, `MVW` will instead set all the remaining 48 bits to `0`, resulting in a final value of `0000000000000000000000000000000000000000000000001111111111111111` — `65535` perfectly.
 
 Similarly to literals, if a source register contains a number greater than what a move instruction can handle, the upper bits will be disregarded.
 
@@ -682,7 +682,7 @@ SHL rg0, 2
 ; | Value | ... | 1  | 1  | 0  | 1  | 0  | 0  | 0  |
 ```
 
-The bits were shifted 2 places to the left, and new bits on the right were set to 0.
+> The bits were shifted 2 places to the left, and new bits on the right were set to 0.
 
 Here's one for shifting right:
 
@@ -698,7 +698,7 @@ SHR rg0, 2
 ; | Value | ... | 0  | 0  | 0  | 0  | 1  | 1  | 0  |
 ```
 
-The bits were shifted 2 places to the right, and new bits on the left were set to 0.
+> The bits were shifted 2 places to the right, and new bits on the left were set to 0.
 
 If, like with the right shift example above, a shift causes at least one `1` bit to go off the edge (either below the first bit or above the 64th), the carry flag will be set to `1`, otherwise it will be set to `0`.
 
@@ -1033,7 +1033,7 @@ FLPT_WCN rg0
 ; "0.3333333333333333" is printed to the console
 ```
 
-As can be seen with the second operation, floating point values cannot always represent decimal numbers with 100% accuracy, and may sometimes be off by a tiny fractional amount when converted to and from base 10.
+> As can be seen with the second operation, floating point values cannot always represent decimal numbers with 100% accuracy, and may sometimes be off by a tiny fractional amount when converted to and from base 10.
 
 Operations exclusive to floating point include trigonometric functions (i.e. Sine, Cosine, and Tangent and their inverses), single-instruction exponentiation, and logarithms. The trigonometric functions all operate on **radians** (a full circle is `2 * PI` radians). You can convert degrees to radians by multiplying the degrees by `0.017453292519943295` (`PI / 180`), and you can convert radians to degrees by multiplying the radians by `57.295779513082323` (`180 / PI`).
 
@@ -1212,7 +1212,7 @@ ADD rg0, 5  ; Add 5 to the current value of rg0
 JMP :ADD_LOOP  ; Go back to ADD_LOOP and continue executing from there
 ```
 
-This program will set rg0 to 0, then infinitely keep adding 5 to the register by jumping back to the `ADD_LOOP` label. To only jump some of the time, for example to create a conditional loop, see the following section on branching.
+> This program will set rg0 to 0, then infinitely keep adding 5 to the register by jumping back to the `ADD_LOOP` label. To only jump some of the time, for example to create a conditional loop, see the following section on branching.
 
 Here is another example of a jump:
 
@@ -1226,7 +1226,7 @@ ADD rg0, 5  ; This won't be executed
 ; rg0 is 5 here
 ```
 
-`rg0` only ends up being 5 at the end of this example, as jumping to the `SKIP` label prevented the two other `ADD` instructions from being reached.
+> `rg0` only ends up being 5 at the end of this example, as jumping to the `SKIP` label prevented the two other `ADD` instructions from being reached.
 
 Jumps can also be made to pointers and address literals, though you must be sure that the address is that of a valid opcode before jumping there.
 
@@ -1294,9 +1294,8 @@ ADD rg0, 1000  ; This will execute only if rg0 is less than or equal to 1000
 SUB rg0, 1000  ; This will execute in either situation
 ```
 
-Be aware that the `GREATER` label will still be reached if `rg0` is less than or equal to `1000` here, the `ADD` instruction will just be executed first.
-
-To have the contents of the `GREATER` label execute **only** if `rg0` is greater than `1000`, include an unconditional jump like so:
+> Be aware that the `GREATER` label will still be reached if `rg0` is less than or equal to `1000` here, the `ADD` instruction will just be executed first.
+> To have the contents of the `GREATER` label execute **only** if `rg0` is greater than `1000`, include an unconditional jump like so:
 
 ```text
 RNG rg0  ; Set rg0 to a random number
@@ -1343,7 +1342,7 @@ WCN 20  ; This will execute
 ; "1020" is output to the console, -6 was interpreted instead as 18446744073709551610
 ```
 
-Here the comparison doesn't work as expected because the conditional jump used (`JGT`) only works assuming the comparison was intended to be unsigned. The signed versions of these instructions (like `SIGN_JGT`) use the state of the sign, overflow, and zero status flags so that they work as expected when used after signed comparisons. A full list of what each conditional jump instruction is checking for in terms of the status flags can be found in the full instruction reference.
+> Here the comparison doesn't work as expected because the conditional jump used (`JGT`) only works assuming the comparison was intended to be unsigned. The signed versions of these instructions (like `SIGN_JGT`) use the state of the sign, overflow, and zero status flags so that they work as expected when used after signed comparisons. A full list of what each conditional jump instruction is checking for in terms of the status flags can be found in the full instruction reference.
 
 ### Comparing Floating Point Numbers
 
@@ -1377,7 +1376,7 @@ TST rsf, 0b100  ; Check if the third bit is set
 JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 ```
 
-This program will keep looping until the third bit of `rsf` becomes `1`. meaning that the end of the file has been reached.
+> This program will keep looping until the third bit of `rsf` becomes `1`. meaning that the end of the file has been reached.
 
 Similarly to `CMP`, `TST` works by performing a bitwise AND on the two operands, discarding the result, but still updating the status flags. A bitwise AND will ensure that only the bit you want to check remains as `1`, but only if it started as `1`. If a bit is not one that you are checking, or it wasn't `1` to start with, it will end up as `0`. If the resulting number isn't zero, leaving the zero flag unset, the bit must've been `1`, and vice versa.
 
@@ -1397,7 +1396,7 @@ WCN 20
 ; Only "20" will be written to the console
 ```
 
-`JCA` here is checking if the carry flag is set or not following the subtraction. The jump will only occur if the carry flag is `1` (set), otherwise, as with the other jump types, execution will continue as normal. `JNC` can be used to perform the inverse, jump only if the carry flag is unset.
+> `JCA` here is checking if the carry flag is set or not following the subtraction. The jump will only occur if the carry flag is `1` (set), otherwise, as with the other jump types, execution will continue as normal. `JNC` can be used to perform the inverse, jump only if the carry flag is unset.
 
 The zero flag checks can also be used following a mathematical operation like so:
 
@@ -1408,7 +1407,7 @@ ADD rg0, 1  ; Only execute this if rg0 became 0 because of the SUB operation
 :NOT_ZERO
 ```
 
-The `ADD` instruction here will only execute if the subtraction by 7 caused `rg0` to become exactly equal to `0`.
+> The `ADD` instruction here will only execute if the subtraction by 7 caused `rg0` to become exactly equal to `0`.
 
 The `SIGN_JOV`, `SIGN_JNO`, `SIGN_JSI`, and `SIGN_JNS` instructions can be used to check if the overflow and sign flags are set and unset respectively in the same way:
 
@@ -1456,13 +1455,13 @@ MVQ *rg0, 765  ; Set the first 8 bytes of the padding to represent 765
 ADD rg0, 8  ; Add 8 to rg0, it now points to the next number
 ```
 
-This program would assemble to the following bytes:
+> This program would assemble to the following bytes:
 
 ```text
 99 06 13 00 00 00 00 00 00 00 02 23 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 9F 06 FD 02 00 00 00 00 00 00 11 06 08 00 00 00 00 00 00 00
 ```
 
-Which can be broken down to:
+> Which can be broken down to:
 
 ```text
 Address | Bytes
@@ -1500,13 +1499,13 @@ HLT  ; Stop the program executing into the %DAT insertion (important!)
 %DAT 54  ; Insert a single 54 byte (0x36)
 ```
 
-This program assembles into the following bytes:
+> This program assembles into the following bytes:
 
 ```text
 82 06 0B 00 00 00 00 00 00 00 00 36
 ```
 
-Which can be broken down to:
+> Which can be broken down to:
 
 ```text
 Address | Bytes
@@ -1541,7 +1540,9 @@ HLT  ; End execution to stop processor running into string data
 ; Note that the string ends with '\0' (a 0 or "null" byte)
 ```
 
-This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely. While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `%DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained toward the end of the document along with a table listing all of the possible sequences.
+> This program will loop through the string, placing the byte value of each character in `rg0` and writing it to the console, until it reaches the 0 byte, when it will then stop to avoid looping infinitely.
+
+While not a strict requirement, terminating a string with a 0 byte like this should always be done to give an easy way of knowing when the end of a string has been reached. Placing a `%DAT 0` directive on the line after the string insertion will also achieve this 0 termination, and will result in the exact same bytes being assembled, however using the `\0` escape sequence is more compact. Escape sequences are explained toward the end of the document along with a table listing all of the possible sequences.
 
 The example program assembles down to the following bytes:
 
@@ -1549,7 +1550,7 @@ The example program assembles down to the following bytes:
 99 06 2E 00 00 00 00 00 00 00 83 07 06 75 07 00 00 00 00 00 00 00 00 04 2D 00 00 00 00 00 00 00 14 06 CC 07 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 21 00
 ```
 
-Which can be broken down to:
+> Which can be broken down to:
 
 ```text
 Address | Bytes
@@ -1598,13 +1599,13 @@ HLT  ; End execution to stop processor running into number data
 %NUM 100_015  ; Insert the number 100015 with 8 bytes
 ```
 
-Which will produce the following bytes:
+> Which will produce the following bytes:
 
 ```text
 99 06 73 00 00 00 00 00 00 00 12 06 15 00 00 00 00 00 00 00 00 AF 86 01 00 00 00 00 00
 ```
 
-Breaking down into:
+> Breaking down into:
 
 ```text
 Address | Bytes
@@ -1630,7 +1631,7 @@ The `%IMP` directive inserts lines of AssEmbly source code from another file int
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `numbers.asm`.
 
-Contents of `program.asm`:
+> Contents of `program.asm`:
 
 ```text
 MVQ rg0, :NUMBER_ONE
@@ -1640,7 +1641,7 @@ HLT  ; Prevent program executing into number data
 %IMP "numbers.asm"
 ```
 
-Contents of `numbers.asm`:
+> Contents of `numbers.asm`:
 
 ```text
 :NUMBER_ONE
@@ -1650,7 +1651,7 @@ Contents of `numbers.asm`:
 %NUM 456
 ```
 
-When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
+> When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
 
 ```text
 MVQ rg0, :NUMBER_ONE
@@ -1665,7 +1666,7 @@ HLT  ; Prevent program executing into number data
 %NUM 456
 ```
 
-Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
+> Meaning that `rg0` will finish with a value of `123`, and `rg1` will finish with a value of `456`.
 
 The `%IMP` directive simply inserts the text contents of a file into the current file for assembly. This means that any label names in files being imported will be usable in the main file, though imposes the added restriction that label names must be unique across the main file and all its imported files.
 
@@ -1675,25 +1676,25 @@ Care should be taken to ensure that a file does not end up depending on itself, 
 
 An example of a circular dependency:
 
-`file_one.asm`:
+> `file_one.asm`:
 
 ```text
 %IMP "file_two.asm"
 ```
 
-`file_two.asm`:
+> `file_two.asm`:
 
 ```text
 %IMP "file_three.asm"
 ```
 
-`file_three.asm`:
+> `file_three.asm`:
 
 ```text
 %IMP "file_one.asm"
 ```
 
-Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
+> Attempting to assemble any of these three files would result in the assembler throwing an error, as each file ends up depending on itself as it resolves its import.
 
 ### %IBF - Import Binary File Contents
 
@@ -1701,7 +1702,7 @@ The `%IBF` directive inserts the raw binary contents of a file into a program wh
 
 For example, suppose you had two files in the same folder, one called `program.asm`, and one called `string.txt`.
 
-Contents of `program.asm`:
+> Contents of `program.asm`:
 
 ```text
 MVQ rg0, :&STRING
@@ -1720,21 +1721,20 @@ HLT  ; Prevent program executing into string data
 %DAT 0
 ```
 
-Contents of `string.txt`:
+> Contents of `string.txt`:
 
 ```text
 Hello, world!
 ```
 
-This program will print `Hello, world!` to the console when executed, with the string "Hello, world!" now being contained within the program itself.
-
-Assembling the program produces the following bytes:
+> This program will print `Hello, world!` to the console when executed, with the string "Hello, world!" now being contained within the program itself.
+> Assembling the program produces the following bytes:
 
 ```text
 99 06 27 00 00 00 00 00 00 00 9B 07 06 70 07 07 04 26 00 00 00 00 00 00 00 CC 07 14 06 02 0A 00 00 00 00 00 00 00 00 48 65 6C 6C 6F 2C 20 77 6F 72 6C 64 21 00
 ```
 
-Breaking down into:
+> Breaking down into:
 
 ```text
 Address | Bytes
@@ -1818,7 +1818,7 @@ For example:
 %LABEL_OVERRIDE 1234
 ```
 
-This program defines two labels (`MY_LABEL` and `MY_OTHER_LABEL`) that will point to the address `1234` (`0x4D2`) when used, despite the labels not being defined at a line with that address.
+> This program defines two labels (`MY_LABEL` and `MY_OTHER_LABEL`) that will point to the address `1234` (`0x4D2`) when used, despite the labels not being defined at a line with that address.
 
 The address given can also be a reference to another label. The label should be in ampersand-prefixed form. For example:
 
@@ -1833,7 +1833,7 @@ MVQ rg5, rg3
 MVQ rg0, rg3
 ```
 
-Both `SOME_CODE` and `POINTS_TO_SOME_CODE` will store the same address here, despite `POINTS_TO_SOME_CODE` being defined before `SOME_CODE` and not being directly above the target code. It is possible to reference labels that are not yet defined, as long as they are defined by the time assembly finishes.
+> Both `SOME_CODE` and `POINTS_TO_SOME_CODE` will store the same address here, despite `POINTS_TO_SOME_CODE` being defined before `SOME_CODE` and not being directly above the target code. It is possible to reference labels that are not yet defined, as long as they are defined by the time assembly finishes.
 
 ### %REPEAT - Repeat Lines of Source Code
 
@@ -1852,7 +1852,7 @@ SUB rfp, 8
 ADD rg1, 16
 ```
 
-The above example is equivalent to the following program and will produce the same program bytes when assembled:
+> The above example is equivalent to the following program and will produce the same program bytes when assembled:
 
 ```text
 SUB rfp, 8
@@ -1871,9 +1871,10 @@ ICR rg1
 ADD rg1, 16
 ```
 
-The lines within the `%REPEAT` block are now present 3 times within the program (the number of repeats given to the directive includes the initial instance). Assembler directives can also be present within `%REPEAT` blocks and will be processed multiple times by the assembler, just like regular instructions.
+> The lines within the `%REPEAT` block are now present 3 times within the program (the number of repeats given to the directive includes the initial instance).
+> Keep in mind that the leading whitespace on each line inside the repeat block (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
 
-Keep in mind that the leading whitespace on each line inside the repeat block (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+Assembler directives can also be present within `%REPEAT` blocks and will be processed multiple times by the assembler, just like regular instructions.
 
 `%REPEAT` blocks can be nested within each other, with nested `%REPEAT` blocks themselves being repeated along with any surrounding lines.
 
@@ -1895,7 +1896,7 @@ SUB rfp, 8
 ADD rg1, 16
 ```
 
-The above example is equivalent to the following program and will produce the same program bytes when assembled:
+> The above example is equivalent to the following program and will produce the same program bytes when assembled:
 
 ```text
 SUB rfp, 8
@@ -1932,7 +1933,7 @@ ICR rg1
 ADD rg1, 16
 ```
 
-Lines within the first `%REPEAT` block are all repeated 4 times. The line within the second `%REPEAT` block is repeated 3 times *for every repeat of the outer `%REPEAT` block*, meaning the line within the second block is repeated a total of 12 (`4 * 3`) times.
+> Lines within the first `%REPEAT` block are all repeated 4 times. The line within the second `%REPEAT` block is repeated 3 times *for every repeat of the outer `%REPEAT` block*, meaning the line within the second block is repeated a total of 12 (`4 * 3`) times.
 
 ### %ASM_ONCE - Guard a File from Being Assembled Multiple Times
 
@@ -1983,7 +1984,7 @@ Inst
 ; rg1 is now 685 ("Inst" was replaced with "OtherMacro", which was then replaced with "ADD rg1, 6")
 ```
 
-The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example). Because macro contents isn't processed until the macro is used, `Inst` was able to contain `OtherMacro` even though `OtherMacro` didn't exist when it was defined.
+> The first line here results in an error, as a macro with a name of `Number` hasn't been defined yet (macros don't apply retroactively). `MVQ rg0, Number` gets replaced with `MVQ rg0, 345`, setting `rg0` to `345`. `MVQ rg1, Number` gets replaced with `MVQ rg1, 678`, as the `Number` macro was redefined on the line before, setting `rg1` to `678`. `Inst` gets replaced with `ICR rg1`, incrementing `rg1` by `1`, therefore setting it to `679` (macros can contain spaces and can be used to give another name to mnemonics, or even entire instructions, as seen in the last example). Because macro contents isn't processed until the macro is used, `Inst` was able to contain `OtherMacro` even though `OtherMacro` didn't exist when it was defined.
 
 Note that single-line macro definitions ignore many standard syntax rules due to each operand being interpreted as literal text. Both operands can contain whitespace, and the second operand may contain commas. Be aware that aside from a **single** space character separating the `%MACRO` mnemonic from its operands, leading and trailing whitespace in the first operand, and leading whitespace in the second operand, will not be removed. Macros can also contain quotation marks (`"`), which will not be immediately parsed as a string within the macro. If the quotation marks are placed into a line as replacement text, they will be parsed normally as a part of the line.
 
@@ -2011,7 +2012,7 @@ WCC '\n'  ; Newline
 WCN rg1
 ```
 
-When executed, this program will print `8` (the value of `rg0`) and `2` (the value of `rg1`) to the console, as each instance of `multi-line` was replaced with both the `ICR` *and* `DCR` instructions. The fully expanded program is equivalent to the following:
+> When executed, this program will print `8` (the value of `rg0`) and `2` (the value of `rg1`) to the console, as each instance of `multi-line` was replaced with both the `ICR` *and* `DCR` instructions. The fully expanded program is equivalent to the following:
 
 ```text
 MVQ rg0, 5
@@ -2027,9 +2028,8 @@ WCC '\n'  ; Newline
 WCN rg1
 ```
 
-Both of the above examples result in the same program bytes after being assembled, as macros are expanded by the assembler, not the processor. The *definition* of a macro does not itself insert any bytes into the program - the macro must be used for its contents to be inserted.
-
-Keep in mind that the leading whitespace on each line inside the macro definition (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+> Both of the above examples result in the same program bytes after being assembled, as macros are expanded by the assembler, not the processor. The *definition* of a macro does not itself insert any bytes into the program - the macro must be used for its contents to be inserted.
+> Keep in mind that the leading whitespace on each line inside the macro definition (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
 
 The assembler does not attempt to search for multi-line macros until every possible single-line macro replacement has been completed on the line. This means that a single-line macro, or a combination of single-line macros, can contain the name of a multi-line macro to expand, as long as the multi-line macro name ends up as the only thing on the line.
 
@@ -2057,9 +2057,8 @@ For example, this program is invalid and will throw an error:
 my_macro1  ; Throws error
 ```
 
-Even though neither `my_macro1` nor `my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
-
-This program, however, is valid, and will assemble without failure:
+> Even though neither `my_macro1` nor `my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
+> This program, however, is valid, and will assemble without failure:
 
 ```text
 %MACRO my_macro1
@@ -2085,7 +2084,7 @@ This program, however, is valid, and will assemble without failure:
 my_macro1  ; No error thrown
 ```
 
-Throughout the expansion of `my_macro1`, `my_macro3` gets expanded multiple times, both directly and indirectly. However, this never occurs while another instance of `my_macro3` is still in the process of being expanded, so it is valid. As long as the expansion of a multi-line macro has finished by the time it is referenced again, it is perfectly valid to reference it multiple times from within the same macro.
+> Throughout the expansion of `my_macro1`, `my_macro3` gets expanded multiple times, both directly and indirectly. However, this never occurs while another instance of `my_macro3` is still in the process of being expanded, so it is valid. As long as the expansion of a multi-line macro has finished by the time it is referenced again, it is perfectly valid to reference it multiple times from within the same macro.
 
 It is not valid to have an `%ENDMACRO` directive in the source code without a paired multi-line `%MACRO` directive, and all multi-line `%MACRO` directives *must* end with an `%ENDMACRO` directive. It is not valid to have a multi-line `%MACRO` directive reach the end of the program without an `%ENDMACRO` directive.
 
@@ -2155,7 +2154,7 @@ start disable block
 
 !>
 another_macro
-; The open macro disabling block will also affect the lines inserted by the above macro 
+; The open macro disabling block will also affect the lines inserted by the above macro
 <!
 
 another_macro
@@ -2185,7 +2184,7 @@ DVR register(0), register(1), rg2
 instruction(rg2,rg3)
 ```
 
-Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. `instruction(rg2,rg3)` gets expanded to the following lines:
+> Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. `instruction(rg2,rg3)` gets expanded to the following lines:
 
 ```text
     ADD rg2, rg3
@@ -2202,7 +2201,7 @@ Macro parameters and macro names do not need to be separated by any characters, 
 MVQ rg0, surround(1,2)surround(3,4)
 ```
 
-This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. Leading whitespace in macro replacement text is *never* trimmed, so it should be removed if it is not desired.
+> This gets expanded to `MVQ rg0, 121343`. Note that the whitespace after the comma in the macro definition was omitted, otherwise it would have been included as a part of the replacement text. Leading whitespace in macro replacement text is *never* trimmed, so it should be removed if it is not desired.
 
 ##### Nesting Macros Inside Parameters
 
@@ -2220,7 +2219,9 @@ For example:
 instruction(register(2), register(3))
 ```
 
-Here `instruction(register(2), register(3))` expands to `ADD rg2, rg3`, as the `register(2)` macro was expanded, followed by the `register(3)` macro, which then became parameters to the final expansion of `instruction`. A single parameter can also contain multiple single-line macros if desired, as they follow the same single-line macro expansion logic as regular lines.
+> Here `instruction(register(2), register(3))` expands to `ADD rg2, rg3`, as the `register(2)` macro was expanded, followed by the `register(3)` macro, which then became parameters to the final expansion of `instruction`.
+
+A single parameter can also contain multiple single-line macros if desired, as they follow the same single-line macro expansion logic as regular lines.
 
 ##### Making Parameters Required
 
@@ -2234,7 +2235,8 @@ For example:
 ADD rg0, my_macro  ; No error thrown
 ```
 
-In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text. To instead throw an error, the example should be written like this:
+> In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text.
+> To instead throw an error, the example should be written like this:
 
 ```text
 %MACRO my_macro, 12$0!
@@ -2242,7 +2244,7 @@ In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is rep
 ADD rg0, my_macro  ; Throws error
 ```
 
-The assembler detects that `my_macro` is attempting to access a parameter at index `0`, but finds that one doesn't exist. Because the parameter has been suffixed with an `!`, the assembler now stops assembly and throws an error instead of replacing it with empty text.
+> The assembler detects that `my_macro` is attempting to access a parameter at index `0`, but finds that one doesn't exist. Because the parameter has been suffixed with an `!`, the assembler now stops assembly and throws an error instead of replacing it with empty text.
 
 If the same parameter is used multiple times within a macro, only one instance of the parameter needs to be suffixed with an `!` for that parameter to become required. Be aware that a required parameter **can** still be empty without an error being thrown if it is explicitly made so when the macro is used.
 
@@ -2276,7 +2278,7 @@ For example:
 my_macro2(123,456)  ; Throws error
 ```
 
-Here, an error is thrown by the assembler, as `my_macro1` has been used by `my_macro2` without giving it its required parameters. `my_macro1` does not automatically get access to `my_macro2`'s parameters.
+> Here, an error is thrown by the assembler, as `my_macro1` has been used by `my_macro2` without giving it its required parameters. `my_macro1` does not automatically get access to `my_macro2`'s parameters.
 
 The program must instead be written like so:
 
@@ -2295,7 +2297,9 @@ The program must instead be written like so:
 my_macro2(123,456)  ; No error thrown
 ```
 
-Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid. Parameter references can be contained within the parameters of a nested macro, and they will be replaced just as they would be anywhere else within the containing macro. The replacement happens before the parameter text is inserted into the contents of the macro being nested.
+> Here `my_macro2` is now explicitly sharing its parameters with `my_macro1`, so this program is valid.
+
+Parameter references can be contained within the parameters of a nested macro, and they will be replaced just as they would be anywhere else within the containing macro. The replacement happens before the parameter text is inserted into the contents of the macro being nested.
 
 ##### Escaping Macro-Specific Special Characters
 
@@ -2309,7 +2313,7 @@ For example:
 instruction(MVQ,rg0\,rg1)
 ```
 
-Here `instruction(MVQ,rg0\,rg1)` expands to `MVQ rg0,rg1`. The first comma was treated as normal, separating the first and second parameters and being removed from the final text, however the second comma became part of the second parameter's contents itself, with the backslash being removed instead.
+> Here `instruction(MVQ,rg0\,rg1)` expands to `MVQ rg0,rg1`. The first comma was treated as normal, separating the first and second parameters and being removed from the final text, however the second comma became part of the second parameter's contents itself, with the backslash being removed instead.
 
 These backslashes are distinct from those found in string escape sequences, as they are processed as part of the macro expansion, before strings even begin being parsed. As a result of this, backslashes being used as string escape sequences must also be doubled up.
 
@@ -2321,7 +2325,7 @@ For example:
 insert_string(a\\nb\\nc)
 ```
 
-`insert_string(a\\nb\\nc)` expands to `%DAT "a\nb\nc"`, as each backslash has another backslash to escape it so that it becomes a part of the final string. The final string inserted into the program will be the bytes `61 0A 62 0A 63`.
+> `insert_string(a\\nb\\nc)` expands to `%DAT "a\nb\nc"`, as each backslash has another backslash to escape it so that it becomes a part of the final string. The final string inserted into the program will be the bytes `61 0A 62 0A 63`.
 
 Similarly, if you wish to have a literal `$` character within the contents of a macro definition, you must instead use two directly adjacent to each other (`$$`) to prevent the dollar sign being interpreted as the start of a parameter.
 
@@ -2333,7 +2337,7 @@ For example:
 balance(1.23)
 ```
 
-The final string inserted by `balance(1.23)` will be `"Your balance is $1.23"`, as the first two `$` signs became a literal dollar sign character, and the third was simply interpreted as the start of a parameter reference as normal.
+> The final string inserted by `balance(1.23)` will be `"Your balance is $1.23"`, as the first two `$` signs became a literal dollar sign character, and the third was simply interpreted as the start of a parameter reference as normal.
 
 Keep in mind that this is only required within a macro *definition*. You should only use a single `$` character if you wish to have a literal dollar sign as a part of a parameter to a macro being used outside a macro definition.
 
@@ -2359,7 +2363,7 @@ For example:
 MVQ rg0, @MY_VARIABLE
 ```
 
-When assembled `MVQ rg0, @MY_VARIABLE` becomes `MVQ rg0, 123`, meaning `rg0` will be given a value of `123` when the program is executed.
+> When assembled `MVQ rg0, @MY_VARIABLE` becomes `MVQ rg0, 123`, meaning `rg0` will be given a value of `123` when the program is executed.
 
 Assembler variables can be inserted anywhere in the program, including inside strings. When encountered by the assembler, the name and `@` sign are replaced with the literal base-10 value of the variable at the time it was encountered. This substitution occurs after all macros on the line have been expanded. The name of the assembler variable to insert is determined by scanning every character after the `@` sign until the first character that is not a valid name character is found, or the end of the line is reached. All of the valid characters are then treated as part of the variable name. Attempting to insert a variable that does not exist will result in the assembler throwing an error, stopping the assembly process. Scanned variable names will **never** be truncated, therefore *all* valid label name characters directly after an `@` sign *must* be a part of the desired variable name. For example, if only a variable with the name `VAR` exists, then typing `@VARIABLE` would result in an error, as a variable with the name `VARIABLE` does not exist, even though a variable with the name `VAR` does.
 
@@ -2376,7 +2380,7 @@ For example:
 %DEFINE MY_VARIABLE, 123
 ```
 
-The string in this example will result in the literal text `This is the value of @MY_VARIABLE: 65535` being assembled. It does not matter what formatting what used to define the variable, the inserted value will always be in plain base-10. It also does not matter that `MY_VARIABLE` was redefined later on, as only the current value of the variable is taken into account when inserting it.
+> The string in this example will result in the literal text `This is the value of @MY_VARIABLE: 65535` being assembled. It does not matter what formatting what used to define the variable, the inserted value will always be in plain base-10. It also does not matter that `MY_VARIABLE` was redefined later on, as only the current value of the variable is taken into account when inserting it.
 
 Assembler variables are not replaced on lines that begin with `%MACRO` or `%DELMACRO` to allow `@` signs to be used as a part of macro names. Variables *are* still replaced on lines prefixed with `!` and within macro disabling blocks, however.
 
@@ -2605,7 +2609,7 @@ For example:
 %ENDIF
 ```
 
-Keep in mind that the leading whitespace on each line inside the conditional blocks (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
+> Keep in mind that the leading whitespace on each line inside the conditional blocks (the **indentation**) is completely optional, and can be omitted or made a different number of spaces if you wish. Its purpose is merely to improve the readability of the program.
 
 ### %WHILE - Conditional Source Code Repetition
 
@@ -2639,7 +2643,7 @@ For example:
 %ENDWHILE
 ```
 
-This program is effectively equivalent to the following example and will assemble to the same bytes:
+> This program is effectively equivalent to the following example and will assemble to the same bytes:
 
 ```text
 MVQ rg0, @MY_VARIABLE
@@ -2671,7 +2675,7 @@ MVQ rg1, @MY_OTHER_VARIABLE
 MVQ rg2, @MY_VARIABLE
 ```
 
-The first `%WHILE` block is repeated six times, as `5` can only be added to `0` six times before it becomes greater than or equal to `30`. The second `%WHILE` block is repeated three times, as `10` can only be added to `30` three times before it becomes greater than or equal to `60`. The nested `%WHILE` block is repeated four times **every time the outer `%WHILE` block repeats**, as `MY_OTHER_VARIABLE` is reset for every outer repetition, and `1` can only be subtracted from `4` four times before it becomes less than or equal to `0`. The final `%WHILE` block is never assembled as its condition is never met.
+> The first `%WHILE` block is repeated six times, as `5` can only be added to `0` six times before it becomes greater than or equal to `30`. The second `%WHILE` block is repeated three times, as `10` can only be added to `30` three times before it becomes greater than or equal to `60`. The nested `%WHILE` block is repeated four times **every time the outer `%WHILE` block repeats**, as `MY_OTHER_VARIABLE` is reset for every outer repetition, and `1` can only be subtracted from `4` four times before it becomes less than or equal to `0`. The final `%WHILE` block is never assembled as its condition is never met.
 
 ### %STOP - End Assembly
 
@@ -2687,7 +2691,7 @@ For example:
 %ENDIF
 ```
 
-This example immediately ends assembly if a variable with the name `MY_VARIABLE` does not exist, thereby ensuring that `MY_VARIABLE` *will* be defined for anything after this `%IF` block.
+> This example immediately ends assembly if a variable with the name `MY_VARIABLE` does not exist, thereby ensuring that `MY_VARIABLE` *will* be defined for anything after this `%IF` block.
 
 ## Console Input and Output
 
@@ -2750,7 +2754,8 @@ Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes
 %DAT "file.txt\0"
 ```
 
-This would normally be placed after all program code and a `HLT` instruction to prevent it accidentally being executed as if it were part of the program. The file can be opened with the following line anywhere in the program:
+> This would normally be placed after all program code and a `HLT` instruction to prevent it accidentally being executed as if it were part of the program.
+> The file can be opened with the following line anywhere in the program:
 
 ```text
 OFL :FILE_PATH
@@ -2758,7 +2763,7 @@ OFL :FILE_PATH
 CFL
 ```
 
-You could also use a pointer if you wish:
+> You could also use a pointer if you wish:
 
 ```text
 MVQ rg0, :&FILE_PATH
@@ -2806,7 +2811,7 @@ HLT  ; Prevent executing into string data
 %DAT "file.txt\0"
 ```
 
-Executing this program will create a file called `file.txt` with the following contents:
+> Executing this program will create a file called `file.txt` with the following contents:
 
 ```text
 16711778
@@ -3068,25 +3073,25 @@ HEAP_ALC rg2, 4  ; Region "C"
 HEAP_ALC rg3, 4  ; Region "D"
 ```
 
-Our mapped memory currently looks like this (`.` corresponds to free memory):
+> Our mapped memory currently looks like this (`.` corresponds to free memory):
 
 ```text
 AAAABBBBCCCCDDDD................
 ```
 
-Now what if we free Region B?
+> Now what if we free Region B?
 
 ```text
 HEAP_FRE rg1
 ```
 
-Our memory now looks like this:
+> Our memory now looks like this:
 
 ```text
 AAAA....CCCCDDDD................
 ```
 
-Freeing a region does not cause the other regions to move, so even though we now have 20 free bytes in memory, we cannot allocate any more than 16 into a single region, as it would require the region to be split across multiple ranges, which is not valid. This ultimately means that the most memory you can allocate in a single region is the number of bytes in the **largest contiguous region of unallocated memory**. Attempting to allocate 17+ bytes in this situation would produce the same result as attempting to allocate without enough free total memory.
+> Freeing a region does not cause the other regions to move, so even though we now have 20 free bytes in memory, we cannot allocate any more than 16 into a single region, as it would require the region to be split across multiple ranges, which is not valid. This ultimately means that the most memory you can allocate in a single region is the number of bytes in the **largest contiguous region of unallocated memory**. Attempting to allocate 17+ bytes in this situation would produce the same result as attempting to allocate without enough free total memory.
 
 ## Interoperating with C# Code
 
@@ -3115,7 +3120,7 @@ public static class AssEmblyInterop
         ulong rg0 = registers[6];  // 6 = rg0, see the registers table for the byte values of each register
         // Or write to them...
         registers[6] = 9000;
-        
+
         // Or do anything else that a normal C# program can do
         if (passedValue == null)
         {
@@ -3165,7 +3170,7 @@ HLT  ; Halt the processor before it reaches data
 %DAT "YourMethod\0"
 ```
 
-Executing this program results in the following console output:
+> Executing this program results in the following console output:
 
 ```text
 You need to pass a value!
@@ -3173,7 +3178,7 @@ Your value: 20
 Your value: 9000
 ```
 
-`9000` is printed on the final line as `rg0` was set to `9000` in both of the prior external function calls.
+> `9000` is printed on the final line as `rg0` was set to `9000` in both of the prior external function calls.
 
 ### Testing if an Assembly or Function Exists
 
