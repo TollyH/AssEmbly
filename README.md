@@ -1,8 +1,8 @@
-# AssEmbly
+# AssEmbly [![.NET](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml/badge.svg)](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml)
 
 A custom processor architecture and assembly language implemented in .NET
 
-For instructions on using the language, see the `Documentation\ReferenceManual` folder.
+Go to the [release page](https://github.com/TollyH/AssEmbly/releases/latest) for executable and reference manual downloads. The included reference manual serves as a detailed guide on writing programs in the language.
 
 See the VSCode extension for AssEmbly here: <https://github.com/TollyH/AssEmbly-VSCode>
 
