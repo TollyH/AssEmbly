@@ -1,4 +1,4 @@
-# AssEmbly [![.NET](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml/badge.svg)](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml)
+# AssEmbly [![Build and Test .NET](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml/badge.svg)](https://github.com/TollyH/AssEmbly/actions/workflows/dotnet.yml) [![Build and Deploy Docs](https://github.com/TollyH/AssEmbly/actions/workflows/static.yml/badge.svg)](https://github.com/TollyH/AssEmbly/actions/workflows/static.yml)
 
 A custom processor architecture and assembly language implemented in .NET
 
