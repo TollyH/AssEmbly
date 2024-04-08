@@ -258,11 +258,13 @@ CONCAT(CONCAT(%,DAT), CONCAT("\,\,, \,\,\)\\0"))
 ; Insert a value with only the number of bytes required to represent the whole value
 %MACRO InsertNoZeroPadding
     %DEFINE _InsertNoZeroPadding_Value, $0!
-    %WHILE GT, @_InsertNoZeroPadding_Value, 0
+!   %WHILE GT, @_InsertNoZeroPadding_Value, 0
+        !>
         %DEFINE _InsertNoZeroPadding_Value_Part, @_InsertNoZeroPadding_Value
         %VAROP REM, _InsertNoZeroPadding_Value_Part, 256
         %VAROP DIV, _InsertNoZeroPadding_Value, 256
         %DAT @_InsertNoZeroPadding_Value_Part
+        <!
     %ENDWHILE
     %UNDEFINE _InsertNoZeroPadding_Value
     %IF DEF, _InsertNoZeroPadding_Value
