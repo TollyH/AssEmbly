@@ -63,7 +63,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 
 ### Mnemonics and Operands
 
-All AssEmbly instructions are written on a separate line, starting with a **mnemonic** — a human-readable code that tells the **assembler** exactly what operation needs to be performed — followed by any **operands** for the instruction. The assembler is the program that takes human-readable assembly programs and turns them into raw numbers — bytes — that can be read by the processor. This process is called **assembly** or **assembling**. An operand can be thought of as a parameter to a function in a high-level language — data that is given to the processor to read and/or operate on. Mnemonics are separated from operands with spaces, and operands are separated with commas.
+All AssEmbly instructions are written on a separate line, starting with a **mnemonic** — a human-readable code that tells the **assembler** exactly what operation needs to be performed — followed by any **operands** for the instruction. The assembler is the program that takes human-readable assembly programs and turns them into raw numbers — bytes — that can be read by the processor. This process is called **assembly** or **assembling**. An operand can be thought of like a parameter to a function in a high-level language — data that is given to the processor to read and/or operate on. Mnemonics are separated from operands with spaces, and operands are separated with commas.
 
 A simple example:
 
@@ -126,7 +126,7 @@ For example:
 :NOT_COMMENT  ; Comment 1
 ; Comment 2
 ; Comment 3
-WCC 10
+WCC '\n'
 ```
 
 > Here `:NOT_COMMENT` will point to `WCC`, as it is the first thing that will be assembled after the definition was written (comments are ignored by the assembler and do not contribute to the final assembled program).
@@ -232,13 +232,13 @@ Escape sequences are explained in more detail and listed in full in a dedicated 
 
 ### Address
 
-An address is a value that is interpreted as a location to be read from, written to, or jumped to in a processor's main memory. In AssEmbly, an address is usually specified by using a **label**. Once a label has been defined as seen earlier, they can be referenced by prefixing their name with a colon (`:`), similarly to how they are defined — only now it will be in the place of an operand. Like literals, they always occupy 8 bytes (64-bits) of memory after assembly.
+An address is a value that is interpreted as a location to be read from, written to, or jumped to in a processor's main memory. In AssEmbly, an address is usually specified by using a **label**. After defining a label as seen earlier, they can be referenced from anywhere within the program by prefixing their name with a colon (`:`), similarly to how they are defined — only now it will be in the place of an operand. Like literals, they always occupy 8 bytes (64-bits) of memory after assembly.
 
 Consider the following example:
 
 ```text
 :AREA_1
-WCC 10
+WCC '\n'
 MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0
 ```
 
@@ -247,19 +247,19 @@ MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0
 Another example, assuming these are the very first lines in a file:
 
 ```text
-WCC 10
+WCC '\n'
 :AREA_1
 WCX :AREA_1  ; Will write "CA" to the console
 ```
 
-> `:AREA_1` will store the memory address `9`, as `WCC 10` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
+> `:AREA_1` will store the memory address `9`, as `WCC '\n'` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
 
 If, when referencing a label, you want to utilise the address of the label *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, and before the label name.
 
 For example:
 
 ```text
-WCC 10
+WCC '\n'
 :AREA_1
 MVQ rg0, :&AREA_1  ; Move 9 (the address itself) to rg0
 WCX :&AREA_1  ; Will write "9" to the console
@@ -272,7 +272,7 @@ While it is usually recommended to use a label to reference an address, it is al
 For example:
 
 ```text
-WCC 10
+WCC '\n'
 WCX :9  ; Will write "CA" to the console
 WCX :0x09  ; Will write "CA" to the console
 WCX :0b1001  ; Will write "CA" to the console
@@ -288,7 +288,7 @@ For example:
 
 ```text
 :AREA_1
-WCC 10
+WCC '\n'
 MVQ rg0, :&AREA_1  ; Move 0 (the address itself) to rg0
 MVQ rg1, *rg0  ; Move the item in memory (0xCD) at the address (0) in rg0 to rg1
 ```
@@ -857,7 +857,7 @@ There are other instructions that have signed equivalents, these are simply used
 
 When shifting bits to the right, there are two options: logical shifting (as explained in the previous shifting section), or arithmetic shifting. Arithmetic shifting should be used when you wish to shift a value whilst retaining its sign.
 
-Arithmetic right shifts can be performed with the `SIGN_SHR`, which takes the same operands as `SHR`, but behaves slightly differently when the sign bit of the initial value is set.
+Arithmetic right shifts can be performed with the `SIGN_SHR` instruction, which takes the same operands as `SHR`, but behaves slightly differently when the sign bit of the initial value is set.
 
 For example:
 
@@ -875,7 +875,7 @@ SIGN_SHR rg0, 2
 ; All omitted bits are 0
 ```
 
-This behaviour is identical to `SHR`, as the value is not signed.
+> This behaviour is identical to `SHR`, as the value is not signed.
 
 Here's an example with a negative value:
 
@@ -893,7 +893,7 @@ SIGN_SHR rg0, 2
 ; All omitted bits are 1
 ```
 
-Because the sign bit was set in the original value, all new bits shifted into the most significant bit were set to `1` instead of `0`, keeping the sign of the result the same as the initial value.
+> Because the sign bit was set in the original value, all new bits shifted into the most significant bit were set to `1` instead of `0`, keeping the sign of the result the same as the initial value.
 
 The behaviour of the carry flag is also altered when performing an arithmetic shift. Where `SHR` sets the carry flag if any `1` bit is shifted past the least significant bit and discarded, `SIGN_SHR` instead sets the carry flag if any bits **not equal to the sign bit** are discarded. This means that for negative initial values, any `0` bit being discarded will set the carry bit, and for positive initial values, any `1` bit being discarded will set the carry bit.
 
@@ -2380,7 +2380,7 @@ For example:
 %DEFINE MY_VARIABLE, 123
 ```
 
-> The string in this example will result in the literal text `This is the value of @MY_VARIABLE: 65535` being assembled. It does not matter what formatting what used to define the variable, the inserted value will always be in plain base-10. It also does not matter that `MY_VARIABLE` was redefined later on, as only the current value of the variable is taken into account when inserting it.
+> The string in this example will result in the literal text `This is the value of @MY_VARIABLE: 65535` being assembled. It does not matter what formatting was used to define the variable, the inserted value will always be in plain base-10. It also does not matter that `MY_VARIABLE` was redefined later on, as only the current value of the variable is taken into account when inserting it.
 
 Assembler variables are not replaced on lines that begin with `%MACRO` or `%DELMACRO` to allow `@` signs to be used as a part of macro names. Variables *are* still replaced on lines prefixed with `!` and within macro disabling blocks, however.
 
@@ -2707,25 +2707,25 @@ MVQ rg0, 0xFF0062
 WCN rg0  ; Write a 64-bit number to the console in decimal
 ; "16711778" (0xFF0062) is written to the console
 
-WCC 10  ; Write a newline character
+WCC '\n'  ; Write a newline character
 
 WCB rg0  ; Write a single byte to the console in decimal
 ; "98" (0x62) is written to the console
 
-WCC 10  ; Write a newline character
+WCC '\n'  ; Write a newline character
 
 WCX rg0  ; Write a single byte to the console in hexadecimal
 ; "62" is written to the console
 
-WCC 10  ; Write a newline character
+WCC '\n'  ; Write a newline character
 
 WCC rg0  ; Write a single byte to the console as a character
 ; "b" (0x62) is written to the console
 
-WCC 10  ; Write a newline character
+WCC '\n'  ; Write a newline character
 ```
 
-Keep in mind that newlines are not automatically written after each write instruction, you will need to manually write the raw byte `10` (a newline character) to start writing on a new line. See the ASCII table at the end of the document for other common character codes.
+Keep in mind that newlines are not automatically written after each write instruction, you will need to manually write the raw byte `10`/`0xA` (a newline character - can be represented with the escape sequence `\n`) to start writing on a new line. See the ASCII table at the end of the document for other common character codes.
 
 An example of reading a byte:
 
@@ -2737,7 +2737,7 @@ When an `RCC` instruction is reached, the program will pause execution and wait 
 
 Be aware that if the user types a character that requires multiple bytes to represent in UTF-8, `RCC` will still only retrieve a single byte. You will have to use `RCC` multiple times to get all of the bytes needed to represent the character. `WCC` will also only write a single byte at a time, though as long as the console has UTF-8 support, simply writing each UTF-8 byte one after the other will result in the correct character being displayed.
 
-Note that the user does not need to press enter after inputting a character, execution will resume immediately after a single character is typed. If you wish to wait for the user to press enter, compare the inputted character to `10` (the code for a newline character). The example program `input.ext.asm` contains a subroutine which does this. The user pressing the enter key will always give a single `10` byte, regardless of platform.
+Note that the user does not need to press enter after inputting a character, execution will resume immediately after a single character is typed. If you wish to wait for the user to press enter, compare the inputted character to the newline character. The example program `input.ext.asm` contains a subroutine which does this. The user pressing the enter key will always give a single `10`/`0xA` newline byte, regardless of platform.
 
 ## File Handling
 
@@ -2787,22 +2787,22 @@ OFL :FILE_PATH  ; Open file with the 0-terminated string at :FILE_PATH
 WFN rg0  ; Write a 64-bit number to the file in decimal
 ; "16711778" (0xFF0062) is appended to the file
 
-WFC 10  ; Write a newline character
+WFC '\n'  ; Write a newline character
 
 WFB rg0  ; Write a single byte to the file in decimal
 ; "98" (0x62) is appended to the file
 
-WFC 10  ; Write a newline character
+WFC '\n'  ; Write a newline character
 
 WFX rg0  ; Write a single byte to the file in hexadecimal
 ; "62" is appended to the file
 
-WFC 10  ; Write a newline character
+WFC '\n'  ; Write a newline character
 
 WFC rg0  ; Write a single byte to the file as a character
 ; "b" (0x62) is appended to the file
 
-WFC 10  ; Write a newline character
+WFC '\n'  ; Write a newline character
 CFL  ; Close the file, saving newly written contents
 
 HLT  ; Prevent executing into string data
@@ -2979,13 +2979,13 @@ CAL :SUBROUTINE_TWO, 6
 
 In order to store the address to return to when using subroutines, the stack is utilised. Every time the `CAL` instruction is used, the address of the next opcode, and the current value of `rsb`, are pushed to the stack in that order. `rsb` and `rso` will then be updated to the new address of the top of the stack (the address where `rsb` was pushed to). `rsb` will continue to point here (the **base**) until another subroutine is called or the subroutine is returned from. `rso` will continue to update as normal as items are popped to and pushed from the stack, always pointing to the top of it. The area from the current **base** (`rsb`) to the top of the stack (`rso`) is called the current **stack frame**. Multiple stack frames can be stacked on top of each other if a subroutine is called from another subroutine.
 
-When returning from a subroutine, the opposite is performed. `rsb`, and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. All values apart from these two must be popped off the stack before using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`). After returning `rso` will point to the same address as when the function was called.
+When returning from a subroutine, the opposite is performed. `rsb` and `rpo` are popped off the top of the stack, thereby continuing execution as it was before the subroutine was called. All values apart from these two must be popped off the stack before using the `RET` instruction (you can ensure this by moving the value of `rsb` into `rso`). After returning, `rso` will point to the same address as when the function was called.
 
 If you utilise registers in a subroutine, you should use the stack to ensure that the value of each modified register is returned to its initial value before returning from the subroutine. See the above section on using the stack to preserve registers for info on how to do this.
 
 ### Passing Multiple Parameters
 
-The `CAL` instruction can only take a single data parameter, however, there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are all 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
+The `CAL` instruction can only take a single data parameter, however, there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are both 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
 
 For example:
 
@@ -3144,7 +3144,7 @@ In order to compile a single C# source file into a .NET DLL, you can use the `cs
 
 For AssEmbly to load a DLL and methods within it, their names need to be defined as null-terminated strings in memory, similarly to when performing file operations. DLL paths can either be relative (i.e. `MyAsm.dll` or `Folder/MyAsm.dll`), or absolute (i.e. `Drive:/Folder/Folder/MyAsm.dll`). Method names should not include the `AssEmblyInterop` class name. Only a single assembly can be loaded at once, and only a single method from that assembly can be loaded at a time.
 
-To load an assembly, use the `ASMX_LDA` instruction with the memory address of the null-terminated file path. Once an assembly is loaded, you can load a function from it with `ASMX_LDF`, with the memory address of the null-terminated method name. Once an assembly is loaded, you can load and unload methods from it as many times as you like. The current function must be closed with `ASMX_CLF` before you can load another, and the current assembly must be closed with `ASMX_CLA` before another can be opened. `ASMX_CLA` will automatically close the open function as well if one is still loaded when it is used.
+To load an assembly, use the `ASMX_LDA` instruction with the memory address of the null-terminated file path. After loading an assembly, you can load a function from it with `ASMX_LDF`, with the memory address of the null-terminated method name. Once an assembly is loaded, you can load and unload methods from it as many times as you like. The current function must be closed with `ASMX_CLF` before you can load another, and the current assembly must be closed with `ASMX_CLA` before another can be opened. `ASMX_CLA` will automatically close the open function as well if one is still loaded when it is used.
 
 Once both an assembly and function are loaded, you can use the `ASMX_CAL` instruction with an optional operand to use as the passed value in order to call it.
 
