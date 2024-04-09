@@ -324,6 +324,7 @@ namespace AssEmbly
 #if DEBUG
                         throw;
 #else
+                        Environment.Exit(1);
                         return;
 #endif
                     }
