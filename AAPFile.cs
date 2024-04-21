@@ -15,8 +15,10 @@ namespace AssEmbly
         GZipCompressed = 0b10000,
         ExtensionExternalAssembly = 0b100000,
         ExtensionMemoryAllocation = 0b1000000,
+        ExtensionFileSystem = 0b10000000,
+        ExtensionTerminal = 0b100000000,
 
-        All = 0b1111111,
+        All = 0b111111111,
         Incompatible = ~All
     }
 

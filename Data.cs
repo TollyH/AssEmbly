@@ -38,6 +38,7 @@
         // Signed
         Sign = 0b1000,
         Overflow = 0b10000,
+        AutoEcho = 0b100000,
 
         // Base
         ZeroAndCarry = Zero | Carry,
@@ -57,6 +58,8 @@
             { 0x03, AAPFeatures.ExtensionExtendedBase },
             { 0x04, AAPFeatures.ExtensionExternalAssembly },
             { 0x05, AAPFeatures.ExtensionMemoryAllocation },
+            { 0x06, AAPFeatures.ExtensionFileSystem },
+            { 0x07, AAPFeatures.ExtensionTerminal },
         };
 
         /// <summary>
@@ -578,6 +581,27 @@
             // EXTD_BSW (Reverse Byte Order)
             { ("EXTD_BSW", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x00) },
 
+            // EXTD_QPF (Query Present Features)
+            { ("EXTD_QPF", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x10) },
+
+            // EXTD_QPV (Query Present Version)
+            { ("EXTD_QPV", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x11) },
+            { ("EXTD_QPV", new OperandType[2] { OperandType.Register, OperandType.Register }), new Opcode(0x03, 0x12) },
+
+            // EXTD_CSS (Call Stack Size)
+            { ("EXTD_CSS", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x13) },
+
+            // EXTD_HLT (Halt With Exit Code)
+            { ("EXTD_HLT", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x20) },
+            { ("EXTD_HLT", new OperandType[1] { OperandType.Literal }), new Opcode(0x03, 0x21) },
+            { ("EXTD_HLT", new OperandType[1] { OperandType.Address }), new Opcode(0x03, 0x22) },
+            { ("EXTD_HLT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x03, 0x23) },
+
+            // EXTD_MPA (Move Pointer Address)
+            { ("EXTD_MPA", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x03, 0x30) },
+            { ("EXTD_MPA", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x03, 0x31) },
+            { ("EXTD_MPA", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x03, 0x32) },
+
             // EXTERNAL ASSEMBLY EXTENSION SET
 
             // ASMX_LDA (Load Assembly)
@@ -637,6 +661,126 @@
 
             // HEAP_FRE (Free Allocated Heap Memory)
             { ("HEAP_FRE", new OperandType[1] { OperandType.Register }), new Opcode(0x05, 0x20) },
+
+            // FILE SYSTEM EXTENSION SET
+
+            // FSYS_CWD (Change Working Directory to Path Specified by 0x00 Terminated String in Memory)
+            { ("FSYS_CWD", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x00) },
+            { ("FSYS_CWD", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x01) },
+
+            // FSYS_CDR (Create Directory at Path Specified by 0x00 Terminated String in Memory)
+            { ("FSYS_CDR", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x10) },
+            { ("FSYS_CDR", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x11) },
+
+            // FSYS_DDR (Delete Directory at Path Specified by 0x00 Terminated String in Memory)
+            { ("FSYS_DDR", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x20) },
+            { ("FSYS_DDR", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x21) },
+
+            // FSYS_DEX (Does Directory Exist at Path Specified by 0x00 Terminated String in Memory?)
+            { ("FSYS_DEX", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x30) },
+            { ("FSYS_DEX", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x31) },
+
+            // FSYS_CPY (Copy Between Paths Specified by 0x00 Terminated Strings in Memory)
+            { ("FSYS_CPY", new OperandType[2] { OperandType.Address, OperandType.Address }), new Opcode(0x06, 0x40) },
+            { ("FSYS_CPY", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x06, 0x41) },
+            { ("FSYS_CPY", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x06, 0x42) },
+            { ("FSYS_CPY", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x06, 0x43) },
+
+            // FSYS_MOV (Move Between Paths Specified by 0x00 Terminated Strings in Memory)
+            { ("FSYS_MOV", new OperandType[2] { OperandType.Address, OperandType.Address }), new Opcode(0x06, 0x44) },
+            { ("FSYS_MOV", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x06, 0x45) },
+            { ("FSYS_MOV", new OperandType[2] { OperandType.Pointer, OperandType.Address }), new Opcode(0x06, 0x46) },
+            { ("FSYS_MOV", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x06, 0x47) },
+
+            // FSYS_BDL (Begin Directory Listing of Current Directory or Directory at Path Specified by 0x00 Terminated String in Memory)
+            { ("FSYS_BDL", Array.Empty<OperandType>()), new Opcode(0x06, 0x50) },
+            { ("FSYS_BDL", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x51) },
+            { ("FSYS_BDL", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x52) },
+
+            // FSYS_GNF (Get Next File in Currently Listed Directory)
+            { ("FSYS_GNF", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x60) },
+            { ("FSYS_GNF", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x61) },
+
+            // FSYS_GND (Get Next Directory in Currently Listed Directory)
+            { ("FSYS_GND", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x62) },
+            { ("FSYS_GND", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x63) },
+
+            // FSYS_GCT (Get Creation Time of File or Directory)
+            { ("FSYS_GCT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x70) },
+            { ("FSYS_GCT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x71) },
+
+            // FSYS_GMT (Get Modification Time of File or Directory)
+            { ("FSYS_GMT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x72) },
+            { ("FSYS_GMT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x73) },
+
+            // FSYS_GAT (Get Access Time of File or Directory)
+            { ("FSYS_GAT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x74) },
+            { ("FSYS_GAT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x75) },
+
+            // FSYS_SCT (Set Creation Time of File or Directory)
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x80) },
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x81) },
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x82) },
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x83) },
+
+            // FSYS_SMT (Set Modification Time of File or Directory)
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x84) },
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x85) },
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x86) },
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x87) },
+
+            // FSYS_SAT (Set Access Time of File or Directory)
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x88) },
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x89) },
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x8A) },
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x8B) },
+
+            // TERMINAL EXTENSION SET
+
+            // TERM_CLS (Clear Screen)
+            { ("TERM_CLS", Array.Empty<OperandType>()), new Opcode(0x07, 0x00) },
+
+            // TERM_AEE (Auto Echo Enable)
+            { ("TERM_AEE", Array.Empty<OperandType>()), new Opcode(0x07, 0x10) },
+
+            // TERM_AED (Auto Echo Disable)
+            { ("TERM_AED", Array.Empty<OperandType>()), new Opcode(0x07, 0x11) },
+
+            // TERM_SCY (Set Vertical Cursor Position)
+            { ("TERM_SCY", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x20) },
+            { ("TERM_SCY", new OperandType[1] { OperandType.Literal }), new Opcode(0x07, 0x21) },
+            { ("TERM_SCY", new OperandType[1] { OperandType.Address }), new Opcode(0x07, 0x22) },
+            { ("TERM_SCY", new OperandType[1] { OperandType.Pointer }), new Opcode(0x07, 0x23) },
+
+            // TERM_SCX (Set Horizontal Cursor Position)
+            { ("TERM_SCX", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x24) },
+            { ("TERM_SCX", new OperandType[1] { OperandType.Literal }), new Opcode(0x07, 0x25) },
+            { ("TERM_SCX", new OperandType[1] { OperandType.Address }), new Opcode(0x07, 0x26) },
+            { ("TERM_SCX", new OperandType[1] { OperandType.Pointer }), new Opcode(0x07, 0x27) },
+
+            // TERM_GCY (Get Vertical Cursor Position)
+            { ("TERM_GCY", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x30) },
+
+            // TERM_GCX (Get Horizontal Cursor Position)
+            { ("TERM_GCX", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x31) },
+
+            // TERM_BEP (Beep)
+            { ("TERM_BEP", Array.Empty<OperandType>()), new Opcode(0x07, 0x40) },
+
+            // TERM_SFC (Set Foreground Color)
+            { ("TERM_SFC", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x50) },
+            { ("TERM_SFC", new OperandType[1] { OperandType.Literal }), new Opcode(0x07, 0x51) },
+            { ("TERM_SFC", new OperandType[1] { OperandType.Address }), new Opcode(0x07, 0x52) },
+            { ("TERM_SFC", new OperandType[1] { OperandType.Pointer }), new Opcode(0x07, 0x53) },
+
+            // TERM_SBC (Set Background Color)
+            { ("TERM_SBC", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x54) },
+            { ("TERM_SBC", new OperandType[1] { OperandType.Literal }), new Opcode(0x07, 0x55) },
+            { ("TERM_SBC", new OperandType[1] { OperandType.Address }), new Opcode(0x07, 0x56) },
+            { ("TERM_SBC", new OperandType[1] { OperandType.Pointer }), new Opcode(0x07, 0x57) },
+
+            // TERM_RSC (Reset Color)
+            { ("TERM_RSC", Array.Empty<OperandType>()), new Opcode(0x07, 0x58) },
         };
 
         /// <summary>
