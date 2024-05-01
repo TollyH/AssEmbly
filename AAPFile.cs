@@ -18,7 +18,15 @@ namespace AssEmbly
         ExtensionFileSystem = 0b10000000,
         ExtensionTerminal = 0b100000000,
 
-        All = 0b111111111,
+        All = V1CallStack
+            | ExtensionSigned
+            | ExtensionFloat
+            | ExtensionExtendedBase
+            | GZipCompressed
+            | ExtensionExternalAssembly
+            | ExtensionMemoryAllocation
+            | ExtensionFileSystem
+            | ExtensionTerminal,
         Incompatible = ~All
     }
 

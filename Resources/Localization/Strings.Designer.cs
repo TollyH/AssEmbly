@@ -3496,6 +3496,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised high opcode for the file system extension set.
+        /// </summary>
+        internal static string Processor_Error_Opcode_High_FileSystem {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_High_FileSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:X} is not a recognised high opcode for the floating point extension set.
         /// </summary>
         internal static string Processor_Error_Opcode_High_FloatingPoint {
@@ -3510,6 +3519,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_High_Signed {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_High_Signed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised high opcode for the terminal extension set.
+        /// </summary>
+        internal static string Processor_Error_Opcode_High_Terminal {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_High_Terminal", resourceCulture);
             }
         }
         
@@ -3690,6 +3708,24 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_Low_Extended_ByteSwap {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Low_Extended_ByteSwap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised extended base set halt low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Extended_Halt {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Extended_Halt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised extended base set processor query low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Extended_InfoQuery {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Extended_InfoQuery", resourceCulture);
             }
         }
         
@@ -3933,6 +3969,51 @@ namespace AssEmbly.Resources.Localization {
         internal static string Processor_Error_Opcode_Low_Signed_SmallMove {
             get {
                 return ResourceManager.GetString("Processor_Error_Opcode_Low_Signed_SmallMove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised terminal extension set beep low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Terminal_Beep {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Terminal_Beep", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised terminal extension set clear low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Terminal_Clear {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Terminal_Clear", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised terminal extension set colour low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Terminal_Colour {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Terminal_Colour", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised terminal extension set information getting low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Terminal_GetPosition {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Terminal_GetPosition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised terminal extension set position setting low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_Terminal_SetPosition {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_Terminal_SetPosition", resourceCulture);
             }
         }
         

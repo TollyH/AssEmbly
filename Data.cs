@@ -764,6 +764,12 @@
             // TERM_GCX (Get Horizontal Cursor Position)
             { ("TERM_GCX", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x31) },
 
+            // TERM_GSY (Get Terminal Buffer Height)
+            { ("TERM_GSY", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x32) },
+
+            // TERM_GSX (Get Terminal Buffer Width)
+            { ("TERM_GSX", new OperandType[1] { OperandType.Register }), new Opcode(0x07, 0x33) },
+
             // TERM_BEP (Beep)
             { ("TERM_BEP", Array.Empty<OperandType>()), new Opcode(0x07, 0x40) },
 

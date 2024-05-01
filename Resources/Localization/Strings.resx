@@ -1604,4 +1604,31 @@ Current while stack (deepest while first):</value>
     <data name="AssemblerWarnings_Suggestion_0019" xml:space="preserve">
         <value>%ASM_ONCE directive is unreachable, as it is not the first one in the file.</value>
     </data>
+    <data name="Processor_Error_Opcode_High_FileSystem" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the file system extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_High_Terminal" xml:space="preserve">
+        <value>{0:X} is not a recognised high opcode for the terminal extension set</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Extended_InfoQuery" xml:space="preserve">
+        <value>{0:X} is not a recognised extended base set processor query low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Extended_Halt" xml:space="preserve">
+        <value>{0:X} is not a recognised extended base set halt low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Terminal_Clear" xml:space="preserve">
+        <value>{0:X} is not a recognised terminal extension set clear low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Terminal_SetPosition" xml:space="preserve">
+        <value>{0:X} is not a recognised terminal extension set position setting low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Terminal_GetPosition" xml:space="preserve">
+        <value>{0:X} is not a recognised terminal extension set information getting low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Terminal_Beep" xml:space="preserve">
+        <value>{0:X} is not a recognised terminal extension set beep low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_Terminal_Colour" xml:space="preserve">
+        <value>{0:X} is not a recognised terminal extension set colour low opcode</value>
+    </data>
 </root>

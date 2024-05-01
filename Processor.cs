@@ -21,7 +21,6 @@ namespace AssEmbly
 
         public readonly bool UseV1CallStack;
         public readonly bool MapStack;
-        public readonly bool AutoEcho;
 
         private readonly ulong stackCallSize;
 
@@ -69,7 +68,10 @@ namespace AssEmbly
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
             MapStack = mapStack;
-            AutoEcho = autoEcho;
+            if (autoEcho)
+            {
+                Registers[(int)Register.rsf] |= (ulong)StatusFlags.AutoEcho;
+            }
         }
 
         ~Processor()
@@ -1536,7 +1538,7 @@ namespace AssEmbly
                                                     }
                                                 }
                                             }
-                                            if (AutoEcho)
+                                            if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.AutoEcho) != 0)
                                             {
                                                 // Echo byte to console
                                                 stdout.WriteByte(currentByte);
@@ -2876,6 +2878,55 @@ namespace AssEmbly
                                 }
                                 WriteMemoryRegister(operandStart, result);
                                 break;
+                            case 0x10:  // Processor Info Query
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // EXTD_QPF reg
+                                        WriteMemoryRegister(operandStart, (ulong)AAPFeatures.All);
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // EXTD_QPV reg
+                                        WriteMemoryRegister(operandStart, (ulong)(Program.version?.Major ?? 0));
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // EXTD_QPV reg, reg
+                                        WriteMemoryRegister(operandStart, (ulong)(Program.version?.Major ?? 0));
+                                        WriteMemoryRegister(operandStart + 1, (ulong)(Program.version?.Minor ?? 0));
+                                        Registers[(ulong)Register.rpo] += 2;
+                                        break;
+                                    case 0x3:  // EXTD_CSS reg
+                                        WriteMemoryRegister(operandStart, stackCallSize);
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_InfoQuery, opcodeLow));
+                                }
+                                break;
+                            case 0x20:  // Halt with Exit Code
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // EXTD_HLT reg
+                                        result = ReadMemoryRegister(operandStart);
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // EXTD_HLT lit
+                                        result = ReadMemoryQWord(operandStart);
+                                        Registers[(ulong)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // EXTD_HLT adr
+                                        result = ReadMemoryPointedQWord(operandStart);
+                                        Registers[(ulong)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // EXTD_HLT ptr
+                                        result = ReadMemoryRegisterPointedQWord(operandStart);
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_Halt, opcodeLow));
+                                }
+                                Environment.ExitCode = (int)result;
+                                halt = true;
+                                break;
                             default:
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Extended, opcodeHigh));
                         }
@@ -3059,7 +3110,7 @@ namespace AssEmbly
                             case 0x20:  // Exists
                                 switch (opcodeLow)
                                 {
-                                    case 0x0:  // ASMX_AEX adr
+                                    case 0x0:  // ASMX_AEX reg, adr
                                         initial = ReadMemoryQWord(operandStart + 1);
                                         mathend = 0;
                                         while (Memory[initial + mathend] != 0x0)
@@ -3083,7 +3134,7 @@ namespace AssEmbly
                                             testLoadContext.Unload();
                                         }
                                         break;
-                                    case 0x1:  // ASMX_AEX ptr
+                                    case 0x1:  // ASMX_AEX reg, ptr
                                         initial = ReadMemoryRegister(operandStart + 1);
                                         mathend = 0;
                                         while (Memory[initial + mathend] != 0x0)
@@ -3107,7 +3158,7 @@ namespace AssEmbly
                                             testLoadContext.Unload();
                                         }
                                         break;
-                                    case 0x2:  // ASMX_FEX adr
+                                    case 0x2:  // ASMX_FEX reg, adr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
@@ -3130,7 +3181,7 @@ namespace AssEmbly
                                             WriteMemoryRegister(operandStart, 0);
                                         }
                                         break;
-                                    case 0x3:  // ASMX_FEX ptr
+                                    case 0x3:  // ASMX_FEX reg, ptr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
@@ -3375,6 +3426,150 @@ namespace AssEmbly
                                 break;
                             default:
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
+                        }
+                        break;
+                    case 0x7:  // Terminal Extension Set
+                        switch (opcodeHigh)
+                        {
+                            case 0x00:  // Clear
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_CLS
+                                        Console.Clear();
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Clear, opcodeLow));
+                                }
+                                break;
+                            case 0x10:  // Auto echo
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_AEE
+                                        Registers[(int)Register.rsf] |= (ulong)StatusFlags.AutoEcho;
+                                        break;
+                                    case 0x1:  // TERM_AED
+                                        Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.AutoEcho;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Clear, opcodeLow));
+                                }
+                                break;
+                            case 0x20:  // Set Cursor Position
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_SCY reg
+                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryRegister(operandStart));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // TERM_SCY lit
+                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryQWord(operandStart));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // TERM_SCY adr
+                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryPointedQWord(operandStart));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // TERM_SCY ptr
+                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryRegisterPointedQWord(operandStart));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x4:  // TERM_SCX reg
+                                        Console.SetCursorPosition((int)ReadMemoryRegister(operandStart), Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x5:  // TERM_SCX lit
+                                        Console.SetCursorPosition((int)ReadMemoryQWord(operandStart), Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x6:  // TERM_SCX adr
+                                        Console.SetCursorPosition((int)ReadMemoryPointedQWord(operandStart), Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x7:  // TERM_SCX ptr
+                                        Console.SetCursorPosition((int)ReadMemoryRegisterPointedQWord(operandStart), Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_SetPosition, opcodeLow));
+                                }
+                                break;
+                            case 0x30:  // Get Terminal Info
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_GCY reg
+                                        WriteMemoryRegister(operandStart, (ulong)Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // TERM_GCX reg
+                                        WriteMemoryRegister(operandStart, (ulong)Console.GetCursorPosition().Left);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // TERM_GSY reg
+                                        WriteMemoryRegister(operandStart, (ulong)Console.BufferHeight);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x3:  // TERM_GSX reg
+                                        WriteMemoryRegister(operandStart, (ulong)Console.BufferWidth);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_GetPosition, opcodeLow));
+                                }
+                                break;
+                            case 0x40:  // Beep
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_BEP
+                                        Console.Beep();
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Beep, opcodeLow));
+                                }
+                                break;
+                            case 0x50:  // Set Colour
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // TERM_SFC reg
+                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // TERM_SFC lit
+                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryQWord(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // TERM_SFC adr
+                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryPointedQWord(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // TERM_SFC ptr
+                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryRegisterPointedQWord(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x4:  // TERM_SBC reg
+                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x5:  // TERM_SBC lit
+                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryQWord(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x6:  // TERM_SBC adr
+                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryPointedQWord(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x7:  // TERM_SBC ptr
+                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryRegisterPointedQWord(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x8:  // TERM_RSC
+                                        Console.ResetColor();
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Colour, opcodeLow));
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Terminal, opcodeHigh));
                         }
                         break;
                     default:
