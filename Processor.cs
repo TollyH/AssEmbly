@@ -2761,20 +2761,22 @@ namespace AssEmbly
                                 floatingInitial = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart));
                                 switch (opcodeLow)
                                 {
+                                    // "(ulong)(long)" cast is used as casting negative floating point values directly to unsigned integers
+                                    // causes unexpected results on some platforms, so a signed integer must be used as an intermediary.
                                     case 0x0:  // FLPT_FTS reg
-                                        result = (ulong)floatingInitial;
+                                        result = (ulong)(long)floatingInitial;
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // FLPT_FCS reg
-                                        result = (ulong)Math.Ceiling(floatingInitial);
+                                        result = (ulong)(long)Math.Ceiling(floatingInitial);
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x2:  // FLPT_FFS reg
-                                        result = (ulong)Math.Floor(floatingInitial);
+                                        result = (ulong)(long)Math.Floor(floatingInitial);
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x3:  // FLPT_FNS reg
-                                        result = (ulong)Math.Round(floatingInitial);
+                                        result = (ulong)(long)Math.Round(floatingInitial);
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
