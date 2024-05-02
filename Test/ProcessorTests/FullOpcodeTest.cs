@@ -12361,13 +12361,13 @@ namespace AssEmbly.Test.ProcessorTests
 
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
-            testProcessor.Registers[(int)Register.rg8] = BitConverter.DoubleToUInt64Bits(3.567);
+            testProcessor.Registers[(int)Register.rg8] = BitConverter.DoubleToUInt64Bits(3.0);
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x50, (int)Register.rg7, (int)Register.rg8 });
             _ = testProcessor.Execute(false);
             Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.0)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
             Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.0), testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
 
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg8] = 552;
@@ -12403,12 +12403,12 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x51, (int)Register.rg7 });
-            testProcessor.WriteMemoryQWord(4, BitConverter.DoubleToUInt64Bits(3.567));
+            testProcessor.WriteMemoryQWord(4, BitConverter.DoubleToUInt64Bits(3.0));
             _ = testProcessor.Execute(false);
             Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.0)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
             Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(4), "Instruction updated the second operand");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.0), testProcessor.ReadMemoryQWord(4), "Instruction updated the second operand");
 
             testProcessor = new(2046);
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x51, (int)Register.rpo, 1, 0, 0, 0, 0, 0, 0, 0 });
@@ -12443,12 +12443,12 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x52, (int)Register.rg7, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-            testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.567));
+            testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.0));
             _ = testProcessor.Execute(false);
             Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.0)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
             Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.0), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
 
             testProcessor = new(2046);
             testProcessor.WriteMemoryQWord(552, 1);
@@ -12488,14 +12488,14 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg7] = BitConverter.DoubleToUInt64Bits(-0.765);
             testProcessor.Registers[(int)Register.rg8] = 552;
-            testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.567));
+            testProcessor.WriteMemoryQWord(552, BitConverter.DoubleToUInt64Bits(3.0));
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x02, 0x53, (int)Register.rg7, (int)Register.rg8 });
             _ = testProcessor.Execute(false);
             Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.567)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(Math.Pow(-0.765, 3.0)), testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
             Assert.AreEqual((ulong)StatusFlags.Sign, testProcessor.Registers[(int)Register.rsf], "Instruction did not correctly set status flags");
             Assert.AreEqual(552UL, testProcessor.Registers[(int)Register.rg8], "Instruction updated the second operand");
-            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.567), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
+            Assert.AreEqual(BitConverter.DoubleToUInt64Bits(3.0), testProcessor.ReadMemoryQWord(552), "Instruction updated the second operand");
 
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg8] = 552;
