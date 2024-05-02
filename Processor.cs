@@ -1376,13 +1376,7 @@ namespace AssEmbly
                                         {
                                             throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
                                         }
-                                        initial = ReadMemoryQWord(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
                                         openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                         openFileSize = openFile.Length;
@@ -1402,13 +1396,7 @@ namespace AssEmbly
                                         {
                                             throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
                                         }
-                                        initial = ReadMemoryRegister(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
                                         openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                         openFileSize = openFile.Length;
@@ -1437,68 +1425,32 @@ namespace AssEmbly
                                         openFileSize = 0;
                                         break;
                                     case 0x3:  // DFL adr
-                                        initial = ReadMemoryQWord(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
                                         File.Delete(filepath);
                                         break;
                                     case 0x4:  // DFL ptr
-                                        initial = ReadMemoryRegister(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
                                         File.Delete(filepath);
                                         break;
                                     case 0x5:  // FEX reg, adr
-                                        initial = ReadMemoryQWord(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
                                         WriteMemoryRegister(operandStart, File.Exists(filepath) ? 1UL : 0UL);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // FEX reg, ptr
-                                        initial = ReadMemoryRegister(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
                                         WriteMemoryRegister(operandStart, File.Exists(filepath) ? 1UL : 0UL);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     case 0x7:  // FSZ reg, adr
-                                        initial = ReadMemoryQWord(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
                                         WriteMemoryRegister(operandStart, (ulong)new FileInfo(filepath).Length);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x8:  // FSZ reg, ptr
-                                        initial = ReadMemoryRegister(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
                                         WriteMemoryRegister(operandStart, (ulong)new FileInfo(filepath).Length);
                                         Registers[(int)Register.rpo] += 2;
                                         break;
@@ -2944,13 +2896,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
                                         }
-                                        initial = ReadMemoryQWord(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
                                         try
                                         {
@@ -2984,13 +2930,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
                                         }
-                                        initial = ReadMemoryRegister(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
                                         try
                                         {
@@ -3028,13 +2968,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
                                         }
-                                        initial = ReadMemoryQWord(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
                                         try
                                         {
@@ -3058,13 +2992,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
                                         }
-                                        initial = ReadMemoryRegister(operandStart);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
                                         try
                                         {
@@ -3113,13 +3041,7 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // ASMX_AEX reg, adr
-                                        initial = ReadMemoryQWord(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         AssemblyLoadContext testLoadContext = new("AssEmblyExternalTest", true);
                                         try
@@ -3137,13 +3059,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x1:  // ASMX_AEX reg, ptr
-                                        initial = ReadMemoryRegister(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         testLoadContext = new AssemblyLoadContext("AssEmblyExternalTest", true);
                                         try
@@ -3165,13 +3081,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
                                         }
-                                        initial = ReadMemoryQWord(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 9;
                                         try
                                         {
@@ -3188,13 +3098,7 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
                                         }
-                                        initial = ReadMemoryRegister(operandStart + 1);
-                                        mathend = 0;
-                                        while (Memory[initial + mathend] != 0x0)
-                                        {
-                                            mathend++;
-                                        }
-                                        filepath = Encoding.UTF8.GetString(Memory, (int)initial, (int)mathend);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 2;
                                         try
                                         {
@@ -3774,7 +3678,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte ReadMemoryRegisterPointedByte(ulong offset)
         {
-            return Memory[Registers[(int)ReadMemoryRegisterType(offset)]];
+            return Memory[ReadMemoryRegister(offset)];
         }
 
         /// <summary>
@@ -3783,7 +3687,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadMemoryRegisterPointedWord(ulong offset)
         {
-            return ReadMemoryWord(Registers[(int)ReadMemoryRegisterType(offset)]);
+            return ReadMemoryWord(ReadMemoryRegister(offset));
         }
 
         /// <summary>
@@ -3792,7 +3696,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadMemoryRegisterPointedDWord(ulong offset)
         {
-            return ReadMemoryDWord(Registers[(int)ReadMemoryRegisterType(offset)]);
+            return ReadMemoryDWord(ReadMemoryRegister(offset));
         }
 
         /// <summary>
@@ -3801,7 +3705,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryRegisterPointedQWord(ulong offset)
         {
-            return ReadMemoryQWord(Registers[(int)ReadMemoryRegisterType(offset)]);
+            return ReadMemoryQWord(ReadMemoryRegister(offset));
         }
 
         /// <summary>
@@ -3838,6 +3742,38 @@ namespace AssEmbly
         public ulong ReadMemoryPointedQWord(ulong offset)
         {
             return ReadMemoryQWord(ReadMemoryQWord(offset));
+        }
+
+        /// <summary>
+        /// Read a null-terminated UTF-8 encoded string from the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ReadMemoryString(ulong offset)
+        {
+            ulong length;
+            for (length = 0; Memory[offset + length] != 0x0; length++) { }
+            return Encoding.UTF8.GetString(Memory, (int)offset, (int)length);
+        }
+
+        /// <summary>
+        /// Read a null-terminated UTF-8 encoded string from the memory address stored at the register type stored at the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ReadMemoryRegisterPointedString(ulong offset)
+        {
+            return ReadMemoryString(ReadMemoryRegister(offset));
+        }
+
+        /// <summary>
+        /// Read a null-terminated UTF-8 encoded string from the memory address stored at the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string ReadMemoryPointedString(ulong offset)
+        {
+            return ReadMemoryString(ReadMemoryQWord(offset));
         }
 
         /// <summary>
@@ -3887,7 +3823,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedByte(ulong offset, byte value)
         {
-            Memory[Registers[(int)ReadMemoryRegisterType(offset)]] = value;
+            Memory[ReadMemoryRegister(offset)] = value;
         }
 
         /// <summary>
@@ -3896,7 +3832,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedWord(ulong offset, ushort value)
         {
-            WriteMemoryWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
+            WriteMemoryWord(ReadMemoryRegister(offset), value);
         }
 
         /// <summary>
@@ -3905,7 +3841,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedDWord(ulong offset, uint value)
         {
-            WriteMemoryDWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
+            WriteMemoryDWord(ReadMemoryRegister(offset), value);
         }
 
         /// <summary>
@@ -3914,7 +3850,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void WriteMemoryRegisterPointedQWord(ulong offset, ulong value)
         {
-            WriteMemoryQWord(Registers[(int)ReadMemoryRegisterType(offset)], value);
+            WriteMemoryQWord(ReadMemoryRegister(offset), value);
         }
 
         /// <summary>
@@ -3951,6 +3887,36 @@ namespace AssEmbly
         public void WriteMemoryPointedQWord(ulong offset, ulong value)
         {
             WriteMemoryQWord(ReadMemoryQWord(offset), value);
+        }
+
+        /// <summary>
+        /// Write a null-terminated UTF-8 encoded string to the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteMemoryString(ulong offset, string value)
+        {
+            Encoding.UTF8.GetBytes(value, 0, value.Length, Memory, (int)offset);
+        }
+
+        /// <summary>
+        /// Write a null-terminated UTF-8 encoded string to the memory address stored at the register type stored at the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteMemoryRegisterPointedString(ulong offset, string value)
+        {
+            WriteMemoryString(ReadMemoryRegister(offset), value);
+        }
+
+        /// <summary>
+        /// Write a null-terminated UTF-8 encoded string to the memory address stored at the given memory offset.
+        /// </summary>
+        /// <remarks>A null terminator is a single 0x00 byte.</remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void WriteMemoryPointedString(ulong offset, string value)
+        {
+            WriteMemoryString(ReadMemoryQWord(offset), value);
         }
     }
 }
