@@ -668,17 +668,25 @@
             { ("FSYS_CWD", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x00) },
             { ("FSYS_CWD", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x01) },
 
+            // FSYS_GWD (Get Working Directory)
+            { ("FSYS_GWD", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x02) },
+            { ("FSYS_GWD", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x03) },
+
             // FSYS_CDR (Create Directory at Path Specified by 0x00 Terminated String in Memory)
             { ("FSYS_CDR", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x10) },
             { ("FSYS_CDR", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x11) },
 
-            // FSYS_DDR (Delete Directory at Path Specified by 0x00 Terminated String in Memory)
+            // FSYS_DDR (Delete Directory Recursively at Path Specified by 0x00 Terminated String in Memory)
             { ("FSYS_DDR", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x20) },
             { ("FSYS_DDR", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x21) },
 
+            // FSYS_DDR (Delete Empty Directory at Path Specified by 0x00 Terminated String in Memory)
+            { ("FSYS_DDE", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x22) },
+            { ("FSYS_DDE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x23) },
+
             // FSYS_DEX (Does Directory Exist at Path Specified by 0x00 Terminated String in Memory?)
-            { ("FSYS_DEX", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x30) },
-            { ("FSYS_DEX", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x31) },
+            { ("FSYS_DEX", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x06, 0x30) },
+            { ("FSYS_DEX", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x06, 0x31) },
 
             // FSYS_CPY (Copy Between Paths Specified by 0x00 Terminated Strings in Memory)
             { ("FSYS_CPY", new OperandType[2] { OperandType.Address, OperandType.Address }), new Opcode(0x06, 0x40) },
@@ -706,16 +714,16 @@
             { ("FSYS_GND", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x63) },
 
             // FSYS_GCT (Get Creation Time of File or Directory)
-            { ("FSYS_GCT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x70) },
-            { ("FSYS_GCT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x71) },
+            { ("FSYS_GCT", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x06, 0x70) },
+            { ("FSYS_GCT", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x06, 0x71) },
 
             // FSYS_GMT (Get Modification Time of File or Directory)
-            { ("FSYS_GMT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x72) },
-            { ("FSYS_GMT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x73) },
+            { ("FSYS_GMT", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x06, 0x72) },
+            { ("FSYS_GMT", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x06, 0x73) },
 
             // FSYS_GAT (Get Access Time of File or Directory)
-            { ("FSYS_GAT", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x74) },
-            { ("FSYS_GAT", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x75) },
+            { ("FSYS_GAT", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x06, 0x74) },
+            { ("FSYS_GAT", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x06, 0x75) },
 
             // FSYS_SCT (Set Creation Time of File or Directory)
             { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x80) },

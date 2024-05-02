@@ -3766,6 +3766,87 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set directory listing low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_BeginListing {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_BeginListing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set create directory low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_CreateDir {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_CreateDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set delete directory low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_DeleteDir {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_DeleteDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set directory existence low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_DirectoryExists {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_DirectoryExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set listing get low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_ListingGet {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_ListingGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set copy/move low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_Move {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_Move", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set file time get low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_TimeGet {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_TimeGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_TimeSet {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_TimeSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set working directory low opcode.
+        /// </summary>
+        internal static string Processor_Error_Opcode_Low_FileSystem_WorkingDir {
+            get {
+                return ResourceManager.GetString("Processor_Error_Opcode_Low_FileSystem_WorkingDir", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:X} is not a recognised floating point extension set addition low opcode.
         /// </summary>
         internal static string Processor_Error_Opcode_Low_FloatingPoint_Addition {

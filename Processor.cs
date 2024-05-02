@@ -16,6 +16,8 @@ namespace AssEmbly
         public static readonly Type[] ExternalMethodParamTypes =
             new Type[3] { typeof(byte[]), typeof(ulong[]), typeof(ulong?) };
 
+        public static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
 
@@ -43,6 +45,9 @@ namespace AssEmbly
         private AssemblyLoadContext? extLoadContext;
         private Type? openExtAssembly;
         private MethodInfo? openExtFunction;
+
+        private IEnumerator<string> directoryListing = Enumerable.Empty<string>().GetEnumerator();
+        private IEnumerator<string> fileListing = Enumerable.Empty<string>().GetEnumerator();
 
         private readonly Random rng = new();
 
@@ -92,6 +97,9 @@ namespace AssEmbly
             fileRead = null;
             fileWrite?.Dispose();
             fileWrite = null;
+
+            directoryListing.Dispose();
+            fileListing.Dispose();
 
             GC.SuppressFinalize(this);
         }
@@ -182,6 +190,7 @@ namespace AssEmbly
                 ulong resultSign;
                 int shiftAmount;
                 string filepath;
+                string destination;
                 long signedInitial;
                 long signedMathend;
                 ulong signedShiftAllBits;
@@ -3334,6 +3343,277 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
                         }
                         break;
+                    case 0x6:  // File System Extension Set
+                        switch (opcodeHigh)
+                        {
+                            case 0x00:  // Current Working Directory
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_CWD adr
+                                        Environment.CurrentDirectory = ReadMemoryPointedString(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x1:  // FSYS_CWD ptr
+                                        Environment.CurrentDirectory = ReadMemoryRegisterPointedString(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // FSYS_GWD adr
+                                        WriteMemoryPointedString(operandStart, Environment.CurrentDirectory);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // FSYS_GWD ptr
+                                        WriteMemoryRegisterPointedString(operandStart, Environment.CurrentDirectory);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_WorkingDir, opcodeLow));
+                                }
+                                break;
+                            case 0x10:  // Create Directory
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_CDR adr
+                                        filepath = ReadMemoryPointedString(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x1:  // FSYS_CDR ptr
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_CreateDir, opcodeLow));
+                                }
+                                _ = Directory.CreateDirectory(filepath);
+                                break;
+                            case 0x20:  // Delete Directory
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_DDR adr
+                                    case 0x2:  // FSYS_DDE adr
+                                        filepath = ReadMemoryPointedString(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x1:  // FSYS_DDR ptr
+                                    case 0x3:  // FSYS_DDE ptr
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_DeleteDir, opcodeLow));
+                                }
+                                if (Directory.Exists(filepath))
+                                {
+                                    Directory.Delete(filepath, opcodeLow <= 0x1);
+                                }
+                                break;
+                            case 0x30:  // Directory Existence
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_DEX reg, adr
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x1:  // FSYS_DEX reg, ptr
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_DirectoryExists, opcodeLow));
+                                }
+                                WriteMemoryRegister(operandStart, Directory.Exists(filepath) ? 1UL : 0UL);
+                                break;
+                            case 0x40:  // Copy/Move
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_CPY adr, adr
+                                    case 0x4:  // FSYS_MOV adr, adr
+                                        destination = ReadMemoryPointedString(operandStart);
+                                        filepath = ReadMemoryPointedString(operandStart + 8);
+                                        Registers[(int)Register.rpo] += 16;
+                                        break;
+                                    case 0x1:  // FSYS_CPY adr, ptr
+                                    case 0x5:  // FSYS_MOV adr, ptr
+                                        destination = ReadMemoryPointedString(operandStart);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 8);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x2:  // FSYS_CPY ptr, adr
+                                    case 0x6:  // FSYS_MOV ptr, adr
+                                        destination = ReadMemoryRegisterPointedString(operandStart);
+                                        filepath = ReadMemoryPointedString(operandStart + 1);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FSYS_CPY ptr, ptr
+                                    case 0x7:  // FSYS_MOV ptr, ptr
+                                        destination = ReadMemoryRegisterPointedString(operandStart);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_Move, opcodeLow));
+                                }
+                                if (opcodeLow <= 0x03)
+                                {
+                                    File.Copy(filepath, destination);
+                                }
+                                else
+                                {
+                                    File.Move(filepath, destination);
+                                }
+                                break;
+                            case 0x50:  // Directory Listing Start
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_BDL
+                                        filepath = Environment.CurrentDirectory;
+                                        break;
+                                    case 0x1:  // FSYS_BDL adr
+                                        filepath = ReadMemoryPointedString(operandStart);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // FSYS_BDL ptr
+                                        filepath = ReadMemoryRegisterPointedString(operandStart);
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_BeginListing, opcodeLow));
+                                }
+                                directoryListing.Dispose();
+                                directoryListing = Directory.EnumerateDirectories(filepath).GetEnumerator();
+                                fileListing.Dispose();
+                                fileListing = Directory.EnumerateFiles(filepath).GetEnumerator();
+                                break;
+                            case 0x60:  // Get Items from Directory Listing
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_GNF adr
+                                        WriteMemoryPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "");
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x1:  // FSYS_GNF ptr
+                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "");
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    case 0x2:  // FSYS_GND adr
+                                        WriteMemoryPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "");
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // FSYS_GND ptr
+                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "");
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_ListingGet, opcodeLow));
+                                }
+                                break;
+                            case 0x70:  // Get File Times
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_GCT reg, adr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x1:  // FSYS_GCT reg, ptr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x2:  // FSYS_GMT reg, adr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x3:  // FSYS_GMT reg, ptr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x4:  // FSYS_GAT reg, adr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x5:  // FSYS_GAT reg, ptr
+                                        WriteMemoryRegister(operandStart,
+                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_TimeGet, opcodeLow));
+                                }
+                                break;
+                            case 0x80:  // Set File Times
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // FSYS_SCT adr, reg
+                                        File.SetCreationTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x1:  // FSYS_SCT ptr, reg
+                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x2:  // FSYS_SCT adr, lit
+                                        File.SetCreationTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 16;
+                                        break;
+                                    case 0x3:  // FSYS_SCT ptr, lit
+                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x4:  // FSYS_SMT adr, reg
+                                        File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x5:  // FSYS_SMT ptr, reg
+                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0x6:  // FSYS_SMT adr, lit
+                                        File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 16;
+                                        break;
+                                    case 0x7:  // FSYS_SMT ptr, lit
+                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x8:  // FSYS_SAT adr, reg
+                                        File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    case 0x9:  // FSYS_SAT ptr, reg
+                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 2;
+                                        break;
+                                    case 0xA:  // FSYS_SAT adr, lit
+                                        File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                        Registers[(int)Register.rpo] += 16;
+                                        break;
+                                    case 0xB:  // FSYS_SAT ptr, lit
+                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                        Registers[(int)Register.rpo] += 9;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_TimeSet, opcodeLow));
+                                }
+                                break;
+                            default:
+                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FileSystem, opcodeHigh));
+                        }
+                        break;
                     case 0x7:  // Terminal Extension Set
                         switch (opcodeHigh)
                         {
@@ -3897,6 +4177,8 @@ namespace AssEmbly
         public void WriteMemoryString(ulong offset, string value)
         {
             Encoding.UTF8.GetBytes(value, 0, value.Length, Memory, (int)offset);
+            // Write null terminator
+            Memory[offset + (ulong)value.Length] = 0x00;
         }
 
         /// <summary>

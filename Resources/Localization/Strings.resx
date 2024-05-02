@@ -1631,4 +1631,31 @@ Current while stack (deepest while first):</value>
     <data name="Processor_Error_Opcode_Low_Terminal_Colour" xml:space="preserve">
         <value>{0:X} is not a recognised terminal extension set colour low opcode</value>
     </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_WorkingDir" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set working directory low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_CreateDir" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set create directory low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_DeleteDir" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set delete directory low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_DirectoryExists" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set directory existence low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_Move" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set copy/move low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_BeginListing" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set directory listing low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_ListingGet" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set listing get low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_TimeGet" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set file time get low opcode</value>
+    </data>
+    <data name="Processor_Error_Opcode_Low_FileSystem_TimeSet" xml:space="preserve">
+        <value>{0:X} is not a recognised file system extension set file time set low opcode</value>
+    </data>
 </root>
