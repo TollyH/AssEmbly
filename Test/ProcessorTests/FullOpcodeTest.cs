@@ -15149,6 +15149,184 @@ namespace AssEmbly.Test.ProcessorTests
             _ = Assert.ThrowsException<InvalidMemoryBlockException>(() => testProcessor.Execute(false),
                     "Instruction did not throw an exception when trying to free invalid/non-existent block");
         }
+        
+        [TestMethod]
+        public void FSYS_CWD_Address()
+        {
+            string startDirectory = Environment.CurrentDirectory;
+            string targetDirectory = Path.Join(Environment.CurrentDirectory, "Example Programs");
+            
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x00, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            Encoding.UTF8.GetBytes(targetDirectory + '\0').CopyTo(testProcessor.Memory, 552);
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            Assert.AreEqual(targetDirectory, Environment.CurrentDirectory, "Instruction did not set correct working directory");
+            Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+            
+            Environment.CurrentDirectory = startDirectory;
+            
+            testProcessor = new(2046);
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x00, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            Encoding.UTF8.GetBytes("Example Programs\0").CopyTo(testProcessor.Memory, 552);
+            _ = testProcessor.Execute(false);
+            Assert.AreEqual(targetDirectory, Environment.CurrentDirectory, "Instruction did not set correct working directory");
+            Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Environment.CurrentDirectory = startDirectory;
+
+            testProcessor = new(2046);
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x00, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            Encoding.UTF8.GetBytes("Not Exists\0").CopyTo(testProcessor.Memory, 552);
+            _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception with non-existent directory");
+            
+            Environment.CurrentDirectory = startDirectory;
+        }
+
+        [TestMethod]
+        public void FSYS_CWD_Pointer()
+        {
+            string startDirectory = Environment.CurrentDirectory;
+            string targetDirectory = Path.Join(Environment.CurrentDirectory, "Example Programs");
+            
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x01, (int)Register.rg7 });
+            Encoding.UTF8.GetBytes(targetDirectory + '\0').CopyTo(testProcessor.Memory, 552);
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            Assert.AreEqual(targetDirectory, Environment.CurrentDirectory, "Instruction did not set correct working directory");
+            Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+            
+            Environment.CurrentDirectory = startDirectory;
+            
+            testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x01, (int)Register.rg7 });
+            Encoding.UTF8.GetBytes("Example Programs\0").CopyTo(testProcessor.Memory, 552);
+            _ = testProcessor.Execute(false);
+            Assert.AreEqual(targetDirectory, Environment.CurrentDirectory, "Instruction did not set correct working directory");
+            Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Environment.CurrentDirectory = startDirectory;
+
+            testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x01, (int)Register.rg7 });
+            Encoding.UTF8.GetBytes("Not Exists\0").CopyTo(testProcessor.Memory, 552);
+            _ = Assert.ThrowsException<DirectoryNotFoundException>(() => testProcessor.Execute(false),
+                    "Instruction did not throw an exception with non-existent directory");
+            
+            Environment.CurrentDirectory = startDirectory;
+        }
+        
+        [TestMethod]
+        public void FSYS_GWD_Address()
+        {
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x02, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            string retrievedDirectory = testProcessor.ReadMemoryString(552);
+            Assert.AreEqual(Environment.CurrentDirectory, retrievedDirectory, "Instruction did not get correct working directory");
+            Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+        }
+
+        [TestMethod]
+        public void FSYS_GWD_Pointer()
+        {
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x03, (int)Register.rg7 });
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            string retrievedDirectory = testProcessor.ReadMemoryString(552);
+            Assert.AreEqual(Environment.CurrentDirectory, retrievedDirectory, "Instruction did not get correct working directory");
+            Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+        }
+
+        [TestMethod]
+        public void FSYS_CDR_Address()
+        {
+            string targetDirectory = Path.Join(Environment.CurrentDirectory, "New Dir");
+
+            if (Directory.Exists(targetDirectory))
+            {
+                Directory.Delete(targetDirectory);
+            }
+
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x10, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            Encoding.UTF8.GetBytes(targetDirectory + '\0').CopyTo(testProcessor.Memory, 552);
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
+            Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Directory.Delete(targetDirectory);
+
+            targetDirectory = Path.Join(Environment.CurrentDirectory, "New Dir", "Dir1", "Directory 2");
+
+            testProcessor = new(2046);
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x10, 0x28, 2, 0, 0, 0, 0, 0, 0 });
+            Encoding.UTF8.GetBytes("New Dir\\Dir1\\Directory 2\0").CopyTo(testProcessor.Memory, 552);
+            _ = testProcessor.Execute(false);
+            Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
+            Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Directory.Delete("New Dir", true);
+        }
+
+        [TestMethod]
+        public void FSYS_CDR_Pointer()
+        {
+            string targetDirectory = Path.Join(Environment.CurrentDirectory, "New Dir");
+
+            if (Directory.Exists(targetDirectory))
+            {
+                Directory.Delete(targetDirectory);
+            }
+
+            Processor testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x11, (int)Register.rg7 });
+            Encoding.UTF8.GetBytes(targetDirectory + '\0').CopyTo(testProcessor.Memory, 552);
+            // Test that no exception is thrown
+            _ = testProcessor.Execute(false);
+            Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
+            Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Directory.Delete(targetDirectory);
+
+            targetDirectory = Path.Join(Environment.CurrentDirectory, "New Dir", "Dir1", "Directory 2");
+
+            testProcessor = new(2046);
+            testProcessor.Registers[(int)Register.rg7] = 552;
+            testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x11, (int)Register.rg7 });
+            Encoding.UTF8.GetBytes("New Dir\\Dir1\\Directory 2\0").CopyTo(testProcessor.Memory, 552);
+            _ = testProcessor.Execute(false);
+            Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
+            Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+            Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+            Directory.Delete("New Dir", true);
+        }
     }
 
     public class AllZeroRandom : Random
