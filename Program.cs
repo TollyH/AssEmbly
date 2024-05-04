@@ -15,13 +15,16 @@ namespace AssEmbly
             if (args.Contains("--version", StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine(version?.ToString());
+                Console.WriteLine(string.Join('|', Enum.GetValues<AAPFeatures>()
+                    .Where(v => v != 0 && ((v & (v - 1)) == 0)).Select(Enum.GetName).Where(n => n != "All").Distinct()));
                 return;
             }
             if (!args.Contains("--no-header", StringComparer.OrdinalIgnoreCase))
             {
                 // Write to stderr to prevent header being included in redirected stdout streams
-                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build} {(Environment.Is64BitProcess ? "64-bit" : "32-bit")}" +
-                    $" - CLR {Environment.Version}, {Environment.OSVersion} {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
+                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build}-{(ulong)AAPFeatures.All:X}" +
+                    $" {(Environment.Is64BitProcess ? "64-bit" : "32-bit")} - CLR {Environment.Version}, {Environment.OSVersion}" +
+                    $" {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                 Console.Error.WriteLine(Strings.Generic_Copyright_Header);
 #if DEBUG
                 Console.Error.WriteLine("(DEBUG BUILD)");
@@ -88,8 +91,10 @@ namespace AssEmbly
             HashSet<int> disabledErrors = new();
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
+#if V1_CALL_STACK_COMPAT
             bool useV1Format = false;
             bool useV1Stack = false;
+#endif
             bool enableObsoleteDirectives = false;
             bool enableVariableExpansion = true;
             bool enableEscapeSequences = true;
@@ -145,6 +150,7 @@ namespace AssEmbly
                 {
                     disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
                 }
+#if V1_CALL_STACK_COMPAT
                 else if (a.Equals("--v1-format", StringComparison.OrdinalIgnoreCase))
                 {
                     useV1Format = true;
@@ -154,6 +160,7 @@ namespace AssEmbly
                 {
                     useV1Stack = true;
                 }
+#endif
                 else if (a.Equals("--allow-old-directives", StringComparison.OrdinalIgnoreCase))
                 {
                     enableObsoleteDirectives = true;
@@ -174,7 +181,13 @@ namespace AssEmbly
             int totalSuggestions = 0;
             try
             {
-                Assembler assembler = new(useV1Format, useV1Stack, disabledErrors, disabledWarnings, disabledSuggestions);
+                Assembler assembler = new(
+#if V1_CALL_STACK_COMPAT
+                    useV1Format, useV1Stack,
+#else
+                    false, false,
+#endif
+                    disabledErrors, disabledWarnings, disabledSuggestions);
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
@@ -266,21 +279,27 @@ namespace AssEmbly
 
             string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
             long programSize = 0;
+#if V1_CALL_STACK_COMPAT
             if (useV1Format)
             {
                 File.WriteAllBytes(destination, assemblyResult.Program);
             }
             else
+#endif
             {
                 AAPFeatures features = assemblyResult.UsedExtensions;
+#if V1_CALL_STACK_COMPAT
                 if (useV1Stack)
                 {
                     features |= AAPFeatures.V1CallStack;
                 }
+#endif
+#if GZIP_COMPRESSION
                 if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
                 {
                     features |= AAPFeatures.GZipCompressed;
                 }
+#endif
                 AAPFile executable = new(version ?? new Version(), features, assemblyResult.EntryPoint, assemblyResult.Program);
                 byte[] bytes = executable.GetBytes();
                 File.WriteAllBytes(destination, executable.GetBytes());
@@ -305,16 +324,29 @@ namespace AssEmbly
             if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine(Strings.CLI_Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
-                    useV1Format ? assemblyResult.Program.LongLength : programSize,
-                    (double)(useV1Format ? assemblyResult.Program.LongLength : programSize) / assemblyResult.Program.LongLength,
-                    useV1Format ? assemblyResult.Program.LongLength : programSize + AAPFile.HeaderSize,
+#if V1_CALL_STACK_COMPAT
+                    useV1Format ? assemblyResult.Program.LongLength :
+#endif
+                    programSize,
+                    (double)(
+#if V1_CALL_STACK_COMPAT
+                        useV1Format ? assemblyResult.Program.LongLength :
+#endif
+                        programSize) / assemblyResult.Program.LongLength,
+#if V1_CALL_STACK_COMPAT
+                    useV1Format ? assemblyResult.Program.LongLength :
+#endif
+                    programSize + AAPFile.HeaderSize,
                     totalErrors, totalWarnings, totalSuggestions,
                     assemblyResult.AssembledLines.Length, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
             else
             {
                 Console.WriteLine(Strings.CLI_Assemble_Result_Success, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
-                    useV1Format ? assemblyResult.Program.LongLength : assemblyResult.Program.LongLength + AAPFile.HeaderSize,
+#if V1_CALL_STACK_COMPAT
+                    useV1Format ? assemblyResult.Program.LongLength :
+#endif
+                    assemblyResult.Program.LongLength + AAPFile.HeaderSize,
                     totalErrors, totalWarnings, totalSuggestions,
                     assemblyResult.AssembledLines.Length, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
@@ -332,8 +364,12 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
+#if V1_CALL_STACK_COMPAT
                 args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
                 args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+#else
+                false, false,
+#endif
                 args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
                 !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
                 args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
@@ -393,7 +429,9 @@ namespace AssEmbly
 
             Processor processor = new(
                 memSize, assemblyResult.EntryPoint,
+#if V1_CALL_STACK_COMPAT
                 useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+#endif
                 mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
                 autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
             LoadProgramIntoProcessor(processor, assemblyResult.Program);
@@ -412,8 +450,12 @@ namespace AssEmbly
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
+#if V1_CALL_STACK_COMPAT
                 args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
                 args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+#else
+                false, false,
+#endif
                 args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
                 !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
                 args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
@@ -438,11 +480,13 @@ namespace AssEmbly
 
             string disassembledProgram;
             byte[] program;
+#if V1_CALL_STACK_COMPAT
             if (args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase))
             {
                 program = File.ReadAllBytes(sourcePath);
             }
             else
+#endif
             {
                 AAPFile file = LoadAAPFile(sourcePath,
                     args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase));
@@ -477,7 +521,9 @@ namespace AssEmbly
         {
             ulong memSize = GetMemorySize(args);
             Debugger debugger = new(true, memorySize: memSize,
+#if V1_CALL_STACK_COMPAT
                 useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+#endif
                 mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
                 autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
             // Some program needs to be loaded or the processor won't run

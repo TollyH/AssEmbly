@@ -196,6 +196,62 @@ namespace AssEmbly
                 { "CURRENT_ADDRESS", () => (ulong)program.Count },
                 { "OBSOLETE_DIRECTIVES", () => EnableObsoleteDirectives ? 1UL : 0UL },
                 { "ESCAPE_SEQUENCES", () => EnableEscapeSequences ? 1UL : 0UL },
+                {
+                    "EXTENSION_SET_SIGNED_AVAIL", () =>
+#if EXTENSION_SET_SIGNED
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_FLOATING_POINT_AVAIL", () =>
+#if EXTENSION_SET_FLOATING_POINT
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_EXTENDED_BASE_AVAIL", () =>
+#if EXTENSION_SET_EXTENDED_BASE
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_EXTERNAL_ASM_AVAIL", () =>
+#if EXTENSION_SET_EXTERNAL_ASM
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_HEAP_ALLOCATE_AVAIL", () =>
+#if EXTENSION_SET_HEAP_ALLOCATE
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_FILE_SYSTEM_AVAIL", () =>
+#if EXTENSION_SET_FILE_SYSTEM
+                        1
+#else
+                        0
+#endif
+                },
+                {
+                    "EXTENSION_SET_TERMINAL_AVAIL", () =>
+#if EXTENSION_SET_TERMINAL
+                        1
+#else
+                        0
+#endif
+                },
             };
 
             InitializeStateDirectives(out stateDirectives, out obsoleteStateDirectives);

@@ -18,11 +18,18 @@ namespace AssEmbly
 
         public List<(Register Register, ulong Value)> Breakpoints { get; } = new();
 
+#if V1_CALL_STACK_COMPAT
         public bool UseV1CallStack => DebuggingProcessor.UseV1CallStack;
         private ulong stackCallSize => UseV1CallStack ? 24UL : 16UL;
-        private Register[] registerPushOrder => UseV1CallStack
-            ? new Register[3] { Register.rso, Register.rsb, Register.rpo }
-            : new Register[2] { Register.rsb, Register.rpo };
+#else
+        private const ulong stackCallSize = 16;
+#endif
+
+        private Register[] registerPushOrder =>
+#if V1_CALL_STACK_COMPAT
+            UseV1CallStack ? new Register[3] { Register.rso, Register.rsb, Register.rpo } :
+#endif
+            new Register[2] { Register.rsb, Register.rpo };
 
         private readonly ulong[] replPreviousRegisters = new ulong[Enum.GetNames(typeof(Register)).Length];
         private readonly Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
@@ -286,9 +293,11 @@ namespace AssEmbly
                                 case "breakpoint":
                                     CommandBreakpointManage(command);
                                     break;
+#if EXTENSION_SET_HEAP_ALLOCATE
                                 case "heap":
                                     CommandHeapStats();
                                     break;
+#endif
                                 case "help":
                                     CommandDebugHelp();
                                     break;
@@ -513,11 +522,13 @@ namespace AssEmbly
                 for (ulong i = rowStartAdr; i < rowStartAdr + 16; i++)
                 {
                     string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+#if EXTENSION_SET_HEAP_ALLOCATE
                     // Being unmapped is the lowest priority colour, and should be completely replaced by any register colours
                     if (DebuggingProcessor.MappedMemoryRanges.All(mappedRange => !mappedRange.Contains((long)i)))
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
                     }
+#endif
                     // Write both characters separately so that if multiple registers point to the same address, the cell becomes multi-coloured
                     if (i == DebuggingProcessor.Registers[(int)Register.rso])
                     {
@@ -649,13 +660,20 @@ namespace AssEmbly
                 Console.WriteLine(Strings.Debugger_Stack_Box_Top);
                 Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_First, currentStackBase, registerPushOrder[0], DebuggingProcessor.ReadMemoryQWord(currentStackBase));
                 Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_Second, currentStackBase + 8, registerPushOrder[1], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8));
+#if V1_CALL_STACK_COMPAT
                 if (UseV1CallStack)
                 {
                     Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_Third, currentStackBase + 16, registerPushOrder[2], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16));
                 }
+#endif
                 Console.WriteLine(Strings.Debugger_Stack_Box_Bottom);
 
-                ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase + (UseV1CallStack ? 8UL : 0UL));
+                ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase
+#if V1_CALL_STACK_COMPAT
+                + (UseV1CallStack ? 8UL : 0UL)
+#endif
+                );
+
                 if (currentStackBase + stackCallSize >= parentStackBase)
                 {
                     // Parent stack is empty
@@ -798,6 +816,7 @@ namespace AssEmbly
             }
         }
 
+#if EXTENSION_SET_HEAP_ALLOCATE
         private void CommandHeapStats()
         {
             long memorySize = DebuggingProcessor.Memory.LongLength;
@@ -877,6 +896,7 @@ namespace AssEmbly
             }
             Console.WriteLine();
         }
+#endif
 
         private static void CommandDebugHelp()
         {

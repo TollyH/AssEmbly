@@ -8,26 +8,63 @@ namespace AssEmbly
     public enum AAPFeatures : ulong
     {
         None = 0,
+#if V1_CALL_STACK_COMPAT
         V1CallStack = 0b1,
+#endif
+#if EXTENSION_SET_SIGNED
         ExtensionSigned = 0b10,
+#endif
+#if EXTENSION_SET_FLOATING_POINT
         ExtensionFloat = 0b100,
+#endif
+#if EXTENSION_SET_EXTENDED_BASE
         ExtensionExtendedBase = 0b1000,
+#endif
+#if GZIP_COMPRESSION
         GZipCompressed = 0b10000,
+#endif
+#if EXTENSION_SET_EXTERNAL_ASM
         ExtensionExternalAssembly = 0b100000,
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
         ExtensionMemoryAllocation = 0b1000000,
+#endif
+#if EXTENSION_SET_FILE_SYSTEM
         ExtensionFileSystem = 0b10000000,
+#endif
+#if EXTENSION_SET_TERMINAL
         ExtensionTerminal = 0b100000000,
+#endif
 
-        All = V1CallStack
+        All = None
+#if V1_CALL_STACK_COMPAT
+            | V1CallStack
+#endif
+#if EXTENSION_SET_SIGNED
             | ExtensionSigned
+#endif
+#if EXTENSION_SET_FLOATING_POINT
             | ExtensionFloat
+#endif
+#if EXTENSION_SET_EXTENDED_BASE
             | ExtensionExtendedBase
+#endif
+#if GZIP_COMPRESSION
             | GZipCompressed
+#endif
+#if EXTENSION_SET_EXTERNAL_ASM
             | ExtensionExternalAssembly
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
             | ExtensionMemoryAllocation
+#endif
+#if EXTENSION_SET_FILE_SYSTEM
             | ExtensionFileSystem
-            | ExtensionTerminal,
-        Incompatible = ~All
+#endif
+#if EXTENSION_SET_TERMINAL
+            | ExtensionTerminal
+#endif
+        , Incompatible = ~All
     }
 
     public class AAPFile
@@ -71,6 +108,7 @@ namespace AssEmbly
             Features = (AAPFeatures)BinaryPrimitives.ReadUInt64LittleEndian(byteSpan[20..]);
             EntryPoint = BinaryPrimitives.ReadUInt64LittleEndian(byteSpan[28..]);
 
+#if GZIP_COMPRESSION
             if (Features.HasFlag(AAPFeatures.GZipCompressed))
             {
                 using MemoryStream compressedProgram = new(executable[36..]);
@@ -81,13 +119,17 @@ namespace AssEmbly
             }
             else
             {
+#endif
                 Program = executable[36..];
+#if GZIP_COMPRESSION
             }
+#endif
         }
 
         public byte[] GetBytes()
         {
             byte[] programBytes;
+#if GZIP_COMPRESSION
             if (Features.HasFlag(AAPFeatures.GZipCompressed))
             {
                 using MemoryStream compressedProgram = new();
@@ -99,8 +141,11 @@ namespace AssEmbly
             }
             else
             {
+#endif
                 programBytes = Program;
+#if GZIP_COMPRESSION
             }
+#endif
 
             byte[] bytes = new byte[HeaderSize + programBytes.Length];
             Span<byte> byteSpan = bytes.AsSpan();

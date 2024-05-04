@@ -53,16 +53,21 @@ namespace AssEmbly
         {
             byte[] program;
             Processor processor;
+#if V1_CALL_STACK_COMPAT
             if (useV1Format)
             {
                 program = File.ReadAllBytes(appPath);
                 processor = new Processor(memSize, entryPoint: 0, useV1CallStack: true, mapStack: mapStack, autoEcho: autoEcho);
             }
             else
+#endif
             {
                 AAPFile file = LoadAAPFile(appPath, ignoreNewerVersion);
                 processor = new Processor(memSize, entryPoint: file.EntryPoint,
-                    useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack), mapStack: mapStack, autoEcho: autoEcho);
+#if V1_CALL_STACK_COMPAT
+                    useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack),
+#endif
+                    mapStack: mapStack, autoEcho: autoEcho);
                 program = file.Program;
             }
             LoadProgramIntoProcessor(processor, program);
@@ -249,14 +254,18 @@ namespace AssEmbly
                 {
                     Console.WriteLine(Strings.CLI_Warning_Processor_Exit_File_Open);
                 }
+#if EXTENSION_SET_EXTERNAL_ASM
                 if (processor.IsExternalOpen)
                 {
                     Console.WriteLine(Strings.CLI_Warning_Processor_Exit_External_Open);
                 }
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
                 if (processor.AnyRegionsMapped)
                 {
                     Console.WriteLine(Strings.CLI_Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
                 }
+#endif
                 Console.ResetColor();
             }
             catch (Exception e)

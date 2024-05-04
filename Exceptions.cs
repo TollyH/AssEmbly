@@ -227,6 +227,7 @@
         public FileOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
+#if EXTENSION_SET_EXTERNAL_ASM
     /// <summary>
     /// The exception that is thrown when an external assembly is invalid or could not be found.
     /// </summary>
@@ -263,7 +264,9 @@
         public ExternalOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public ExternalOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
+#endif
 
+#if EXTENSION_SET_HEAP_ALLOCATE
     /// <summary>
     /// The exception that is thrown when there is not enough free memory remaining to perform the requested allocation.
     /// </summary>
@@ -299,6 +302,7 @@
         public InvalidMemoryBlockException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public InvalidMemoryBlockException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
+#endif
 
     // AAP FORMAT EXCEPTIONS
     /// <summary>

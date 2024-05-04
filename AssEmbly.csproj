@@ -15,6 +15,10 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="Example Programs\C# Interop\**" />
     <Compile Remove="Test\**" />

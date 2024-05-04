@@ -31,19 +31,22 @@
     [Flags]
     public enum StatusFlags
     {
-        // Base
         Zero = 0b1,
         Carry = 0b10,
         FileEnd = 0b100,
-        // Signed
+#if EXTENSION_SET_SIGNED
         Sign = 0b1000,
         Overflow = 0b10000,
+#endif
+#if EXTENSION_SET_TERMINAL
         AutoEcho = 0b100000,
+#endif
 
-        // Base
         ZeroAndCarry = Zero | Carry,
+#if EXTENSION_SET_SIGNED
         // Signed
         SignAndOverflow = Sign | Overflow,
+#endif
     }
 
     /// <summary>
@@ -53,13 +56,27 @@
     {
         public static readonly Dictionary<byte, AAPFeatures> ExtensionSetFeatureFlags = new()
         {
+#if EXTENSION_SET_SIGNED
             { 0x01, AAPFeatures.ExtensionSigned },
+#endif
+#if EXTENSION_SET_FLOATING_POINT
             { 0x02, AAPFeatures.ExtensionFloat },
+#endif
+#if EXTENSION_SET_EXTENDED_BASE
             { 0x03, AAPFeatures.ExtensionExtendedBase },
+#endif
+#if EXTENSION_SET_EXTERNAL_ASM
             { 0x04, AAPFeatures.ExtensionExternalAssembly },
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
             { 0x05, AAPFeatures.ExtensionMemoryAllocation },
+#endif
+#if EXTENSION_SET_FILE_SYSTEM
             { 0x06, AAPFeatures.ExtensionFileSystem },
+#endif
+#if EXTENSION_SET_TERMINAL
             { 0x07, AAPFeatures.ExtensionTerminal },
+#endif
         };
 
         /// <summary>
@@ -350,6 +367,7 @@
             // RFC (Read Character from Open File as a Byte)
             { ("RFC", new OperandType[1] { OperandType.Register }), new Opcode(0x00, 0xF1) },
 
+#if EXTENSION_SET_SIGNED
             // SIGNED EXTENSION SET
 
             // Signed Conditional Jumps
@@ -458,7 +476,9 @@
 
             // SIGN_NEG (Two's Complement Negation)
             { ("SIGN_NEG", new OperandType[1] { OperandType.Register }), new Opcode(0x01, 0x80) },
+#endif
 
+#if EXTENSION_SET_FLOATING_POINT
             // FLOATING POINT EXTENSION SET
 
             // Math (All operations store result in the first register operand)
@@ -575,7 +595,9 @@
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Literal }), new Opcode(0x02, 0xD1) },  // (reg - lit)
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Address }), new Opcode(0x02, 0xD2) },  // (reg - adr)
             { ("FLPT_CMP", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x02, 0xD3) },  // (reg - ptr)
+#endif
 
+#if EXTENSION_SET_EXTENDED_BASE
             // EXTENDED BASE SET
 
             // EXTD_BSW (Reverse Byte Order)
@@ -601,7 +623,9 @@
             { ("EXTD_MPA", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x03, 0x30) },
             { ("EXTD_MPA", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x03, 0x31) },
             { ("EXTD_MPA", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x03, 0x32) },
+#endif
 
+#if EXTENSION_SET_EXTERNAL_ASM
             // EXTERNAL ASSEMBLY EXTENSION SET
 
             // ASMX_LDA (Load Assembly)
@@ -632,7 +656,9 @@
             { ("ASMX_CAL", new OperandType[1] { OperandType.Literal }), new Opcode(0x04, 0x32) },
             { ("ASMX_CAL", new OperandType[1] { OperandType.Address }), new Opcode(0x04, 0x33) },
             { ("ASMX_CAL", new OperandType[1] { OperandType.Pointer }), new Opcode(0x04, 0x34) },
+#endif
 
+#if EXTENSION_SET_HEAP_ALLOCATE
             // MEMORY ALLOCATION EXTENSION SET
 
             // HEAP_ALC (Allocate Heap Memory - Error if Fail)
@@ -661,7 +687,9 @@
 
             // HEAP_FRE (Free Allocated Heap Memory)
             { ("HEAP_FRE", new OperandType[1] { OperandType.Register }), new Opcode(0x05, 0x20) },
+#endif
 
+#if EXTENSION_SET_FILE_SYSTEM
             // FILE SYSTEM EXTENSION SET
 
             // FSYS_CWD (Change Working Directory to Path Specified by 0x00 Terminated String in Memory)
@@ -742,7 +770,9 @@
             { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x89) },
             { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x8A) },
             { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x8B) },
+#endif
 
+#if EXTENSION_SET_TERMINAL
             // TERMINAL EXTENSION SET
 
             // TERM_CLS (Clear Screen)
@@ -795,6 +825,7 @@
 
             // TERM_RSC (Reset Color)
             { ("TERM_RSC", Array.Empty<OperandType>()), new Opcode(0x07, 0x58) },
+#endif
         };
 
         /// <summary>

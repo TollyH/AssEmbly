@@ -13,41 +13,72 @@ namespace AssEmbly
     /// </summary>
     public class Processor : IDisposable
     {
+#if EXTENSION_SET_EXTERNAL_ASM
         public static readonly Type[] ExternalMethodParamTypes =
             new Type[3] { typeof(byte[]), typeof(ulong[]), typeof(ulong?) };
+#endif
 
         public static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
 
+#if V1_CALL_STACK_COMPAT
         public readonly bool UseV1CallStack;
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
         public readonly bool MapStack;
+#endif
+#if !EXTENSION_SET_TERMINAL
+        public readonly bool AutoEcho;
+#endif
 
+#if V1_CALL_STACK_COMPAT
         private readonly ulong stackCallSize;
+#else
+        private const ulong stackCallSize = 16;
+#endif
 
+#if EXTENSION_SET_HEAP_ALLOCATE
         private readonly List<Range> _mappedMemoryRanges = new();
         public IReadOnlyList<Range> MappedMemoryRanges => _mappedMemoryRanges.AsReadOnly();
+#endif
 
         public bool ProgramLoaded { get; private set; }
 
         public bool IsFileOpen => openFile is not null || fileRead is not null || fileWrite is not null;
+#if EXTENSION_SET_EXTERNAL_ASM
         public bool IsExternalOpen => openExtAssembly is not null || openExtFunction is not null || extLoadContext is not null;
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
         public bool AnyRegionsMapped => _mappedMemoryRanges.Count > 2;
+#endif
 
-        public bool IsClean => !IsFileOpen && !IsExternalOpen && !AnyRegionsMapped;
+        public bool IsClean =>
+        !IsFileOpen
+#if EXTENSION_SET_EXTERNAL_ASM
+        && !IsExternalOpen
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
+        && !AnyRegionsMapped
+#endif
+        ;
 
         private Stream? openFile;
         private BinaryReader? fileRead;
         private BinaryWriter? fileWrite;
         private long openFileSize;
 
+#if EXTENSION_SET_EXTERNAL_ASM
         private AssemblyLoadContext? extLoadContext;
         private Type? openExtAssembly;
         private MethodInfo? openExtFunction;
+#endif
 
+#if EXTENSION_SET_FILE_SYSTEM
         private IEnumerator<string> directoryListing = Enumerable.Empty<string>().GetEnumerator();
         private IEnumerator<string> fileListing = Enumerable.Empty<string>().GetEnumerator();
+#endif
 
         private readonly Random rng = new();
 
@@ -66,17 +97,27 @@ namespace AssEmbly
             Registers[(int)Register.rpo] = entryPoint;
             Registers[(int)Register.rso] = memorySize;
             Registers[(int)Register.rsb] = memorySize;
+#if EXTENSION_SET_HEAP_ALLOCATE
             _mappedMemoryRanges.Add(new Range((long)memorySize, (long)memorySize));
+#endif
             ProgramLoaded = false;
             // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
             Console.OutputEncoding = Encoding.UTF8;
+#if V1_CALL_STACK_COMPAT
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
             MapStack = mapStack;
+#endif
+#if EXTENSION_SET_TERMINAL
             if (autoEcho)
             {
                 Registers[(int)Register.rsf] |= (ulong)StatusFlags.AutoEcho;
             }
+#else
+            AutoEcho = autoEcho;
+#endif
         }
 
         ~Processor()
@@ -86,10 +127,12 @@ namespace AssEmbly
 
         public void Dispose()
         {
+#if EXTENSION_SET_EXTERNAL_ASM
             extLoadContext?.Unload();
             extLoadContext = null;
             openExtAssembly = null;
             openExtFunction = null;
+#endif
 
             openFile?.Dispose();
             openFile = null;
@@ -98,8 +141,10 @@ namespace AssEmbly
             fileWrite?.Dispose();
             fileWrite = null;
 
+#if EXTENSION_SET_FILE_SYSTEM
             directoryListing.Dispose();
             fileListing.Dispose();
+#endif
 
             GC.SuppressFinalize(this);
         }
@@ -123,7 +168,9 @@ namespace AssEmbly
                 throw new InvalidOperationException(string.Format(Strings.Processor_Error_Program_Too_Large, Memory.LongLength, programData.LongLength));
             }
             Array.Copy(programData, Memory, programData.LongLength);
+#if EXTENSION_SET_HEAP_ALLOCATE
             _mappedMemoryRanges.Insert(0, new Range(0, programData.LongLength));
+#endif
             ProgramLoaded = true;
         }
 
@@ -179,24 +226,32 @@ namespace AssEmbly
                 byte opcodeLow = (byte)(0x0F & opcode);
                 ulong operandStart = ++Registers[(int)Register.rpo];
 
+#if EXTENSION_SET_HEAP_ALLOCATE
                 ulong oldSO = Registers[(int)Register.rso];
+#endif
 
                 // Local variables used to hold additional state information while executing instructions
                 ulong initial;
                 ulong mathend;
                 ulong result;
                 ulong remainder;
-                ulong initialSign;
-                ulong resultSign;
                 int shiftAmount;
                 string filepath;
-                string destination;
+#if EXTENSION_SET_SIGNED
+                ulong initialSign;
+                ulong resultSign;
                 long signedInitial;
                 long signedMathend;
                 ulong signedShiftAllBits;
+#endif
+#if EXTENSION_SET_FLOATING_POINT
                 double floatingInitial;
                 double floatingMathend;
                 double floatingResult;
+#endif
+#if EXTENSION_SET_FILE_SYSTEM
+                string destination;
+#endif
 
                 switch (extensionSet)
                 {
@@ -380,6 +435,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
                                 initialSign = initial & SignBit;
                                 resultSign = result & SignBit;
                                 if (initialSign == (mathend & SignBit) && initialSign != resultSign)
@@ -399,6 +455,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -448,6 +505,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
                                 initialSign = initial & SignBit;
                                 resultSign = result & SignBit;
                                 if (initialSign != (mathend & SignBit) && initialSign != resultSign)
@@ -467,6 +525,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -503,8 +562,6 @@ namespace AssEmbly
                                 result = initial * mathend;
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (result < initial && mathend != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -513,6 +570,10 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
+
+
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
                                 {
@@ -531,6 +592,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
+#endif
                                 break;
                             case 0x40:  // Division
                                 initial = ReadMemoryRegister(operandStart);
@@ -602,6 +664,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -612,6 +676,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -707,6 +772,7 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
 
+#if EXTENSION_SET_SIGNED
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -717,6 +783,7 @@ namespace AssEmbly
                                 }
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+#endif
                                 break;
                             case 0x60:  // Bitwise
                                 initial = ReadMemoryRegister(operandStart);
@@ -784,7 +851,6 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if (result == 0)
                                 {
@@ -795,6 +861,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -803,6 +872,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
                                 break;
                             case 0x70:  // Test
                                 initial = ReadMemoryRegister(operandStart);
@@ -856,6 +926,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                     }
 
+#if EXTENSION_SET_SIGNED
                                     initialSign = initial & SignBit;
                                     resultSign = result & SignBit;
                                     if (initialSign != (mathend & SignBit) && initialSign != resultSign)
@@ -866,13 +937,17 @@ namespace AssEmbly
                                     {
                                         Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
                                     }
+#endif
                                 }
                                 else
                                 {
                                     result = initial & mathend;
+#if EXTENSION_SET_SIGNED
                                     resultSign = result & SignBit;
+#endif
                                 }
 
+#if EXTENSION_SET_SIGNED
                                 if (resultSign != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -881,6 +956,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -1071,10 +1147,12 @@ namespace AssEmbly
                                     case 0x0:  // CAL adr
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
@@ -1082,10 +1160,12 @@ namespace AssEmbly
                                     case 0x1:  // CAL ptr
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
@@ -1094,10 +1174,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
@@ -1106,10 +1188,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryQWord(operandStart + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 16);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
@@ -1118,10 +1202,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryPointedQWord(operandStart + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 16);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
@@ -1130,10 +1216,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryRegisterPointedQWord(operandStart + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
@@ -1142,10 +1230,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 2);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
@@ -1154,10 +1244,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryQWord(operandStart + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
@@ -1166,10 +1258,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryPointedQWord(operandStart + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
@@ -1178,10 +1272,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rfp] = ReadMemoryRegisterPointedQWord(operandStart + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 2);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
+#if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
                                         {
                                             WriteMemoryQWord(Registers[(int)Register.rso] - 24, Registers[(int)Register.rso]);
                                         }
+#endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
                                         Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
@@ -1499,7 +1595,11 @@ namespace AssEmbly
                                                     }
                                                 }
                                             }
+#if EXTENSION_SET_TERMINAL
                                             if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.AutoEcho) != 0)
+#else
+                                            if (AutoEcho)
+#endif
                                             {
                                                 // Echo byte to console
                                                 stdout.WriteByte(currentByte);
@@ -1533,6 +1633,7 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Base, opcodeHigh));
                         }
                         break;
+#if EXTENSION_SET_SIGNED
                     case 0x01:  // Signed extension set
                         switch (opcodeHigh)
                         {
@@ -2103,6 +2204,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Signed, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_FLOATING_POINT
                     case 0x2:  // Floating point extension set
                         switch (opcodeHigh)
                         {
@@ -2133,8 +2236,6 @@ namespace AssEmbly
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (floatingResult < floatingInitial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -2144,6 +2245,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2152,6 +2256,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2189,8 +2294,6 @@ namespace AssEmbly
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (floatingResult > floatingInitial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -2200,6 +2303,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2208,6 +2314,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2245,8 +2352,6 @@ namespace AssEmbly
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (floatingResult < floatingInitial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -2256,6 +2361,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2264,6 +2372,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2345,6 +2454,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2355,6 +2466,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2416,6 +2528,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2426,6 +2540,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2463,8 +2578,6 @@ namespace AssEmbly
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (floatingResult < floatingInitial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -2474,6 +2587,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2482,6 +2598,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2519,8 +2636,6 @@ namespace AssEmbly
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
 
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
-
                                 if (floatingResult > floatingInitial)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Carry;
@@ -2530,6 +2645,9 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2538,6 +2656,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2624,6 +2743,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2634,6 +2755,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -2659,6 +2781,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2669,6 +2793,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2698,6 +2823,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2708,6 +2835,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2746,6 +2874,8 @@ namespace AssEmbly
                                 WriteMemoryRegister(operandStart, result);
 
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
+
+#if EXTENSION_SET_SIGNED
                                 Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if ((result & SignBit) != 0)
@@ -2756,6 +2886,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (result == 0)
                                 {
@@ -2790,9 +2921,6 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Comparison, opcodeLow));
                                 }
                                 floatingResult = floatingInitial - floatingMathend;
-                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
-
-                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
 
                                 if (floatingInitial < floatingMathend)
                                 {
@@ -2803,6 +2931,11 @@ namespace AssEmbly
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Carry;
                                 }
 
+#if EXTENSION_SET_SIGNED
+                                result = BitConverter.DoubleToUInt64Bits(floatingResult);
+
+                                Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Overflow;
+
                                 if ((result & SignBit) != 0)
                                 {
                                     Registers[(int)Register.rsf] |= (ulong)StatusFlags.Sign;
@@ -2811,6 +2944,7 @@ namespace AssEmbly
                                 {
                                     Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Sign;
                                 }
+#endif
 
                                 if (floatingResult == 0)
                                 {
@@ -2825,6 +2959,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FloatingPoint, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_EXTENDED_BASE
                     case 0x3:  // Extended base set
                         switch (opcodeHigh)
                         {
@@ -2894,6 +3030,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Extended, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_EXTERNAL_ASM
                     case 0x4:  // External Assembly Extension Set
                         switch (opcodeHigh)
                         {
@@ -3177,6 +3315,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_External, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_HEAP_ALLOCATE
                     case 0x5:  // Memory Allocation Extension Set
                         switch (opcodeHigh)
                         {
@@ -3343,6 +3483,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_FILE_SYSTEM
                     case 0x6:  // File System Extension Set
                         switch (opcodeHigh)
                         {
@@ -3614,6 +3756,8 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FileSystem, opcodeHigh));
                         }
                         break;
+#endif
+#if EXTENSION_SET_TERMINAL
                     case 0x7:  // Terminal Extension Set
                         switch (opcodeHigh)
                         {
@@ -3758,9 +3902,11 @@ namespace AssEmbly
                                 throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Terminal, opcodeHigh));
                         }
                         break;
-                    default:
+#endif
+                            default:
                         throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
                 }
+#if EXTENSION_SET_HEAP_ALLOCATE
                 ulong newSO = Registers[(int)Register.rso];
                 if (MapStack && newSO != oldSO)
                 {
@@ -3775,10 +3921,12 @@ namespace AssEmbly
                         throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
                     }
                 }
+#endif
             } while (runUntilHalt && !halt);
             return halt;
         }
 
+#if EXTENSION_SET_EXTERNAL_ASM
         private static Assembly? ExtLoadContext_Resolving(AssemblyLoadContext loadContext, AssemblyName assemblyName)
         {
             try
@@ -3794,7 +3942,9 @@ namespace AssEmbly
                 return null;
             }
         }
+#endif
 
+#if EXTENSION_SET_HEAP_ALLOCATE
         /// <summary>
         /// Allocate a block of memory with a given size into the processor memory map.
         /// </summary>
@@ -3906,6 +4056,7 @@ namespace AssEmbly
             }
             return false;
         }
+#endif
 
         /// <summary>
         /// Read a word (16 bit, 2 byte, unsigned, integer) from the given memory offset.
