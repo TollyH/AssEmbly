@@ -15282,7 +15282,7 @@ namespace AssEmbly.Test.ProcessorTests
 
             testProcessor = new(2046);
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x10, 0x28, 2, 0, 0, 0, 0, 0, 0 });
-            Encoding.UTF8.GetBytes("New Dir\\Dir1\\Directory 2\0").CopyTo(testProcessor.Memory, 552);
+            Encoding.UTF8.GetBytes("New Dir/Dir1/Directory 2\0").CopyTo(testProcessor.Memory, 552);
             _ = testProcessor.Execute(false);
             Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
             Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
@@ -15319,7 +15319,7 @@ namespace AssEmbly.Test.ProcessorTests
             testProcessor = new(2046);
             testProcessor.Registers[(int)Register.rg7] = 552;
             testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x11, (int)Register.rg7 });
-            Encoding.UTF8.GetBytes("New Dir\\Dir1\\Directory 2\0").CopyTo(testProcessor.Memory, 552);
+            Encoding.UTF8.GetBytes("New Dir/Dir1/Directory 2\0").CopyTo(testProcessor.Memory, 552);
             _ = testProcessor.Execute(false);
             Assert.IsTrue(Directory.Exists(targetDirectory), "Instruction did not create directory");
             Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
