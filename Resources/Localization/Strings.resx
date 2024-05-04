@@ -151,6 +151,7 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
     --compress - Apply GZip compression to the resulting executable.
     --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports. Be aware that the expanded source file will not produce functionally identical output to the original, and may not even be a valid assemble-able program.
+    --full-base-opcodes - Disable single-byte opcodes, therefore making all instructions in the base instruction set assemble to full three-byte opcodes.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
     --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
     --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.

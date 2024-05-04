@@ -98,6 +98,7 @@ namespace AssEmbly
             bool enableObsoleteDirectives = false;
             bool enableVariableExpansion = true;
             bool enableEscapeSequences = true;
+            bool forceFullOpcodes = false;
             int macroExpansionLimit = GetMacroLimit(args);
             int whileRepeatLimit = GetWhileLimit(args);
             foreach (string a in args)
@@ -173,6 +174,10 @@ namespace AssEmbly
                 {
                     enableEscapeSequences = false;
                 }
+                else if (a.Equals("--full-base-opcodes", StringComparison.OrdinalIgnoreCase))
+                {
+                    forceFullOpcodes = true;
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -199,6 +204,7 @@ namespace AssEmbly
                 assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
                 assembler.EnableVariableExpansion = enableVariableExpansion;
                 assembler.EnableEscapeSequences = enableEscapeSequences;
+                assembler.ForceFullOpcodes = forceFullOpcodes;
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);

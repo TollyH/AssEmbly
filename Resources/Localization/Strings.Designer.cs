@@ -3829,7 +3829,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to {0:X} is not a recognised file system extension set file time set low opcode.
         /// </summary>
         internal static string Processor_Error_Opcode_Low_FileSystem_TimeSet {
             get {

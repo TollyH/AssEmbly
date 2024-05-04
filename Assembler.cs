@@ -79,6 +79,8 @@ namespace AssEmbly
         // <= 1.1.0
         public bool EnableEscapeSequences { get; set; } = true;
 
+        public bool ForceFullOpcodes { get; set; } = false;
+
         // Lines that start with anything in this HashSet followed by a space when trimmed are not subject to single-line macro expansion,
         // assembler variable insertion, or operand syntax validation
         private static readonly HashSet<string> automaticMacroExcludedMnemonics = new(StringComparer.OrdinalIgnoreCase) { "%DELMACRO", "%MACRO", "MAC" };
@@ -487,7 +489,8 @@ namespace AssEmbly
                     }
 
                     (byte[] newBytes, List<(string LabelName, ulong AddressOffset)> newLabels) =
-                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures, EnableObsoleteDirectives);
+                        AssembleStatement(mnemonic, operands, out AAPFeatures newFeatures,
+                            EnableObsoleteDirectives, ForceFullOpcodes);
 
                     foreach ((string label, ulong relativeOffset) in newLabels)
                     {
@@ -556,7 +559,7 @@ namespace AssEmbly
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
-            out AAPFeatures usedExtensions, bool enableObsoleteDirectives = false)
+            out AAPFeatures usedExtensions, bool enableObsoleteDirectives = false, bool forceFullOpcode = false)
         {
             OperandType[] operandTypes = new OperandType[operands.Length];
             List<byte> operandBytes = new();
@@ -624,7 +627,7 @@ namespace AssEmbly
             operandBytes.Insert(0, opcode.InstructionCode);
             // Base instruction set only needs to be referenced by instruction code,
             // all others need to be in full form (0xFF, {ExtensionSet}, {InstructionCode})
-            if (opcode.ExtensionSet != 0x00)
+            if (opcode.ExtensionSet != 0x00 || forceFullOpcode)
             {
                 opcodeSize = 3;
                 operandBytes.Insert(0, opcode.ExtensionSet);
@@ -651,9 +654,9 @@ namespace AssEmbly
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
-            bool enableObsoleteDirectives = false)
+            bool enableObsoleteDirectives = false, bool forceFullOpcode = false)
         {
-            return AssembleStatement(mnemonic, operands, out _, enableObsoleteDirectives);
+            return AssembleStatement(mnemonic, operands, out _, enableObsoleteDirectives, forceFullOpcode);
         }
 
         /// <summary>
