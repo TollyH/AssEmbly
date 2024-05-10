@@ -1995,9 +1995,9 @@ namespace AssEmbly
 
         private void SetFileMacros()
         {
-            SetSingleLineMacro("#FILE_PATH", $"\"{EscapeStringCharacters(currentFilePosition.File)}\"");
-            SetSingleLineMacro("#FILE_NAME", $"\"{EscapeStringCharacters(Path.GetFileName(currentFilePosition.File))}\"");
-            SetSingleLineMacro("#FOLDER_PATH", $"\"{EscapeStringCharacters(Path.GetDirectoryName(currentFilePosition.File) ?? "")}\"");
+            SetSingleLineMacro("#FILE_PATH", EscapeStringCharacters(currentFilePosition.File));
+            SetSingleLineMacro("#FILE_NAME", EscapeStringCharacters(Path.GetFileName(currentFilePosition.File)));
+            SetSingleLineMacro("#FOLDER_PATH", EscapeStringCharacters(Path.GetDirectoryName(currentFilePosition.File) ?? ""));
         }
 
         /// <summary>
