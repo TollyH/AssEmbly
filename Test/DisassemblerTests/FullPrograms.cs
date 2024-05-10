@@ -12,7 +12,7 @@
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.asm"), program,
                 "The disassembly process produced unexpected output");
 
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(program.Split('\n'));
             AssemblyResult result = asm.GetAssemblyResult(true);
 
@@ -29,7 +29,7 @@
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.NoStrings.asm"), program,
                 "The disassembly process produced unexpected output");
 
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(program.Split('\n'));
             AssemblyResult result = asm.GetAssemblyResult(true);
 
@@ -46,7 +46,7 @@
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.NoPads.asm"), program,
                 "The disassembly process produced unexpected output");
 
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(program.Split('\n'));
             AssemblyResult result = asm.GetAssemblyResult(true);
 

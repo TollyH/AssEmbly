@@ -72,7 +72,11 @@ namespace AssEmbly
         // This limit is per program, not per loop
         public int WhileRepeatLimit { get; set; } = DefaultWhileRepeatLimit;
 
+        public string BaseFilePath { get; }
+
         // Backwards compatibility
+        // <= 3.2.0
+        public bool EnableFilePathMacros { get; set; } = true;
         // <= 3.1.0
         public bool EnableObsoleteDirectives { get; set; } = false;
         public bool EnableVariableExpansion { get; set; } = true;
@@ -94,7 +98,7 @@ namespace AssEmbly
         // Map of label names to final memory addresses
         private readonly Dictionary<string, ulong> labels = new();
         // Map of label names that link to another label name, along with the file and line the link was made on
-        private readonly Dictionary<string, (string Target, string? FilePath, int Line)> labelLinks = new();
+        private readonly Dictionary<string, (string Target, string FilePath, int Line)> labelLinks = new();
         // List of references to labels by name along with the address to insert the relevant address in to.
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
         private readonly List<(string LabelName, ulong Address, AssemblyPosition Position)> labelReferences = new();
@@ -116,6 +120,7 @@ namespace AssEmbly
         private readonly Stack<ImportStackFrame> importStack = new();
         private ImportStackFrame? currentImport = null;
         private int baseFileLine = 0;
+        private int baseFileLineTotal = 0;
         private FilePosition currentFilePosition = new();
 
         // When %REPEAT is used, the current position of the assembler is cloned and added to this stack
@@ -166,6 +171,10 @@ namespace AssEmbly
         // Files that begin with an %ASM_ONCE directive (i.e. won't throw a circular import error)
         private readonly HashSet<string> completeAsmOnceFiles = new();
 
+        /// <param name="baseFilePath">
+        /// The path to the file being assembled.
+        /// This is used only for presentation to the user, it need not be accurate or even valid.
+        /// </param>
         /// <param name="usingV1Format">
         /// Whether or not a v1 executable will be generated from this assembly.
         /// </param>
@@ -175,9 +184,11 @@ namespace AssEmbly
         /// <param name="disabledNonFatalErrors">A set of non-fatal error codes to disable.</param>
         /// <param name="disabledWarnings">A set of warning codes to disable.</param>
         /// <param name="disabledSuggestions">A set of suggestion codes to disable.</param>
-        public Assembler(bool usingV1Format, bool usingV1Stack,
+        public Assembler(string baseFilePath, bool usingV1Format, bool usingV1Stack,
             IEnumerable<int> disabledNonFatalErrors, IEnumerable<int> disabledWarnings, IEnumerable<int> disabledSuggestions)
         {
+            BaseFilePath = baseFilePath;
+
             warningGenerator = new AssemblerWarnings(usingV1Format);
             warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
             warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
@@ -259,7 +270,7 @@ namespace AssEmbly
             InitializeStateDirectives(out stateDirectives, out obsoleteStateDirectives);
         }
 
-        public Assembler() : this(false, false,
+        public Assembler(string baseFilePath) : this(baseFilePath, false, false,
             Enumerable.Empty<int>(), Enumerable.Empty<int>(), Enumerable.Empty<int>()) { }
 
         /// <returns>
@@ -317,7 +328,7 @@ namespace AssEmbly
         /// <summary>
         /// Create or update an assembler variable with the given name to the specified value.
         /// </summary>
-        /// <remarks>This method will perform validation the name of the assembler variable.</remarks>
+        /// <remarks>This method will perform validation on the name of the assembler variable.</remarks>
         /// <exception cref="SyntaxError">Thrown if the given name is invalid.</exception>
         public void SetAssemblerVariable(string name, ulong value)
         {
@@ -334,6 +345,46 @@ namespace AssEmbly
             }
 
             assemblerVariables[name] = value;
+        }
+
+        /// <summary>
+        /// Create or update a single-line assembler macro where the given name will be replaced by the given replacement text.
+        /// </summary>
+        /// <remarks>
+        /// This method will perform validation on the name of the macro and remove a multi-line macro with the same name if it exists.
+        /// </remarks>
+        /// <exception cref="SyntaxError">Thrown if the given name is invalid.</exception>
+        public void SetSingleLineMacro(string name, string replacement)
+        {
+            ValidateMacroName(name);
+
+            singleLineMacros[name] = replacement;
+            singleLineMacroNames.Add(name);
+            singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).Distinct().ToList();
+            if (multiLineMacros.Remove(name))
+            {
+                _ = multiLineMacroNames.Remove(name);
+            }
+        }
+
+        /// <summary>
+        /// Create or update a multi-line assembler macro where the given name will cause the insertion of the given replacement lines.
+        /// </summary>
+        /// <remarks>
+        /// This method will perform validation on the name of the macro and remove a single-line macro with the same name if it exists.
+        /// </remarks>
+        /// <exception cref="SyntaxError">Thrown if the given name is invalid.</exception>
+        public void SetMultiLineMacro(string name, string[] replacement)
+        {
+            ValidateMacroName(name);
+
+            multiLineMacros[name] = replacement;
+            multiLineMacroNames.Add(name);
+            multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).Distinct().ToList();
+            if (singleLineMacros.Remove(name))
+            {
+                _ = singleLineMacroNames.Remove(name);
+            }
         }
 
         /// <summary>
@@ -404,7 +455,13 @@ namespace AssEmbly
 
             importStack.Clear();
             baseFileLine = 1;
-            currentFilePosition = new FilePosition(1, "");
+            baseFileLineTotal = newLines.Count;
+            currentFilePosition = new FilePosition(1, BaseFilePath);
+
+            if (EnableFilePathMacros)
+            {
+                SetFileMacros();
+            }
 
             lineIndex = 0;
             do
@@ -1295,15 +1352,24 @@ namespace AssEmbly
             return formattedContent.ToString();
         }
 
+        /// <summary>
+        /// Convert raw text to its equivalent form as an AssEmbly string literal.
+        /// </summary>
+        /// <remarks>Neither the input nor the output to this function have surrounding quote marks.</remarks>
+        public static string EscapeStringCharacters(string unescaped)
+        {
+            return unescaped.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("@", "\\@");
+        }
+
         private void ResolveLabelReferences()
         {
-            foreach ((string labelLink, (string labelTarget, string? filePath, int line)) in labelLinks)
+            foreach ((string labelLink, (string labelTarget, string filePath, int line)) in labelLinks)
             {
                 if (!labels.TryGetValue(labelTarget, out ulong targetOffset))
                 {
                     LabelNameException exc = new(
-                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelTarget), line, filePath ?? "");
-                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath ?? Strings.Generic_Base_File, exc.Message);
+                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelTarget), line, filePath);
+                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath, exc.Message);
                     throw exc;
                 }
                 labels[labelLink] = targetOffset;
@@ -1411,7 +1477,12 @@ namespace AssEmbly
 
             currentFilePosition = new FilePosition(
                 currentImport?.CurrentLine ?? baseFileLine,
-                currentImport?.ImportPath ?? string.Empty);
+                currentImport?.ImportPath ?? BaseFilePath);
+
+            if (EnableFilePathMacros)
+            {
+                SetFileMacros();
+            }
 
             return lineIndex < dynamicLines.Count;
         }
@@ -1450,7 +1521,7 @@ namespace AssEmbly
 
             currentFilePosition = new FilePosition(
                 currentImport?.CurrentLine ?? baseFileLine,
-                currentImport?.ImportPath ?? string.Empty);
+                currentImport?.ImportPath ?? BaseFilePath);
         }
 
         private string ExpandSingleLineMacros(string text)
@@ -1707,18 +1778,19 @@ namespace AssEmbly
 
             if (currentImport is null)
             {
-                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message_Base_File, baseFileLine, rawLine, e.Message);
+                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message, baseFileLine, BaseFilePath, rawLine);
+                e.ConsoleMessage += '\n' + e.Message;
             }
             else
             {
-                string newMessage = string.Format(Strings.Assembler_Error_Message_Imported, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
+                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
                 _ = importStack.Pop();  // Remove already printed frame from stack
                 while (importStack.TryPop(out ImportStackFrame? nestedImport))
                 {
-                    newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Import, nestedImport.CurrentLine, nestedImport.ImportPath);
+                    e.ConsoleMessage += string.Format(Strings.Assembler_Error_Message_Imported, nestedImport.CurrentLine, nestedImport.ImportPath);
                 }
-                newMessage += string.Format(Strings.Assembler_Error_Message_Imported_Base, baseFileLine, e.Message);
-                e.ConsoleMessage = newMessage;
+                e.ConsoleMessage += string.Format(Strings.Assembler_Error_Message_Imported, baseFileLine, BaseFilePath);
+                e.ConsoleMessage += '\n' + e.Message;
             }
 
             if (currentMacro is not null)
@@ -1921,6 +1993,13 @@ namespace AssEmbly
             };
         }
 
+        private void SetFileMacros()
+        {
+            SetSingleLineMacro("#FILE_PATH", $"\"{EscapeStringCharacters(currentFilePosition.File)}\"");
+            SetSingleLineMacro("#FILE_NAME", $"\"{EscapeStringCharacters(Path.GetFileName(currentFilePosition.File))}\"");
+            SetSingleLineMacro("#FOLDER_PATH", $"\"{EscapeStringCharacters(Path.GetDirectoryName(currentFilePosition.File) ?? "")}\"");
+        }
+
         /// <summary>
         /// Determine if a given statement is a known data insertion assembler directive and process it if it is.
         /// </summary>
@@ -1978,6 +2057,19 @@ namespace AssEmbly
             if (operand is "0x" or "0b")
             {
                 throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
+            }
+        }
+
+        private static void ValidateMacroName(string name)
+        {
+            int index;
+            if ((index = name.IndexOf('(')) != -1)
+            {
+                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, name, new string(' ', index)));
+            }
+            if ((index = name.IndexOf(')')) != -1)
+            {
+                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, name, new string(' ', index)));
             }
         }
     }

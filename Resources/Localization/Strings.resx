@@ -157,6 +157,7 @@ assemble - Take a source file written in AssEmbly and assemble it in to an execu
     --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
     --disable-variables - Disable the expansion of assembler variables to ensure compatibility with pre-3.2.0 strings containing '@' signs.
     --disable-escapes - Disable the use of escape sequences in strings; treat backslashes as literal characters instead. Ensures compatibility with pre-1.1.0 strings.
+    --disable-file-macros - Prevent macros with the names #FILE_PATH, #FILE_NAME, and #FOLDER_PATH from being automatically defined.
 
 execute - Execute an already assembled executable file
     Usage: 'AssEmbly execute &lt;file-path&gt; [options]'
@@ -177,6 +178,7 @@ run - Assemble then execute a source file written in AssEmbly. The assembled pro
     --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
     --disable-variables - Disable the expansion of assembler variables to ensure compatibility with pre-3.2.0 strings containing '@' signs.
     --disable-escapes - Disable the use of escape sequences in strings; treat backslashes as literal characters instead. Ensures compatibility with pre-1.1.0 strings.
+    --disable-file-macros - Prevent macros with the names #FILE_PATH, #FILE_NAME, and #FOLDER_PATH from being automatically defined.
     --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
     --auto-echo - Automatically write inputted characters back to the console.
 
@@ -717,24 +719,13 @@ return - Continue to the next return instruction in this subroutine or higher</v
     <data name="Assembler_Error_ANALYZER_Operand_Third" xml:space="preserve">
         <value>The third operand to the %ANALYZER directive must be one of '0', '1', or 'r'.</value>
     </data>
-    <data name="Assembler_Error_Message_Base_File" xml:space="preserve">
-        <value>Error on line {0} in base file
-    "{1}"
-{2}</value>
-    </data>
-    <data name="Assembler_Error_Message_Imported" xml:space="preserve">
+    <data name="Assembler_Error_Message" xml:space="preserve">
         <value>Error on line {0} in "{1}"
     "{2}"</value>
     </data>
-    <data name="Assembler_Error_Message_Imported_Import" xml:space="preserve">
+    <data name="Assembler_Error_Message_Imported" xml:space="preserve">
         <value>
 Imported on line {0} of "{1}"</value>
-    </data>
-    <data name="Assembler_Error_Message_Imported_Base" xml:space="preserve">
-        <value>
-Imported on line {0} of base file
-
-{1}</value>
     </data>
     <data name="Assembler_Error_Label_Not_Exists" xml:space="preserve">
         <value>A label with the name "{0}" does not exist, but a reference was made to it. Have you missed a definition?</value>
@@ -865,9 +856,6 @@ Did you forget a '0x' prefix before a hexadecimal number or put a digit other th
     </data>
     <data name="Assembler_Error_String_Followed_Internal" xml:space="preserve">
         <value>String literal contains characters after closing quote mark.</value>
-    </data>
-    <data name="Generic_Base_File" xml:space="preserve">
-        <value>base file</value>
     </data>
     <data name="Debugger_Command_Prompt" xml:space="preserve">
         <value>
@@ -1213,9 +1201,6 @@ Current import stack (deepest file first):</value>
     </data>
     <data name="Assembler_Debug_Directive_Import_Stack_Line" xml:space="preserve">
         <value>    {0} at line {1}/{2}</value>
-    </data>
-    <data name="Assembler_Debug_Directive_Import_Stack_Base" xml:space="preserve">
-        <value>    Base file at line {0}</value>
     </data>
     <data name="Assembler_Debug_Directive_Current_Extensions" xml:space="preserve">
         <value>

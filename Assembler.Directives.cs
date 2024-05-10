@@ -124,39 +124,15 @@ namespace AssEmbly
                 throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
             }
 
-            string newMacroName = operands[0];
-            int index;
-            if ((index = newMacroName.IndexOf('(')) != -1)
-            {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, newMacroName, new string(' ', index)));
-            }
-            if ((index = newMacroName.IndexOf(')')) != -1)
-            {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, newMacroName, new string(' ', index)));
-            }
-
             if (operands.Length == 2)
             {
                 // Single-line macro
-                singleLineMacros[newMacroName] = operands[1];
-                singleLineMacroNames.Add(newMacroName);
-                singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).ToList();
-                if (multiLineMacros.Remove(newMacroName))
-                {
-                    _ = multiLineMacroNames.Remove(newMacroName);
-                }
+                SetSingleLineMacro(operands[0], operands[1]);
             }
             else if (operands.Length == 1)
             {
                 // Multi-line macro (must be terminated with %ENDMACRO)
-                string[] replacement = GoToNextClosingDirective("%ENDMACRO", true);
-                multiLineMacros[newMacroName] = replacement.ToArray();
-                multiLineMacroNames.Add(newMacroName);
-                multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).ToList();
-                if (singleLineMacros.Remove(newMacroName))
-                {
-                    _ = singleLineMacroNames.Remove(newMacroName);
-                }
+                SetMultiLineMacro(operands[0], GoToNextClosingDirective("%ENDMACRO", true));
             }
         }
 
@@ -209,11 +185,11 @@ namespace AssEmbly
                         throw new LabelNameException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
                     }
                     // If the target label is already a link, store link to the actual target instead of chaining links
-                    while (labelLinks.TryGetValue(linkedName, out (string Target, string? FilePath, int Line) checkName))
+                    while (labelLinks.TryGetValue(linkedName, out (string Target, string FilePath, int Line) checkName))
                     {
                         linkedName = checkName.Target;
                     }
-                    labelLinks[labelName] = (linkedName, currentImport?.ImportPath, currentImport?.CurrentLine ?? baseFileLine);
+                    labelLinks[labelName] = (linkedName, currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
                 }
             }
             else
@@ -540,7 +516,7 @@ namespace AssEmbly
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
                 currentImport?.CurrentLine ?? baseFileLine,
-                currentImport is null ? Strings.Generic_Base_File : currentImport.ImportPath, program.Count);
+                currentImport?.ImportPath ?? BaseFilePath, program.Count);
             if (macroLineDepth != 0)
             {
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header_Macro_Lines, macroLineDepth);
@@ -561,10 +537,10 @@ namespace AssEmbly
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
             }
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Link_Header, labelLinks.Count);
-            foreach ((string labelName, (string target, string? filePath, int line)) in labelLinks)
+            foreach ((string labelName, (string target, string filePath, int line)) in labelLinks)
             {
                 Console.Error.WriteLine(
-                    Strings.Assembler_Debug_Directive_Label_Link_Line, labelName, target, filePath ?? Strings.Generic_Base_File, line);
+                    Strings.Assembler_Debug_Directive_Label_Link_Line, labelName, target, filePath, line);
             }
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
             foreach ((string labelName, ulong insertOffset, _) in labelReferences)
@@ -599,7 +575,7 @@ namespace AssEmbly
                 }
                 else
                 {
-                    filePath = "base file";
+                    filePath = BaseFilePath;
                     line = startPosition.BaseFileLine;
                 }
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Repeat_Stack_Line, filePath, line, remainingIterations);
@@ -616,7 +592,7 @@ namespace AssEmbly
                 }
                 else
                 {
-                    filePath = "base file";
+                    filePath = BaseFilePath;
                     line = startPosition.BaseFileLine;
                 }
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_While_Stack_Line, filePath, line);
@@ -631,7 +607,7 @@ namespace AssEmbly
             {
                 Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Base, baseFileLine);
+            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, BaseFilePath, baseFileLine, baseFileLineTotal);
             Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
             Console.ResetColor();
         }

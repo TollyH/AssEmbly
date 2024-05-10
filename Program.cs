@@ -98,6 +98,7 @@ namespace AssEmbly
             bool enableObsoleteDirectives = false;
             bool enableVariableExpansion = true;
             bool enableEscapeSequences = true;
+            bool enableFileMacros = true;
             bool forceFullOpcodes = false;
             int macroExpansionLimit = GetMacroLimit(args);
             int whileRepeatLimit = GetWhileLimit(args);
@@ -178,6 +179,10 @@ namespace AssEmbly
                 {
                     forceFullOpcodes = true;
                 }
+                else if (a.Equals("--disable-file-macros", StringComparison.OrdinalIgnoreCase))
+                {
+                    enableFileMacros = false;
+                }
             }
 
             AssemblyResult assemblyResult;
@@ -186,7 +191,7 @@ namespace AssEmbly
             int totalSuggestions = 0;
             try
             {
-                Assembler assembler = new(
+                Assembler assembler = new(sourcePath,
 #if V1_CALL_STACK_COMPAT
                     useV1Format, useV1Stack,
 #else
@@ -204,6 +209,7 @@ namespace AssEmbly
                 assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
                 assembler.EnableVariableExpansion = enableVariableExpansion;
                 assembler.EnableEscapeSequences = enableEscapeSequences;
+                assembler.EnableFilePathMacros = enableFileMacros;
                 assembler.ForceFullOpcodes = forceFullOpcodes;
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
@@ -261,7 +267,7 @@ namespace AssEmbly
                     }
                     Console.WriteLine(Strings.CLI_Assemble_Error_Warning_Printout,
                         messageStart, warning.Code, warning.Position.Line,
-                        warning.Position.File == "" ? Strings.Generic_Base_File : warning.Position.File,
+                        warning.Position.File,
                         warning.OriginalLine, warning.Message, macroName);
                     Console.ResetColor();
                 }
@@ -400,7 +406,7 @@ namespace AssEmbly
                 int macroExpansionLimit = GetMacroLimit(args);
                 int whileRepeatLimit = GetWhileLimit(args);
 
-                Assembler assembler = new();
+                Assembler assembler = new(sourcePath);
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
@@ -415,6 +421,8 @@ namespace AssEmbly
                     "--disable-variables", StringComparer.OrdinalIgnoreCase);
                 assembler.EnableEscapeSequences = !args.Contains(
                     "--disable-escapes", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableFilePathMacros = !args.Contains(
+                    "--disable-file-macros", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -562,7 +570,7 @@ namespace AssEmbly
                 int macroExpansionLimit = GetMacroLimit(args);
                 int whileRepeatLimit = GetWhileLimit(args);
 
-                Assembler assembler = new();
+                Assembler assembler = new(sourcePath);
                 if (macroExpansionLimit >= 0)
                 {
                     assembler.MacroExpansionLimit = macroExpansionLimit;
@@ -577,6 +585,8 @@ namespace AssEmbly
                     "--disable-variables", StringComparer.OrdinalIgnoreCase);
                 assembler.EnableEscapeSequences = !args.Contains(
                     "--disable-escapes", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableFilePathMacros = !args.Contains(
+                    "--disable-file-macros", StringComparer.OrdinalIgnoreCase);
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);

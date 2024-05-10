@@ -198,13 +198,10 @@ namespace AssEmbly
             if (pendingStringCharacters.Count > 0)
             {
                 string newString = Encoding.ASCII.GetString(CollectionsMarshal.AsSpan(pendingStringCharacters));
-                newString = newString.Replace(@"\", @"\\");
-                newString = newString.Replace("\"", "\\\"");
-                newString = newString.Replace("@", @"\@");
 
                 offsetToLine[offset - (ulong)pendingStringCharacters.Count] = result.Count;
 
-                result.Add($"%DAT \"{newString}\"");
+                result.Add($"%DAT \"{Assembler.EscapeStringCharacters(newString)}\"");
                 pendingStringCharacters.Clear();
             }
         }

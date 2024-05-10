@@ -12,7 +12,7 @@ namespace AssEmbly
             Dictionary<ulong, string> ImportLocations,
             Dictionary<ulong, FilePosition> FileLineMap);
 
-        public static readonly string FormatVersion = "1.0";
+        public static readonly string FormatVersion = "1.1";
 
         public static readonly string Separator = "===============================================================================";
 

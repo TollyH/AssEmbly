@@ -146,15 +146,6 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     Base file at line {0}.
-        /// </summary>
-        internal static string Assembler_Debug_Directive_Import_Stack_Base {
-            get {
-                return ResourceManager.GetString("Assembler_Debug_Directive_Import_Stack_Base", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to 
         ///Current import stack (deepest file first):.
         /// </summary>
@@ -1052,35 +1043,12 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Error on line {0} in base file
-        ///    &quot;{1}&quot;
-        ///{2}.
-        /// </summary>
-        internal static string Assembler_Error_Message_Base_File {
-            get {
-                return ResourceManager.GetString("Assembler_Error_Message_Base_File", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Error on line {0} in &quot;{1}&quot;
         ///    &quot;{2}&quot;.
         /// </summary>
-        internal static string Assembler_Error_Message_Imported {
+        internal static string Assembler_Error_Message {
             get {
-                return ResourceManager.GetString("Assembler_Error_Message_Imported", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 
-        ///Imported on line {0} of base file
-        ///
-        ///{1}.
-        /// </summary>
-        internal static string Assembler_Error_Message_Imported_Base {
-            get {
-                return ResourceManager.GetString("Assembler_Error_Message_Imported_Base", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_Message", resourceCulture);
             }
         }
         
@@ -1088,9 +1056,9 @@ namespace AssEmbly.Resources.Localization {
         ///   Looks up a localized string similar to 
         ///Imported on line {0} of &quot;{1}&quot;.
         /// </summary>
-        internal static string Assembler_Error_Message_Imported_Import {
+        internal static string Assembler_Error_Message_Imported {
             get {
-                return ResourceManager.GetString("Assembler_Error_Message_Imported_Import", resourceCulture);
+                return ResourceManager.GetString("Assembler_Error_Message_Imported", resourceCulture);
             }
         }
         
@@ -3049,15 +3017,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string DebugInfo_Error_Wrong_Version {
             get {
                 return ResourceManager.GetString("DebugInfo_Error_Wrong_Version", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to base file.
-        /// </summary>
-        internal static string Generic_Base_File {
-            get {
-                return ResourceManager.GetString("Generic_Base_File", resourceCulture);
             }
         }
         

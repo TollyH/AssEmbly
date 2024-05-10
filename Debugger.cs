@@ -106,9 +106,7 @@ namespace AssEmbly
                     }
                     if (LoadedDebugInfoFile.Value.FileLineMap.TryGetValue(currentAddress, out FilePosition position))
                     {
-                        Console.WriteLine(Strings.Debugger_Execution_Position,
-                            position.File == "" ? Strings.Generic_Base_File : position.File,
-                            position.Line);
+                        Console.WriteLine(Strings.Debugger_Execution_Position, position.File, position.Line);
                     }
                 }
                 Console.Write(Strings.Debugger_Execution_Preface_Header);

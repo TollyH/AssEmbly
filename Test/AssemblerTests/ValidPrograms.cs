@@ -6,7 +6,7 @@
         [TestMethod]
         public void KitchenSink()
         {
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(File.ReadAllLines("KitchenSink.asm"));
             AssemblyResult result = asm.GetAssemblyResult(true);
 
@@ -29,7 +29,7 @@
                     // Skip files only intended to be imported
                     continue;
                 }
-                Assembler asm = new();
+                Assembler asm = new("");
                 asm.SetAssemblerVariable("RUNNING_UNIT_TESTS", 1);
                 asm.AssembleLines(File.ReadAllLines(asmFile));
                 AssemblyResult result = asm.GetAssemblyResult(true);
@@ -42,7 +42,7 @@
         [TestMethod]
         public void SetEntryPoint()
         {
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(new[] { "%PAD 56", "    :ENTRY" });
             AssemblyResult result = asm.GetAssemblyResult(true);
 
@@ -52,17 +52,17 @@
         [TestMethod]
         public void STOP_Directive()
         {
-            _ = Assert.ThrowsException<AssemblyStoppedException>(() => new Assembler().AssembleLines(new[] { "MVQ rg0, 45", "%STOP", "BAD" }));
+            _ = Assert.ThrowsException<AssemblyStoppedException>(() => new Assembler("").AssembleLines(new[] { "MVQ rg0, 45", "%STOP", "BAD" }));
 
             AssemblyStoppedException exc = Assert.ThrowsException<AssemblyStoppedException>(() =>
-                new Assembler().AssembleLines(new[] { "MVQ rg0, 45", "%STOP \"ABCDEFG\n\nmy message :)\"", "BAD" }));
+                new Assembler("").AssembleLines(new[] { "MVQ rg0, 45", "%STOP \"ABCDEFG\n\nmy message :)\"", "BAD" }));
             Assert.AreEqual("ABCDEFG\n\nmy message :)", exc.Message, "%STOP exception had incorrect message");
         }
 
         [TestMethod]
         public void MESSAGE_Directive()
         {
-            Assembler asm = new();
+            Assembler asm = new("");
             asm.AssembleLines(new[] { "%MESSAGE warning", "%MESSAGE suggestion", "%MESSAGE error" });
             AssemblyResult result = asm.GetAssemblyResult(true);
 
@@ -77,7 +77,7 @@
             Assert.AreEqual(0, result.Warnings[2].Code);
             Assert.AreEqual(WarningSeverity.NonFatalError, result.Warnings[2].Severity);
 
-            asm = new Assembler();
+            asm = new Assembler("");
             asm.AssembleLines(new[] { "%MESSAGE WarNing, \"test warning\"", "%MESSAGE suGGestIon, \"test suggestion\"", "%MESSAGE erroR, \"test error\"" });
             result = asm.GetAssemblyResult(true);
 
@@ -99,7 +99,7 @@
         [TestMethod]
         public void CompatibilityOptions()
         {
-            Assembler asm = new()
+            Assembler asm = new("")
             {
                 EnableObsoleteDirectives = true
             };
@@ -110,7 +110,7 @@
             CollectionAssert.AreEqual(new byte[] { 123, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0 }, result.Program,
                 "Obsolete directives did not produce correct program.");
 
-            asm = new Assembler()
+            asm = new Assembler("")
             {
                 EnableVariableExpansion = false
             };
@@ -119,7 +119,7 @@
             CollectionAssert.AreEqual("Test @VARIABLE_TEST @ test @anotherTest@"u8.ToArray(), result.Program,
                 "Variable was expanded when the feature was disabled.");
 
-            asm = new Assembler()
+            asm = new Assembler("")
             {
                 EnableEscapeSequences = false
             };
