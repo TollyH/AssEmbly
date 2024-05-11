@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,7 @@ namespace AssEmbly
     public readonly record struct AssemblyResult
     (
         byte[] Program,
+        ImmutableDictionary<string, ulong> Labels,
         string DebugInfo,
         string[] ExpandedSourceFile,
         Warning[] Warnings,
@@ -420,7 +422,7 @@ namespace AssEmbly
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports, fileLineMap);
             return new AssemblyResult(
-                programBytes, debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
+                programBytes, labels.ToImmutableDictionary(), debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
                 entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
         }
 
