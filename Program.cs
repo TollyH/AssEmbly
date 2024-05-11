@@ -19,14 +19,14 @@ namespace AssEmbly
 
             args = processedArgs.GetPositionalArguments();
 
-            if (args.Contains("--version", StringComparer.OrdinalIgnoreCase))
+            if (processedArgs.IsOptionGiven('v', "version"))
             {
                 Console.WriteLine(version?.ToString());
                 Console.WriteLine(string.Join('|', Enum.GetValues<AAPFeatures>()
                     .Where(v => v != 0 && ((v & (v - 1)) == 0)).Select(Enum.GetName).Where(n => n != "All").Distinct()));
                 return;
             }
-            if (!args.Contains("--no-header", StringComparer.OrdinalIgnoreCase))
+            if (!processedArgs.IsOptionGiven('n', "no-header"))
             {
                 // Write to stderr to prevent header being included in redirected stdout streams
                 Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build}-{(ulong)AAPFeatures.All:X}" +
@@ -71,10 +71,10 @@ namespace AssEmbly
                     PerformLintingAssembly(processedArgs);
                     break;
                 case "help":
-                    DisplayHelp();
+                    DisplayHelp(processedArgs);
                     break;
                 case "license":
-                    DisplayLicense();
+                    DisplayLicense(processedArgs);
                     break;
                 default:
                     Console.ForegroundColor = ConsoleColor.Red;
@@ -402,9 +402,9 @@ namespace AssEmbly
                 !args.IsOptionGiven('u', "unmapped-stack"),
                 args.IsOptionGiven('a', "auto-echo"));
 
-            ExecuteProcessor(processor);
-
             args.WarnUnconsumedOptions(2);
+
+            ExecuteProcessor(processor);
         }
 
         private static void AssembleAndExecute(CommandLineArgs args)
@@ -464,9 +464,10 @@ namespace AssEmbly
                 mapStack: !args.IsOptionGiven('u', "unmapped-stack"),
                 autoEcho: args.IsOptionGiven('a', "auto-echo"));
             LoadProgramIntoProcessor(processor, assemblyResult.Program);
-            ExecuteProcessor(processor);
 
             args.WarnUnconsumedOptions(2);
+
+            ExecuteProcessor(processor);
         }
 
         private static void RunDebugger(CommandLineArgs args)
@@ -498,9 +499,10 @@ namespace AssEmbly
                 string debugFilePath = positionalArgs[2];
                 debugger.LoadDebugFile(debugFilePath);
             }
-            debugger.StartDebugger();
 
             args.WarnUnconsumedOptions(3);
+
+            debugger.StartDebugger();
         }
 
         private static void PerformDisassembly(CommandLineArgs args)
@@ -565,6 +567,9 @@ namespace AssEmbly
                 autoEcho: args.IsOptionGiven('a', "auto-echo"));
             // Some program needs to be loaded or the processor won't run
             debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
+
+            args.WarnUnconsumedOptions(1);
+
             debugger.StartDebugger();
         }
 
@@ -630,13 +635,15 @@ namespace AssEmbly
             }
         }
 
-        private static void DisplayHelp()
+        private static void DisplayHelp(CommandLineArgs args)
         {
             Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize,
                 Assembler.DefaultMacroExpansionLimit, Assembler.DefaultWhileRepeatLimit);
+
+            args.WarnUnconsumedOptions(1);
         }
 
-        private static void DisplayLicense()
+        private static void DisplayLicense(CommandLineArgs args)
         {
             try
             {
@@ -654,6 +661,8 @@ namespace AssEmbly
                     ?? throw new NullReferenceException("Resource stream with name 'LICENSE' was missing");
                 using StreamReader resourceReader = new(resourceStream);
                 Console.WriteLine(resourceReader.ReadToEnd(), DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
+
+                args.WarnUnconsumedOptions(1);
             }
             catch
             {
