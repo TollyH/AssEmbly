@@ -148,7 +148,7 @@ A parameter with just two dashes (--) can be given to treat all subsequent param
 Operations:
 assemble - Take a source file written in AssEmbly and assemble it in to an executable file
     Usage: 'AssEmbly assemble &lt;file-path&gt; [destination-path] [options]'
-    -d, --no-debug-file - Do not generate a debug information file with the executable.
+    -D, --no-debug-file - Do not generate a debug information file with the executable.
     -E|W|S, --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
     --disabled-errors|warnings|suggestions=xxxx,xxxx - Disable one or more specific messages with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled. Formatted as a comma-separated list of message codes.
     --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.

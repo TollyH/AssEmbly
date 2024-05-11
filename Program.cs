@@ -308,7 +308,7 @@ namespace AssEmbly
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
-            if (!args.IsOptionGiven('d', "no-debug-file"))
+            if (!args.IsOptionGiven('D', "no-debug-file"))
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
