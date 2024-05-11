@@ -374,6 +374,9 @@ FodyWeavers.xsd
 # Decompiled AssEmbly files
 *.dis.asm
 
+# Expanded AssEmbly source files
+*.exp.asm
+
 # AssEmbly symbol files
 *.sym.asm
 
