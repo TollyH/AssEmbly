@@ -2326,14 +2326,13 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Usage: &apos;AssEmbly &lt;operation&gt; &lt;required-parameters (if any)&gt; [optional-parameters]&apos;
-        ///Any command can take the &apos;--no-header&apos; optional parameter to disable the copyright printout.
-        ///Using the &apos;--version&apos; optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
+        ///   Looks up a localized string similar to Usage: &apos;AssEmbly &lt;operation&gt; [parameters]&apos;
+        ///Any command can take the &apos;--no-header&apos; or &apos;-n&apos; optional parameter to disable the copyright printout.
+        ///Using the &apos;--version&apos; or &apos;-v&apos; optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
         ///
-        ///Operations:
-        ///assemble - Take a source file written in AssEmbly and assemble it in to an executable file
-        ///    Usage: &apos;AssEmbly assemble &lt;file-path&gt; [destination-path] [options]&apos;
-        ///    --no-debug-file - [rest of string was truncated]&quot;;.
+        ///Single-character parameter options are denoted with a single dash and are case-sensitive.
+        ///Multi-character parameter options are denoted with a double dash and are case-insensitive.
+        ///Single-character parameter options can b [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CLI_Help_Body {
             get {
@@ -2403,6 +2402,78 @@ namespace AssEmbly.Resources.Localization {
         internal static string CLI_Warning_Processor_Exit_Region_Mapped {
             get {
                 return ResourceManager.GetString("CLI_Warning_Processor_Exit_Region_Mapped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A key/value argument with the name {0} already exists. The value has not been updated..
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Exists_KeyValue {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Exists_KeyValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The multi-character argument --{0} is given multiple times..
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Exists_MultiCharacter {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Exists_MultiCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The single-character argument -{0} is given multiple times..
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Exists_SingleCharacter {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Exists_SingleCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognised key/value option: --{0}.
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Unconsumed_KeyValue {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Unconsumed_KeyValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognised multi-character option: --{0}.
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Unconsumed_MultiCharacter {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Unconsumed_MultiCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} more positional arguments were given than were expected and have been ignored..
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Unconsumed_Positional_Multiple {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Unconsumed_Positional_Multiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} more positional argument was given than was expected and has been ignored..
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Unconsumed_Positional_Single {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Unconsumed_Positional_Single", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unrecognised single-character option: -{0}.
+        /// </summary>
+        internal static string CommandLineArgs_Warning_Unconsumed_SingleCharacter {
+            get {
+                return ResourceManager.GetString("CommandLineArgs_Warning_Unconsumed_SingleCharacter", resourceCulture);
             }
         }
         

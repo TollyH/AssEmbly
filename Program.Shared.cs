@@ -1,4 +1,5 @@
-﻿using AssEmbly.Resources.Localization;
+﻿using System.ComponentModel;
+using AssEmbly.Resources.Localization;
 
 namespace AssEmbly
 {
@@ -93,8 +94,7 @@ namespace AssEmbly
             }
         }
 
-        [System.ComponentModel.Localizable(true)]
-        public static bool CheckInputFileArg(string[] args, string missingMessage)
+        public static bool CheckInputFileArg(string[] args, [Localizable(true)] string missingMessage)
         {
             if (args.Length < 2)
             {
@@ -124,98 +124,82 @@ namespace AssEmbly
             return (argPath, filename);
         }
 
-        public static ulong GetMemorySize(string[] args)
+        public static ulong GetMemorySize(CommandLineArgs args)
         {
-            foreach (string a in args)
+            if (args.TryGetKeyValueOption("mem-size", out string? memSizeString))
             {
-                if (a.StartsWith("--mem-size=", StringComparison.OrdinalIgnoreCase))
+                if (!ulong.TryParse(memSizeString, out ulong memSize))
                 {
-                    string memSizeString = a.Split("=")[1];
-                    if (!ulong.TryParse(memSizeString, out ulong memSize))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return 0;
-                    }
-                    return memSize;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                    return 0;
                 }
+                return memSize;
             }
             return DefaultMemorySize;
         }
 
-        public static int GetMacroLimit(string[] args)
+        public static int GetMacroLimit(CommandLineArgs args)
         {
-            foreach (string a in args)
+            if (args.TryGetKeyValueOption("macro-limit", out string? macroLimitString))
             {
-                if (a.StartsWith("--macro-limit=", StringComparison.OrdinalIgnoreCase))
+                if (!int.TryParse(macroLimitString, out int macroLimit))
                 {
-                    string macroLimitString = a.Split("=")[1];
-                    if (!int.TryParse(macroLimitString, out int macroLimit))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return -1;
-                    }
-                    return macroLimit;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                    return -1;
                 }
+                return macroLimit;
             }
             return -1;
         }
 
-        public static int GetWhileLimit(string[] args)
+        public static int GetWhileLimit(CommandLineArgs args)
         {
-            foreach (string a in args)
+            if (args.TryGetKeyValueOption("while-limit", out string? whileLimitString))
             {
-                if (a.StartsWith("--while-limit=", StringComparison.OrdinalIgnoreCase))
+                if (!int.TryParse(whileLimitString, out int whileLimit))
                 {
-                    string whileLimitString = a.Split("=")[1];
-                    if (!int.TryParse(whileLimitString, out int whileLimit))
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
-                        return -1;
-                    }
-                    return whileLimit;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                    return -1;
                 }
+                return whileLimit;
             }
             return -1;
         }
 
-        public static List<(string Name, ulong Value)> GetVariableDefinitions(string[] args)
+        public static List<(string Name, ulong Value)> GetVariableDefinitions(CommandLineArgs args)
         {
-            List<(string Name, ulong Value)> result = new();
-            foreach (string a in args)
+            if (args.TryGetKeyValueOption("define", out string? definitionString))
             {
-                if (a.StartsWith("--define=", StringComparison.OrdinalIgnoreCase))
+                List<(string Name, ulong Value)> result = new();
+                foreach (string variableDefinition in definitionString.Split(','))
                 {
-                    string definitionString = a.Split("=")[1];
-                    foreach (string variableDefinition in definitionString.Split(','))
+                    string[] split = variableDefinition.Split(':', 2);
+                    ulong value = 0;
+                    if (split.Length == 2 && !ulong.TryParse(split[1], out value))
                     {
-                        string[] split = variableDefinition.Split(':', 2);
-                        ulong value = 0;
-                        if (split.Length == 2 && !ulong.TryParse(split[1], out value))
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
-                            Console.ResetColor();
-                            Environment.Exit(1);
-                            return new List<(string Name, ulong Value)>();
-                        }
-                        string name = split[0];
-                        if (name.Length == 0)
-                        {
-                            continue;
-                        }
-                        result.Add((name, value));
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
+                        Console.ResetColor();
+                        Environment.Exit(1);
+                        return new List<(string Name, ulong Value)>();
                     }
-                    return result;
+                    string name = split[0];
+                    if (name.Length == 0)
+                    {
+                        continue;
+                    }
+                    result.Add((name, value));
                 }
+                return result;
             }
             return new List<(string Name, ulong Value)>();
         }

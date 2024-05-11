@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -13,6 +14,11 @@ namespace AssEmbly
 
         private static void Main(string[] args)
         {
+            CommandLineArgs processedArgs = new(StringComparer.OrdinalIgnoreCase, EqualityComparer<char>.Default);
+            processedArgs.AddArguments(args);
+
+            args = processedArgs.GetPositionalArguments();
+
             if (args.Contains("--version", StringComparer.OrdinalIgnoreCase))
             {
                 Console.WriteLine(version?.ToString());
@@ -44,25 +50,25 @@ namespace AssEmbly
             switch (args[0])
             {
                 case "assemble":
-                    AssembleSourceFile(args);
+                    AssembleSourceFile(processedArgs);
                     break;
                 case "execute":
-                    ExecuteProgram(args);
+                    ExecuteProgram(processedArgs);
                     break;
                 case "run":
-                    AssembleAndExecute(args);
+                    AssembleAndExecute(processedArgs);
                     break;
                 case "debug":
-                    RunDebugger(args);
+                    RunDebugger(processedArgs);
                     break;
                 case "disassemble":
-                    PerformDisassembly(args);
+                    PerformDisassembly(processedArgs);
                     break;
                 case "repl":
-                    RunRepl(args);
+                    RunRepl(processedArgs);
                     break;
                 case "lint":
-                    PerformLintingAssembly(args);
+                    PerformLintingAssembly(processedArgs);
                     break;
                 case "help":
                     DisplayHelp();
@@ -79,112 +85,95 @@ namespace AssEmbly
             }
         }
 
-        private static void AssembleSourceFile(string[] args)
+        private static void AssembleSourceFile(CommandLineArgs args)
         {
             Stopwatch assemblyStopwatch = Stopwatch.StartNew();
-            if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_Assemble))
+
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Assemble))
             {
                 return;
             }
 
-            (string sourcePath, string filename) = ResolveInputFilePath(args);
+            (string sourcePath, string filename) = ResolveInputFilePath(positionalArgs);
 
             HashSet<int> disabledErrors = new();
             HashSet<int> disabledWarnings = new();
             HashSet<int> disabledSuggestions = new();
-#if V1_CALL_STACK_COMPAT
-            bool useV1Format = false;
-            bool useV1Stack = false;
-#endif
-            bool enableObsoleteDirectives = false;
-            bool enableVariableExpansion = true;
-            bool enableEscapeSequences = true;
-            bool enableFileMacros = true;
-            bool forceFullOpcodes = false;
-            int macroExpansionLimit = GetMacroLimit(args);
-            int whileRepeatLimit = GetWhileLimit(args);
-            foreach (string a in args)
+            if (args.TryGetKeyValueOption("--disabled-errors", out string? errorCodes))
             {
-                if (a.StartsWith("--disable-error-", StringComparison.OrdinalIgnoreCase))
+                foreach (string codeString in errorCodes.Split(','))
                 {
-                    if (!int.TryParse(a[16..], out int errorCode))
+                    if (!int.TryParse(codeString, out int errorCode))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Error_Code, a[16..]);
+                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Error_Code, codeString);
                         Console.ResetColor();
                         Environment.Exit(1);
                         return;
                     }
                     _ = disabledErrors.Add(errorCode);
                 }
-                else if (a.StartsWith("--disable-warning-", StringComparison.OrdinalIgnoreCase))
+            }
+            if (args.TryGetKeyValueOption("--disabled-warnings", out string? warningCodes))
+            {
+                foreach (string codeString in warningCodes.Split(','))
                 {
-                    if (!int.TryParse(a[18..], out int errorCode))
+                    if (!int.TryParse(codeString, out int errorCode))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Warning_Code, a[18..]);
+                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Warning_Code, codeString);
                         Console.ResetColor();
                         Environment.Exit(1);
                         return;
                     }
                     _ = disabledWarnings.Add(errorCode);
                 }
-                else if (a.StartsWith("--disable-suggestion-", StringComparison.OrdinalIgnoreCase))
+            }
+            if (args.TryGetKeyValueOption("--disabled-suggestions", out string? suggestionsCodes))
+            {
+                foreach (string codeString in suggestionsCodes.Split(','))
                 {
-                    if (!int.TryParse(a[21..], out int errorCode))
+                    if (!int.TryParse(codeString, out int errorCode))
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Suggestion_Code, a[21..]);
+                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Suggestion_Code, codeString);
                         Console.ResetColor();
                         Environment.Exit(1);
                         return;
                     }
                     _ = disabledSuggestions.Add(errorCode);
                 }
-                else if (a.Equals("--no-errors", StringComparison.OrdinalIgnoreCase))
-                {
-                    disabledErrors = AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet();
-                }
-                else if (a.Equals("--no-warnings", StringComparison.OrdinalIgnoreCase))
-                {
-                    disabledWarnings = AssemblerWarnings.WarningMessages.Keys.ToHashSet();
-                }
-                else if (a.Equals("--no-suggestions", StringComparison.OrdinalIgnoreCase))
-                {
-                    disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
-                }
-#if V1_CALL_STACK_COMPAT
-                else if (a.Equals("--v1-format", StringComparison.OrdinalIgnoreCase))
-                {
-                    useV1Format = true;
-                    useV1Stack = true;
-                }
-                else if (a.Equals("--v1-call-stack", StringComparison.OrdinalIgnoreCase))
-                {
-                    useV1Stack = true;
-                }
-#endif
-                else if (a.Equals("--allow-old-directives", StringComparison.OrdinalIgnoreCase))
-                {
-                    enableObsoleteDirectives = true;
-                }
-                else if (a.Equals("--disable-variables", StringComparison.OrdinalIgnoreCase))
-                {
-                    enableVariableExpansion = false;
-                }
-                else if (a.Equals("--disable-escapes", StringComparison.OrdinalIgnoreCase))
-                {
-                    enableEscapeSequences = false;
-                }
-                else if (a.Equals("--full-base-opcodes", StringComparison.OrdinalIgnoreCase))
-                {
-                    forceFullOpcodes = true;
-                }
-                else if (a.Equals("--disable-file-macros", StringComparison.OrdinalIgnoreCase))
-                {
-                    enableFileMacros = false;
-                }
             }
+
+            if (args.IsOptionGiven('E', "no-errors"))
+            {
+                disabledErrors = AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet();
+            }
+            if (args.IsOptionGiven('W', "no-warnings"))
+            {
+                disabledWarnings = AssemblerWarnings.WarningMessages.Keys.ToHashSet();
+            }
+            if (args.IsOptionGiven('S', "no-suggestions"))
+            {
+                disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
+            }
+
+#if V1_CALL_STACK_COMPAT
+            bool useV1Format = false;
+            bool useV1Stack = false;
+            if (args.IsOptionGiven('1', "v1-format"))
+            {
+                useV1Format = true;
+                useV1Stack = true;
+            }
+            if (args.IsMultiCharacterOptionGiven("v1-call-stack"))
+            {
+                useV1Stack = true;
+            }
+#endif
+            int macroExpansionLimit = GetMacroLimit(args);
+            int whileRepeatLimit = GetWhileLimit(args);
 
             AssemblyResult assemblyResult;
             int totalErrors = 0;
@@ -207,11 +196,11 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
-                assembler.EnableObsoleteDirectives = enableObsoleteDirectives;
-                assembler.EnableVariableExpansion = enableVariableExpansion;
-                assembler.EnableEscapeSequences = enableEscapeSequences;
-                assembler.EnableFilePathMacros = enableFileMacros;
-                assembler.ForceFullOpcodes = forceFullOpcodes;
+                assembler.EnableObsoleteDirectives = args.IsMultiCharacterOptionGiven("allow-old-directives");
+                assembler.EnableVariableExpansion = !args.IsMultiCharacterOptionGiven("disable-variables");
+                assembler.EnableEscapeSequences = !args.IsMultiCharacterOptionGiven("disable-escapes");
+                assembler.EnableFilePathMacros = !args.IsMultiCharacterOptionGiven("disable-file-macros");
+                assembler.ForceFullOpcodes = args.IsOptionGiven('f', "full-base-opcodes");
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -290,7 +279,7 @@ namespace AssEmbly
 #endif
             }
 
-            string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".aap";
+            string destination = positionalArgs.Length >= 3 ? positionalArgs[2] : filename + ".aap";
             long programSize = 0;
 #if V1_CALL_STACK_COMPAT
             if (useV1Format)
@@ -308,7 +297,7 @@ namespace AssEmbly
                 }
 #endif
 #if GZIP_COMPRESSION
-                if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
+                if (args.IsOptionGiven('c', "compress"))
                 {
                     features |= AAPFeatures.GZipCompressed;
                 }
@@ -319,15 +308,15 @@ namespace AssEmbly
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
-            if (!args.Contains("--no-debug-file", StringComparer.OrdinalIgnoreCase))
+            if (!args.IsOptionGiven('d', "no-debug-file"))
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
-            if (args.Contains("--output-expanded", StringComparer.OrdinalIgnoreCase))
+            if (args.IsOptionGiven('e', "output-expanded"))
             {
                 File.WriteAllLines(filename + ".exp.asm", assemblyResult.ExpandedSourceFile);
             }
-            if (args.Contains("--output-symbols", StringComparer.OrdinalIgnoreCase))
+            if (args.IsOptionGiven('s', "output-symbols"))
             {
                 StringBuilder symbolFile = new StringBuilder()
                     .AppendLine("; AssEmbly Symbol File")
@@ -346,7 +335,7 @@ namespace AssEmbly
                         .AppendLine($"%LABEL_OVERRIDE :_SYM_FILE_@!CURRENT_ADDRESS[0x{address:x}]");
 #endif
                 }
-                symbolFile.AppendLine($":_SYM_FILE_@!CURRENT_ADDRESS")
+                symbolFile.AppendLine(":_SYM_FILE_@!CURRENT_ADDRESS")
                     .AppendLine($"%IBF \"#FOLDER_PATH/{filename}.aap\"");
                 File.WriteAllText(filename + ".sym.asm", symbolFile.ToString());
             }
@@ -357,7 +346,7 @@ namespace AssEmbly
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(Strings.CLI_Assemble_Result_Header_Success);
             Console.ResetColor();
-            if (args.Contains("--compress", StringComparer.OrdinalIgnoreCase))
+            if (args.IsOptionGiven('c', "compress"))
             {
                 Console.WriteLine(Strings.CLI_Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
 #if V1_CALL_STACK_COMPAT
@@ -386,41 +375,47 @@ namespace AssEmbly
                     totalErrors, totalWarnings, totalSuggestions,
                     assemblyResult.AssembledLines.Length, assemblyResult.AssembledFiles, assemblyStopwatch.Elapsed.TotalMilliseconds);
             }
+
+            args.WarnUnconsumedOptions(3);
         }
 
-        private static void ExecuteProgram(string[] args)
+        private static void ExecuteProgram(CommandLineArgs args)
         {
-            if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_Execute))
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Execute))
             {
                 return;
             }
 
-            (string appPath, _) = ResolveInputFilePath(args);
+            (string appPath, _) = ResolveInputFilePath(positionalArgs);
 
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
 #if V1_CALL_STACK_COMPAT
-                args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
-                args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                args.IsOptionGiven('1', "v1-format"),
+                args.IsMultiCharacterOptionGiven("v1-call-stack"),
 #else
                 false, false,
 #endif
-                args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
-                !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
-                args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
+                args.IsOptionGiven('i', "ignore-newer-version"),
+                !args.IsOptionGiven('u', "unmapped-stack"),
+                args.IsOptionGiven('a', "auto-echo"));
 
             ExecuteProcessor(processor);
+
+            args.WarnUnconsumedOptions(2);
         }
 
-        private static void AssembleAndExecute(string[] args)
+        private static void AssembleAndExecute(CommandLineArgs args)
         {
-            if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_AssembleAndExecute))
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_AssembleAndExecute))
             {
                 return;
             }
 
-            (string sourcePath, _) = ResolveInputFilePath(args);
+            (string sourcePath, _) = ResolveInputFilePath(positionalArgs);
 
             ulong memSize = GetMemorySize(args);
 
@@ -439,14 +434,10 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
-                assembler.EnableObsoleteDirectives = args.Contains(
-                    "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableVariableExpansion = !args.Contains(
-                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableEscapeSequences = !args.Contains(
-                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableFilePathMacros = !args.Contains(
-                    "--disable-file-macros", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableObsoleteDirectives = args.IsMultiCharacterOptionGiven("allow-old-directives");
+                assembler.EnableVariableExpansion = !args.IsMultiCharacterOptionGiven("disable-variables");
+                assembler.EnableEscapeSequences = !args.IsMultiCharacterOptionGiven("disable-escapes");
+                assembler.EnableFilePathMacros = !args.IsMultiCharacterOptionGiven("disable-file-macros");
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);
@@ -468,58 +459,64 @@ namespace AssEmbly
             Processor processor = new(
                 memSize, assemblyResult.EntryPoint,
 #if V1_CALL_STACK_COMPAT
-                useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                useV1CallStack: args.IsMultiCharacterOptionGiven("v1-call-stack"),
 #endif
-                mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
-                autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
+                mapStack: !args.IsOptionGiven('u', "unmapped-stack"),
+                autoEcho: args.IsOptionGiven('a', "auto-echo"));
             LoadProgramIntoProcessor(processor, assemblyResult.Program);
             ExecuteProcessor(processor);
+
+            args.WarnUnconsumedOptions(2);
         }
 
-        private static void RunDebugger(string[] args)
+        private static void RunDebugger(CommandLineArgs args)
         {
-            if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_Debugger))
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Debugger))
             {
                 return;
             }
 
-            (string appPath, _) = ResolveInputFilePath(args);
+            (string appPath, _) = ResolveInputFilePath(positionalArgs);
 
             ulong memSize = GetMemorySize(args);
 
             Processor processor = LoadExecutableToProcessor(appPath, memSize,
 #if V1_CALL_STACK_COMPAT
-                args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase),
-                args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                args.IsOptionGiven('1', "v1-format"),
+                args.IsMultiCharacterOptionGiven("v1-call-stack"),
 #else
                 false, false,
 #endif
-                args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase),
-                !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
-                args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
+                args.IsOptionGiven('i', "ignore-newer-version"),
+                !args.IsOptionGiven('u', "unmapped-stack"),
+                args.IsOptionGiven('a', "auto-echo"));
 
             Debugger debugger = new(false, processor);
-            if (args.Length >= 3 && !args[2].StartsWith('-'))
+            if (positionalArgs.Length >= 3)
             {
-                string debugFilePath = args[2];
+                string debugFilePath = positionalArgs[2];
                 debugger.LoadDebugFile(debugFilePath);
             }
             debugger.StartDebugger();
+
+            args.WarnUnconsumedOptions(3);
         }
 
-        private static void PerformDisassembly(string[] args)
+        private static void PerformDisassembly(CommandLineArgs args)
         {
-            if (!CheckInputFileArg(args, Strings.CLI_Error_Argument_Missing_Path_Disassemble))
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Disassemble))
             {
                 return;
             }
 
-            (string sourcePath, string filename) = ResolveInputFilePath(args);
+            (string sourcePath, string filename) = ResolveInputFilePath(positionalArgs);
 
             string disassembledProgram;
             byte[] program;
 #if V1_CALL_STACK_COMPAT
-            if (args.Contains("--v1-format", StringComparer.OrdinalIgnoreCase))
+            if (args.IsOptionGiven('1', "v1-format"))
             {
                 program = File.ReadAllBytes(sourcePath);
             }
@@ -527,16 +524,16 @@ namespace AssEmbly
 #endif
             {
                 AAPFile file = LoadAAPFile(sourcePath,
-                    args.Contains("--ignore-newer-version", StringComparer.OrdinalIgnoreCase));
+                    args.IsOptionGiven('i', "ignore-newer-version"));
                 program = file.Program;
             }
 
             try
             {
                 disassembledProgram = Disassembler.DisassembleProgram(
-                    program, !args.Contains("--no-strings", StringComparer.OrdinalIgnoreCase),
-                    !args.Contains("--no-pads", StringComparer.OrdinalIgnoreCase),
-                    args.Contains("--allow-full-base-opcodes", StringComparer.OrdinalIgnoreCase));
+                    program, !args.IsOptionGiven('S', "no-strings"),
+                    !args.IsOptionGiven('P', "no-pads"),
+                    args.IsOptionGiven('f', "allow-full-base-opcodes"));
             }
             catch (Exception e)
             {
@@ -550,44 +547,47 @@ namespace AssEmbly
                 return;
 #endif
             }
-            string destination = args.Length >= 3 && !args[2].StartsWith('-') ? args[2] : filename + ".dis.asm";
+            string destination = positionalArgs.Length >= 3 ? positionalArgs[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);
             Console.WriteLine(Strings.CLI_Disassemble_Success, Path.GetFullPath(destination));
+
+            args.WarnUnconsumedOptions(3);
         }
 
-        private static void RunRepl(string[] args)
+        private static void RunRepl(CommandLineArgs args)
         {
             ulong memSize = GetMemorySize(args);
             Debugger debugger = new(true, memorySize: memSize,
 #if V1_CALL_STACK_COMPAT
-                useV1CallStack: args.Contains("--v1-call-stack", StringComparer.OrdinalIgnoreCase),
+                useV1CallStack: args.IsMultiCharacterOptionGiven("v1-call-stack"),
 #endif
-                mapStack: !args.Contains("--unmapped-stack", StringComparer.OrdinalIgnoreCase),
-                autoEcho: args.Contains("--auto-echo", StringComparer.OrdinalIgnoreCase));
+                mapStack: !args.IsOptionGiven('u', "unmapped-stack"),
+                autoEcho: args.IsOptionGiven('a', "auto-echo"));
             // Some program needs to be loaded or the processor won't run
             debugger.DebuggingProcessor.LoadProgram(Array.Empty<byte>());
             debugger.StartDebugger();
         }
 
-        [System.ComponentModel.Localizable(false)]
-        private static void PerformLintingAssembly(string[] args)
+        [Localizable(false)]
+        private static void PerformLintingAssembly(CommandLineArgs args)
         {
             // This is an undocumented operation designed for IDE extensions to provide linting on source files.
             // As such, all output is JSON formatted and does not use console colours.
-            if (args.Length < 2)
+            string[] positionalArgs = args.GetPositionalArguments();
+            if (positionalArgs.Length < 2)
             {
                 Console.WriteLine("{\"error\":\"A path to the program to be disassembled is required.\"}");
                 Environment.Exit(1);
                 return;
             }
-            if (!File.Exists(args[1]))
+            if (!File.Exists(positionalArgs[1]))
             {
                 Console.WriteLine("{\"error\":\"The specified file does not exist.\"}");
                 Environment.Exit(1);
                 return;
             }
 
-            (string sourcePath, _) = ResolveInputFilePath(args);
+            (string sourcePath, _) = ResolveInputFilePath(positionalArgs);
 
             try
             {
@@ -603,14 +603,10 @@ namespace AssEmbly
                 {
                     assembler.WhileRepeatLimit = whileRepeatLimit;
                 }
-                assembler.EnableObsoleteDirectives = args.Contains(
-                    "--allow-old-directives", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableVariableExpansion = !args.Contains(
-                    "--disable-variables", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableEscapeSequences = !args.Contains(
-                    "--disable-escapes", StringComparer.OrdinalIgnoreCase);
-                assembler.EnableFilePathMacros = !args.Contains(
-                    "--disable-file-macros", StringComparer.OrdinalIgnoreCase);
+                assembler.EnableObsoleteDirectives = args.IsMultiCharacterOptionGiven("allow-old-directives");
+                assembler.EnableVariableExpansion = !args.IsMultiCharacterOptionGiven("disable-variables");
+                assembler.EnableEscapeSequences = !args.IsMultiCharacterOptionGiven("disable-escapes");
+                assembler.EnableFilePathMacros = !args.IsMultiCharacterOptionGiven("disable-file-macros");
                 foreach ((string name, ulong value) in GetVariableDefinitions(args))
                 {
                     assembler.SetAssemblerVariable(name, value);

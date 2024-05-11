@@ -1,4 +1,6 @@
-﻿namespace AssEmbly
+﻿using System.ComponentModel;
+
+namespace AssEmbly
 {
     // BASE CLASS
 
@@ -8,7 +10,6 @@
     /// <remarks>
     /// This is a base class for more specific exception types, which should most often be used instead.
     /// </remarks>
-    [System.ComponentModel.Localizable(true)]
     public class AssEmblyException : Exception
     {
         private string? _consoleMessage;
@@ -19,15 +20,15 @@
         }
 
         public AssEmblyException() { }
-        public AssEmblyException(string message) : base(message) { }
-        public AssEmblyException(string message, Exception inner) : base(message, inner) { }
+        public AssEmblyException([Localizable(true)] string message) : base(message) { }
+        public AssEmblyException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
 
-        public AssEmblyException(string message, string consoleMessage) : base(message)
+        public AssEmblyException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message)
         {
             ConsoleMessage = consoleMessage;
         }
 
-        public AssEmblyException(string message, string consoleMessage, Exception inner) : base(message, inner)
+        public AssEmblyException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, inner)
         {
             ConsoleMessage = consoleMessage;
         }

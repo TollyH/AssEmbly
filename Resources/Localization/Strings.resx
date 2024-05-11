@@ -136,25 +136,30 @@ Path: "{1}".</value>
         <value>Program disassembled successfully. It can be found at: "{0}"</value>
     </data>
     <data name="CLI_Help_Body" xml:space="preserve">
-        <value>Usage: 'AssEmbly &lt;operation&gt; &lt;required-parameters (if any)&gt; [optional-parameters]'
-Any command can take the '--no-header' optional parameter to disable the copyright printout.
-Using the '--version' optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
+        <value>Usage: 'AssEmbly &lt;operation&gt; [parameters]'
+Any command can take the '--no-header' or '-n' optional parameter to disable the copyright printout.
+Using the '--version' or '-v' optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
+
+Single-character parameter options are denoted with a single dash and are case-sensitive.
+Multi-character parameter options are denoted with a double dash and are case-insensitive.
+Single-character parameter options can be combined after a single dash. For example, '-Eef' is equivalent to '-E -e -f'.
+A parameter with just two dashes (--) can be given to treat all subsequent parameters as regular positional parameters, even those beginning with a dash.
 
 Operations:
 assemble - Take a source file written in AssEmbly and assemble it in to an executable file
     Usage: 'AssEmbly assemble &lt;file-path&gt; [destination-path] [options]'
-    --no-debug-file - Do not generate a debug information file with the executable.
-    --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
-    --disable-error|warning|suggestion-xxxx - Disable a specific message with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled.
+    -d, --no-debug-file - Do not generate a debug information file with the executable.
+    -E|W|S, --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
+    --disabled-errors|warnings|suggestions=xxxx,xxxx - Disable one or more specific messages with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled. Formatted as a comma-separated list of message codes.
     --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
     --while-limit={2} - Set the limit of %WHILE loop iterations that can occur throughout the entire program. Limit will be {2} if parameter is not given.
     --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
-    --compress - Apply GZip compression to the resulting executable.
-    --output-symbols - Save a symbol file that can be used to reference assembled code from another program with the original label names. Label names starting with an underscore (_) are ignored.
-    --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports. Be aware that the expanded source file will not produce functionally identical output to the original, and may not even be a valid assemble-able program.
-    --full-base-opcodes - Disable single-byte opcodes, therefore making all instructions in the base instruction set assemble to full three-byte opcodes.
+    -c, --compress - Apply GZip compression to the resulting executable.
+    -s, --output-symbols - Save a symbol file that can be used to reference assembled code from another program with the original label names. Label names starting with an underscore (_) are ignored.
+    -e, --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports. Be aware that the expanded source file will not produce functionally identical output to the original, and may not even be a valid assemble-able program.
+    -f, --full-base-opcodes - Disable single-byte opcodes, therefore making all instructions in the base instruction set assemble to full three-byte opcodes.
     --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
-    --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
+    -1, --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
     --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
     --disable-variables - Disable the expansion of assembler variables to ensure compatibility with pre-3.2.0 strings containing '@' signs.
     --disable-escapes - Disable the use of escape sequences in strings; treat backslashes as literal characters instead. Ensures compatibility with pre-1.1.0 strings.
@@ -164,10 +169,10 @@ execute - Execute an already assembled executable file
     Usage: 'AssEmbly execute &lt;file-path&gt; [options]'
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
-    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
-    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
-    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
-    --auto-echo - Automatically write inputted characters back to the console.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.
 
 run - Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.
     Usage: 'AssEmbly run &lt;file-path&gt; [options]'
@@ -188,25 +193,25 @@ debug - Step through an assembled executable file, pausing before each instructi
     Providing a debug info file will allow label names and original AssEmbly source lines to be made available.
     --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
-    --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
-    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
-    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
-    --auto-echo - Automatically write inputted characters back to the console.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.
 
 disassemble - Generate an AssEmbly program listing from an already assembled executable.
     Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
-    --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes
-    --no-pads - Don't attempt to locate uses of the %PAD directive; keep them as chains of HLT
-    --allow-full-base-opcodes - Allow data detected as fully qualified opcodes for the base instruction set to be interpreted as instructions instead of data. Re-assembly may not be byte-perfect.
-    --v1-format - Specifies that the given executable uses the v1.x.x header-less format.
-    --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    -S, --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes
+    -P, --no-pads - Don't attempt to locate uses of the %PAD directive; keep them as chains of HLT
+    -f, --allow-full-base-opcodes - Allow data detected as fully qualified opcodes for the base instruction set to be interpreted as instructions instead of data. Re-assembly may not be byte-perfect.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format.
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
 
 repl - Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions.
     Usage: 'AssEmbly repl [options]'
     --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
     --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
-    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
-    --auto-echo - Automatically write inputted characters back to the console.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.
 
 license - Print the full GPLv3 license text that this software is licensed under.
 
@@ -1644,5 +1649,29 @@ Current while stack (deepest while first):</value>
     </data>
     <data name="Processor_Error_Opcode_Low_FileSystem_TimeSet" xml:space="preserve">
         <value>{0:X} is not a recognised file system extension set file time set low opcode</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Exists_KeyValue" xml:space="preserve">
+        <value>A key/value argument with the name {0} already exists. The value has not been updated.</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Exists_MultiCharacter" xml:space="preserve">
+        <value>The multi-character argument --{0} is given multiple times.</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Exists_SingleCharacter" xml:space="preserve">
+        <value>The single-character argument -{0} is given multiple times.</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Unconsumed_SingleCharacter" xml:space="preserve">
+        <value>Unrecognised single-character option: -{0}</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Unconsumed_MultiCharacter" xml:space="preserve">
+        <value>Unrecognised multi-character option: --{0}</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Unconsumed_KeyValue" xml:space="preserve">
+        <value>Unrecognised key/value option: --{0}</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Unconsumed_Positional_Single" xml:space="preserve">
+        <value>{0} more positional argument was given than was expected and has been ignored.</value>
+    </data>
+    <data name="CommandLineArgs_Warning_Unconsumed_Positional_Multiple" xml:space="preserve">
+        <value>{0} more positional arguments were given than were expected and have been ignored.</value>
     </data>
 </root>
