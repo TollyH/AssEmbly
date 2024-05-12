@@ -1725,6 +1725,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use the `HLT` instruction instead of `EXTD_HLT` when the exit code is always 0..
+        /// </summary>
+        internal static string AssemblerWarnings_Suggestion_0020 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_Suggestion_0020", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string AssemblerWarnings_Warning_0000 {

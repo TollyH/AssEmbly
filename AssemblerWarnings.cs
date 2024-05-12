@@ -273,6 +273,7 @@ namespace AssEmbly
                 { 0016, Analyzer_Rolling_Suggestion_0016 },
                 { 0017, Analyzer_Rolling_Suggestion_0017 },
                 { 0019, Analyzer_Rolling_Suggestion_0019 },
+                { 0020, Analyzer_Rolling_Suggestion_0020 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -1047,35 +1048,35 @@ namespace AssEmbly
         {
             // Suggestion 0013: Use `DCR {reg}` instead of `ADD {reg}, -1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x11) && operands[1][0] != ':'
-                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
+                && BinaryPrimitives.ReadInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0014()
         {
             // Suggestion 0014: Use `ICR {reg}` instead of `SUB {reg}, -1`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x21) && operands[1][0] != ':'
-                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
+                && BinaryPrimitives.ReadInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == -1;
         }
 
         private bool Analyzer_Rolling_Suggestion_0015()
         {
             // Suggestion 0015: Use `MVB {reg}, {reg}` instead of `AND {reg}, 0xFF`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
-                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFF;
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFF;
         }
 
         private bool Analyzer_Rolling_Suggestion_0016()
         {
             // Suggestion 0016: Use `MVW {reg}, {reg}` instead of `AND {reg}, 0xFFFF`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
-                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFF;
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFF;
         }
 
         private bool Analyzer_Rolling_Suggestion_0017()
         {
             // Suggestion 0017: Use `MVD {reg}, {reg}` instead of `AND {reg}, 0xFFFFFFFF`, as it results in less bytes.
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x00, 0x61) && operands[1][0] != ':'
-                && (long)BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFFFFFF;
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[((int)operandStart + 1)..]) == 0xFFFFFFFF;
         }
 
         private List<Warning> Analyzer_Final_Suggestion_0018()
@@ -1098,6 +1099,13 @@ namespace AssEmbly
             // Suggestion 0019: Uses of %ASM_ONCE beyond the first in a file will never be reached.
             return instructionIsAsmOnce &&
                 firstAsmOnceLineInFiles.TryGetValue(filePosition.File, out int firstAsmOnceLine) && firstAsmOnceLine < filePosition.Line;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0020()
+        {
+            // Suggestion 0020: Use the `HLT` instruction instead of `EXTD_HLT` when the exit code is always 0.
+            return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x03, 0x21) && operands[0][0] != ':'
+                && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[(int)operandStart..]) == 0;
         }
     }
 }

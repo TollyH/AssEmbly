@@ -75,6 +75,7 @@ namespace AssEmbly
             { 0017, Strings.AssemblerWarnings_Suggestion_0017 },
             { 0018, Strings.AssemblerWarnings_Suggestion_0018 },
             { 0019, Strings.AssemblerWarnings_Suggestion_0019 },
+            { 0020, Strings.AssemblerWarnings_Suggestion_0020 },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)
