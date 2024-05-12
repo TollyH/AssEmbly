@@ -47,7 +47,7 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
             }
-            switch (args[0])
+            switch (args[0].ToLowerInvariant())
             {
                 case "assemble":
                     AssembleSourceFile(processedArgs);
@@ -642,10 +642,50 @@ namespace AssEmbly
 
         private static void DisplayHelp(CommandLineArgs args)
         {
-            Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize,
-                Assembler.DefaultMacroExpansionLimit, Assembler.DefaultWhileRepeatLimit);
+            string[] positionalArgs = args.GetPositionalArguments();
 
-            args.WarnUnconsumedOptions(1);
+            if (positionalArgs.Length <= 1)
+            {
+                Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize,
+                    Assembler.DefaultMacroExpansionLimit, Assembler.DefaultWhileRepeatLimit);
+            }
+            else
+            {
+                switch (positionalArgs[1].ToLowerInvariant())
+                {
+                    case "assemble":
+                        PrintOperationHelp("assemble", Strings.CLI_Help_Description_Assemble, Strings.CLI_Help_Options_Assemble);
+                        break;
+                    case "execute":
+                        PrintOperationHelp("execute", Strings.CLI_Help_Description_Execute, Strings.CLI_Help_Options_Execute);
+                        break;
+                    case "run":
+                        PrintOperationHelp("run", Strings.CLI_Help_Description_Run, Strings.CLI_Help_Options_Run);
+                        break;
+                    case "debug":
+                        PrintOperationHelp("debug", Strings.CLI_Help_Description_Debug, Strings.CLI_Help_Options_Debug);
+                        break;
+                    case "disassemble":
+                        PrintOperationHelp("disassemble", Strings.CLI_Help_Description_Disassemble, Strings.CLI_Help_Options_Disassemble);
+                        break;
+                    case "repl":
+                        PrintOperationHelp("repl", Strings.CLI_Help_Description_REPL, Strings.CLI_Help_Options_REPL);
+                        break;
+                    case "license":
+                        PrintOperationHelp("license", Strings.CLI_Help_Description_License, Strings.CLI_Help_Options_License);
+                        break;
+                    case "help":
+                        PrintOperationHelp("help", Strings.CLI_Help_Description_Help, Strings.CLI_Help_Options_Help);
+                        break;
+                    default:
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine(Strings.CLI_Error_Invalid_Operation, positionalArgs[1]);
+                        Console.ResetColor();
+                        break;
+                }
+            }
+
+            args.WarnUnconsumedOptions(2);
         }
 
         private static void DisplayLicense(CommandLineArgs args)
@@ -681,6 +721,23 @@ namespace AssEmbly
                 return;
 #endif
             }
+        }
+
+        private static void PrintOperationHelp(string operationName,
+            [Localizable(true)] string operationDescription,
+            [Localizable(true)] string options)
+        {
+            Console.ForegroundColor = ConsoleColor.Black;
+            Console.BackgroundColor = ConsoleColor.White;
+            Console.Write(operationName);
+
+            Console.ResetColor();
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine(' ' + operationDescription);
+
+            Console.ResetColor();
+            Console.WriteLine(options);
         }
     }
 }

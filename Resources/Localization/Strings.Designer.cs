@@ -2141,7 +2141,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A path to the program listing to be assembled is required..
+        ///   Looks up a localized string similar to A path to the source code file to be assembled is required. Run &apos;AssEmbly help assemble&apos; for more information..
         /// </summary>
         internal static string CLI_Error_Argument_Missing_Path_Assemble {
             get {
@@ -2150,7 +2150,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A path to the program listing to be executed is required..
+        ///   Looks up a localized string similar to A path to the source code file to be executed is required. Run &apos;AssEmbly help run&apos; for more information..
         /// </summary>
         internal static string CLI_Error_Argument_Missing_Path_AssembleAndExecute {
             get {
@@ -2159,7 +2159,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A path to the assembled program to be debugged is required..
+        ///   Looks up a localized string similar to A path to the assembled program to be debugged is required. Run &apos;AssEmbly help debug&apos; for more information..
         /// </summary>
         internal static string CLI_Error_Argument_Missing_Path_Debugger {
             get {
@@ -2168,7 +2168,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A path to the program to be disassembled is required..
+        ///   Looks up a localized string similar to A path to the program to be disassembled is required. Run &apos;AssEmbly help disassemble&apos; for more information..
         /// </summary>
         internal static string CLI_Error_Argument_Missing_Path_Disassemble {
             get {
@@ -2177,7 +2177,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A path to the assembled program to be executed is required..
+        ///   Looks up a localized string similar to A path to the assembled program to be executed is required. Run &apos;AssEmbly help execute&apos; for more information..
         /// </summary>
         internal static string CLI_Error_Argument_Missing_Path_Execute {
             get {
@@ -2222,7 +2222,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid operation..
+        ///   Looks up a localized string similar to &quot;{0}&quot; is not a valid operation. Run &apos;AssEmbly help&apos; to see a list of available operations..
         /// </summary>
         internal static string CLI_Error_Invalid_Operation {
             get {
@@ -2267,7 +2267,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Because the major release number is higher ({0} &gt; {1}), this program will not be executed. Use the --ignore-newer-version parameter to override this..
+        ///   Looks up a localized string similar to Because the major release number is higher ({0} &gt; {1}), this program will not be executed. Use the -i or --ignore-newer-version parameter to override this..
         /// </summary>
         internal static string CLI_Error_Newer_Major_Build_Version {
             get {
@@ -2330,13 +2330,195 @@ namespace AssEmbly.Resources.Localization {
         ///Any command can take the &apos;--no-header&apos; or &apos;-n&apos; optional parameter to disable the copyright printout.
         ///Using the &apos;--version&apos; or &apos;-v&apos; optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
         ///
+        ///Run &apos;AssEmbly help [operation]&apos; to see usage information and all the available options for a given operation.
+        ///
         ///Single-character parameter options are denoted with a single dash and are case-sensitive.
-        ///Multi-character parameter options are denoted with a double dash and are case-insensitive.
-        ///Single-character parameter options can b [rest of string was truncated]&quot;;.
+        ///Multi-character par [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CLI_Help_Body {
             get {
                 return ResourceManager.GetString("CLI_Help_Body", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Take a source file written in AssEmbly and assemble it in to an executable file..
+        /// </summary>
+        internal static string CLI_Help_Description_Assemble {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Assemble", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Step through an assembled executable file, pausing before each instruction begins execution..
+        /// </summary>
+        internal static string CLI_Help_Description_Debug {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Debug", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generate an AssEmbly source code file from an already assembled executable..
+        /// </summary>
+        internal static string CLI_Help_Description_Disassemble {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Disassemble", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Execute an already assembled executable file..
+        /// </summary>
+        internal static string CLI_Help_Description_Execute {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Print this help text, or get help with a specific operation..
+        /// </summary>
+        internal static string CLI_Help_Description_Help {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Print the full GPLv3 license text that this software is licensed under..
+        /// </summary>
+        internal static string CLI_Help_Description_License {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_License", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions..
+        /// </summary>
+        internal static string CLI_Help_Description_REPL {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_REPL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution..
+        /// </summary>
+        internal static string CLI_Help_Description_Run {
+            get {
+                return ResourceManager.GetString("CLI_Help_Description_Run", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly assemble &lt;file-path&gt; [destination-path] [options]&apos;
+        /// Options:
+        ///    -D, --no-debug-file - Do not generate a debug information file with the executable.
+        ///    -E|W|S, --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
+        ///    --disabled-errors|warnings|suggestions=xxxx,xxxx - Disable one or more specific messages with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled. Formatt [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLI_Help_Options_Assemble {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Assemble", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: Usage: &apos;AssEmbly debug &lt;file-path&gt; [debug-info-file-path] [options]&apos;
+        ///    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.
+        /// Options:
+        ///    --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
+        ///    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+        ///    -1, --v1-format - Specifies tha [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLI_Help_Options_Debug {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Debug", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]&apos;
+        /// Options:
+        ///    -S, --no-strings - Don&apos;t attempt to locate and decode strings; keep them as raw bytes
+        ///    -P, --no-pads - Don&apos;t attempt to locate uses of the %PAD directive; keep them as chains of HLT
+        ///    -F, --no-floats - Don&apos;t attempt to detect floating point literal operands; keep them as integers
+        ///    -G, --no-signed - Don&apos;t attempt to detect signed negative operands; keep them as positive integers
+        ///    -f, --allow-full-base-opc [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLI_Help_Options_Disassemble {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Disassemble", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly execute &lt;file-path&gt; [options]&apos;
+        /// Options:
+        ///    --mem-size={0} - Sets the total size of memory available to the program in bytes. Memory size will be {0} bytes if parameter is not given.
+        ///    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+        ///    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
+        ///    -i, --ignore-newer-version - Force an executable [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLI_Help_Options_Execute {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Execute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly help [operation]&apos;.
+        /// </summary>
+        internal static string CLI_Help_Options_Help {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Help", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly license&apos;.
+        /// </summary>
+        internal static string CLI_Help_Options_License {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_License", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: &apos;AssEmbly repl [options]&apos;
+        /// Options:
+        ///    --mem-size={0} - Sets the total size of memory available to the REPL in bytes. Memory size will be {0} bytes if parameter is not given.
+        ///    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+        ///    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+        ///    -a, --auto-echo - Automatically write inputted characters back to the console..
+        /// </summary>
+        internal static string CLI_Help_Options_REPL {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_REPL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        /// Usage: Usage: &apos;AssEmbly run &lt;file-path&gt; [options]&apos;
+        /// Options:
+        ///    --macro-limit={1} - Set the limit of macro expansions that can occur on a single line. Limit will be {1} if parameter is not given.
+        ///    --while-limit={2} - Set the limit of %WHILE loop iterations that can occur throughout the entire program. Limit will be {2} if parameter is not given.
+        ///    --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable na [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CLI_Help_Options_Run {
+            get {
+                return ResourceManager.GetString("CLI_Help_Options_Run", resourceCulture);
             }
         }
         
