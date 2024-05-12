@@ -202,6 +202,8 @@ disassemble - Generate an AssEmbly program listing from an already assembled exe
     Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
     -S, --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes
     -P, --no-pads - Don't attempt to locate uses of the %PAD directive; keep them as chains of HLT
+    -F, --no-floats - Don't attempt to detect floating point literal operands; keep them as integers
+    -G, --no-signed - Don't attempt to detect signed negative operands; keep them as positive integers
     -f, --allow-full-base-opcodes - Allow data detected as fully qualified opcodes for the base instruction set to be interpreted as instructions instead of data. Re-assembly may not be byte-perfect.
     -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format.
     -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.

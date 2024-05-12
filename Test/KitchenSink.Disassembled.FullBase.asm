@@ -53,7 +53,7 @@ JLT :0x8ABEED000005292C  ; Address does not align to a disassembled instruction
 %DAT 3
 POP rpo
 MVQ rg0, :0x123456789  ; Address does not align to a disassembled instruction
-MVQ :0x123456789, 696969420  ; Address does not align to a disassembled instruction
+MVQ :0x123456789, 4664385274516035810  ; Address does not align to a disassembled instruction
 HLT
 %DAT 240
 %DAT 159

@@ -35,6 +35,11 @@ namespace AssEmbly
         private readonly Dictionary<string, ulong> replLabels = new() { { "START", 0 } };
         private ulong nextFreeRpoAddress;
 
+        private static readonly DisassemblerOptions disassemblerOptions = new()
+        {
+            AllowFullyQualifiedBaseOpcodes = true
+        };
+
         public Debugger(bool inReplMode, ulong entryPoint = 0,
             bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
         {
@@ -85,7 +90,7 @@ namespace AssEmbly
                 string lineDisassembly = LoadedDebugInfoFile is null
                     || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
                         ? Disassembler.DisassembleInstruction(
-                            DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..], true, false).Line
+                            DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..], disassemblerOptions, false).Line
                         : inst;
 
                 Console.WriteLine();

@@ -7,7 +7,14 @@
         public void StringsPadsNoFullBase()
         {
             string program = Disassembler.DisassembleProgram(File.ReadAllBytes("KitchenSink.bin"),
-                true, true, false);
+                new DisassemblerOptions()
+                {
+                    DetectStrings = true,
+                    DetectPads = true,
+                    AllowFullyQualifiedBaseOpcodes = false,
+                    DetectFloats = true,
+                    DetectSigned = true
+                });
 
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.asm"), program,
                 "The disassembly process produced unexpected output");
@@ -24,7 +31,14 @@
         public void NoStringsPadsNoFullBase()
         {
             string program = Disassembler.DisassembleProgram(File.ReadAllBytes("KitchenSink.bin"),
-                false, true, false);
+                new DisassemblerOptions()
+                {
+                    DetectStrings = false,
+                    DetectPads = true,
+                    AllowFullyQualifiedBaseOpcodes = false,
+                    DetectFloats = true,
+                    DetectSigned = false
+                });
 
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.NoStrings.asm"), program,
                 "The disassembly process produced unexpected output");
@@ -41,7 +55,14 @@
         public void StringsNoPadsNoFullBase()
         {
             string program = Disassembler.DisassembleProgram(File.ReadAllBytes("KitchenSink.bin"),
-                true, false, false);
+                new DisassemblerOptions()
+                {
+                    DetectStrings = true,
+                    DetectPads = false,
+                    AllowFullyQualifiedBaseOpcodes = false,
+                    DetectFloats = false,
+                    DetectSigned = false
+                });
 
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.NoPads.asm"), program,
                 "The disassembly process produced unexpected output");
@@ -58,7 +79,14 @@
         public void StringsPadsFullBase()
         {
             string program = Disassembler.DisassembleProgram(File.ReadAllBytes("KitchenSink.bin"),
-                true, true, true);
+                new DisassemblerOptions()
+                {
+                    DetectStrings = true,
+                    DetectPads = true,
+                    AllowFullyQualifiedBaseOpcodes = true,
+                    DetectFloats = false,
+                    DetectSigned = false
+                });
 
             Assert.AreEqual(File.ReadAllText("KitchenSink.Disassembled.FullBase.asm"), program,
                 "The disassembly process produced unexpected output");

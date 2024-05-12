@@ -1,15 +1,23 @@
 ﻿using System.Buffers.Binary;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
 namespace AssEmbly
 {
+    public record DisassemblerOptions(
+        bool DetectStrings = true,
+        bool DetectPads = true,
+        bool DetectFloats = true,
+        bool DetectSigned = true,
+        bool AllowFullyQualifiedBaseOpcodes = false);
+
     public static class Disassembler
     {
         /// <summary>
         /// Disassemble a program to AssEmbly code from it's assembled bytecode.
         /// </summary>
-        public static string DisassembleProgram(byte[] program, bool detectStrings, bool detectPads, bool allowFullyQualifiedBaseOpcodes)
+        public static string DisassembleProgram(byte[] program, DisassemblerOptions options)
         {
             ulong offset = 0;
             List<string> result = new();
@@ -25,7 +33,7 @@ namespace AssEmbly
             while (offset < (ulong)program.LongLength)
             {
                 (string line, ulong additionalOffset, List<ulong> referencedAddresses, bool datFallback) =
-                    DisassembleInstruction(program.AsSpan()[(int)offset..], allowFullyQualifiedBaseOpcodes, true);
+                    DisassembleInstruction(program.AsSpan()[(int)offset..], options, true);
 
                 foreach (ulong address in referencedAddresses)
                 {
@@ -33,12 +41,13 @@ namespace AssEmbly
                     addressReferences[address].Add(offset);
                 }
 
-                if (detectStrings && char.IsAscii((char)program[offset]) && !char.IsControl((char)program[offset]) && datFallback)
+                if (options.DetectStrings
+                    && char.IsAscii((char)program[offset]) && !char.IsControl((char)program[offset]) && datFallback)
                 {
                     DumpPendingZeroPad(ref pendingZeroPad, result, offset, offsetToLine);
                     pendingStringCharacters.Add(program[offset]);
                 }
-                else if (detectPads && program[offset] == 0 && additionalOffset == 1)
+                else if (options.DetectPads && program[offset] == 0 && additionalOffset == 1)
                 {
                     DumpPendingString(pendingStringCharacters, result, offset, offsetToLine);
                     pendingZeroPad++;
@@ -89,7 +98,7 @@ namespace AssEmbly
         /// </param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present], Used %DAT directive)</returns>
         public static (string Line, ulong AdditionalOffset, List<ulong> References, bool DatFallback) DisassembleInstruction(
-            Span<byte> instruction, bool allowFullyQualifiedBaseOpcodes, bool useLabelNames)
+            Span<byte> instruction, DisassemblerOptions options, bool useLabelNames)
         {
             if (instruction.Length == 0)
             {
@@ -113,7 +122,8 @@ namespace AssEmbly
                 opcode = Opcode.ParseBytes(instruction, ref totalBytes);
                 totalBytes++;
             }
-            if (!fallbackToDat && !allowFullyQualifiedBaseOpcodes && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
+            if (!fallbackToDat && !options.AllowFullyQualifiedBaseOpcodes
+                && instruction[0] == Opcode.FullyQualifiedMarker && instruction[1] == 0x00)
             {
                 // Opcode is fully qualified but is for the base instruction set
                 // - technically valid but never done by the assembler, so interpret as data.
@@ -151,7 +161,32 @@ namespace AssEmbly
                                 fallbackToDat = true;
                                 break;
                             }
-                            operandStrings.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]).ToString());
+
+                            ulong value;
+                            if (options.DetectFloats)
+                            {
+                                double floatingValue = BinaryPrimitives.ReadDoubleLittleEndian(instruction[(int)totalBytes..]);
+                                if (Math.Abs(floatingValue) is >= 0.0000000000000001 and <= ulong.MaxValue)
+                                {
+                                    operandStrings.Add(floatingValue.ToString(CultureInfo.InvariantCulture));
+                                    totalBytes += 8;
+                                    break;
+                                }
+                                value = BitConverter.DoubleToUInt64Bits(floatingValue);
+                            }
+                            else
+                            {
+                                value = BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]);
+                            }
+
+                            if (options.DetectSigned && value > long.MaxValue)
+                            {
+                                operandStrings.Add(unchecked((long)value).ToString());
+                            }
+                            else
+                            {
+                                operandStrings.Add(value.ToString());
+                            }
                             totalBytes += 8;
                             break;
                         case OperandType.Address:
@@ -161,7 +196,7 @@ namespace AssEmbly
                                 break;
                             }
                             referencedAddresses.Add(BinaryPrimitives.ReadUInt64LittleEndian(instruction[(int)totalBytes..]));
-                            operandStrings.Add(useLabelNames ? $":ADDR_{referencedAddresses[^1]:X}" : $":{referencedAddresses[^1]:X}");
+                            operandStrings.Add(useLabelNames ? $":ADDR_{referencedAddresses[^1]:X}" : $":0x{referencedAddresses[^1]:X}");
                             totalBytes += 8;
                             break;
                         case OperandType.Pointer:

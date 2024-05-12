@@ -533,9 +533,14 @@ namespace AssEmbly
             try
             {
                 disassembledProgram = Disassembler.DisassembleProgram(
-                    program, !args.IsOptionGiven('S', "no-strings"),
-                    !args.IsOptionGiven('P', "no-pads"),
-                    args.IsOptionGiven('f', "allow-full-base-opcodes"));
+                    program, new DisassemblerOptions()
+                    {
+                        DetectStrings = !args.IsOptionGiven('S', "no-strings"),
+                        DetectPads = !args.IsOptionGiven('P', "no-pads"),
+                        DetectFloats = !args.IsOptionGiven('F', "no-floats"),
+                        DetectSigned = !args.IsOptionGiven('G', "no-signed"),
+                        AllowFullyQualifiedBaseOpcodes = args.IsOptionGiven('f', "allow-full-base-opcodes")
+                    });
             }
             catch (Exception e)
             {
