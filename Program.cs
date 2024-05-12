@@ -40,11 +40,8 @@ namespace AssEmbly
             }
             if (args.Length < 1)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Error_Missing_Operation_Body);
-                Console.WriteLine(Strings.CLI_Error_Missing_Operation_Hint);
-                Console.ResetColor();
-                Environment.Exit(1);
+                PrintError(Strings.CLI_Error_Missing_Operation_Body);
+                PrintFatalError(Strings.CLI_Error_Missing_Operation_Hint);
                 return;
             }
             switch (args[0].ToLowerInvariant())
@@ -77,10 +74,7 @@ namespace AssEmbly
                     DisplayLicense(processedArgs);
                     break;
                 default:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.CLI_Error_Invalid_Operation, args[0]);
-                    Console.ResetColor();
-                    Environment.Exit(1);
+                    PrintFatalError(Strings.CLI_Error_Invalid_Operation, args[0]);
                     return;
             }
         }
@@ -106,10 +100,7 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Error_Code, codeString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
+                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Error_Code, codeString);
                         return;
                     }
                     _ = disabledErrors.Add(errorCode);
@@ -121,10 +112,7 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Warning_Code, codeString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
+                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Warning_Code, codeString);
                         return;
                     }
                     _ = disabledWarnings.Add(errorCode);
@@ -136,10 +124,7 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Assemble_Error_Invalid_Suggestion_Code, codeString);
-                        Console.ResetColor();
-                        Environment.Exit(1);
+                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Suggestion_Code, codeString);
                         return;
                     }
                     _ = disabledSuggestions.Add(errorCode);
@@ -267,14 +252,10 @@ namespace AssEmbly
                 OnAssemblerException(e);
 
                 Console.Write(Strings.CLI_Assemble_Result_Header_Start);
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Assemble_Result_Header_Failed);
-                Console.ResetColor();
-
+                PrintFatalError(Strings.CLI_Assemble_Result_Header_Failed);
 #if DEBUG
                 throw;
 #else
-                Environment.Exit(1);
                 return;
 #endif
             }
@@ -391,7 +372,7 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor processor = LoadExecutableToProcessor(appPath, memSize,
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
 #if V1_CALL_STACK_COMPAT
                 args.IsOptionGiven('1', "v1-format"),
                 args.IsMultiCharacterOptionGiven("v1-call-stack"),
@@ -401,6 +382,11 @@ namespace AssEmbly
                 args.IsOptionGiven('i', "ignore-newer-version"),
                 !args.IsOptionGiven('u', "unmapped-stack"),
                 args.IsOptionGiven('a', "auto-echo"));
+
+            if (processor is null)
+            {
+                return;
+            }
 
             args.WarnUnconsumedOptions(2);
 
@@ -482,7 +468,7 @@ namespace AssEmbly
 
             ulong memSize = GetMemorySize(args);
 
-            Processor processor = LoadExecutableToProcessor(appPath, memSize,
+            Processor? processor = LoadExecutableToProcessor(appPath, memSize,
 #if V1_CALL_STACK_COMPAT
                 args.IsOptionGiven('1', "v1-format"),
                 args.IsMultiCharacterOptionGiven("v1-call-stack"),
@@ -492,6 +478,11 @@ namespace AssEmbly
                 args.IsOptionGiven('i', "ignore-newer-version"),
                 !args.IsOptionGiven('u', "unmapped-stack"),
                 args.IsOptionGiven('a', "auto-echo"));
+
+            if (processor is null)
+            {
+                return;
+            }
 
             Debugger debugger = new(false, processor);
             if (positionalArgs.Length >= 3)
@@ -525,8 +516,12 @@ namespace AssEmbly
             else
 #endif
             {
-                AAPFile file = LoadAAPFile(sourcePath,
+                AAPFile? file = LoadAAPFile(sourcePath,
                     args.IsOptionGiven('i', "ignore-newer-version"));
+                if (file is null)
+                {
+                    return;
+                }
                 program = file.Program;
             }
 
@@ -544,13 +539,10 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Disassemble_Error_Unexpected, e.GetType().Name, e.Message);
-                Console.ResetColor();
+                PrintFatalError(Strings.CLI_Disassemble_Error_Unexpected, e.GetType().Name, e.Message);
 #if DEBUG
                 throw;
 #else
-                Environment.Exit(1);
                 return;
 #endif
             }
@@ -678,9 +670,7 @@ namespace AssEmbly
                         PrintOperationHelp("help", Strings.CLI_Help_Description_Help, Strings.CLI_Help_Options_Help);
                         break;
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_Operation, positionalArgs[1]);
-                        Console.ResetColor();
+                        PrintError(Strings.CLI_Error_Invalid_Operation, positionalArgs[1]);
                         break;
                 }
             }
@@ -711,13 +701,10 @@ namespace AssEmbly
             }
             catch
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_License_Error);
-                Console.ResetColor();
+                PrintFatalError(Strings.CLI_License_Error);
 #if DEBUG
                 throw;
 #else
-                Environment.Exit(1);
                 return;
 #endif
             }

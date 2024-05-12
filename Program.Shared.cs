@@ -8,7 +8,7 @@ namespace AssEmbly
         public static readonly ulong DefaultMemorySize = 8192;  // 8KB
 
         // Shared methods that are used by multiple commands
-        public static AAPFile LoadAAPFile(string appPath, bool ignoreNewerVersion)
+        public static AAPFile? LoadAAPFile(string appPath, bool ignoreNewerVersion)
         {
             AAPFile file;
             try
@@ -17,39 +17,28 @@ namespace AssEmbly
             }
             catch
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Error_Invalid_AAP);
-                Console.ResetColor();
-                Environment.Exit(1);
+                PrintFatalError(Strings.CLI_Error_Invalid_AAP);
                 return null;
             }
             if ((file.Features & AAPFeatures.Incompatible) != 0)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Error_AAP_Feature_Incompatible);
-                Console.ResetColor();
-                Environment.Exit(1);
+                PrintFatalError(Strings.CLI_Error_AAP_Feature_Incompatible);
                 return null;
             }
             if (!ignoreNewerVersion && file.LanguageVersion > (version ?? new Version()))
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(Strings.CLI_Warning_Newer_Build_Version,
+                PrintWarning(Strings.CLI_Warning_Newer_Build_Version,
                     file.LanguageVersion.Major, file.LanguageVersion.Minor, file.LanguageVersion.Build, version?.Major, version?.Minor, version?.Build);
-                Console.ResetColor();
                 if (file.LanguageVersion.Major > version?.Major)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.CLI_Error_Newer_Major_Build_Version, file.LanguageVersion.Major, version.Major);
-                    Console.ResetColor();
-                    Environment.Exit(1);
+                    PrintFatalError(Strings.CLI_Error_Newer_Major_Build_Version, file.LanguageVersion.Major, version.Major);
                     return null;
                 }
             }
             return file;
         }
 
-        public static Processor LoadExecutableToProcessor(string appPath, ulong memSize,
+        public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize,
             bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion, bool mapStack, bool autoEcho)
         {
             byte[] program;
@@ -63,7 +52,11 @@ namespace AssEmbly
             else
 #endif
             {
-                AAPFile file = LoadAAPFile(appPath, ignoreNewerVersion);
+                AAPFile? file = LoadAAPFile(appPath, ignoreNewerVersion);
+                if (file is null)
+                {
+                    return null;
+                }
                 processor = new Processor(memSize, entryPoint: file.EntryPoint,
 #if V1_CALL_STACK_COMPAT
                     useV1CallStack: useV1CallStack || file.Features.HasFlag(AAPFeatures.V1CallStack),
@@ -83,13 +76,9 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
-                Console.ResetColor();
+                PrintFatalError(Strings.CLI_Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
 #if DEBUG
                 throw;
-#else
-                Environment.Exit(1);
 #endif
             }
         }
@@ -98,18 +87,12 @@ namespace AssEmbly
         {
             if (args.Length < 2)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(missingMessage);
-                Console.ResetColor();
-                Environment.Exit(1);
+                PrintFatalError(missingMessage);
                 return false;
             }
             if (!File.Exists(args[1]))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.CLI_Error_File_Not_Exists);
-                Console.ResetColor();
-                Environment.Exit(1);
+                PrintFatalError(Strings.CLI_Error_File_Not_Exists);
                 return false;
             }
             return true;
@@ -130,10 +113,7 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(memSizeString, out ulong memSize))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
-                    Console.ResetColor();
-                    Environment.Exit(1);
+                    PrintFatalError(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
                     return 0;
                 }
                 return memSize;
@@ -147,10 +127,7 @@ namespace AssEmbly
             {
                 if (!int.TryParse(macroLimitString, out int macroLimit))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
-                    Console.ResetColor();
-                    Environment.Exit(1);
+                    PrintFatalError(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
                     return -1;
                 }
                 return macroLimit;
@@ -164,10 +141,7 @@ namespace AssEmbly
             {
                 if (!int.TryParse(whileLimitString, out int whileLimit))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
-                    Console.ResetColor();
-                    Environment.Exit(1);
+                    PrintFatalError(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
                     return -1;
                 }
                 return whileLimit;
@@ -186,10 +160,7 @@ namespace AssEmbly
                     ulong value = 0;
                     if (split.Length == 2 && !ulong.TryParse(split[1], out value))
                     {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
-                        Console.ResetColor();
-                        Environment.Exit(1);
+                        PrintFatalError(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
                         return new List<(string Name, ulong Value)>();
                     }
                     string name = split[0];
@@ -206,7 +177,6 @@ namespace AssEmbly
 
         public static void OnExecutionException(Exception e, Processor processor)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
             if (e is IndexOutOfRangeException or ArgumentOutOfRangeException or RuntimeException
                 or DivideByZeroException or FileNotFoundException or DirectoryNotFoundException)
             {
@@ -217,12 +187,13 @@ namespace AssEmbly
                     FileNotFoundException or DirectoryNotFoundException => e.Message,
                     _ => Strings.CLI_Error_Runtime_Invalid_Address
                 };
-                Console.WriteLine(Strings.CLI_Error_Runtime_Known, message);
+                PrintError(Strings.CLI_Error_Runtime_Known, message);
             }
             else
             {
-                Console.WriteLine(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
+                PrintError(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
+            Console.ForegroundColor = ConsoleColor.Red;
             PrintRegisterStates(processor);
             Console.ResetColor();
         }
@@ -233,24 +204,22 @@ namespace AssEmbly
             {
                 _ = processor.Execute(true);
 
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
                 if (processor.IsFileOpen)
                 {
-                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_File_Open);
+                    PrintWarning(Strings.CLI_Warning_Processor_Exit_File_Open);
                 }
 #if EXTENSION_SET_EXTERNAL_ASM
                 if (processor.IsExternalOpen)
                 {
-                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_External_Open);
+                    PrintWarning(Strings.CLI_Warning_Processor_Exit_External_Open);
                 }
 #endif
 #if EXTENSION_SET_HEAP_ALLOCATE
                 if (processor.AnyRegionsMapped)
                 {
-                    Console.WriteLine(Strings.CLI_Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
+                    PrintWarning(Strings.CLI_Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
                 }
 #endif
-                Console.ResetColor();
             }
             catch (Exception e)
             {
@@ -266,16 +235,14 @@ namespace AssEmbly
 
         public static void OnAssemblerException(Exception e)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
             if (e is AssemblerException assemblerException)
             {
-                Console.WriteLine(assemblerException.ConsoleMessage);
+                PrintError(assemblerException.ConsoleMessage);
             }
             else
             {
-                Console.WriteLine(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
+                PrintError(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
-            Console.ResetColor();
         }
 
         public static void PrintRegisterStates(Processor processor)
@@ -313,6 +280,31 @@ namespace AssEmbly
                 }
                 Console.WriteLine();
             }
+        }
+
+        public static void PrintFatalError([Localizable(true)] string errorText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            PrintError(errorText, formatParams);
+#if !DEBUG
+            Environment.Exit(1);
+#endif
+        }
+
+        public static void PrintError([Localizable(true)] string errorText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(errorText, formatParams);
+            Console.ResetColor();
+        }
+
+        public static void PrintWarning([Localizable(true)] string warningText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(warningText, formatParams);
+            Console.ResetColor();
         }
     }
 }

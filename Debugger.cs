@@ -72,9 +72,7 @@ namespace AssEmbly
             }
             catch (Exception exc)
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(Strings.Debugger_Warning_Debug_Info_File, exc.GetType().Name, exc.Message);
-                Console.ResetColor();
+                Program.PrintWarning(Strings.Debugger_Warning_Debug_Info_File, exc.GetType().Name, exc.Message);
 #if DEBUG
                 throw;
 #endif
@@ -305,18 +303,14 @@ namespace AssEmbly
                                     CommandDebugHelp();
                                     break;
                                 default:
-                                    Console.ForegroundColor = ConsoleColor.Red;
-                                    Console.WriteLine(Strings.Debugger_Error_Unrecognised_Command, command[0]);
-                                    Console.ResetColor();
+                                    Program.PrintError(Strings.Debugger_Error_Unrecognised_Command, command[0]);
                                     break;
                             }
                         }
                     }
                     if (DebuggingProcessor.Execute(false) && !InReplMode)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.WriteLine(Strings.Debugger_Warning_HLT_Reached);
-                        Console.ResetColor();
+                        Program.PrintWarning(Strings.Debugger_Warning_HLT_Reached);
                         Console.Write(Strings.Debugger_Any_Key_Continue);
                         _ = Console.ReadKey(true);
                         Console.WriteLine();
@@ -352,23 +346,17 @@ namespace AssEmbly
                     ? 2 : command[1] == "dword" ? 4 : command[1] == "qword" ? 8 : 0U;
                 if (bytesToRead == 0)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Size, command[1]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Size, command[1]);
                     return;
                 }
                 if (!ulong.TryParse(command[2], out ulong address))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Address, command[2]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Address, command[2]);
                     return;
                 }
                 if (address + bytesToRead > (ulong)DebuggingProcessor.Memory.LongLength)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_OutOfRange_Address, command[2]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_OutOfRange_Address, command[2]);
                     return;
                 }
                 ulong value = 0;
@@ -380,9 +368,7 @@ namespace AssEmbly
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_2);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_2);
             }
         }
 
@@ -396,23 +382,17 @@ namespace AssEmbly
                     {
                         if (!ulong.TryParse(command[2], out ulong address))
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.Debugger_Error_Invalid_Address, command[2]);
-                            Console.ResetColor();
+                            Program.PrintError(Strings.Debugger_Error_Invalid_Address, command[2]);
                             return;
                         }
                         if (address >= (ulong)DebuggingProcessor.Memory.LongLength)
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.Debugger_Error_OutOfRange_Address, command[2]);
-                            Console.ResetColor();
+                            Program.PrintError(Strings.Debugger_Error_OutOfRange_Address, command[2]);
                             return;
                         }
                         if (!byte.TryParse(command[3], out byte value))
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.Debugger_Error_Invalid_Byte_Value, command[3]);
-                            Console.ResetColor();
+                            Program.PrintError(Strings.Debugger_Error_Invalid_Byte_Value, command[3]);
                             return;
                         }
                         DebuggingProcessor.Memory[address] = value;
@@ -423,16 +403,12 @@ namespace AssEmbly
                     {
                         if (!Enum.TryParse(command[2], out Register register))
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.Debugger_Error_Invalid_Register, command[2]);
-                            Console.ResetColor();
+                            Program.PrintError(Strings.Debugger_Error_Invalid_Register, command[2]);
                             return;
                         }
                         if (!ulong.TryParse(command[3], out ulong value))
                         {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine(Strings.Debugger_Error_Invalid_Register_Value, command[3]);
-                            Console.ResetColor();
+                            Program.PrintError(Strings.Debugger_Error_Invalid_Register_Value, command[3]);
                             return;
                         }
                         DebuggingProcessor.Registers[(int)register] = value;
@@ -440,17 +416,13 @@ namespace AssEmbly
                         break;
                     }
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.Debugger_Error_Invalid_Location, command[1]);
-                        Console.ResetColor();
+                        Program.PrintError(Strings.Debugger_Error_Invalid_Location, command[1]);
                         break;
                 }
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_3);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_3);
             }
         }
 
@@ -462,9 +434,7 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[1], out offset))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Offset, command[1]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Offset, command[1]);
                     return;
                 }
             }
@@ -472,17 +442,13 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[2], out limit))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Limit, command[1]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Limit, command[1]);
                     return;
                 }
             }
             if (command.Length is not 1 and > 3)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_0to2);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_0to2);
                 return;
             }
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -597,32 +563,24 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[1], out limit))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Limit, command[1]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Limit, command[1]);
                     return;
                 }
             }
             else if (command.Length != 1)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_0to1);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_0to1);
                 return;
             }
 
             if (DebuggingProcessor.Registers[(int)Register.rso] >= (ulong)DebuggingProcessor.Memory.LongLength)
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(Strings.Debugger_Warning_Stack_Empty);
-                Console.ResetColor();
+                Program.PrintWarning(Strings.Debugger_Warning_Stack_Empty);
                 return;
             }
             if (DebuggingProcessor.Registers[(int)Register.rso] > DebuggingProcessor.Registers[(int)Register.rsb])
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(Strings.Debugger_Warning_rso_GT_rsb);
-                Console.ResetColor();
+                Program.PrintWarning(Strings.Debugger_Warning_rso_GT_rsb);
                 return;
             }
 
@@ -704,9 +662,7 @@ namespace AssEmbly
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine(Strings.Debugger_Warning_Stack_Bottom);
-                Console.ResetColor();
+                Program.PrintWarning(Strings.Debugger_Warning_Stack_Bottom);
             }
         }
 
@@ -714,16 +670,12 @@ namespace AssEmbly
         {
             if (command.Length != 2)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_1);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_1);
                 return;
             }
             if (!ulong.TryParse(command[1], out ulong decValue))
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
                 return;
             }
             Console.WriteLine(Strings.Debugger_Value_In_Hex, decValue, decValue);
@@ -733,9 +685,7 @@ namespace AssEmbly
         {
             if (command.Length != 2)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_1);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_1);
                 return;
             }
             try
@@ -745,9 +695,7 @@ namespace AssEmbly
             }
             catch
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
             }
         }
 
@@ -765,16 +713,12 @@ namespace AssEmbly
             {
                 if (!Enum.TryParse(command[2], out Register register))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Register, command[2]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Register, command[2]);
                     return;
                 }
                 if (!ulong.TryParse(command[3], out ulong value))
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(Strings.Debugger_Error_Invalid_Break_Value, command[3]);
-                    Console.ResetColor();
+                    Program.PrintError(Strings.Debugger_Error_Invalid_Break_Value, command[3]);
                     return;
                 }
                 switch (command[1].ToLower())
@@ -787,17 +731,13 @@ namespace AssEmbly
                         }
                         else
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
-                            Console.WriteLine(Strings.Debugger_Warning_Breakpoint_Exists, register, value);
-                            Console.ResetColor();
+                            Program.PrintWarning(Strings.Debugger_Warning_Breakpoint_Exists, register, value);
                         }
                         break;
                     case "remove":
                         if (Breakpoints.RemoveAll(x => x.Register == register && x.Value == value) == 0)
                         {
-                            Console.ForegroundColor = ConsoleColor.DarkYellow;
-                            Console.WriteLine(Strings.Debugger_Warning_Breakpoint_No_Matching);
-                            Console.ResetColor();
+                            Program.PrintWarning(Strings.Debugger_Warning_Breakpoint_No_Matching);
                         }
                         else
                         {
@@ -805,17 +745,13 @@ namespace AssEmbly
                         }
                         break;
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.Debugger_Error_Invalid_Breakpoint_Action, command[1]);
-                        Console.ResetColor();
+                        Program.PrintError(Strings.Debugger_Error_Invalid_Breakpoint_Action, command[1]);
                         break;
                 }
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(Strings.Debugger_Error_Args_Required_Breakpoint);
-                Console.ResetColor();
+                Program.PrintError(Strings.Debugger_Error_Args_Required_Breakpoint);
             }
         }
 
