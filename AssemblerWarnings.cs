@@ -279,7 +279,6 @@ namespace AssEmbly
             warningFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>
             {
                 { 0002, Analyzer_Final_Warning_0002 },
-                { 0003, Analyzer_Final_Warning_0003 },
                 { 0004, Analyzer_Final_Warning_0004 },
                 { 0005, Analyzer_Final_Warning_0005 },
                 { 0006, Analyzer_Final_Warning_0006 },
@@ -540,23 +539,6 @@ namespace AssEmbly
                 if (!executableAddresses.Contains(address))
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0002, jumpPosition,
-                        lineMnemonics[(jumpPosition, jumpMacroLineDepth)], lineOperands[(jumpPosition, jumpMacroLineDepth)],
-                        lineText[(jumpPosition, jumpMacroLineDepth)], jumpMacroName));
-                }
-            }
-            return warnings;
-        }
-
-        private List<Warning> Analyzer_Final_Warning_0003()
-        {
-            // Warning 0003: Jump/Call target address points to end of file, not executable code.
-            List<Warning> warnings = new();
-            foreach ((FilePosition jumpPosition, string? jumpMacroName, int jumpMacroLineDepth, ulong jumpAddress) in jumpCallToAddress)
-            {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)jumpAddress..]);
-                if (address >= currentAddress)
-                {
-                    warnings.Add(new Warning(WarningSeverity.Warning, 0003, jumpPosition,
                         lineMnemonics[(jumpPosition, jumpMacroLineDepth)], lineOperands[(jumpPosition, jumpMacroLineDepth)],
                         lineText[(jumpPosition, jumpMacroLineDepth)], jumpMacroName));
                 }
