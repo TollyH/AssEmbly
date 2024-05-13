@@ -50,3 +50,21 @@ jobs:
         name: AssEmbly-${{ matrix.runtime-target }}
         path: Publish/${{ matrix.runtime-target }}/
         if-no-files-found: error
+
+  test-build-opts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install tqdm
+        run: pip3 install tqdm
+      - name: Test Build Option Combinations
+        run: python3 Scripts/test_build_options.py
