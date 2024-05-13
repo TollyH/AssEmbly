@@ -1730,4 +1730,7 @@ Current while stack (deepest while first):</value>
     <data name="AssemblerWarnings_Suggestion_0020" xml:space="preserve">
         <value>Use the `HLT` instruction instead of `EXTD_HLT` when the exit code is always 0.</value>
     </data>
+    <data name="AssemblerWarnings_NonFatal_0005" xml:space="preserve">
+        <value>The given literal value does not correspond to a valid terminal colour.</value>
+    </data>
 </root>

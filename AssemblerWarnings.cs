@@ -228,6 +228,7 @@ namespace AssEmbly
                 { 0002, Analyzer_Rolling_NonFatalError_0002 },
                 { 0003, Analyzer_Rolling_NonFatalError_0003 },
                 { 0004, Analyzer_Rolling_NonFatalError_0004 },
+                { 0005, Analyzer_Rolling_NonFatalError_0005 },
             };
             warningRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -485,10 +486,21 @@ namespace AssEmbly
         private bool Analyzer_Rolling_NonFatalError_0004()
         {
             // Non-Fatal Error 0004: Allocating constant 0 bytes.
-            if (allocationOfLiteral.Contains(instructionOpcode))
+            if (newBytes.Length > 0 && !instructionIsData && allocationOfLiteral.Contains(instructionOpcode))
             {
                 _ = Assembler.ParseLiteral(operands[1], false, out ulong number);
                 return number == 0;
+            }
+            return false;
+        }
+
+        private bool Analyzer_Rolling_NonFatalError_0005()
+        {
+            // Non-Fatal Error 0005: The given literal value does not correspond to a valid terminal colour.
+            if (newBytes.Length > 0 && !instructionIsData && terminalColorInstructions.Contains(instructionOpcode))
+            {
+                _ = Assembler.ParseLiteral(operands[0], false, out ulong number);
+                return !Enum.IsDefined((ConsoleColor)number);
             }
             return false;
         }

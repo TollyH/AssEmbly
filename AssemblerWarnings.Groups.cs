@@ -367,7 +367,6 @@
             { new Opcode(0x05, 0x16), new ulong[] { 1 } },  // HEAP_TRE reg, adr
 
             { new Opcode(0x06, 0x00), new ulong[] { 0 } },  // FSYS_CWD adr
-            { new Opcode(0x06, 0x02), new ulong[] { 0 } },  // FSYS_GWD adr
             { new Opcode(0x06, 0x10), new ulong[] { 0 } },  // FSYS_CDR adr
             { new Opcode(0x06, 0x20), new ulong[] { 0 } },  // FSYS_DDR adr
             { new Opcode(0x06, 0x22), new ulong[] { 0 } },  // FSYS_DDE adr
@@ -730,6 +729,15 @@
             new Opcode(0x02, 0x71),  // FLPT_WCN reg, lit
             new Opcode(0x02, 0x81),  // FLPT_WFN reg, lit
             new Opcode(0x02, 0xD1),  // FLPT_CMP reg, lit
+        };
+
+        /// <summary>
+        /// All opcodes that require a valid terminal colour literal
+        /// </summary>
+        internal static readonly HashSet<Opcode> terminalColorInstructions = new()
+        {
+            new Opcode(0x07, 0x51),
+            new Opcode(0x07, 0x55)
         };
     }
 }

@@ -1545,6 +1545,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The given literal value does not correspond to a valid terminal colour..
+        /// </summary>
+        internal static string AssemblerWarnings_NonFatal_0005 {
+            get {
+                return ResourceManager.GetString("AssemblerWarnings_NonFatal_0005", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted suggestion..
         /// </summary>
         internal static string AssemblerWarnings_Suggestion_0000 {
