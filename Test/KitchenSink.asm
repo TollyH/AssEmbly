@@ -7,8 +7,8 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
-; Disable unused label suggestion
 %ANALYZER suggestion, 0018, 0
+%ANALYZER suggestion, 0004, 0
 
 MVQ rg0, 69
 
@@ -42,8 +42,6 @@ HLT
 
 %NUM @!CURRENT_ADDRESS
 
-%ANALYZER suggestion, 0004, 0
-
 %DAT "Hello, world!\nEscape test complete\"Still string\0",
 %DAT                     0x42
 %NUM 1189998819991197253
@@ -63,10 +61,6 @@ this@LineIsNowBlank()
 %num :&THIS_DOESNT_POINT_HERE
 %nUm :&NOR_DOES_THIS
 %NuM :&NOR_THIS
-
-; Final analyzers currently can't be re-enabled without them showing again
-; This should hopefully be changed in a future version
-; %ANALYZER suggestion, 0004, r
 
 %MACRO CFL, ASMX_CLF
 :thisLabelRemovesTheWarning

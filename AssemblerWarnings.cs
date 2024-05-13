@@ -60,6 +60,12 @@ namespace AssEmbly
         public readonly HashSet<int> DisabledWarnings = new();
         public readonly HashSet<int> DisabledSuggestions = new();
 
+        // Store every line where each warning has been disabled so that final warning analyzers don't return warnings
+        // in places that have the warning disabled when the warning was since re-enabled.
+        private readonly Dictionary<int, HashSet<FilePosition>> disabledNonFatalErrorPositions = new();
+        private readonly Dictionary<int, HashSet<FilePosition>> disabledWarningPositions = new();
+        private readonly Dictionary<int, HashSet<FilePosition>> disabledSuggestionPositions = new();
+
         // Variables updated by parameters of the NextInstruction method
         private byte[] newBytes = Array.Empty<byte>();
         private string mnemonic = "";
@@ -171,6 +177,7 @@ namespace AssEmbly
         /// <param name="macroName">The name of the current macro being expanded, or <see langword="null"/> if no macro is.</param>
         public void NewLabel(string labelName, FilePosition filePosition, string? macroName)
         {
+            UpdateDisabledPositions(filePosition);
             labelDefinitionPositions[labelName] = (filePosition, macroName);
         }
 
@@ -192,27 +199,18 @@ namespace AssEmbly
 
             foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in nonFatalErrorFinalAnalyzers)
             {
-                if (DisabledNonFatalErrors.Contains(code))
-                {
-                    continue;
-                }
-                warnings.AddRange(finalAnalyzer());
+                warnings.AddRange(finalAnalyzer().Where(w =>
+                    !disabledNonFatalErrorPositions.GetValueOrDefault(code)?.Contains(w.Position) ?? true));
             }
             foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in warningFinalAnalyzers)
             {
-                if (DisabledWarnings.Contains(code))
-                {
-                    continue;
-                }
-                warnings.AddRange(finalAnalyzer());
+                warnings.AddRange(finalAnalyzer().Where(w =>
+                    !disabledWarningPositions.GetValueOrDefault(code)?.Contains(w.Position) ?? true));
             }
             foreach ((int code, FinalWarningAnalyzer finalAnalyzer) in suggestionFinalAnalyzers)
             {
-                if (DisabledSuggestions.Contains(code))
-                {
-                    continue;
-                }
-                warnings.AddRange(finalAnalyzer());
+                warnings.AddRange(finalAnalyzer().Where(w =>
+                    !disabledSuggestionPositions.GetValueOrDefault(code)?.Contains(w.Position) ?? true));
             }
 
             return warnings.ToArray();
@@ -335,6 +333,8 @@ namespace AssEmbly
 
         private void PreAnalyzeStateUpdate()
         {
+            UpdateDisabledPositions(filePosition);
+
             if (newBytes.Length > 0)
             {
                 operandStart = 0;
@@ -438,6 +438,25 @@ namespace AssEmbly
             lastImportStack = importStack;
             lastMacroName = macroName;
             lastMacroLineDepth = macroLineDepth;
+        }
+
+        private void UpdateDisabledPositions(FilePosition filePosition)
+        {
+            foreach (int code in DisabledNonFatalErrors)
+            {
+                _ = disabledNonFatalErrorPositions.TryAdd(code, new HashSet<FilePosition>());
+                disabledNonFatalErrorPositions[code].Add(filePosition);
+            }
+            foreach (int code in DisabledWarnings)
+            {
+                _ = disabledWarningPositions.TryAdd(code, new HashSet<FilePosition>());
+                disabledWarningPositions[code].Add(filePosition);
+            }
+            foreach (int code in DisabledSuggestions)
+            {
+                _ = disabledSuggestionPositions.TryAdd(code, new HashSet<FilePosition>());
+                disabledSuggestionPositions[code].Add(filePosition);
+            }
         }
 
         // Analyzer methods
