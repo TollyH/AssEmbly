@@ -397,9 +397,12 @@ namespace AssEmbly
                 {
                     writesToAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
                 }
-                if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong addressOpcodeOffset))
+                if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong[]? addressOpcodeOffsets))
                 {
-                    readsFromAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart + addressOpcodeOffset));
+                    foreach (ulong offset in addressOpcodeOffsets)
+                    {
+                        readsFromAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart + offset));
+                    }
                 }
                 if (jumpCallToAddressOpcodes.Contains(instructionOpcode))
                 {

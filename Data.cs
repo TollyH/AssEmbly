@@ -708,7 +708,7 @@
             { ("FSYS_DDR", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x20) },
             { ("FSYS_DDR", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x21) },
 
-            // FSYS_DDR (Delete Empty Directory at Path Specified by 0x00 Terminated String in Memory)
+            // FSYS_DDE (Delete Empty Directory at Path Specified by 0x00 Terminated String in Memory)
             { ("FSYS_DDE", new OperandType[1] { OperandType.Address }), new Opcode(0x06, 0x22) },
             { ("FSYS_DDE", new OperandType[1] { OperandType.Pointer }), new Opcode(0x06, 0x23) },
 

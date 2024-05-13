@@ -246,6 +246,33 @@
             { new Opcode(0x05, 0x15), new[] { 0 } },  // HEAP_TRE reg, lit
             { new Opcode(0x05, 0x16), new[] { 0 } },  // HEAP_TRE reg, adr
             { new Opcode(0x05, 0x17), new[] { 0 } },  // HEAP_TRE reg, ptr
+
+            // File system extension set
+
+            { new Opcode(0x06, 0x02), new[] { 0 } },  // FSYS_GWD adr
+            { new Opcode(0x06, 0x03), new[] { 0 } },  // FSYS_GWD ptr
+
+            { new Opcode(0x06, 0x30), new[] { 0 } },  // FSYS_DEX reg, adr
+            { new Opcode(0x06, 0x31), new[] { 0 } },  // FSYS_DEX reg, ptr
+
+            { new Opcode(0x06, 0x60), new[] { 0 } },  // FSYS_GNF adr
+            { new Opcode(0x06, 0x61), new[] { 0 } },  // FSYS_GNF ptr
+            { new Opcode(0x06, 0x62), new[] { 0 } },  // FSYS_GND adr
+            { new Opcode(0x06, 0x63), new[] { 0 } },  // FSYS_GND ptr
+
+            { new Opcode(0x06, 0x70), new[] { 0 } },  // FSYS_GCT reg, adr
+            { new Opcode(0x06, 0x71), new[] { 0 } },  // FSYS_GCT reg, ptr
+            { new Opcode(0x06, 0x72), new[] { 0 } },  // FSYS_GMT reg, adr
+            { new Opcode(0x06, 0x73), new[] { 0 } },  // FSYS_GMT reg, ptr
+            { new Opcode(0x06, 0x74), new[] { 0 } },  // FSYS_GAT reg, adr
+            { new Opcode(0x06, 0x75), new[] { 0 } },  // FSYS_GAT reg, ptr
+
+            // Terminal extension set
+
+            { new Opcode(0x07, 0x30), new[] { 0 } },  // TERM_GCY reg
+            { new Opcode(0x07, 0x31), new[] { 0 } },  // TERM_GCX reg
+            { new Opcode(0x07, 0x32), new[] { 0 } },  // TERM_GSY reg
+            { new Opcode(0x07, 0x33), new[] { 0 } },  // TERM_GSX reg
         };
         /// <summary>
         /// Every opcode that writes to a literal memory location.
@@ -261,79 +288,111 @@
             new Opcode(0x00, 0x95),  // MVB adr, lit
             new Opcode(0x00, 0x9C),  // MVW adr, reg
             new Opcode(0x00, 0x9D),  // MVW adr, lit
+
+            new Opcode(0x06, 0x02),  // FSYS_GWD adr
+            new Opcode(0x06, 0x60),  // FSYS_GNF adr
+            new Opcode(0x06, 0x62),  // FSYS_GND adr
         };
 
         /// <summary>
-        /// Every opcode that reads a value from memory as data, mapped to the byte offset of the operand that is the memory address (not including the opcode).
+        /// Every opcode that reads a value from memory as data, mapped to the byte offsets of the operands that are the memory addresses (not including the opcode).
         /// </summary>
-        internal static readonly Dictionary<Opcode, ulong> readValueFromMemory = new()
+        internal static readonly Dictionary<Opcode, ulong[]> readValueFromMemory = new()
         {
-            { new Opcode(0x00, 0x12), 1 },  // ADD reg, adr
-            { new Opcode(0x00, 0x22), 1 },  // SUB reg, adr
-            { new Opcode(0x00, 0x32), 1 },  // MUL reg, adr
-            { new Opcode(0x00, 0x42), 1 },  // DIV reg, adr
-            { new Opcode(0x00, 0x46), 2 },  // DVR reg, reg, adr
-            { new Opcode(0x00, 0x4A), 1 },  // REM reg, adr
-            { new Opcode(0x00, 0x52), 1 },  // SHL reg, adr
-            { new Opcode(0x00, 0x56), 1 },  // SHR reg, adr
-            { new Opcode(0x00, 0x62), 1 },  // AND reg, adr
-            { new Opcode(0x00, 0x66), 1 },  // ORR reg, adr
-            { new Opcode(0x00, 0x6A), 1 },  // XOR reg, adr
-            { new Opcode(0x00, 0x72), 1 },  // TST reg, adr
-            { new Opcode(0x00, 0x76), 1 },  // CMP reg, adr
-            { new Opcode(0x00, 0x82), 1 },  // MVB reg, adr
-            { new Opcode(0x00, 0x8A), 1 },  // MVW reg, adr
-            { new Opcode(0x00, 0x92), 1 },  // MVD reg, adr
-            { new Opcode(0x00, 0x9A), 1 },  // MVQ reg, adr
-            { new Opcode(0x00, 0xA2), 0 },  // PSH adr
-            { new Opcode(0x00, 0xB4), 8 },  // CAL adr, adr
-            { new Opcode(0x00, 0xB8), 1 },  // CAL ptr, adr
-            { new Opcode(0x00, 0xBD), 0 },  // RET adr
-            { new Opcode(0x00, 0xC2), 0 },  // WCN adr
-            { new Opcode(0x00, 0xC6), 0 },  // WCB adr
-            { new Opcode(0x00, 0xCA), 0 },  // WCX adr
-            { new Opcode(0x00, 0xCE), 0 },  // WCC adr
-            { new Opcode(0x00, 0xD2), 0 },  // WFN adr
-            { new Opcode(0x00, 0xD6), 0 },  // WFB adr
-            { new Opcode(0x00, 0xDA), 0 },  // WFX adr
-            { new Opcode(0x00, 0xDE), 0 },  // WFC adr
-            { new Opcode(0x00, 0xE0), 0 },  // OFL adr
-            { new Opcode(0x00, 0xE3), 0 },  // DFL adr
-            { new Opcode(0x00, 0xE5), 1 },  // FEX reg, adr
-            { new Opcode(0x00, 0xE7), 1 },  // FSZ reg, adr
+            { new Opcode(0x00, 0x12), new ulong[] { 1 } },  // ADD reg, adr
+            { new Opcode(0x00, 0x22), new ulong[] { 1 } },  // SUB reg, adr
+            { new Opcode(0x00, 0x32), new ulong[] { 1 } },  // MUL reg, adr
+            { new Opcode(0x00, 0x42), new ulong[] { 1 } },  // DIV reg, adr
+            { new Opcode(0x00, 0x46), new ulong[] { 2 } },  // DVR reg, reg, adr
+            { new Opcode(0x00, 0x4A), new ulong[] { 1 } },  // REM reg, adr
+            { new Opcode(0x00, 0x52), new ulong[] { 1 } },  // SHL reg, adr
+            { new Opcode(0x00, 0x56), new ulong[] { 1 } },  // SHR reg, adr
+            { new Opcode(0x00, 0x62), new ulong[] { 1 } },  // AND reg, adr
+            { new Opcode(0x00, 0x66), new ulong[] { 1 } },  // ORR reg, adr
+            { new Opcode(0x00, 0x6A), new ulong[] { 1 } },  // XOR reg, adr
+            { new Opcode(0x00, 0x72), new ulong[] { 1 } },  // TST reg, adr
+            { new Opcode(0x00, 0x76), new ulong[] { 1 } },  // CMP reg, adr
+            { new Opcode(0x00, 0x82), new ulong[] { 1 } },  // MVB reg, adr
+            { new Opcode(0x00, 0x8A), new ulong[] { 1 } },  // MVW reg, adr
+            { new Opcode(0x00, 0x92), new ulong[] { 1 } },  // MVD reg, adr
+            { new Opcode(0x00, 0x9A), new ulong[] { 1 } },  // MVQ reg, adr
+            { new Opcode(0x00, 0xA2), new ulong[] { 0 } },  // PSH adr
+            { new Opcode(0x00, 0xB4), new ulong[] { 8 } },  // CAL adr, adr
+            { new Opcode(0x00, 0xB8), new ulong[] { 1 } },  // CAL ptr, adr
+            { new Opcode(0x00, 0xBD), new ulong[] { 0 } },  // RET adr
+            { new Opcode(0x00, 0xC2), new ulong[] { 0 } },  // WCN adr
+            { new Opcode(0x00, 0xC6), new ulong[] { 0 } },  // WCB adr
+            { new Opcode(0x00, 0xCA), new ulong[] { 0 } },  // WCX adr
+            { new Opcode(0x00, 0xCE), new ulong[] { 0 } },  // WCC adr
+            { new Opcode(0x00, 0xD2), new ulong[] { 0 } },  // WFN adr
+            { new Opcode(0x00, 0xD6), new ulong[] { 0 } },  // WFB adr
+            { new Opcode(0x00, 0xDA), new ulong[] { 0 } },  // WFX adr
+            { new Opcode(0x00, 0xDE), new ulong[] { 0 } },  // WFC adr
+            { new Opcode(0x00, 0xE0), new ulong[] { 0 } },  // OFL adr
+            { new Opcode(0x00, 0xE3), new ulong[] { 0 } },  // DFL adr
+            { new Opcode(0x00, 0xE5), new ulong[] { 1 } },  // FEX reg, adr
+            { new Opcode(0x00, 0xE7), new ulong[] { 1 } },  // FSZ reg, adr
 
-            { new Opcode(0x01, 0x12), 1 },  // SIGN_DIV reg, adr
-            { new Opcode(0x01, 0x16), 2 },  // SIGN_DVR reg, reg, adr
-            { new Opcode(0x01, 0x1A), 1 },  // SIGN_REM reg, adr
-            { new Opcode(0x01, 0x22), 1 },  // SIGN_SHL reg, adr
-            { new Opcode(0x01, 0x32), 1 },  // SIGN_MVB reg, adr
-            { new Opcode(0x01, 0x36), 1 },  // SIGN_MVW reg, adr
-            { new Opcode(0x01, 0x42), 1 },  // SIGN_MVD reg, adr
-            { new Opcode(0x01, 0x52), 0 },  // SIGN_WCN adr
-            { new Opcode(0x01, 0x56), 0 },  // SIGN_WCB adr
-            { new Opcode(0x01, 0x62), 0 },  // SIGN_WFN adr
-            { new Opcode(0x01, 0x66), 0 },  // SIGN_WFB adr
+            { new Opcode(0x01, 0x12), new ulong[] { 1 } },  // SIGN_DIV reg, adr
+            { new Opcode(0x01, 0x16), new ulong[] { 2 } },  // SIGN_DVR reg, reg, adr
+            { new Opcode(0x01, 0x1A), new ulong[] { 1 } },  // SIGN_REM reg, adr
+            { new Opcode(0x01, 0x22), new ulong[] { 1 } },  // SIGN_SHL reg, adr
+            { new Opcode(0x01, 0x32), new ulong[] { 1 } },  // SIGN_MVB reg, adr
+            { new Opcode(0x01, 0x36), new ulong[] { 1 } },  // SIGN_MVW reg, adr
+            { new Opcode(0x01, 0x42), new ulong[] { 1 } },  // SIGN_MVD reg, adr
+            { new Opcode(0x01, 0x52), new ulong[] { 0 } },  // SIGN_WCN adr
+            { new Opcode(0x01, 0x56), new ulong[] { 0 } },  // SIGN_WCB adr
+            { new Opcode(0x01, 0x62), new ulong[] { 0 } },  // SIGN_WFN adr
+            { new Opcode(0x01, 0x66), new ulong[] { 0 } },  // SIGN_WFB adr
 
-            { new Opcode(0x02, 0x02), 1 },  // FLPT_ADD reg, adr
-            { new Opcode(0x02, 0x12), 1 },  // FLPT_SUB reg, adr
-            { new Opcode(0x02, 0x22), 1 },  // FLPT_MUL reg, adr
-            { new Opcode(0x02, 0x32), 1 },  // FLPT_DIV reg, adr
-            { new Opcode(0x02, 0x36), 2 },  // FLPT_DVR reg, reg, adr
-            { new Opcode(0x02, 0x3A), 1 },  // FLPT_REM reg, adr
-            { new Opcode(0x02, 0x48), 1 },  // FLPT_PTN reg, adr
-            { new Opcode(0x02, 0x52), 1 },  // FLPT_POW reg, adr
-            { new Opcode(0x02, 0x62), 1 },  // FLPT_LOG reg, adr
-            { new Opcode(0x02, 0x72), 0 },  // FLPT_WCN adr
-            { new Opcode(0x02, 0x82), 0 },  // FLPT_WFN adr
-            { new Opcode(0x02, 0xD2), 1 },  // FLPT_CMP reg, adr
+            { new Opcode(0x02, 0x02), new ulong[] { 1 } },  // FLPT_ADD reg, adr
+            { new Opcode(0x02, 0x12), new ulong[] { 1 } },  // FLPT_SUB reg, adr
+            { new Opcode(0x02, 0x22), new ulong[] { 1 } },  // FLPT_MUL reg, adr
+            { new Opcode(0x02, 0x32), new ulong[] { 1 } },  // FLPT_DIV reg, adr
+            { new Opcode(0x02, 0x36), new ulong[] { 2 } },  // FLPT_DVR reg, reg, adr
+            { new Opcode(0x02, 0x3A), new ulong[] { 1 } },  // FLPT_REM reg, adr
+            { new Opcode(0x02, 0x48), new ulong[] { 1 } },  // FLPT_PTN reg, adr
+            { new Opcode(0x02, 0x52), new ulong[] { 1 } },  // FLPT_POW reg, adr
+            { new Opcode(0x02, 0x62), new ulong[] { 1 } },  // FLPT_LOG reg, adr
+            { new Opcode(0x02, 0x72), new ulong[] { 0 } },  // FLPT_WCN adr
+            { new Opcode(0x02, 0x82), new ulong[] { 0 } },  // FLPT_WFN adr
+            { new Opcode(0x02, 0xD2), new ulong[] { 1 } },  // FLPT_CMP reg, adr
 
-            { new Opcode(0x04, 0x20), 1 },  // ASMX_AEX reg, adr
-            { new Opcode(0x04, 0x22), 1 },  // ASMX_FEX reg, adr
+            { new Opcode(0x04, 0x20), new ulong[] { 1 } },  // ASMX_AEX reg, adr
+            { new Opcode(0x04, 0x22), new ulong[] { 1 } },  // ASMX_FEX reg, adr
 
-            { new Opcode(0x05, 0x02), 1 },  // HEAP_ALC reg, adr
-            { new Opcode(0x05, 0x06), 1 },  // HEAP_TRY reg, adr
-            { new Opcode(0x05, 0x12), 1 },  // HEAP_REA reg, adr
-            { new Opcode(0x05, 0x16), 1 },  // HEAP_TRE reg, adr
+            { new Opcode(0x05, 0x02), new ulong[] { 1 } },  // HEAP_ALC reg, adr
+            { new Opcode(0x05, 0x06), new ulong[] { 1 } },  // HEAP_TRY reg, adr
+            { new Opcode(0x05, 0x12), new ulong[] { 1 } },  // HEAP_REA reg, adr
+            { new Opcode(0x05, 0x16), new ulong[] { 1 } },  // HEAP_TRE reg, adr
+
+            { new Opcode(0x06, 0x00), new ulong[] { 0 } },  // FSYS_CWD adr
+            { new Opcode(0x06, 0x02), new ulong[] { 0 } },  // FSYS_GWD adr
+            { new Opcode(0x06, 0x10), new ulong[] { 0 } },  // FSYS_CDR adr
+            { new Opcode(0x06, 0x20), new ulong[] { 0 } },  // FSYS_DDR adr
+            { new Opcode(0x06, 0x22), new ulong[] { 0 } },  // FSYS_DDE adr
+            { new Opcode(0x06, 0x30), new ulong[] { 1 } },  // FSYS_DEX reg, adr
+            { new Opcode(0x06, 0x40), new ulong[] { 0, 8 } },  // FSYS_CPY adr, adr
+            { new Opcode(0x06, 0x41), new ulong[] { 0 } },  // FSYS_CPY adr, ptr
+            { new Opcode(0x06, 0x42), new ulong[] { 1 } },  // FSYS_CPY ptr, adr
+            { new Opcode(0x06, 0x44), new ulong[] { 0, 8 } },  // FSYS_MOV adr, adr
+            { new Opcode(0x06, 0x45), new ulong[] { 0 } },  // FSYS_MOV adr, ptr
+            { new Opcode(0x06, 0x46), new ulong[] { 1 } },  // FSYS_MOV ptr, adr
+            { new Opcode(0x06, 0x51), new ulong[] { 0 } },  // FSYS_BDL adr
+            { new Opcode(0x06, 0x70), new ulong[] { 1 } },  // FSYS_GCT reg, adr
+            { new Opcode(0x06, 0x72), new ulong[] { 1 } },  // FSYS_GMT reg, adr
+            { new Opcode(0x06, 0x74), new ulong[] { 1 } },  // FSYS_GAT reg, adr
+            { new Opcode(0x06, 0x80), new ulong[] { 0 } },  // FSYS_SCT adr, reg
+            { new Opcode(0x06, 0x82), new ulong[] { 0 } },  // FSYS_SCT adr, lit
+            { new Opcode(0x06, 0x84), new ulong[] { 0 } },  // FSYS_SMT adr, reg
+            { new Opcode(0x06, 0x86), new ulong[] { 0 } },  // FSYS_SMT adr, lit
+            { new Opcode(0x06, 0x88), new ulong[] { 0 } },  // FSYS_SAT adr, reg
+            { new Opcode(0x06, 0x8A), new ulong[] { 0 } },  // FSYS_SAT adr, lit
+
+            { new Opcode(0x07, 0x22), new ulong[] { 0 } },  // TERM_SCY adr
+            { new Opcode(0x07, 0x26), new ulong[] { 0 } },  // TERM_SCX adr
+            { new Opcode(0x07, 0x52), new ulong[] { 0 } },  // TERM_SFC adr
+            { new Opcode(0x07, 0x56), new ulong[] { 0 } },  // TERM_SBC adr
         };
 
         /// <summary>
@@ -595,6 +654,13 @@
             new Opcode(0x01, 0x65),  // SIGN_WFB lit
 
             new Opcode(0x04, 0x32),  // ASMX_CAL lit
+
+            new Opcode(0x06, 0x82),  // FSYS_SCT adr, lit
+            new Opcode(0x06, 0x83),  // FSYS_SCT ptr, lit
+            new Opcode(0x06, 0x86),  // FSYS_SMT adr, lit
+            new Opcode(0x06, 0x87),  // FSYS_SMT ptr, lit
+            new Opcode(0x06, 0x8A),  // FSYS_SAT adr, lit
+            new Opcode(0x06, 0x8B),  // FSYS_SAT ptr, lit
         };
         /// <summary>
         /// All opcodes that can only operate as intended when given literals within the range of a signed 64-bit integer as an operand
@@ -611,6 +677,13 @@
             new Opcode(0x01, 0x55),  // SIGN_WCB lit
             new Opcode(0x01, 0x61),  // SIGN_WFN lit
             new Opcode(0x01, 0x65),  // SIGN_WFB lit
+
+            new Opcode(0x06, 0x82),  // FSYS_SCT adr, lit
+            new Opcode(0x06, 0x83),  // FSYS_SCT ptr, lit
+            new Opcode(0x06, 0x86),  // FSYS_SMT adr, lit
+            new Opcode(0x06, 0x87),  // FSYS_SMT ptr, lit
+            new Opcode(0x06, 0x8A),  // FSYS_SAT adr, lit
+            new Opcode(0x06, 0x8B),  // FSYS_SAT ptr, lit
         };
         /// <summary>
         /// All opcodes that can operate as intended when given floating point literals as an operand
