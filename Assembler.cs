@@ -13,9 +13,13 @@ namespace AssEmbly
     (
         byte[] Program,
         ImmutableDictionary<string, ulong> Labels,
+#if DEBUGGER
         string DebugInfo,
+#endif
         string[] ExpandedSourceFile,
+#if ASSEMBLER_WARNINGS
         Warning[] Warnings,
+#endif
         ulong EntryPoint,
         AAPFeatures UsedExtensions,
         FilePosition[] AssembledLines,
@@ -157,12 +161,14 @@ namespace AssEmbly
         private readonly List<(string LocalPath, string FullPath, ulong Address)> resolvedImports = new();
         private readonly List<(ulong Address, FilePosition Position)> fileLineMap = new();
 
+#if ASSEMBLER_WARNINGS
         private readonly AssemblerWarnings warningGenerator;
         private readonly List<Warning> warnings = new();
 
         private readonly HashSet<int> initialDisabledNonFatalErrors;
         private readonly HashSet<int> initialDisabledWarnings;
         private readonly HashSet<int> initialDisabledSuggestions;
+#endif
 
         private bool lineIsLabelled = false;
         private bool lineIsEntry = false;
@@ -191,6 +197,7 @@ namespace AssEmbly
         {
             BaseFilePath = baseFilePath;
 
+#if ASSEMBLER_WARNINGS
             warningGenerator = new AssemblerWarnings(usingV1Format);
             warningGenerator.DisabledNonFatalErrors.UnionWith(disabledNonFatalErrors);
             warningGenerator.DisabledWarnings.UnionWith(disabledWarnings);
@@ -199,12 +206,15 @@ namespace AssEmbly
             initialDisabledNonFatalErrors = warningGenerator.DisabledNonFatalErrors.ToHashSet();
             initialDisabledWarnings = warningGenerator.DisabledWarnings.ToHashSet();
             initialDisabledSuggestions = warningGenerator.DisabledSuggestions.ToHashSet();
+#endif
+
+            Version? version = typeof(Assembler).Assembly.GetName().Version;
 
             assemblerConstants = new Dictionary<string, Func<ulong>>()
             {
-                { "ASSEMBLER_VERSION_MAJOR", () => (ulong)(Program.version?.Major ?? 0) },
-                { "ASSEMBLER_VERSION_MINOR", () => (ulong)(Program.version?.Minor ?? 0) },
-                { "ASSEMBLER_VERSION_PATCH", () => (ulong)(Program.version?.Build ?? 0) },
+                { "ASSEMBLER_VERSION_MAJOR", () => (ulong)(version?.Major ?? 0) },
+                { "ASSEMBLER_VERSION_MINOR", () => (ulong)(version?.Minor ?? 0) },
+                { "ASSEMBLER_VERSION_PATCH", () => (ulong)(version?.Build ?? 0) },
                 { "V1_FORMAT", () => usingV1Format ? 1UL : 0UL },
                 { "V1_CALL_STACK", () => usingV1Stack ? 1UL : 0UL },
                 { "IMPORT_DEPTH", () => (ulong)importStack.Count },
@@ -275,6 +285,7 @@ namespace AssEmbly
         public Assembler(string baseFilePath) : this(baseFilePath, false, false,
             Enumerable.Empty<int>(), Enumerable.Empty<int>(), Enumerable.Empty<int>()) { }
 
+#if ASSEMBLER_WARNINGS
         /// <returns>
         /// <see langword="false"/> if the warning with the given severity and code was already disabled, else <see langword="true"/>
         /// </returns>
@@ -285,7 +296,7 @@ namespace AssEmbly
                 WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Add(code),
                 WarningSeverity.Warning => warningGenerator.DisabledWarnings.Add(code),
                 WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Add(code),
-                _ => throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity),
+                _ => throw new ArgumentException(Strings_Assembler.Error_Invalid_Severity),
             };
         }
 
@@ -299,7 +310,7 @@ namespace AssEmbly
                 WarningSeverity.NonFatalError => warningGenerator.DisabledNonFatalErrors.Remove(code),
                 WarningSeverity.Warning => warningGenerator.DisabledWarnings.Remove(code),
                 WarningSeverity.Suggestion => warningGenerator.DisabledSuggestions.Remove(code),
-                _ => throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity),
+                _ => throw new ArgumentException(Strings_Assembler.Error_Invalid_Severity),
             };
         }
 
@@ -323,9 +334,10 @@ namespace AssEmbly
                     _ = initialDisabledSuggestions.Contains(code) ? warningGenerator.DisabledSuggestions.Add(code) : warningGenerator.DisabledSuggestions.Remove(code);
                     return warningGenerator.DisabledSuggestions.Contains(code);
                 default:
-                    throw new ArgumentException(Strings.Assembler_Error_Invalid_Severity);
+                    throw new ArgumentException(Strings_Assembler.Error_Invalid_Severity);
             }
         }
+#endif
 
         /// <summary>
         /// Create or update an assembler variable with the given name to the specified value.
@@ -336,14 +348,14 @@ namespace AssEmbly
         {
             if (name.Length == 0)
             {
-                throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
+                throw new SyntaxError(Strings_Assembler.Error_Variable_Empty_Name);
             }
 
             Match invalidMatch = Regex.Match(name, "[^A-Za-z0-9_]");
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(
-                    string.Format(Strings.Assembler_Error_Variable_Invalid_Character, name, new string(' ', invalidMatch.Index)));
+                    string.Format(Strings_Assembler.Error_Variable_Invalid_Character, name, new string(' ', invalidMatch.Index)));
             }
 
             assemblerVariables[name] = value;
@@ -405,24 +417,33 @@ namespace AssEmbly
                 ResolveLabelReferences();
                 programBytes = program.ToArray();
 
+#if ASSEMBLER_WARNINGS
                 IEnumerable<string> labelNameReferences = labelReferences.Select(l => l.LabelName);
                 IEnumerable<string> labelNameLinks = labelLinks.Values.Select(l => l.Target);
-
                 warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint,
                     labelNameReferences.Union(labelNameLinks).ToHashSet()));
-
+#endif
                 Finalized = true;
             }
             else
             {
                 programBytes = program.ToArray();
             }
+#if DEBUGGER
             string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports, fileLineMap);
+#endif
             return new AssemblyResult(
-                programBytes, labels.ToImmutableDictionary(), debugInfo, dynamicLines.ToArray(), warnings.ToArray(),
+                programBytes, labels.ToImmutableDictionary(),
+#if DEBUGGER
+                debugInfo,
+#endif
+                dynamicLines.ToArray(),
+#if ASSEMBLER_WARNINGS
+                warnings.ToArray(),
+#endif
                 entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
         }
 
@@ -443,7 +464,7 @@ namespace AssEmbly
         {
             if (Finalized)
             {
-                throw new InvalidOperationException(Strings.Assembler_Error_Finalized);
+                throw new InvalidOperationException(Strings_Assembler.Error_Finalized);
             }
 
             List<string> newLines = lines.ToList();
@@ -497,27 +518,27 @@ namespace AssEmbly
                         if (line.Length > 1)
                         {
                             throw new SyntaxError(string.Format(
-                                Strings.Assembler_Error_Label_Spaces_Contained, mnemonic, line[1], new string(' ', mnemonic.Length)));
+                                Strings_Assembler.Error_Label_Spaces_Contained, mnemonic, line[1], new string(' ', mnemonic.Length)));
                         }
                         // Will throw an error if label is not valid
                         _ = DetermineOperandType(mnemonic, false);
                         if (mnemonic[1] == '&')
                         {
-                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Invalid_Literal_Label, rawLine));
+                            throw new SyntaxError(string.Format(Strings_Assembler.Error_Invalid_Literal_Label, rawLine));
                         }
                         string labelName = mnemonic[1..];
                         if (labels.ContainsKey(labelName))
                         {
-                            throw new LabelNameException(string.Format(Strings.Assembler_Error_Label_Already_Defined, labelName));
+                            throw new LabelNameException(string.Format(Strings_Assembler.Error_Label_Already_Defined, labelName));
                         }
                         if (labelName.Equals("ENTRY", StringComparison.OrdinalIgnoreCase))
                         {
                             lineIsEntry = true;
                         }
                         labels[labelName] = (uint)program.Count;
-
+#if ASSEMBLER_WARNINGS
                         warningGenerator.NewLabel(labelName, currentFilePosition, currentMacro?.MacroName);
-
+#endif
                         lineIsLabelled = true;
                         continue;
                     }
@@ -528,6 +549,7 @@ namespace AssEmbly
                     bool lineWasEntry = lineIsEntry;
                     if (ProcessStateDirective(mnemonic, operands, preVariableLine))
                     {
+#if ASSEMBLER_WARNINGS
                         // Don't run warning analyzers if directive has changed our position in the file
                         // - it will have already run them for the original line if required
                         if (currentFilePosition == startPosition)
@@ -537,7 +559,7 @@ namespace AssEmbly
                                 currentFilePosition, lineWasLabelled, lineWasEntry, rawLine, importStack,
                                 currentMacro?.MacroName, macroLineDepth));
                         }
-
+#endif
                         // Directive found and processed, move onto next statement
                         continue;
                     }
@@ -562,12 +584,12 @@ namespace AssEmbly
                     fileLineMap.Add(((uint)program.Count, currentFilePosition));
 
                     program.AddRange(newBytes);
-
+#if ASSEMBLER_WARNINGS
                     warnings.AddRange(warningGenerator.NextInstruction(
                         newBytes, mnemonic, operands, preVariableLine,
                         currentFilePosition, lineIsLabelled, lineIsEntry, rawLine, importStack,
                         currentMacro?.MacroName, macroLineDepth));
-
+#endif
                     lineIsLabelled = false;
                     lineIsEntry = false;
                 }
@@ -584,7 +606,7 @@ namespace AssEmbly
                 // Rollback the current position of the assembler,
                 // so that the line that the repeat started on is shown in the error message
                 SetCurrentPosition(currentRepeatSections.Pop().StartPosition, false);
-                EndingDirectiveException e = new(Strings.Assembler_Error_ENDREPEAT_Missing);
+                EndingDirectiveException e = new(Strings_Assembler.Error_ENDREPEAT_Missing);
                 HandleAssemblerException(e);
                 throw e;
             }
@@ -595,7 +617,7 @@ namespace AssEmbly
                 // Rollback the current position of the assembler,
                 // so that the line that the while loop started on is shown in the error message
                 SetCurrentPosition(currentWhileLoops.Pop(), false);
-                EndingDirectiveException e = new(Strings.Assembler_Error_ENDWHILE_Missing);
+                EndingDirectiveException e = new(Strings_Assembler.Error_ENDWHILE_Missing);
                 HandleAssemblerException(e);
                 throw e;
             }
@@ -604,7 +626,7 @@ namespace AssEmbly
             if (currentlyOpenIfBlocks > 0)
             {
                 SetCurrentPosition(lastIfDefinedPosition, false);
-                EndingDirectiveException e = new(Strings.Assembler_Error_ENDIF_Missing);
+                EndingDirectiveException e = new(Strings_Assembler.Error_ENDIF_Missing);
                 HandleAssemblerException(e);
                 throw e;
             }
@@ -679,7 +701,7 @@ namespace AssEmbly
             }
             if (!Data.Mnemonics.TryGetValue((mnemonic, operandTypes), out Opcode opcode))
             {
-                throw new OpcodeException(string.Format(Strings.Assembler_Error_Invalid_Mnemonic_Combo, mnemonic, string.Join(Strings.Generic_CommaSeparate, operandTypes)));
+                throw new OpcodeException(string.Format(Strings_Assembler.Error_Invalid_Mnemonic_Combo, mnemonic, string.Join(Strings.Generic_CommaSeparate, operandTypes)));
             }
 
             uint opcodeSize = 1;
@@ -809,11 +831,11 @@ namespace AssEmbly
                     if (elements.Count == 0)
                     {
                         throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_Mnemonic_Operand_Space, line, new string(' ', i)));
+                            string.Format(Strings_Assembler.Error_Mnemonic_Operand_Space, line, new string(' ', i)));
                     }
                     if (sb.Length == 0)
                     {
-                        throw new SyntaxError(string.Format(Strings.Assembler_Error_Empty_Operand, line, new string(' ', i)));
+                        throw new SyntaxError(string.Format(Strings_Assembler.Error_Empty_Operand, line, new string(' ', i)));
                     }
                     // The replacement portion of macros can contain commas without it being considered a different operand
                     if (!isMacro || elements.Count < 2)
@@ -829,23 +851,23 @@ namespace AssEmbly
                 if (trailingWhitespace != -1 && !isMacro)
                 {
                     throw new SyntaxError(
-                        string.Format(Strings.Assembler_Error_Operand_Whitespace, line, new string(' ', trailingWhitespace)));
+                        string.Format(Strings_Assembler.Error_Operand_Whitespace, line, new string(' ', trailingWhitespace)));
                 }
                 if (stringEnd != -1 && !isMacro)
                 {
                     throw new SyntaxError(
-                        string.Format(Strings.Assembler_Error_Quoted_Literal_Followed, line, new string(' ', i)));
+                        string.Format(Strings_Assembler.Error_Quoted_Literal_Followed, line, new string(' ', i)));
                 }
                 if (c is '"' or '\'' && !isMacro)
                 {
                     if (sb.Length != 0)
                     {
                         throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_Quoted_Literal_Following, line, new string(' ', i)));
+                            string.Format(Strings_Assembler.Error_Quoted_Literal_Following, line, new string(' ', i)));
                     }
                     if (line.Length < 2)
                     {
-                        throw new SyntaxError(Strings.Assembler_Error_Quoted_Literal_Line_Length_One);
+                        throw new SyntaxError(Strings_Assembler.Error_Quoted_Literal_Line_Length_One);
                     }
                     _ = sb.Append(PreParseStringLiteral(line, ref i, enableEscapeSequences));
                     stringEnd = i;
@@ -886,11 +908,11 @@ namespace AssEmbly
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
-                throw new IndexOutOfRangeException(Strings.Assembler_Error_String_Bad_StartIndex);
+                throw new IndexOutOfRangeException(Strings_Assembler.Error_String_Bad_StartIndex);
             }
             if (line.Length < 2)
             {
-                throw new ArgumentException(Strings.Assembler_Error_String_Too_Short);
+                throw new ArgumentException(Strings_Assembler.Error_String_Too_Short);
             }
             bool singleCharacterLiteral = false;
             bool containsHighSurrogate = false;  // Only used for character literals
@@ -898,7 +920,7 @@ namespace AssEmbly
             {
                 if (line[startIndex] != '\'')
                 {
-                    throw new ArgumentException(Strings.Assembler_Error_String_Bad_First_Char);
+                    throw new ArgumentException(Strings_Assembler.Error_String_Bad_First_Char);
                 }
                 singleCharacterLiteral = true;
             }
@@ -909,14 +931,14 @@ namespace AssEmbly
                 if (++i >= line.Length)
                 {
                     throw new SyntaxError(
-                        string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
+                        string.Format(Strings_Assembler.Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
                 }
                 // If the character literal contains a high surrogate, we need to allow 2 UTF-16 chars to get the full pair.
                 // This will result in a single final represented character to convert to UTF-8.
                 if (singleCharacterLiteral && sb.Length > (containsHighSurrogate ? 2 : 1))
                 {
                     throw new SyntaxError(
-                        string.Format(Strings.Assembler_Error_Character_Literal_Too_Long, line, new string(' ', i - 1)));
+                        string.Format(Strings_Assembler.Error_Character_Literal_Too_Long, line, new string(' ', i - 1)));
                 }
                 char c = line[i];
                 if (char.IsHighSurrogate(c))
@@ -942,7 +964,7 @@ namespace AssEmbly
                         if (++i >= line.Length)
                         {
                             throw new SyntaxError(
-                                string.Format(Strings.Assembler_Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
+                                string.Format(Strings_Assembler.Error_Quoted_Literal_EndOfLine, line, new string(' ', i - 1)));
                         }
                         char escape = line[i];
                         switch (escape)
@@ -980,7 +1002,7 @@ namespace AssEmbly
                             case 'u':
                                 if (i + 4 >= line.Length)
                                 {
-                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                    throw new SyntaxError(string.Format(Strings_Assembler.Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
                                 }
                                 string rawCodePoint = line[(i + 1)..(i + 5)];
                                 try
@@ -990,14 +1012,14 @@ namespace AssEmbly
                                 catch (FormatException)
                                 {
                                     throw new SyntaxError(
-                                        string.Format(Strings.Assembler_Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
+                                        string.Format(Strings_Assembler.Error_Unicode_Escape_4_Digits, line, new string(' ', i)));
                                 }
                                 i += 4;
                                 break;
                             case 'U':
                                 if (i + 8 >= line.Length)
                                 {
-                                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
+                                    throw new SyntaxError(string.Format(Strings_Assembler.Error_Unicode_Escape_EndOfLine, line, new string(' ', i)));
                                 }
                                 rawCodePoint = line[(i + 1)..(i + 9)];
                                 try
@@ -1012,13 +1034,13 @@ namespace AssEmbly
                                 catch
                                 {
                                     throw new SyntaxError(
-                                        string.Format(Strings.Assembler_Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
+                                        string.Format(Strings_Assembler.Error_Unicode_Escape_8_Digits, line, new string(' ', i)));
                                 }
                                 i += 8;
                                 continue;
                             default:
                                 throw new SyntaxError(
-                                    string.Format(Strings.Assembler_Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
+                                    string.Format(Strings_Assembler.Error_Invalid_Escape_Sequence, escape, line, new string(' ', i)));
                         }
                         _ = sb.Append(escape);
                     }
@@ -1035,7 +1057,7 @@ namespace AssEmbly
             {
                 if (sb.Length == 0)
                 {
-                    throw new SyntaxError(string.Format(Strings.Assembler_Error_Character_Literal_Empty, line, new string(' ', i)));
+                    throw new SyntaxError(string.Format(Strings_Assembler.Error_Character_Literal_Empty, line, new string(' ', i)));
                 }
                 byte[] characterBytes = new byte[4];
                 _ = Encoding.UTF8.GetBytes(sb.ToString(), characterBytes);
@@ -1061,7 +1083,7 @@ namespace AssEmbly
                 {
                     if (operand.Length < 2)
                     {
-                        throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
+                        throw new SyntaxError(Strings_Assembler.Error_Label_Empty_Name);
                     }
                     int offset;
                     if (operand[1] == '&')
@@ -1075,7 +1097,7 @@ namespace AssEmbly
                     }
                     if (operand.Length <= offset)
                     {
-                        throw new SyntaxError(Strings.Assembler_Error_Label_Empty_Name);
+                        throw new SyntaxError(Strings_Assembler.Error_Label_Empty_Name);
                     }
                     // Validating address literals with the same rules as labels has the intended
                     // side effect of disallowing negative and floating point literals
@@ -1089,7 +1111,7 @@ namespace AssEmbly
                     }
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success
-                        ? throw new SyntaxError(string.Format(Strings.Assembler_Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + offset)))
+                        ? throw new SyntaxError(string.Format(Strings_Assembler.Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + offset)))
                         : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
                 }
                 case (>= '0' and <= '9') or '-' or '.':
@@ -1105,7 +1127,7 @@ namespace AssEmbly
                     return Enum.TryParse<Register>(operand[offset..], true, out _)
                         ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
                         : throw new SyntaxError(
-                            string.Format(Strings.Assembler_Error_Operand_Invalid, operand));
+                            string.Format(Strings_Assembler.Error_Operand_Invalid, operand));
                 }
             }
         }
@@ -1132,11 +1154,11 @@ namespace AssEmbly
             {
                 if (!allowString)
                 {
-                    throw new SyntaxError(Strings.Assembler_Error_String_Not_Allowed);
+                    throw new SyntaxError(Strings_Assembler.Error_String_Not_Allowed);
                 }
                 if (operand[^1] != '"')
                 {
-                    throw new SyntaxError(Strings.Assembler_Error_String_Followed_Internal);
+                    throw new SyntaxError(Strings_Assembler.Error_String_Followed_Internal);
                 }
                 string str = operand[1..^1];
                 parsedNumber = (uint)str.Length;
@@ -1159,8 +1181,8 @@ namespace AssEmbly
             catch (OverflowException)
             {
                 throw new OperandException(operand.StartsWith('-')
-                    ? string.Format(Strings.Assembler_Error_Literal_Too_Small, long.MinValue, operand)
-                    : string.Format(Strings.Assembler_Error_Literal_Too_Large, ulong.MaxValue, operand));
+                    ? string.Format(Strings_Assembler.Error_Literal_Too_Small, long.MinValue, operand)
+                    : string.Format(Strings_Assembler.Error_Literal_Too_Large, ulong.MaxValue, operand));
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);
@@ -1198,11 +1220,11 @@ namespace AssEmbly
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
-                throw new IndexOutOfRangeException(Strings.Assembler_Error_Macro_Params_Bad_StartIndex);
+                throw new IndexOutOfRangeException(Strings_Assembler.Error_Macro_Params_Bad_StartIndex);
             }
             if (line[startIndex] != '(')
             {
-                throw new ArgumentException(Strings.Assembler_Error_Macro_Params_Bad_First_Char);
+                throw new ArgumentException(Strings_Assembler.Error_Macro_Params_Bad_First_Char);
             }
 
             List<string> parameters = new();
@@ -1216,7 +1238,7 @@ namespace AssEmbly
                 if (++i >= line.Length)
                 {
                     throw new SyntaxError(
-                        string.Format(Strings.Assembler_Error_Macro_Params_EndOfLine, line, new string(' ', i - 1)));
+                        string.Format(Strings_Assembler.Error_Macro_Params_EndOfLine, line, new string(' ', i - 1)));
                 }
 
                 char c = line[i];
@@ -1305,7 +1327,7 @@ namespace AssEmbly
                         {
                             if (parsedParameterIndex >= parameters.Count)
                             {
-                                throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Missing_Parameter, parsedParameterIndex));
+                                throw new MacroExpansionException(string.Format(Strings_Assembler.Error_Macro_Missing_Parameter, parsedParameterIndex));
                             }
                             parsedParameterIndex = 0;
                             // Don't add literal ! character to replacement text
@@ -1323,7 +1345,7 @@ namespace AssEmbly
                     {
                         if (i >= macroContent.Length - 1 || (!char.IsAsciiDigit(macroContent[i + 1]) && macroContent[i + 1] != '$'))
                         {
-                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Param_No_Number, macroContent, new string(' ', i)));
+                            throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Param_No_Number, macroContent, new string(' ', i)));
                         }
 
                         if (macroContent[i + 1] != '$')
@@ -1354,15 +1376,6 @@ namespace AssEmbly
             return formattedContent.ToString();
         }
 
-        /// <summary>
-        /// Convert raw text to its equivalent form as an AssEmbly string literal.
-        /// </summary>
-        /// <remarks>Neither the input nor the output to this function have surrounding quote marks.</remarks>
-        public static string EscapeStringCharacters(string unescaped)
-        {
-            return unescaped.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("@", "\\@");
-        }
-
         private void ResolveLabelReferences()
         {
             foreach ((string labelLink, (string labelTarget, string filePath, int line)) in labelLinks)
@@ -1370,8 +1383,8 @@ namespace AssEmbly
                 if (!labels.TryGetValue(labelTarget, out ulong targetOffset))
                 {
                     LabelNameException exc = new(
-                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelTarget), line, filePath);
-                    exc.ConsoleMessage = string.Format(Strings.Assembler_Error_On_Line, line, filePath, exc.Message);
+                        string.Format(Strings_Assembler.Error_Label_Not_Exists, labelTarget), line, filePath);
+                    exc.ConsoleMessage = string.Format(Strings_Assembler.Error_On_Line, line, filePath, exc.Message);
                     throw exc;
                 }
                 labels[labelLink] = targetOffset;
@@ -1401,7 +1414,7 @@ namespace AssEmbly
                     // so that the line that the label was defined on is shown in the error message
                     SetCurrentPosition(position, false);
                     LabelNameException exc = new(
-                        string.Format(Strings.Assembler_Error_Label_Not_Exists, labelName));
+                        string.Format(Strings_Assembler.Error_Label_Not_Exists, labelName));
                     HandleAssemblerException(exc);
                     throw exc;
                 }
@@ -1550,7 +1563,7 @@ namespace AssEmbly
                     {
                         if (++currentMacroExpansions > MacroExpansionLimit)
                         {
-                            throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Macro_Limit_Exceeded, MacroExpansionLimit));
+                            throw new MacroExpansionException(string.Format(Strings_Assembler.Error_Macro_Limit_Exceeded, MacroExpansionLimit));
                         }
                         string[] parameters;
                         int paramIndex = i + macro.Length;
@@ -1594,7 +1607,7 @@ namespace AssEmbly
             {
                 if (insideMacroSkipBlock)
                 {
-                    throw new SyntaxError(Strings.Assembler_Error_Macro_Disable_Block_Nested);
+                    throw new SyntaxError(Strings_Assembler.Error_Macro_Disable_Block_Nested);
                 }
                 insideMacroSkipBlock = true;
                 return true;
@@ -1603,7 +1616,7 @@ namespace AssEmbly
             {
                 if (!insideMacroSkipBlock)
                 {
-                    throw new SyntaxError(Strings.Assembler_Error_Macro_Disable_Block_Missing_Start);
+                    throw new SyntaxError(Strings_Assembler.Error_Macro_Disable_Block_Missing_Start);
                 }
                 insideMacroSkipBlock = false;
                 return true;
@@ -1635,7 +1648,7 @@ namespace AssEmbly
                         parameters = ParseMacroParameters(rawLine, ref paramIndex).Select(ExpandSingleLineMacros).ToArray();
                         if (paramIndex != rawLine.Length - 1)
                         {
-                            throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Params_Unescaped_Close, rawLine, new string(' ', paramIndex)));
+                            throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Params_Unescaped_Close, rawLine, new string(' ', paramIndex)));
                         }
                         // Remove now-parsed parameters from line
                         rawLine = rawLine[..macro.Length];
@@ -1649,7 +1662,7 @@ namespace AssEmbly
                     {
                         if (macroStack.Any(m => m.MacroName == macro))
                         {
-                            throw new MacroExpansionException(string.Format(Strings.Assembler_Error_Circular_Macro, macro));
+                            throw new MacroExpansionException(string.Format(Strings_Assembler.Error_Circular_Macro, macro));
                         }
                         string[] replacement = multiLineMacros[macro];
                         dynamicLines.InsertRange(lineIndex + 1, replacement.Select(r => InsertMacroParameters(r, parameters)));
@@ -1744,7 +1757,7 @@ namespace AssEmbly
                 // Assembler constant
                 if (name.Length == 1)
                 {
-                    throw new SyntaxError(Strings.Assembler_Error_Constant_Empty_Name);
+                    throw new SyntaxError(Strings_Assembler.Error_Constant_Empty_Name);
                 }
 
                 name = name[1..];
@@ -1753,13 +1766,13 @@ namespace AssEmbly
                     return valueGetter().ToString();
                 }
 
-                throw new VariableNameException(string.Format(Strings.Assembler_Error_Constant_Not_Exists, name));
+                throw new VariableNameException(string.Format(Strings_Assembler.Error_Constant_Not_Exists, name));
             }
 
             // Assembler variable
             if (name.Length == 0)
             {
-                throw new SyntaxError(Strings.Assembler_Error_Variable_Empty_Name);
+                throw new SyntaxError(Strings_Assembler.Error_Variable_Empty_Name);
             }
 
             if (assemblerVariables.TryGetValue(name, out ulong value))
@@ -1767,38 +1780,38 @@ namespace AssEmbly
                 return value.ToString();
             }
 
-            throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, name));
+            throw new VariableNameException(string.Format(Strings_Assembler.Error_Variable_Not_Exists, name));
         }
 
         private void HandleAssemblerException(AssemblerException e)
         {
             string rawLine = dynamicLines[lineIndex];
-
+#if ASSEMBLER_WARNINGS
             e.WarningObject = new Warning(
                 WarningSeverity.FatalError, 0000, currentFilePosition, "", Array.Empty<string>(),
                 rawLine, currentMacro?.MacroName, e.Message);
-
+#endif
             if (currentImport is null)
             {
-                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message, baseFileLine, BaseFilePath, rawLine);
+                e.ConsoleMessage = string.Format(Strings_Assembler.Error_Message, baseFileLine, BaseFilePath, rawLine);
                 e.ConsoleMessage += '\n' + e.Message;
             }
             else
             {
-                e.ConsoleMessage = string.Format(Strings.Assembler_Error_Message, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
+                e.ConsoleMessage = string.Format(Strings_Assembler.Error_Message, currentImport.CurrentLine, currentImport.ImportPath, rawLine);
                 _ = importStack.Pop();  // Remove already printed frame from stack
                 while (importStack.TryPop(out ImportStackFrame? nestedImport))
                 {
-                    e.ConsoleMessage += string.Format(Strings.Assembler_Error_Message_Imported, nestedImport.CurrentLine, nestedImport.ImportPath);
+                    e.ConsoleMessage += string.Format(Strings_Assembler.Error_Message_Imported, nestedImport.CurrentLine, nestedImport.ImportPath);
                 }
-                e.ConsoleMessage += string.Format(Strings.Assembler_Error_Message_Imported, baseFileLine, BaseFilePath);
+                e.ConsoleMessage += string.Format(Strings_Assembler.Error_Message_Imported, baseFileLine, BaseFilePath);
                 e.ConsoleMessage += '\n' + e.Message;
             }
 
             if (currentMacro is not null)
             {
                 e.ConsoleMessage += string.Format(
-                    Strings.Assembler_Error_Message_Macro_Stack, string.Join(" -> ", macroStack.Select(m => m.MacroName)));
+                    Strings_Assembler.Error_Message_Macro_Stack, string.Join(" -> ", macroStack.Select(m => m.MacroName)));
             }
         }
 
@@ -1923,7 +1936,7 @@ namespace AssEmbly
                 // Rollback the state of the import stack to when loop started,
                 // so that error message shows that line instead of the end of the file
                 SetCurrentPosition(startPosition, false);
-                throw new EndingDirectiveException(Strings.Assembler_Error_Closing_Directive_Missing);
+                throw new EndingDirectiveException(Strings_Assembler.Error_Closing_Directive_Missing);
             }
 
             return lines.ToArray();
@@ -1937,7 +1950,7 @@ namespace AssEmbly
             if (parsedMatchedLine.Length != 1)
             {
                 throw new OperandException(
-                    string.Format(Strings.Assembler_Error_Closing_Directive_Operand_Count, parsedMatchedLine.Length - 1, parsedMatchedLine[0]));
+                    string.Format(Strings_Assembler.Error_Closing_Directive_Operand_Count, parsedMatchedLine.Length - 1, parsedMatchedLine[0]));
             }
             return lines;
         }
@@ -1951,7 +1964,7 @@ namespace AssEmbly
         {
             if (operands.Length < 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_Conditional_Operand_Count, mnemonic, operands.Length));
             }
 
             string operation = operands[0];
@@ -1960,7 +1973,7 @@ namespace AssEmbly
             if ((isDefinedCheck && operands.Length != 2)
                 || (!isDefinedCheck && operands.Length != 3))
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Count, mnemonic, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_Conditional_Operand_Count, mnemonic, operands.Length));
             }
 
             ulong value = 0;
@@ -1971,11 +1984,11 @@ namespace AssEmbly
                 OperandType operandTypeThird = DetermineOperandType(operands[2]);
                 if (operandTypeSecond != OperandType.Literal || operandTypeThird != OperandType.Literal)
                 {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Type, mnemonic));
+                    throw new OperandException(string.Format(Strings_Assembler.Error_Conditional_Operand_Second_Third_Type, mnemonic));
                 }
                 if (operands[1][0] == ':' || operands[2][0] == ':')
                 {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_Second_Third_Label_Reference, mnemonic));
+                    throw new OperandException(string.Format(Strings_Assembler.Error_Conditional_Operand_Second_Third_Label_Reference, mnemonic));
                 }
                 _ = ParseLiteral(operands[1], false, out value);
                 _ = ParseLiteral(operands[2], false, out comparison);
@@ -1991,15 +2004,15 @@ namespace AssEmbly
                 "GTE" => value >= comparison,
                 "LT" => value < comparison,
                 "LTE" => value <= comparison,
-                _ => throw new OperandException(string.Format(Strings.Assembler_Error_Conditional_Operand_First, mnemonic, operation)),
+                _ => throw new OperandException(string.Format(Strings_Assembler.Error_Conditional_Operand_First, mnemonic, operation)),
             };
         }
 
         private void SetFileMacros()
         {
-            SetSingleLineMacro("#FILE_PATH", EscapeStringCharacters(currentFilePosition.File));
-            SetSingleLineMacro("#FILE_NAME", EscapeStringCharacters(Path.GetFileName(currentFilePosition.File)));
-            SetSingleLineMacro("#FOLDER_PATH", EscapeStringCharacters(Path.GetDirectoryName(currentFilePosition.File) ?? ""));
+            SetSingleLineMacro("#FILE_PATH", currentFilePosition.File.EscapeCharacters());
+            SetSingleLineMacro("#FILE_NAME", Path.GetFileName(currentFilePosition.File).EscapeCharacters());
+            SetSingleLineMacro("#FOLDER_PATH", (Path.GetDirectoryName(currentFilePosition.File) ?? "").EscapeCharacters());
         }
 
         /// <summary>
@@ -2037,28 +2050,28 @@ namespace AssEmbly
                     : Regex.Match(operand, @"[^0-9_\.](?<!^-)");  // Dec
             if (invalidMatch.Success)
             {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
             }
             // Edge-case syntax errors not detected by invalid character regular expressions
             if ((operand[0] == '.' && operand.Length == 1) || operand == "-.")
             {
-                throw new SyntaxError(Strings.Assembler_Error_Literal_Floating_Point_Decimal_Only);
+                throw new SyntaxError(Strings_Assembler.Error_Literal_Floating_Point_Decimal_Only);
             }
             if (operand[0] == '-' && operand.Length == 1)
             {
-                throw new SyntaxError(Strings.Assembler_Error_Literal_Negative_Dash_Only);
+                throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
             }
             if (operand.Equals("0x_", StringComparison.OrdinalIgnoreCase) || operand.Equals("0b_", StringComparison.OrdinalIgnoreCase))
             {
-                throw new SyntaxError(Strings.Assembler_Error_Literal_Underscore_Only);
+                throw new SyntaxError(Strings_Assembler.Error_Literal_Underscore_Only);
             }
             if (operand.IndexOf('.') != operand.LastIndexOf('.'))
             {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Too_Many_Points, operand, new string(' ', operand.LastIndexOf('.'))));
             }
             if (operand is "0x" or "0b")
             {
-                throw new SyntaxError(Strings.Assembler_Error_Literal_Base_Prefix_Only);
+                throw new SyntaxError(Strings_Assembler.Error_Literal_Base_Prefix_Only);
             }
         }
 
@@ -2067,11 +2080,11 @@ namespace AssEmbly
             int index;
             if ((index = name.IndexOf('(')) != -1)
             {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, name, new string(' ', index)));
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Name_Brackets, name, new string(' ', index)));
             }
             if ((index = name.IndexOf(')')) != -1)
             {
-                throw new SyntaxError(string.Format(Strings.Assembler_Error_Macro_Name_Brackets, name, new string(' ', index)));
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Name_Brackets, name, new string(' ', index)));
             }
         }
     }

@@ -236,7 +236,7 @@ namespace AssEmbly
 
                 offsetToLine[offset - (ulong)pendingStringCharacters.Count] = result.Count;
 
-                result.Add($"%DAT \"{Assembler.EscapeStringCharacters(newString)}\"");
+                result.Add($"%DAT \"{newString.EscapeCharacters()}\"");
                 pendingStringCharacters.Clear();
             }
         }

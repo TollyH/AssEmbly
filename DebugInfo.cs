@@ -110,11 +110,11 @@ namespace AssEmbly
             Match fileMatch = DebugFileRegex.Match(fileText);
             if (!fileMatch.Success)
             {
-                throw new DebugFileException(Strings.DebugInfo_Error_Invalid_Format);
+                throw new DebugFileException(Strings_Debugger.DebugInfo_Error_Invalid_Format);
             }
             if (fileMatch.Groups["Version"].Value != FormatVersion)
             {
-                throw new DebugFileException(Strings.DebugInfo_Error_Wrong_Version);
+                throw new DebugFileException(Strings_Debugger.DebugInfo_Error_Wrong_Version);
             }
 
             List<(ulong Address, string Line)> assembledInstructions = new();

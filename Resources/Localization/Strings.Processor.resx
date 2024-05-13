@@ -1,0 +1,331 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Error_Already_Loaded" xml:space="preserve">
+    <value>A program is already loaded in this processor.</value>
+  </data>
+  <data name="Error_Assembly_Already_Open" xml:space="preserve">
+    <value>Cannot execute load external assembly instruction if an assembly is already loaded</value>
+  </data>
+  <data name="Error_Assembly_Invalid" xml:space="preserve">
+    <value>The specified external assembly file is invalid</value>
+  </data>
+  <data name="Error_Assembly_No_Type" xml:space="preserve">
+    <value>The specified external assembly file does not contain a global public static class named 'AssEmblyInterop'</value>
+  </data>
+  <data name="Error_Assembly_Not_Found" xml:space="preserve">
+    <value>The specified external assembly file could not be found</value>
+  </data>
+  <data name="Error_Assembly_Not_Open" xml:space="preserve">
+    <value>Cannot execute instruction if an external assembly is not loaded</value>
+  </data>
+  <data name="Error_Assembly_Unknown" xml:space="preserve">
+    <value>An unexpected error occurred trying to load the external assembly</value>
+  </data>
+  <data name="Error_External_Method" xml:space="preserve">
+    <value>An error was thrown by an external method ({0} -&gt; {1}):
+        {2}: {3}</value>
+  </data>
+  <data name="Error_File_Already_Open" xml:space="preserve">
+    <value>Cannot execute open file instruction if a file is already open</value>
+  </data>
+  <data name="Error_File_Close_None_Open" xml:space="preserve">
+    <value>Cannot execute close file instruction if a file is not open</value>
+  </data>
+  <data name="Error_File_No_Open" xml:space="preserve">
+    <value>Cannot perform file operations if no file is open. Run OFL (0xE0) first</value>
+  </data>
+  <data name="Error_File_Read_End_Reached" xml:space="preserve">
+    <value>Cannot execute file read instruction. The end of the file has already been reached.</value>
+  </data>
+  <data name="Error_File_Read_No_Open" xml:space="preserve">
+    <value>Cannot execute file read instruction if a file is not open</value>
+  </data>
+  <data name="Error_Function_Already_Open" xml:space="preserve">
+    <value>Cannot execute open external function instruction if a function is already loaded</value>
+  </data>
+  <data name="Error_Function_Invalid" xml:space="preserve">
+    <value>The specified external function is invalid or does not exist in the loaded external assembly</value>
+  </data>
+  <data name="Error_Function_Not_Open" xml:space="preserve">
+    <value>Cannot execute instruction if an external function is not loaded</value>
+  </data>
+  <data name="Error_Function_Unknown" xml:space="preserve">
+    <value>An unexpected error occurred trying to load the external function</value>
+  </data>
+  <data name="Error_Invalid_Memory_Block" xml:space="preserve">
+    <value>The given memory address does not correspond to the start of an allocated memory block.</value>
+  </data>
+  <data name="Error_Memory_Allocation" xml:space="preserve">
+    <value>Memory allocation failed. There may not be enough free contiguous memory remaining.</value>
+  </data>
+  <data name="Error_No_Program" xml:space="preserve">
+    <value>A program has not been loaded in this processor.</value>
+  </data>
+  <data name="Error_Opcode_Extension_Set" xml:space="preserve">
+    <value>{0:X} is not a recognised extension set</value>
+  </data>
+  <data name="Error_Opcode_High_Allocation" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the memory allocation extension set</value>
+  </data>
+  <data name="Error_Opcode_High_Base" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the base instruction set</value>
+  </data>
+  <data name="Error_Opcode_High_Extended" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the extended base set</value>
+  </data>
+  <data name="Error_Opcode_High_External" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the external assembly extension set</value>
+  </data>
+  <data name="Error_Opcode_High_FileSystem" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the file system extension set</value>
+  </data>
+  <data name="Error_Opcode_High_FloatingPoint" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the floating point extension set</value>
+  </data>
+  <data name="Error_Opcode_High_Signed" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the signed extension set</value>
+  </data>
+  <data name="Error_Opcode_High_Terminal" xml:space="preserve">
+    <value>{0:X} is not a recognised high opcode for the terminal extension set</value>
+  </data>
+  <data name="Error_Opcode_Low_Allocation_Allocation" xml:space="preserve">
+    <value>{0:X} is not a recognised memory allocation extension set allocation low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Allocation_Free" xml:space="preserve">
+    <value>{0:X} is not a recognised memory allocation extension set free low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Allocation_Reallocation" xml:space="preserve">
+    <value>{0:X} is not a recognised memory allocation extension set re-allocation low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Addition" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set addition low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Bitwise" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set bitwise low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Comparison" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set comparison low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_ConsoleWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set console write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Control" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set control low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Division" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set division low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_FileOperation" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set file operation low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_FileWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set file write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_LargeMove" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set large move low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Multiplication" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set multiplication low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Reading" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set reading low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Shifting" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set shifting low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_SmallMove" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set small move low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Stack" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set stack low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Subroutine" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set subroutine low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Base_Subtraction" xml:space="preserve">
+    <value>{0:X} is not a recognised base instruction set subtraction low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Extended_ByteSwap" xml:space="preserve">
+    <value>{0:X} is not a recognised extended base set byte swap low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Extended_Halt" xml:space="preserve">
+    <value>{0:X} is not a recognised extended base set halt low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Extended_InfoQuery" xml:space="preserve">
+    <value>{0:X} is not a recognised extended base set processor query low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_External_Call" xml:space="preserve">
+    <value>{0:X} is not a recognised external assembly extension set calling low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_External_Close" xml:space="preserve">
+    <value>{0:X} is not a recognised external assembly extension set closing low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_External_Existence" xml:space="preserve">
+    <value>{0:X} is not a recognised external assembly extension set existence low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_External_Load" xml:space="preserve">
+    <value>{0:X} is not a recognised external assembly extension set loading low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_BeginListing" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set directory listing low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_CreateDir" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set create directory low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_DeleteDir" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set delete directory low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_DirectoryExists" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set directory existence low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_ListingGet" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set listing get low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_Move" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set copy/move low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_TimeGet" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set file time get low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_TimeSet" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set file time set low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FileSystem_WorkingDir" xml:space="preserve">
+    <value>{0:X} is not a recognised file system extension set working directory low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Addition" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set addition low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Comparison" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set comparison low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_ConsoleWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set console write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Division" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set division low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Exponentiation" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set exponentiation low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_FileWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set file write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_FloatToInt" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set float to int low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_IntToFloat" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set int to float low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Logarithm" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set logarithm low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Multiplication" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set multiplication low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Negate" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set negate low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_SizeConversion" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set size conversion low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Subtraction" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set subtraction low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_FloatingPoint_Trigonometry" xml:space="preserve">
+    <value>{0:X} is not a recognised floating point extension set trigonometry low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_ConsoleWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set console write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_Division" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set division low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_Extend" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set extend low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_FileWrite" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set file write low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_Jump" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set jump low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_LargeMove" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set large move low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_Negate" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set negate low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_Shifting" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set shifting low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Signed_SmallMove" xml:space="preserve">
+    <value>{0:X} is not a recognised signed extension set small move low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Terminal_Beep" xml:space="preserve">
+    <value>{0:X} is not a recognised terminal extension set beep low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Terminal_Clear" xml:space="preserve">
+    <value>{0:X} is not a recognised terminal extension set clear low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Terminal_Colour" xml:space="preserve">
+    <value>{0:X} is not a recognised terminal extension set colour low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Terminal_GetPosition" xml:space="preserve">
+    <value>{0:X} is not a recognised terminal extension set information getting low opcode</value>
+  </data>
+  <data name="Error_Opcode_Low_Terminal_SetPosition" xml:space="preserve">
+    <value>{0:X} is not a recognised terminal extension set position setting low opcode</value>
+  </data>
+  <data name="Error_Program_Too_Large" xml:space="preserve">
+    <value>Program too large to fit in allocated memory. {0} bytes available, {1} given.</value>
+  </data>
+  <data name="Error_Read_Only_Register" xml:space="preserve">
+    <value>Cannot write to read-only register {0}</value>
+  </data>
+  <data name="Error_Stack_Collide" xml:space="preserve">
+    <value>The stack has collided with already allocated memory</value>
+  </data>
+  <data name="Error_Stack_Out_Of_Range" xml:space="preserve">
+    <value>The rso register is outside the range of available memory</value>
+  </data>
+</root>

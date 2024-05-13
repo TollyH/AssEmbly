@@ -161,11 +161,11 @@ namespace AssEmbly
         {
             if (ProgramLoaded)
             {
-                throw new InvalidOperationException(Strings.Processor_Error_Already_Loaded);
+                throw new InvalidOperationException(Strings_Processor.Error_Already_Loaded);
             }
             if (programData.LongLength > Memory.LongLength)
             {
-                throw new InvalidOperationException(string.Format(Strings.Processor_Error_Program_Too_Large, Memory.LongLength, programData.LongLength));
+                throw new InvalidOperationException(string.Format(Strings_Processor.Error_Program_Too_Large, Memory.LongLength, programData.LongLength));
             }
             Array.Copy(programData, Memory, programData.LongLength);
 #if EXTENSION_SET_HEAP_ALLOCATE
@@ -198,7 +198,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
+                throw new InvalidOperationException(Strings_Processor.Error_No_Program);
             }
             if (Registers[(int)Register.rpo] >= (ulong)Memory.LongLength)
             {
@@ -393,7 +393,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Control, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Control, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Addition
@@ -421,7 +421,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Addition, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Addition, opcodeLow));
                                 }
                                 result = initial + mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -491,7 +491,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Subtraction, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Subtraction, opcodeLow));
                                 }
                                 result = initial - mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -557,7 +557,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Multiplication, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Multiplication, opcodeLow));
                                 }
                                 result = initial * mathend;
                                 WriteMemoryRegister(operandStart, result);
@@ -659,7 +659,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Division, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Division, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -732,7 +732,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Shifting, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Shifting, opcodeLow));
                                 }
                                 // C# only counts the lower 6 bits of the amount to shift by, so values greater than or equal to 64 will not return 0 as
                                 // wanted for AssEmbly.
@@ -846,7 +846,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Bitwise, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Bitwise, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -911,7 +911,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Comparison, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Comparison, opcodeLow));
                                 }
 
                                 if (opcodeLow >= 0x4)
@@ -1035,7 +1035,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_SmallMove, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_SmallMove, opcodeLow));
                                 }
                                 break;
                             case 0x90:  // Large Move
@@ -1106,7 +1106,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_LargeMove, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_LargeMove, opcodeLow));
                                 }
                                 break;
                             case 0xA0:  // Stack
@@ -1138,7 +1138,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Stack, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Stack, opcodeLow));
                                 }
                                 break;
                             case 0xB0:  // Subroutines
@@ -1312,7 +1312,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rsb] = ReadMemoryQWord(Registers[(int)Register.rso] - 16);
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Subroutine, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Subroutine, opcodeLow));
                                 }
                                 break;
                             case 0xC0:  // Console Write
@@ -1392,13 +1392,13 @@ namespace AssEmbly
                                             break;
                                         }
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_ConsoleWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0xD0:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
+                                    throw new FileOperationException(Strings_Processor.Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -1470,7 +1470,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_FileWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0xE0:  // File Operations
@@ -1479,7 +1479,7 @@ namespace AssEmbly
                                     case 0x0:  // OFL adr
                                         if (openFile is not null)
                                         {
-                                            throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
+                                            throw new FileOperationException(Strings_Processor.Error_File_Already_Open);
                                         }
                                         filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
@@ -1499,7 +1499,7 @@ namespace AssEmbly
                                     case 0x1:  // OFL ptr
                                         if (openFile is not null)
                                         {
-                                            throw new FileOperationException(Strings.Processor_Error_File_Already_Open);
+                                            throw new FileOperationException(Strings_Processor.Error_File_Already_Open);
                                         }
                                         filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
@@ -1519,7 +1519,7 @@ namespace AssEmbly
                                     case 0x2:  // CFL
                                         if (openFile is null)
                                         {
-                                            throw new FileOperationException(Strings.Processor_Error_File_Close_None_Open);
+                                            throw new FileOperationException(Strings_Processor.Error_File_Close_None_Open);
                                         }
                                         fileWrite!.Close();
                                         fileWrite = null;
@@ -1560,7 +1560,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_FileOperation, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_FileOperation, opcodeLow));
                                 }
                                 break;
                             case 0xF0:  // Reading
@@ -1612,11 +1612,11 @@ namespace AssEmbly
                                     case 0x1:  // RFC reg
                                         if (fileRead is null)
                                         {
-                                            throw new FileOperationException(Strings.Processor_Error_File_Read_No_Open);
+                                            throw new FileOperationException(Strings_Processor.Error_File_Read_No_Open);
                                         }
                                         if (fileRead.BaseStream.Position >= openFileSize)
                                         {
-                                            throw new FileOperationException(Strings.Processor_Error_File_Read_End_Reached);
+                                            throw new FileOperationException(Strings_Processor.Error_File_Read_End_Reached);
                                         }
                                         WriteMemoryRegister(operandStart, fileRead.ReadByte());
                                         if (fileRead.BaseStream.Position >= openFileSize)
@@ -1626,11 +1626,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Base_Reading, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Reading, opcodeLow));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Base, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Base, opcodeHigh));
                         }
                         break;
 #if EXTENSION_SET_SIGNED
@@ -1813,7 +1813,7 @@ namespace AssEmbly
                                         }
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Jump, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Jump, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Division
@@ -1881,7 +1881,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Division, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Division, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -1931,7 +1931,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Shifting, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Shifting, opcodeLow));
                                 }
                                 initialSign = initial & SignBit;
                                 signedShiftAllBits = initialSign == 0 ? 0 : (~0UL);
@@ -2016,7 +2016,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_SmallMove, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_SmallMove, opcodeLow));
                                 }
                                 break;
                             case 0x40:  // Large Sign-Preserving Move
@@ -2039,7 +2039,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_LargeMove, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_LargeMove, opcodeLow));
                                 }
                                 break;
                             case 0x50:  // Console Write
@@ -2078,13 +2078,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_ConsoleWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0x60:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
+                                    throw new FileOperationException(Strings_Processor.Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -2121,7 +2121,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_FileWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0x70:  // Extend
@@ -2141,7 +2141,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Extend, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Extend, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2175,7 +2175,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Signed_Negate, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Negate, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2201,7 +2201,7 @@ namespace AssEmbly
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Signed, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Signed, opcodeHigh));
                         }
                         break;
 #endif
@@ -2230,7 +2230,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Addition, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Addition, opcodeLow));
                                 }
                                 floatingResult = floatingInitial + floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2288,7 +2288,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Subtraction, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Subtraction, opcodeLow));
                                 }
                                 floatingResult = floatingInitial - floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2346,7 +2346,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Multiplication, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Multiplication, opcodeLow));
                                 }
                                 floatingResult = floatingInitial * floatingMathend;
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2448,7 +2448,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Division, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Division, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2522,7 +2522,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Trigonometry, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Trigonometry, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2572,7 +2572,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Exponentiation, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Exponentiation, opcodeLow));
                                 }
                                 floatingResult = Math.Pow(floatingInitial, floatingMathend);
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2630,7 +2630,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Logarithm, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Logarithm, opcodeLow));
                                 }
                                 floatingResult = Math.Log(floatingInitial, floatingMathend);
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
@@ -2687,13 +2687,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_ConsoleWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_ConsoleWrite, opcodeLow));
                                 }
                                 break;
                             case 0x80:  // File Write
                                 if (openFile is null)
                                 {
-                                    throw new FileOperationException(Strings.Processor_Error_File_No_Open);
+                                    throw new FileOperationException(Strings_Processor.Error_File_No_Open);
                                 }
                                 switch (opcodeLow)
                                 {
@@ -2714,7 +2714,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_FileWrite, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_FileWrite, opcodeLow));
                                 }
                                 break;
                             case 0x90:  // Float Size Conversions
@@ -2738,7 +2738,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_SizeConversion, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_SizeConversion, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2775,7 +2775,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Negate, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Negate, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2817,7 +2817,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_IntToFloat, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_IntToFloat, opcodeLow));
                                 }
                                 result = BitConverter.DoubleToUInt64Bits(floatingResult);
                                 WriteMemoryRegister(operandStart, result);
@@ -2869,7 +2869,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_FloatToInt, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_FloatToInt, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
 
@@ -2918,7 +2918,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FloatingPoint_Comparison, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Comparison, opcodeLow));
                                 }
                                 floatingResult = floatingInitial - floatingMathend;
 
@@ -2956,7 +2956,7 @@ namespace AssEmbly
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FloatingPoint, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_FloatingPoint, opcodeHigh));
                         }
                         break;
 #endif
@@ -2973,7 +2973,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_ByteSwap, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_ByteSwap, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, result);
                                 break;
@@ -2985,12 +2985,12 @@ namespace AssEmbly
                                         Registers[(ulong)Register.rpo]++;
                                         break;
                                     case 0x1:  // EXTD_QPV reg
-                                        WriteMemoryRegister(operandStart, (ulong)(Program.version?.Major ?? 0));
+                                        WriteMemoryRegister(operandStart, (ulong)(typeof(Processor).Assembly.GetName().Version?.Major ?? 0));
                                         Registers[(ulong)Register.rpo]++;
                                         break;
                                     case 0x2:  // EXTD_QPV reg, reg
-                                        WriteMemoryRegister(operandStart, (ulong)(Program.version?.Major ?? 0));
-                                        WriteMemoryRegister(operandStart + 1, (ulong)(Program.version?.Minor ?? 0));
+                                        WriteMemoryRegister(operandStart, (ulong)(typeof(Processor).Assembly.GetName().Version?.Major ?? 0));
+                                        WriteMemoryRegister(operandStart + 1, (ulong)(typeof(Processor).Assembly.GetName().Version?.Minor ?? 0));
                                         Registers[(ulong)Register.rpo] += 2;
                                         break;
                                     case 0x3:  // EXTD_CSS reg
@@ -2998,7 +2998,7 @@ namespace AssEmbly
                                         Registers[(ulong)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_InfoQuery, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_InfoQuery, opcodeLow));
                                 }
                                 break;
                             case 0x20:  // Halt with Exit Code
@@ -3021,13 +3021,13 @@ namespace AssEmbly
                                         Registers[(ulong)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Extended_Halt, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_Halt, opcodeLow));
                                 }
                                 Environment.ExitCode = (int)result;
                                 halt = true;
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Extended, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Extended, opcodeHigh));
                         }
                         break;
 #endif
@@ -3041,7 +3041,7 @@ namespace AssEmbly
                                     case 0x0:  // ASMX_LDA adr
                                         if (extLoadContext is not null || openExtAssembly is not null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Already_Open);
                                         }
                                         filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
@@ -3058,24 +3058,24 @@ namespace AssEmbly
                                             throw e switch
                                             {
                                                 BadImageFormatException => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Invalid),
+                                                    Strings_Processor.Error_Assembly_Invalid),
                                                 FileNotFoundException => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Not_Found),
+                                                    Strings_Processor.Error_Assembly_Not_Found),
                                                 _ => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Unknown)
+                                                    Strings_Processor.Error_Assembly_Unknown)
                                             };
                                         }
                                         if (openExtAssembly is null)
                                         {
                                             extLoadContext?.Unload();
                                             extLoadContext = null;
-                                            throw new InvalidAssemblyException(Strings.Processor_Error_Assembly_No_Type);
+                                            throw new InvalidAssemblyException(Strings_Processor.Error_Assembly_No_Type);
                                         }
                                         break;
                                     case 0x1:  // ASMX_LDA ptr
                                         if (extLoadContext is not null || openExtAssembly is not null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Already_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Already_Open);
                                         }
                                         filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
@@ -3092,28 +3092,28 @@ namespace AssEmbly
                                             throw e switch
                                             {
                                                 BadImageFormatException => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Invalid),
+                                                    Strings_Processor.Error_Assembly_Invalid),
                                                 FileNotFoundException => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Not_Found),
+                                                    Strings_Processor.Error_Assembly_Not_Found),
                                                 _ => new InvalidAssemblyException(
-                                                    Strings.Processor_Error_Assembly_Unknown)
+                                                    Strings_Processor.Error_Assembly_Unknown)
                                             };
                                         }
                                         if (openExtAssembly is null)
                                         {
                                             extLoadContext?.Unload();
                                             extLoadContext = null;
-                                            throw new InvalidAssemblyException(Strings.Processor_Error_Assembly_No_Type);
+                                            throw new InvalidAssemblyException(Strings_Processor.Error_Assembly_No_Type);
                                         }
                                         break;
                                     case 0x2:  // ASMX_LDF adr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
                                         if (openExtFunction is not null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Function_Already_Open);
                                         }
                                         filepath = ReadMemoryPointedString(operandStart);
                                         Registers[(int)Register.rpo] += 8;
@@ -3123,21 +3123,21 @@ namespace AssEmbly
                                         }
                                         catch
                                         {
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Unknown);
+                                            throw new InvalidFunctionException(Strings_Processor.Error_Function_Unknown);
                                         }
                                         if (openExtFunction is null)
                                         {
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Invalid);
+                                            throw new InvalidFunctionException(Strings_Processor.Error_Function_Invalid);
                                         }
                                         break;
                                     case 0x3:  // ASMX_LDF ptr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
                                         if (openExtFunction is not null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Already_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Function_Already_Open);
                                         }
                                         filepath = ReadMemoryRegisterPointedString(operandStart);
                                         Registers[(int)Register.rpo]++;
@@ -3147,16 +3147,16 @@ namespace AssEmbly
                                         }
                                         catch
                                         {
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Unknown);
+                                            throw new InvalidFunctionException(Strings_Processor.Error_Function_Unknown);
                                         }
                                         if (openExtFunction is null)
                                         {
-                                            throw new InvalidFunctionException(Strings.Processor_Error_Function_Invalid);
+                                            throw new InvalidFunctionException(Strings_Processor.Error_Function_Invalid);
                                         }
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Load, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_External_Load, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Close
@@ -3165,7 +3165,7 @@ namespace AssEmbly
                                     case 0x0:  // ASMX_CLA
                                         if (extLoadContext is null && openExtAssembly is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
                                         extLoadContext?.Unload();
                                         extLoadContext = null;
@@ -3175,13 +3175,13 @@ namespace AssEmbly
                                     case 0x1:  // ASMX_CLF
                                         if (openExtFunction is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Function_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Function_Not_Open);
                                         }
                                         openExtFunction = null;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Close, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_External_Close, opcodeLow));
                                 }
                                 break;
                             case 0x20:  // Exists
@@ -3226,7 +3226,7 @@ namespace AssEmbly
                                     case 0x2:  // ASMX_FEX reg, adr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
                                         filepath = ReadMemoryPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 9;
@@ -3243,7 +3243,7 @@ namespace AssEmbly
                                     case 0x3:  // ASMX_FEX reg, ptr
                                         if (extLoadContext is null || openExtAssembly is null)
                                         {
-                                            throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                            throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
                                         filepath = ReadMemoryRegisterPointedString(operandStart + 1);
                                         Registers[(int)Register.rpo] += 2;
@@ -3259,17 +3259,17 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_External_Existence, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_External_Existence, opcodeLow));
                                 }
                                 break;
                             case 0x30:  // Call
                                 if (extLoadContext is null || openExtAssembly is null)
                                 {
-                                    throw new ExternalOperationException(Strings.Processor_Error_Assembly_Not_Open);
+                                    throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                 }
                                 if (openExtFunction is null)
                                 {
-                                    throw new ExternalOperationException(Strings.Processor_Error_Function_Not_Open);
+                                    throw new ExternalOperationException(Strings_Processor.Error_Function_Not_Open);
                                 }
                                 try
                                 {
@@ -3301,18 +3301,18 @@ namespace AssEmbly
                                             break;
                                         default:
                                             throw new InvalidOpcodeException(
-                                                string.Format(Strings.Processor_Error_Opcode_Low_External_Call, opcodeLow));
+                                                string.Format(Strings_Processor.Error_Opcode_Low_External_Call, opcodeLow));
                                     }
                                 }
                                 catch (TargetInvocationException exc)
                                 {
                                     throw new ExternalOperationException(string.Format(
-                                        Strings.Processor_Error_External_Method, exc.InnerException?.Source, exc.InnerException?.TargetSite?.Name,
+                                        Strings_Processor.Error_External_Method, exc.InnerException?.Source, exc.InnerException?.TargetSite?.Name,
                                         exc.InnerException?.GetType(), exc.InnerException?.Message));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_External, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_External, opcodeHigh));
                         }
                         break;
 #endif
@@ -3327,7 +3327,7 @@ namespace AssEmbly
                                         result = AllocateMemory(ReadMemoryRegister(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
@@ -3336,7 +3336,7 @@ namespace AssEmbly
                                         result = AllocateMemory(ReadMemoryQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
@@ -3345,7 +3345,7 @@ namespace AssEmbly
                                         result = AllocateMemory(ReadMemoryPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
@@ -3354,7 +3354,7 @@ namespace AssEmbly
                                         result = AllocateMemory(ReadMemoryRegisterPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
@@ -3381,7 +3381,7 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Allocation, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_Allocation_Allocation, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Re-allocation
@@ -3391,11 +3391,11 @@ namespace AssEmbly
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         if (result == ulong.MaxValue - 1)
                                         {
-                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                            throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
@@ -3404,11 +3404,11 @@ namespace AssEmbly
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         if (result == ulong.MaxValue - 1)
                                         {
-                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                            throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
@@ -3417,11 +3417,11 @@ namespace AssEmbly
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         if (result == ulong.MaxValue - 1)
                                         {
-                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                            throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 9;
@@ -3430,11 +3430,11 @@ namespace AssEmbly
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
                                         if (result == ulong.MaxValue)
                                         {
-                                            throw new MemoryAllocationException(Strings.Processor_Error_Memory_Allocation);
+                                            throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         if (result == ulong.MaxValue - 1)
                                         {
-                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                            throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         WriteMemoryRegister(operandStart, result);
                                         Registers[(int)Register.rpo] += 2;
@@ -3461,7 +3461,7 @@ namespace AssEmbly
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Reallocation, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_Allocation_Reallocation, opcodeLow));
                                 }
                                 break;
                             case 0x20:  // Free
@@ -3470,17 +3470,17 @@ namespace AssEmbly
                                     case 0x0:  // HEAP_FRE reg
                                         if (!FreeMemory(ReadMemoryRegister(operandStart)))
                                         {
-                                            throw new InvalidMemoryBlockException(Strings.Processor_Error_Invalid_Memory_Block);
+                                            throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
-                                            string.Format(Strings.Processor_Error_Opcode_Low_Allocation_Free, opcodeLow));
+                                            string.Format(Strings_Processor.Error_Opcode_Low_Allocation_Free, opcodeLow));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Allocation, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Allocation, opcodeHigh));
                         }
                         break;
 #endif
@@ -3508,7 +3508,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_WorkingDir, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_WorkingDir, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Create Directory
@@ -3523,7 +3523,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_CreateDir, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_CreateDir, opcodeLow));
                                 }
                                 _ = Directory.CreateDirectory(filepath);
                                 break;
@@ -3541,7 +3541,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_DeleteDir, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_DeleteDir, opcodeLow));
                                 }
                                 if (Directory.Exists(filepath))
                                 {
@@ -3560,7 +3560,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_DirectoryExists, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_DirectoryExists, opcodeLow));
                                 }
                                 WriteMemoryRegister(operandStart, Directory.Exists(filepath) ? 1UL : 0UL);
                                 break;
@@ -3592,7 +3592,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_Move, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_Move, opcodeLow));
                                 }
                                 if (opcodeLow <= 0x03)
                                 {
@@ -3618,7 +3618,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_BeginListing, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_BeginListing, opcodeLow));
                                 }
                                 directoryListing.Dispose();
                                 directoryListing = Directory.EnumerateDirectories(filepath).GetEnumerator();
@@ -3645,7 +3645,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_ListingGet, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_ListingGet, opcodeLow));
                                 }
                                 break;
                             case 0x70:  // Get File Times
@@ -3682,7 +3682,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 2;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_TimeGet, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_TimeGet, opcodeLow));
                                 }
                                 break;
                             case 0x80:  // Set File Times
@@ -3749,11 +3749,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_FileSystem_TimeSet, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_TimeSet, opcodeLow));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_FileSystem, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_FileSystem, opcodeHigh));
                         }
                         break;
 #endif
@@ -3768,7 +3768,7 @@ namespace AssEmbly
                                         Console.Clear();
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Clear, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_Clear, opcodeLow));
                                 }
                                 break;
                             case 0x10:  // Auto echo
@@ -3781,7 +3781,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.AutoEcho;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Clear, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_Clear, opcodeLow));
                                 }
                                 break;
                             case 0x20:  // Set Cursor Position
@@ -3820,7 +3820,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_SetPosition, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_SetPosition, opcodeLow));
                                 }
                                 break;
                             case 0x30:  // Get Terminal Info
@@ -3843,7 +3843,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_GetPosition, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_GetPosition, opcodeLow));
                                 }
                                 break;
                             case 0x40:  // Beep
@@ -3853,7 +3853,7 @@ namespace AssEmbly
                                         Console.Beep();
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Beep, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_Beep, opcodeLow));
                                 }
                                 break;
                             case 0x50:  // Set Colour
@@ -3895,16 +3895,16 @@ namespace AssEmbly
                                         Console.ResetColor();
                                         break;
                                     default:
-                                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Low_Terminal_Colour, opcodeLow));
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_Colour, opcodeLow));
                                 }
                                 break;
                             default:
-                                throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_High_Terminal, opcodeHigh));
+                                throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Terminal, opcodeHigh));
                         }
                         break;
 #endif
                             default:
-                        throw new InvalidOpcodeException(string.Format(Strings.Processor_Error_Opcode_Extension_Set, extensionSet));
+                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Extension_Set, extensionSet));
                 }
 #if EXTENSION_SET_HEAP_ALLOCATE
                 ulong newSO = Registers[(int)Register.rso];
@@ -3913,12 +3913,12 @@ namespace AssEmbly
                     // Update the mapped memory occupied by the stack, and throw an error if the stack has collided with allocated memory
                     if (newSO > (ulong)Memory.LongLength)
                     {
-                        throw new StackSizeException(Strings.Processor_Error_Stack_Out_Of_Range);
+                        throw new StackSizeException(Strings_Processor.Error_Stack_Out_Of_Range);
                     }
                     _mappedMemoryRanges[^1] = new Range((long)newSO, Memory.LongLength);
                     if (_mappedMemoryRanges.Count >= 2 && _mappedMemoryRanges[^2].Overlaps(_mappedMemoryRanges[^1]))
                     {
-                        throw new StackSizeException(Strings.Processor_Error_Stack_Collide);
+                        throw new StackSizeException(Strings_Processor.Error_Stack_Collide);
                     }
                 }
 #endif
@@ -3954,7 +3954,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
+                throw new InvalidOperationException(Strings_Processor.Error_No_Program);
             }
             if (size is 0 or > long.MaxValue)
             {
@@ -3986,7 +3986,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
+                throw new InvalidOperationException(Strings_Processor.Error_No_Program);
             }
             if (size is 0 or > long.MaxValue)
             {
@@ -4044,7 +4044,7 @@ namespace AssEmbly
         {
             if (!ProgramLoaded)
             {
-                throw new InvalidOperationException(Strings.Processor_Error_No_Program);
+                throw new InvalidOperationException(Strings_Processor.Error_No_Program);
             }
             for (int i = 1; i < _mappedMemoryRanges.Count - 1; i++)
             {
@@ -4243,7 +4243,7 @@ namespace AssEmbly
             Register registerType = ReadMemoryRegisterType(offset);
             if (registerType == Register.rpo)
             {
-                throw new ReadOnlyRegisterException(string.Format(Strings.Processor_Error_Read_Only_Register, registerType));
+                throw new ReadOnlyRegisterException(string.Format(Strings_Processor.Error_Read_Only_Register, registerType));
             }
             Registers[(int)registerType] = value;
         }

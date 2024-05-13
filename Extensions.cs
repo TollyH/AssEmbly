@@ -2,6 +2,15 @@
 {
     public static class Extensions
     {
+        /// <summary>
+        /// Convert raw text to its equivalent form as an AssEmbly string literal.
+        /// </summary>
+        /// <remarks>Neither the input nor the output to this function have surrounding quote marks.</remarks>
+        public static string EscapeCharacters(this string unescaped)
+        {
+            return unescaped.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("@", "\\@");
+        }
+
         public static void SetContentTo<T>(this Stack<T> target, Stack<T> source)
         {
             target.Clear();

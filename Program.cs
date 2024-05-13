@@ -10,7 +10,7 @@ namespace AssEmbly
 {
     internal static partial class Program
     {
-        internal static readonly Version? version = typeof(Program).Assembly.GetName().Version;
+        private static readonly Version? version = typeof(Program).Assembly.GetName().Version;
 
         private static void Main(string[] args)
         {
@@ -29,7 +29,7 @@ namespace AssEmbly
             if (!processedArgs.IsOptionGiven('n', "no-header"))
             {
                 // Write to stderr to prevent header being included in redirected stdout streams
-                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build}-{(ulong)AAPFeatures.All:X}" +
+                Console.Error.WriteLine($"AssEmbly {version?.Major}.{version?.Minor}.{version?.Build}" +
                     $" {(Environment.Is64BitProcess ? "64-bit" : "32-bit")} - CLR {Environment.Version}, {Environment.OSVersion}" +
                     $" {(Environment.Is64BitOperatingSystem ? "64-bit" : "32-bit")}");
                 Console.Error.WriteLine(Strings.Generic_Copyright_Header);
@@ -40,33 +40,47 @@ namespace AssEmbly
             }
             if (args.Length < 1)
             {
-                PrintError(Strings.CLI_Error_Missing_Operation_Body);
-                PrintFatalError(Strings.CLI_Error_Missing_Operation_Hint);
+                PrintError(Strings_CommandLine.Error_Missing_Operation_Body);
+                PrintFatalError(Strings_CommandLine.Error_Missing_Operation_Hint);
                 return;
             }
             switch (args[0].ToLowerInvariant())
             {
+#if ASSEMBLER
                 case "assemble":
                     AssembleSourceFile(processedArgs);
                     break;
+#endif
+#if PROCESSOR
                 case "execute":
                     ExecuteProgram(processedArgs);
                     break;
+#endif
+#if ASSEMBLER && PROCESSOR
                 case "run":
                     AssembleAndExecute(processedArgs);
                     break;
+#endif
+#if DEBUGGER
                 case "debug":
                     RunDebugger(processedArgs);
                     break;
+#endif
+#if DISASSEMBLER
                 case "disassemble":
                     PerformDisassembly(processedArgs);
                     break;
+#endif
+#if DEBUGGER
                 case "repl":
                     RunRepl(processedArgs);
                     break;
+#endif
+#if ASSEMBLER && ASSEMBLER_WARNINGS
                 case "lint":
                     PerformLintingAssembly(processedArgs);
                     break;
+#endif
                 case "help":
                     DisplayHelp(processedArgs);
                     break;
@@ -74,17 +88,18 @@ namespace AssEmbly
                     DisplayLicense(processedArgs);
                     break;
                 default:
-                    PrintFatalError(Strings.CLI_Error_Invalid_Operation, args[0]);
+                    PrintFatalError(Strings_CommandLine.Error_Invalid_Operation, args[0]);
                     return;
             }
         }
 
+#if ASSEMBLER
         private static void AssembleSourceFile(CommandLineArgs args)
         {
             Stopwatch assemblyStopwatch = Stopwatch.StartNew();
 
             string[] positionalArgs = args.GetPositionalArguments();
-            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Assemble))
+            if (!CheckInputFileArg(positionalArgs, Strings_CommandLine.Error_Argument_Missing_Path_Assemble))
             {
                 return;
             }
@@ -100,7 +115,7 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Error_Code, codeString);
+                        PrintFatalError(Strings_CommandLine.Assemble_Error_Invalid_Error_Code, codeString);
                         return;
                     }
                     _ = disabledErrors.Add(errorCode);
@@ -112,7 +127,7 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Warning_Code, codeString);
+                        PrintFatalError(Strings_CommandLine.Assemble_Error_Invalid_Warning_Code, codeString);
                         return;
                     }
                     _ = disabledWarnings.Add(errorCode);
@@ -124,13 +139,14 @@ namespace AssEmbly
                 {
                     if (!int.TryParse(codeString, out int errorCode))
                     {
-                        PrintFatalError(Strings.CLI_Assemble_Error_Invalid_Suggestion_Code, codeString);
+                        PrintFatalError(Strings_CommandLine.Assemble_Error_Invalid_Suggestion_Code, codeString);
                         return;
                     }
                     _ = disabledSuggestions.Add(errorCode);
                 }
             }
 
+#if ASSEMBLER_WARNINGS
             if (args.IsOptionGiven('E', "no-errors"))
             {
                 disabledErrors = AssemblerWarnings.NonFatalErrorMessages.Keys.ToHashSet();
@@ -143,6 +159,7 @@ namespace AssEmbly
             {
                 disabledSuggestions = AssemblerWarnings.SuggestionMessages.Keys.ToHashSet();
             }
+#endif
 
 #if V1_CALL_STACK_COMPAT
             bool useV1Format = false;
@@ -192,6 +209,7 @@ namespace AssEmbly
                 }
                 assembler.AssembleLines(File.ReadAllLines(sourcePath));
                 assemblyResult = assembler.GetAssemblyResult(true);
+#if ASSEMBLER_WARNINGS
                 // Sort warnings by severity, then file, then line
                 Array.Sort(assemblyResult.Warnings, (a, b) =>
                 {
@@ -238,21 +256,22 @@ namespace AssEmbly
                     string macroName = "";
                     if (warning.MacroName != "")
                     {
-                        macroName = string.Format(Strings.CLI_Assemble_Error_Warning_Printout_InMacro, warning.MacroName);
+                        macroName = string.Format(Strings_CommandLine.Assemble_Error_Warning_Printout_InMacro, warning.MacroName);
                     }
-                    Console.WriteLine(Strings.CLI_Assemble_Error_Warning_Printout,
+                    Console.WriteLine(Strings_CommandLine.Assemble_Error_Warning_Printout,
                         messageStart, warning.Code, warning.Position.Line,
                         warning.Position.File,
                         warning.OriginalLine, warning.Message, macroName);
                     Console.ResetColor();
                 }
+#endif
             }
             catch (Exception e)
             {
                 OnAssemblerException(e);
 
-                Console.Write(Strings.CLI_Assemble_Result_Header_Start);
-                PrintFatalError(Strings.CLI_Assemble_Result_Header_Failed);
+                Console.Write(Strings_CommandLine.Assemble_Result_Header_Start);
+                PrintFatalError(Strings_CommandLine.Assemble_Result_Header_Failed);
 #if DEBUG
                 throw;
 #else
@@ -289,10 +308,12 @@ namespace AssEmbly
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
+#if DEBUGGER
             if (!args.IsOptionGiven('D', "no-debug-file"))
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
+#endif
             if (args.IsOptionGiven('e', "output-expanded"))
             {
                 File.WriteAllLines(filename + ".exp.asm", assemblyResult.ExpandedSourceFile);
@@ -323,13 +344,13 @@ namespace AssEmbly
 
             assemblyStopwatch.Stop();
 
-            Console.Write(Strings.CLI_Assemble_Result_Header_Start);
+            Console.Write(Strings_CommandLine.Assemble_Result_Header_Start);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(Strings.CLI_Assemble_Result_Header_Success);
+            Console.WriteLine(Strings_CommandLine.Assemble_Result_Header_Success);
             Console.ResetColor();
             if (args.IsOptionGiven('c', "compress"))
             {
-                Console.WriteLine(Strings.CLI_Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
+                Console.WriteLine(Strings_CommandLine.Assemble_Result_Success_Compressed, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
 #if V1_CALL_STACK_COMPAT
                     useV1Format ? assemblyResult.Program.LongLength :
 #endif
@@ -348,7 +369,7 @@ namespace AssEmbly
             }
             else
             {
-                Console.WriteLine(Strings.CLI_Assemble_Result_Success, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
+                Console.WriteLine(Strings_CommandLine.Assemble_Result_Success, assemblyResult.Program.LongLength, Path.GetFullPath(destination),
 #if V1_CALL_STACK_COMPAT
                     useV1Format ? assemblyResult.Program.LongLength :
 #endif
@@ -359,11 +380,13 @@ namespace AssEmbly
 
             args.WarnUnconsumedOptions(3);
         }
+#endif
 
+#if PROCESSOR
         private static void ExecuteProgram(CommandLineArgs args)
         {
             string[] positionalArgs = args.GetPositionalArguments();
-            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Execute))
+            if (!CheckInputFileArg(positionalArgs, Strings_CommandLine.Error_Argument_Missing_Path_Execute))
             {
                 return;
             }
@@ -392,11 +415,13 @@ namespace AssEmbly
 
             ExecuteProcessor(processor);
         }
+#endif
 
+#if ASSEMBLER && PROCESSOR
         private static void AssembleAndExecute(CommandLineArgs args)
         {
             string[] positionalArgs = args.GetPositionalArguments();
-            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_AssembleAndExecute))
+            if (!CheckInputFileArg(positionalArgs, Strings_CommandLine.Error_Argument_Missing_Path_AssembleAndExecute))
             {
                 return;
             }
@@ -455,11 +480,13 @@ namespace AssEmbly
 
             ExecuteProcessor(processor);
         }
+#endif
 
+#if DEBUGGER
         private static void RunDebugger(CommandLineArgs args)
         {
             string[] positionalArgs = args.GetPositionalArguments();
-            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Debugger))
+            if (!CheckInputFileArg(positionalArgs, Strings_CommandLine.Error_Argument_Missing_Path_Debugger))
             {
                 return;
             }
@@ -495,11 +522,13 @@ namespace AssEmbly
 
             debugger.StartDebugger();
         }
+#endif
 
+#if DISASSEMBLER
         private static void PerformDisassembly(CommandLineArgs args)
         {
             string[] positionalArgs = args.GetPositionalArguments();
-            if (!CheckInputFileArg(positionalArgs, Strings.CLI_Error_Argument_Missing_Path_Disassemble))
+            if (!CheckInputFileArg(positionalArgs, Strings_CommandLine.Error_Argument_Missing_Path_Disassemble))
             {
                 return;
             }
@@ -539,7 +568,7 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                PrintFatalError(Strings.CLI_Disassemble_Error_Unexpected, e.GetType().Name, e.Message);
+                PrintFatalError(Strings_CommandLine.Disassemble_Error_Unexpected, e.GetType().Name, e.Message);
 #if DEBUG
                 throw;
 #else
@@ -548,11 +577,13 @@ namespace AssEmbly
             }
             string destination = positionalArgs.Length >= 3 ? positionalArgs[2] : filename + ".dis.asm";
             File.WriteAllText(destination, disassembledProgram);
-            Console.WriteLine(Strings.CLI_Disassemble_Success, Path.GetFullPath(destination));
+            Console.WriteLine(Strings_CommandLine.Disassemble_Success, Path.GetFullPath(destination));
 
             args.WarnUnconsumedOptions(3);
         }
+#endif
 
+#if DEBUGGER
         private static void RunRepl(CommandLineArgs args)
         {
             ulong memSize = GetMemorySize(args);
@@ -569,8 +600,10 @@ namespace AssEmbly
 
             debugger.StartDebugger();
         }
+#endif
 
-        [Localizable(false)]
+#if ASSEMBLER && ASSEMBLER_WARNINGS
+            [Localizable(false)]
         private static void PerformLintingAssembly(CommandLineArgs args)
         {
             // This is an undocumented operation designed for IDE extensions to provide linting on source files.
@@ -631,6 +664,7 @@ namespace AssEmbly
                 }
             }
         }
+#endif
 
         private static void DisplayHelp(CommandLineArgs args)
         {
@@ -638,39 +672,58 @@ namespace AssEmbly
 
             if (positionalArgs.Length <= 1)
             {
-                Console.WriteLine(Strings.CLI_Help_Body, DefaultMemorySize,
-                    Assembler.DefaultMacroExpansionLimit, Assembler.DefaultWhileRepeatLimit);
+                Console.WriteLine(Strings_CommandLine.Help_Body);
+#if ASSEMBLER
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Assemble, Strings_CommandLine.Help_Description_Assemble);
+#endif
+#if PROCESSOR
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Execute, Strings_CommandLine.Help_Description_Execute);
+#endif
+#if ASSEMBLER && PROCESSOR
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Run, Strings_CommandLine.Help_Description_Run);
+#endif
+#if DEBUGGER
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Debug, Strings_CommandLine.Help_Description_Debug);
+#endif
+#if DISASSEMBLER
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Disassemble, Strings_CommandLine.Help_Description_Disassemble);
+#endif
+#if DEBUGGER
+                Console.WriteLine(Strings_CommandLine.Help_Operation_REPL, Strings_CommandLine.Help_Description_REPL);
+#endif
+                Console.WriteLine(Strings_CommandLine.Help_Operation_License, Strings_CommandLine.Help_Description_License);
+                Console.WriteLine(Strings_CommandLine.Help_Operation_Help, Strings_CommandLine.Help_Description_Help);
             }
             else
             {
                 switch (positionalArgs[1].ToLowerInvariant())
                 {
                     case "assemble":
-                        PrintOperationHelp("assemble", Strings.CLI_Help_Description_Assemble, Strings.CLI_Help_Options_Assemble);
+                        PrintOperationHelp("assemble", Strings_CommandLine.Help_Description_Assemble, Strings_CommandLine.Help_Options_Assemble);
                         break;
                     case "execute":
-                        PrintOperationHelp("execute", Strings.CLI_Help_Description_Execute, Strings.CLI_Help_Options_Execute);
+                        PrintOperationHelp("execute", Strings_CommandLine.Help_Description_Execute, Strings_CommandLine.Help_Options_Execute);
                         break;
                     case "run":
-                        PrintOperationHelp("run", Strings.CLI_Help_Description_Run, Strings.CLI_Help_Options_Run);
+                        PrintOperationHelp("run", Strings_CommandLine.Help_Description_Run, Strings_CommandLine.Help_Options_Run);
                         break;
                     case "debug":
-                        PrintOperationHelp("debug", Strings.CLI_Help_Description_Debug, Strings.CLI_Help_Options_Debug);
+                        PrintOperationHelp("debug", Strings_CommandLine.Help_Description_Debug, Strings_CommandLine.Help_Options_Debug);
                         break;
                     case "disassemble":
-                        PrintOperationHelp("disassemble", Strings.CLI_Help_Description_Disassemble, Strings.CLI_Help_Options_Disassemble);
+                        PrintOperationHelp("disassemble", Strings_CommandLine.Help_Description_Disassemble, Strings_CommandLine.Help_Options_Disassemble);
                         break;
                     case "repl":
-                        PrintOperationHelp("repl", Strings.CLI_Help_Description_REPL, Strings.CLI_Help_Options_REPL);
+                        PrintOperationHelp("repl", Strings_CommandLine.Help_Description_REPL, Strings_CommandLine.Help_Options_REPL);
                         break;
                     case "license":
-                        PrintOperationHelp("license", Strings.CLI_Help_Description_License, Strings.CLI_Help_Options_License);
+                        PrintOperationHelp("license", Strings_CommandLine.Help_Description_License, Strings_CommandLine.Help_Options_License);
                         break;
                     case "help":
-                        PrintOperationHelp("help", Strings.CLI_Help_Description_Help, Strings.CLI_Help_Options_Help);
+                        PrintOperationHelp("help", Strings_CommandLine.Help_Description_Help, Strings_CommandLine.Help_Options_Help);
                         break;
                     default:
-                        PrintError(Strings.CLI_Error_Invalid_Operation, positionalArgs[1]);
+                        PrintError(Strings_CommandLine.Error_Invalid_Operation, positionalArgs[1]);
                         break;
                 }
             }
@@ -682,7 +735,7 @@ namespace AssEmbly
         {
             try
             {
-                Console.WriteLine(Strings.CLI_License_Header);
+                Console.WriteLine(Strings_CommandLine.License_Header);
                 Console.WriteLine();
                 if (!Console.IsOutputRedirected)
                 {
@@ -695,13 +748,13 @@ namespace AssEmbly
                 using Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("AssEmbly.LICENSE")
                     ?? throw new NullReferenceException("Resource stream with name 'LICENSE' was missing");
                 using StreamReader resourceReader = new(resourceStream);
-                Console.WriteLine(resourceReader.ReadToEnd(), DefaultMemorySize, Assembler.DefaultMacroExpansionLimit);
+                Console.WriteLine(resourceReader.ReadToEnd());
 
                 args.WarnUnconsumedOptions(1);
             }
             catch
             {
-                PrintFatalError(Strings.CLI_License_Error);
+                PrintFatalError(Strings_CommandLine.License_Error);
 #if DEBUG
                 throw;
 #else

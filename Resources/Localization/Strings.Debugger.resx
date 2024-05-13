@@ -1,0 +1,310 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Any_Key_Continue" xml:space="preserve">
+    <value>Press any key to continue, or CTRL+C to stop...</value>
+  </data>
+  <data name="Breakpoint_Hit" xml:space="preserve">
+    <value>Breakpoint hit! {0} == {1}</value>
+  </data>
+  <data name="Breakpoints_Header" xml:space="preserve">
+    <value>Current breakpoints:</value>
+  </data>
+  <data name="Command_Prompt" xml:space="preserve">
+    <value>
+Press ENTER to continue, or type a command ('help' for command list): </value>
+  </data>
+  <data name="Error_Args_Required_0to1" xml:space="preserve">
+    <value>This command requires either 1 or no arguments. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Args_Required_0to2" xml:space="preserve">
+    <value>This command requires 0 to 2 arguments. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Args_Required_1" xml:space="preserve">
+    <value>This command requires 1 argument. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Args_Required_2" xml:space="preserve">
+    <value>This command requires 2 arguments. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Args_Required_3" xml:space="preserve">
+    <value>This command requires 3 arguments. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Args_Required_Breakpoint" xml:space="preserve">
+    <value>This command requires either 3 arguments to add or remove a breakpoint, or none to list them. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Address" xml:space="preserve">
+    <value>"{0}" is not a valid memory address. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Break_Value" xml:space="preserve">
+    <value>"{0}" is not a valid value to break on.</value>
+  </data>
+  <data name="Error_Invalid_Breakpoint_Action" xml:space="preserve">
+    <value>"{0}" is not a valid breakpoint action. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Byte_Value" xml:space="preserve">
+    <value>"{0}" is not a valid byte value for memory.</value>
+  </data>
+  <data name="Error_Invalid_Convert_Value" xml:space="preserve">
+    <value>"{0}" is not a valid value to convert.</value>
+  </data>
+  <data name="Error_Invalid_Limit" xml:space="preserve">
+    <value>"{0}" is not a valid limit. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Location" xml:space="preserve">
+    <value>"{0}" is not a valid location specifier. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Offset" xml:space="preserve">
+    <value>"{0}" is not a valid offset. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Register" xml:space="preserve">
+    <value>"{0}" is not a valid register. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_Invalid_Register_Value" xml:space="preserve">
+    <value>"{0}" is not a valid value for register.</value>
+  </data>
+  <data name="Error_Invalid_Size" xml:space="preserve">
+    <value>"{0}" is not a valid size specifier. Run 'help' for more info.</value>
+  </data>
+  <data name="Error_OutOfRange_Address" xml:space="preserve">
+    <value>"{0}" is outside the range of allowed memory addresses.</value>
+  </data>
+  <data name="Error_Unrecognised_Command" xml:space="preserve">
+    <value>"{0}" is not a recognised command. Run 'help' for more info.</value>
+  </data>
+  <data name="Execution_Position" xml:space="preserve">
+    <value>This instruction was assembled from {0} at line {1}</value>
+  </data>
+  <data name="Execution_Preface_Header" xml:space="preserve">
+    <value>About to execute instruction:
+    </value>
+  </data>
+  <data name="Execution_Preface_Imports" xml:space="preserve">
+    <value>The following file was imported here:
+    </value>
+  </data>
+  <data name="Execution_Preface_Labels" xml:space="preserve">
+    <value>This address is referenced by the following labels:
+    </value>
+  </data>
+  <data name="Heap_Map_Fully_Mapped" xml:space="preserve">
+    <value> = Fully mapped, </value>
+  </data>
+  <data name="Heap_Map_Fully_Unmapped" xml:space="preserve">
+    <value> = Fully unmapped, </value>
+  </data>
+  <data name="Heap_Map_Header" xml:space="preserve">
+    <value>Memory map:</value>
+  </data>
+  <data name="Heap_Map_Partially_Mapped" xml:space="preserve">
+    <value> = Partially mapped  (1 block = {0:N2} bytes)</value>
+  </data>
+  <data name="Heap_Stats_Main" xml:space="preserve">
+    <value>
+Current memory statistics:
+Total memory: {0:N0} bytes
+Total free memory: {1:N0} bytes
+
+Number of free blocks: {2:N0}
+Largest free contiguous block: {3:N0} bytes ({4:N2}% fragmentation)
+
+Number of allocated blocks: {5:N0}
+Total size of allocated blocks: {6:N0} bytes
+
+Stack size: {7:N0} bytes{8}
+Program size: {9:N0} bytes</value>
+  </data>
+  <data name="Heap_Unmapped" xml:space="preserve">
+    <value> (unmapped)</value>
+  </data>
+  <data name="Help_Body" xml:space="preserve">
+    <value>
+read &lt;byte|word|dword|qword&gt; &lt;address&gt; - Read data at a memory address
+write &lt;mem|reg&gt; &lt;address|register-name&gt; &lt;value&gt; - Modify the value of a memory address or register
+map [start offset] [limit] - Display (optionally limited amount) of memory in a grid of bytes
+stack [limit] - Visualise the state of the stack, optionally limited by the number of bytes away from the stack base
+heap - View statistics related to the current state of heap allocation
+breakpoint [&lt;add|remove&gt; &lt;register&gt; &lt;value&gt;] - Add or remove a breakpoint for when a register is equal to a value
+dec2hex &lt;dec-number&gt; - Convert a decimal number to hexadecimal
+hex2dec &lt;hex-number&gt; - Convert a hexadecimal number to decimal
+refresh - Display the instruction to be executed and register states again
+run - Run the program without debugging until the next HLT instruction
+over - Continue to the next instruction in the current subroutine
+return - Continue to the next return instruction in this subroutine or higher</value>
+  </data>
+  <data name="Memory_Value" xml:space="preserve">
+    <value>Value at {0}: {1} (0x{2:X}) (0b{3})</value>
+  </data>
+  <data name="MemoryMap_Cell" xml:space="preserve">
+    <value>{0:X2}</value>
+  </data>
+  <data name="MemoryMap_FirstCol" xml:space="preserve">
+    <value>{0:X16} │ </value>
+  </data>
+  <data name="MemoryMap_Header" xml:space="preserve">
+    <value>
+Offset (Hex)     │ 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F │ ASCII
+─────────────────┼─────────────────────────────────────────────────┼─────────────────
+</value>
+  </data>
+  <data name="MemoryMap_VerticalSep" xml:space="preserve">
+    <value>│ </value>
+  </data>
+  <data name="Stack_Box_Bottom" xml:space="preserve">
+    <value>└──────────────────┴───────────────────────────────┴────────────┘</value>
+  </data>
+  <data name="Stack_Box_Top" xml:space="preserve">
+    <value>┌──────────────────┬───────────────────────────────┬────────────┐</value>
+  </data>
+  <data name="Stack_CurrentFrame_Header" xml:space="preserve">
+    <value>Current stack frame (likely local variables)</value>
+  </data>
+  <data name="Stack_CurrentFrame_Row" xml:space="preserve">
+    <value>│ {0:X16} │ {1:X16}              │ rsb - {2,-4} │</value>
+  </data>
+  <data name="Stack_ParentFrame_Header" xml:space="preserve">
+    <value>Parent stack frame (possibly parameters to this subroutine)</value>
+  </data>
+  <data name="Stack_ParentFrame_Row" xml:space="preserve">
+    <value>│ {0:X16} │ {1:X16}              │ rsb + {2,-4} │</value>
+  </data>
+  <data name="Stack_Pointer_rso" xml:space="preserve">
+    <value> &lt;- rso</value>
+  </data>
+  <data name="Stack_ReturnInfo_First" xml:space="preserve">
+    <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 0    | &lt;- rsb</value>
+  </data>
+  <data name="Stack_ReturnInfo_Header" xml:space="preserve">
+    <value>Return information</value>
+  </data>
+  <data name="Stack_ReturnInfo_Second" xml:space="preserve">
+    <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 8    |</value>
+  </data>
+  <data name="Stack_ReturnInfo_Third" xml:space="preserve">
+    <value>│ {0:X16} │ Reset {1} to {2:X16} | rsb + 16   |</value>
+  </data>
+  <data name="Success_Address_Value_Set" xml:space="preserve">
+    <value>Successfully set value of address {0} to {1}</value>
+  </data>
+  <data name="Success_Breakpoint" xml:space="preserve">
+    <value>Breakpoint added for {0} with value {1}</value>
+  </data>
+  <data name="Success_Breakpoint_Remove" xml:space="preserve">
+    <value>Breakpoint removed for {0} with value {1}</value>
+  </data>
+  <data name="Success_Register_Value_Set" xml:space="preserve">
+    <value>Successfully set value of register {0} to {1}</value>
+  </data>
+  <data name="Value_In_Decimal" xml:space="preserve">
+    <value>{0} in decimal is {1}</value>
+  </data>
+  <data name="Value_In_Hex" xml:space="preserve">
+    <value>{0} in hexadecimal is {1:X}</value>
+  </data>
+  <data name="Warning_Breakpoint_Exists" xml:space="preserve">
+    <value>There is already a breakpoint added for {0} with value {1}.</value>
+  </data>
+  <data name="Warning_Breakpoint_No_Matching" xml:space="preserve">
+    <value>There were no matching breakpoints to remove.</value>
+  </data>
+  <data name="Warning_Debug_Info_File" xml:space="preserve">
+    <value>An error occurred whilst loading the debug information file:
+"{0}: {1}".
+Label names and original source lines will not be available.</value>
+  </data>
+  <data name="Warning_HLT_Reached" xml:space="preserve">
+    <value>
+
+Halt instruction reached. You should not continue unless this instruction was placed as a breakpoint.</value>
+  </data>
+  <data name="Warning_rso_GT_rsb" xml:space="preserve">
+    <value>The stack pointer is currently greater than the stack base - stack visualisation not available in this state.</value>
+  </data>
+  <data name="Warning_Stack_Bottom" xml:space="preserve">
+    <value>Bottom of the stack reached - most likely the program is not currently in a subroutine.</value>
+  </data>
+  <data name="Warning_Stack_Empty" xml:space="preserve">
+    <value>The stack is currently empty.</value>
+  </data>
+  <data name="DebugInfo_Error_Invalid_Format" xml:space="preserve">
+    <value>The provided debug information file was in an invalid format</value>
+  </data>
+  <data name="DebugInfo_Error_Wrong_Version" xml:space="preserve">
+    <value>The provided debug information file was created for a different version of AssEmbly</value>
+  </data>
+  <data name="REPL_Changed_Flags_Header" xml:space="preserve">
+    <value>Flag changes:</value>
+  </data>
+  <data name="REPL_Changed_Flags_Set" xml:space="preserve">
+    <value>SET</value>
+  </data>
+  <data name="REPL_Changed_Flags_Unset" xml:space="preserve">
+    <value>UNSET</value>
+  </data>
+  <data name="REPL_Changed_Registers_Header" xml:space="preserve">
+    <value>
+
+Changed registers:</value>
+  </data>
+  <data name="REPL_Changed_Registers_Line" xml:space="preserve">
+    <value>    {0}: {1} -&gt; {2} (0x{3:X} -&gt; 0x{4:X})</value>
+  </data>
+  <data name="REPL_Command_Prompt" xml:space="preserve">
+    <value>
+&gt;&gt;&gt; </value>
+  </data>
+  <data name="REPL_Error_Label_Ampersand" xml:space="preserve">
+    <value>The first character of a label cannot be '&amp;'</value>
+  </data>
+  <data name="REPL_Error_Label_Not_Exists" xml:space="preserve">
+    <value>A label with the name "{0}" doesn't exist. Labels must be defined before usage in REPL.</value>
+  </data>
+  <data name="REPL_Header" xml:space="preserve">
+    <value>AssEmbly REPL Environment
+
+Type an AssEmbly instruction and press ENTER to insert and execute it.
+Preface the instruction with one or more spaces to insert it without executing it.
+Press ENTER without typing anything to output the state of all registers.</value>
+  </data>
+  <data name="REPL_Remaining_Memory" xml:space="preserve">
+    <value>
+{0} bytes of memory remaining</value>
+  </data>
+</root>

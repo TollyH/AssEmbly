@@ -88,12 +88,12 @@ namespace AssEmbly
                             string argKey = argText[..equalsIndex];
                             if (!keyValueOptions.TryAdd(argKey, argText[(equalsIndex + 1)..]) && PrintWarnings)
                             {
-                                Program.PrintWarning(Strings.CommandLineArgs_Warning_Exists_KeyValue, argKey);
+                                Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Exists_KeyValue, argKey);
                             }
                         }
                         else if (!multiCharacterOptions.Add(argText) && PrintWarnings)
                         {
-                            Program.PrintWarning(Strings.CommandLineArgs_Warning_Exists_MultiCharacter, argText);
+                            Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Exists_MultiCharacter, argText);
                         }
                     }
                     else
@@ -102,7 +102,7 @@ namespace AssEmbly
                         {
                             if (!singleCharacterOptions.Add(c) && PrintWarnings)
                             {
-                                Program.PrintWarning(Strings.CommandLineArgs_Warning_Exists_SingleCharacter, c);
+                                Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Exists_SingleCharacter, c);
                             }
                         }
                     }
@@ -170,15 +170,15 @@ namespace AssEmbly
         {
             foreach (char singleArgument in singleCharacterOptions.Except(consumedSingleCharacterOptions))
             {
-                Program.PrintWarning(Strings.CommandLineArgs_Warning_Unconsumed_SingleCharacter, singleArgument);
+                Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Unconsumed_SingleCharacter, singleArgument);
             }
             foreach (string multiArgument in multiCharacterOptions.Except(consumedMultiCharacterOptions))
             {
-                Program.PrintWarning(Strings.CommandLineArgs_Warning_Unconsumed_MultiCharacter, multiArgument);
+                Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Unconsumed_MultiCharacter, multiArgument);
             }
             foreach (string key in keyValueOptions.Keys.Except(consumedKeyValueOptions))
             {
-                Program.PrintWarning(Strings.CommandLineArgs_Warning_Unconsumed_KeyValue, key);
+                Program.PrintWarning(Strings_CommandLine.CommandLineArgs_Warning_Unconsumed_KeyValue, key);
             }
         }
 
@@ -195,8 +195,8 @@ namespace AssEmbly
             {
                 int excess = positionalArgs.Count - maxPositionalArgsLength;
                 Program.PrintWarning(excess == 1
-                    ? Strings.CommandLineArgs_Warning_Unconsumed_Positional_Single
-                    : Strings.CommandLineArgs_Warning_Unconsumed_Positional_Multiple, excess);
+                    ? Strings_CommandLine.CommandLineArgs_Warning_Unconsumed_Positional_Single
+                    : Strings_CommandLine.CommandLineArgs_Warning_Unconsumed_Positional_Multiple, excess);
             }
         }
     }

@@ -80,29 +80,29 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_IMP_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_IMP_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_IMP_Operand_Type, operandType));
             }
             if (operands[0][0] != '"')
             {
-                throw new OperandException(Strings.Assembler_Error_IMP_Operand_String);
+                throw new OperandException(Strings_Assembler.Error_IMP_Operand_String);
             }
             byte[] parsedBytes = ParseLiteral(operands[0], true);
             string importPath = Encoding.UTF8.GetString(parsedBytes);
             string resolvedPath = Path.GetFullPath(importPath);
             if (!File.Exists(resolvedPath))
             {
-                throw new ImportException(string.Format(Strings.Assembler_Error_IMP_File_Not_Exists, resolvedPath));
+                throw new ImportException(string.Format(Strings_Assembler.Error_IMP_File_Not_Exists, resolvedPath));
             }
             if (importStack.Any(x => string.Equals(x.ImportPath, resolvedPath, StringComparison.OrdinalIgnoreCase))
                 // If a file is entirely guarded by %ASM_ONCE, we don't need to error if it's already present on import stack.
                 && !completeAsmOnceFiles.Any(s => string.Equals(s, resolvedPath, StringComparison.OrdinalIgnoreCase)))
             {
-                throw new ImportException(string.Format(Strings.Assembler_Error_Circular_Import, resolvedPath));
+                throw new ImportException(string.Format(Strings_Assembler.Error_Circular_Import, resolvedPath));
             }
             string[] linesToImport = File.ReadAllLines(resolvedPath);
             // Insert the contents of the imported file so they are assembled next
@@ -121,7 +121,7 @@ namespace AssEmbly
         {
             if (operands.Length is < 1 or > 2)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_MACRO_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_MACRO_Operand_Count, operands.Length));
             }
 
             if (operands.Length == 2)
@@ -140,7 +140,7 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(Strings.Assembler_Error_DELMACRO_Operand_Count);
+                throw new OperandException(Strings_Assembler.Error_DELMACRO_Operand_Count);
             }
             bool removed = false;
             if (singleLineMacros.Remove(operands[0]))
@@ -155,7 +155,7 @@ namespace AssEmbly
             }
             if (!removed)
             {
-                throw new MacroNameException(string.Format(Strings.Assembler_Error_DELMACRO_Not_Exists, operands[0]));
+                throw new MacroNameException(string.Format(Strings_Assembler.Error_DELMACRO_Not_Exists, operands[0]));
             }
         }
 
@@ -163,12 +163,12 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Operand_Type, operandType));
             }
             List<string> labelsToEdit = labels
                 .Where(kv => kv.Value == (ulong)program.Count && !overriddenLabels.Contains(kv.Key))
@@ -182,7 +182,7 @@ namespace AssEmbly
                     string linkedName = operands[0][2..];
                     if (labelName == linkedName)
                     {
-                        throw new LabelNameException(string.Format(Strings.Assembler_Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
+                        throw new LabelNameException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
                     }
                     // If the target label is already a link, store link to the actual target instead of chaining links
                     while (labelLinks.TryGetValue(linkedName, out (string Target, string FilePath, int Line) checkName))
@@ -211,18 +211,19 @@ namespace AssEmbly
         {
             if (operands.Length != 3)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ANALYZER_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ANALYZER_Operand_Count, operands.Length));
             }
+#if ASSEMBLER_WARNINGS
             WarningSeverity severity = operands[0].ToUpperInvariant() switch
             {
                 "ERROR" => WarningSeverity.NonFatalError,
                 "WARNING" => WarningSeverity.Warning,
                 "SUGGESTION" => WarningSeverity.Suggestion,
-                _ => throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_First)
+                _ => throw new OperandException(Strings_Assembler.Error_ANALYZER_Operand_First)
             };
             if (!int.TryParse(operands[1], out int code))
             {
-                throw new OperandException(Strings.Assembler_Error_ANALYZER_Operand_Second);
+                throw new OperandException(Strings_Assembler.Error_ANALYZER_Operand_Second);
             }
             _ = operands[2].ToUpperInvariant() switch
             {
@@ -233,22 +234,24 @@ namespace AssEmbly
                 // Restore
                 "R" => ResetAssemblerWarning(severity, code),
                 _ => throw new OperandException(
-                    Strings.Assembler_Error_ANALYZER_Operand_Third)
+                    Strings_Assembler.Error_ANALYZER_Operand_Third)
             };
+#endif
         }
 
         private void StateDirective_EmitAssemblerMessage(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length is < 1 or > 2)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_MESSAGE_Operand_Count, operands.Length));
             }
+#if ASSEMBLER_WARNINGS
             WarningSeverity severity = operands[0].ToUpperInvariant() switch
             {
                 "ERROR" => WarningSeverity.NonFatalError,
                 "WARNING" => WarningSeverity.Warning,
                 "SUGGESTION" => WarningSeverity.Suggestion,
-                _ => throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_First)
+                _ => throw new OperandException(Strings_Assembler.Error_MESSAGE_Operand_First)
             };
             string? message = null;
             if (operands.Length == 2)
@@ -256,11 +259,11 @@ namespace AssEmbly
                 OperandType operandType = DetermineOperandType(operands[1]);
                 if (operandType != OperandType.Literal)
                 {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_MESSAGE_Operand_Second_Type, operandType));
+                    throw new OperandException(string.Format(Strings_Assembler.Error_MESSAGE_Operand_Second_Type, operandType));
                 }
                 if (operands[1][0] != '"')
                 {
-                    throw new OperandException(Strings.Assembler_Error_MESSAGE_Operand_Second_String);
+                    throw new OperandException(Strings_Assembler.Error_MESSAGE_Operand_Second_String);
                 }
                 byte[] parsedBytes = ParseLiteral(operands[1], true);
                 message = Encoding.UTF8.GetString(parsedBytes);
@@ -268,13 +271,14 @@ namespace AssEmbly
             warnings.Add(new Warning(
                 severity, 0000, currentFilePosition,
                 mnemonic, operands, dynamicLines[lineIndex], currentMacro?.MacroName, message));
+#endif
         }
 
         private void StateDirective_StopAssembly(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length > 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_STOP_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_STOP_Operand_Count, operands.Length));
             }
             string? message = null;
             if (operands.Length == 1)
@@ -282,41 +286,41 @@ namespace AssEmbly
                 OperandType operandType = DetermineOperandType(operands[0]);
                 if (operandType != OperandType.Literal)
                 {
-                    throw new OperandException(string.Format(Strings.Assembler_Error_STOP_Operand_First_Type, operandType));
+                    throw new OperandException(string.Format(Strings_Assembler.Error_STOP_Operand_First_Type, operandType));
                 }
                 if (operands[0][0] != '"')
                 {
-                    throw new OperandException(Strings.Assembler_Error_STOP_Operand_First_String);
+                    throw new OperandException(Strings_Assembler.Error_STOP_Operand_First_String);
                 }
                 byte[] parsedBytes = ParseLiteral(operands[0], true);
                 message = Encoding.UTF8.GetString(parsedBytes);
             }
-            throw new AssemblyStoppedException(message ?? Strings.Assembler_Error_STOP);
+            throw new AssemblyStoppedException(message ?? Strings_Assembler.Error_STOP);
         }
 
         private void StateDirective_RepeatSourceLines(string mnemonic, string[] operands, string preVariableLine)
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_REPEAT_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_REPEAT_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_REPEAT_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_REPEAT_Operand_Type, operandType));
             }
             if (operands[0][0] == ':')
             {
-                throw new OperandException(Strings.Assembler_Error_REPEAT_Operand_Label_Reference);
+                throw new OperandException(Strings_Assembler.Error_REPEAT_Operand_Label_Reference);
             }
             if (operands[0][0] == '-' || operands[0].Contains('.'))
             {
-                throw new OperandException(Strings.Assembler_Error_REPEAT_Operand_Signed_Or_Floating);
+                throw new OperandException(Strings_Assembler.Error_REPEAT_Operand_Signed_Or_Floating);
             }
             _ = ParseLiteral(operands[0], false, out ulong repeatCount);
             if (repeatCount == 0)
             {
-                throw new OperandException(Strings.Assembler_Error_REPEAT_Zero);
+                throw new OperandException(Strings_Assembler.Error_REPEAT_Zero);
             }
             currentRepeatSections.Push((GetCurrentPosition(), repeatCount - 1));
         }
@@ -325,11 +329,11 @@ namespace AssEmbly
         {
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ENDREPEAT_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ENDREPEAT_Operand_Count, operands.Length));
             }
             if (currentRepeatSections.Count == 0)
             {
-                throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
+                throw new EndingDirectiveException(string.Format(Strings_Assembler.Error_Opening_Directive_Missing, mnemonic));
             }
             (AssemblyPosition position, ulong iterationsRemaining) = currentRepeatSections.Pop();
             if (iterationsRemaining > 0)
@@ -344,11 +348,11 @@ namespace AssEmbly
         {
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ASM_ONCE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ASM_ONCE_Operand_Count, operands.Length));
             }
             if (currentImport is null)
             {
-                throw new SyntaxError(Strings.Assembler_Error_ASM_ONCE_Not_Imported);
+                throw new SyntaxError(Strings_Assembler.Error_ASM_ONCE_Not_Imported);
             }
             if (!currentImport.AnyAssembledLines)
             {
@@ -367,12 +371,12 @@ namespace AssEmbly
         {
             if (operands.Length != 2)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_DEFINE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_DEFINE_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[1]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_DEFINE_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_DEFINE_Operand_Type, operandType));
             }
 
             string newVariableName = operands[0];
@@ -384,11 +388,11 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_UNDEFINE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_UNDEFINE_Operand_Count, operands.Length));
             }
             if (!assemblerVariables.Remove(operands[0]))
             {
-                throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, operands[0]));
+                throw new VariableNameException(string.Format(Strings_Assembler.Error_Variable_Not_Exists, operands[0]));
             }
         }
 
@@ -396,23 +400,23 @@ namespace AssEmbly
         {
             if (operands.Length != 3)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_VAROP_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[2]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_Third_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_VAROP_Operand_Third_Type, operandType));
             }
             if (operands[2][0] == ':')
             {
-                throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Label_Reference);
+                throw new OperandException(Strings_Assembler.Error_VAROP_Operand_Third_Label_Reference);
             }
             _ = ParseLiteral(operands[2], false, out ulong value);
 
             string variableName = operands[1];
             if (!assemblerVariables.ContainsKey(variableName))
             {
-                throw new VariableNameException(string.Format(Strings.Assembler_Error_Variable_Not_Exists, variableName));
+                throw new VariableNameException(string.Format(Strings_Assembler.Error_Variable_Not_Exists, variableName));
             }
 
             switch (operands[0].ToUpperInvariant())
@@ -429,14 +433,14 @@ namespace AssEmbly
                 case "DIV":
                     if (value == 0)
                     {
-                        throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Zero);
+                        throw new OperandException(Strings_Assembler.Error_VAROP_Operand_Third_Zero);
                     }
                     assemblerVariables[variableName] /= value;
                     break;
                 case "REM":
                     if (value == 0)
                     {
-                        throw new OperandException(Strings.Assembler_Error_VAROP_Operand_Third_Zero);
+                        throw new OperandException(Strings_Assembler.Error_VAROP_Operand_Third_Zero);
                     }
                     assemblerVariables[variableName] %= value;
                     break;
@@ -503,7 +507,7 @@ namespace AssEmbly
                     assemblerVariables[variableName] = assemblerVariables[variableName] <= value ? 1UL : 0UL;
                     break;
                 default:
-                    throw new OperandException(string.Format(Strings.Assembler_Error_VAROP_Operand_First, operands[0]));
+                    throw new OperandException(string.Format(Strings_Assembler.Error_VAROP_Operand_First, operands[0]));
             }
         }
 
@@ -511,59 +515,59 @@ namespace AssEmbly
         {
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_DEBUG_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_DEBUG_Operand_Count, operands.Length));
             }
             Console.ForegroundColor = ConsoleColor.Blue;
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header,
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Header,
                 currentImport?.CurrentLine ?? baseFileLine,
                 currentImport?.ImportPath ?? BaseFilePath, program.Count);
             if (macroLineDepth != 0)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Header_Macro_Lines, macroLineDepth);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Header_Macro_Lines, macroLineDepth);
             }
             if (insideMacroSkipBlock)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Inside_Macro_Skip_Block);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Inside_Macro_Skip_Block);
             }
             if (currentlyOpenIfBlocks > 0)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_If_Blocks, currentlyOpenIfBlocks);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Current_If_Blocks, currentlyOpenIfBlocks);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_While_Repeats, whileRepeats, WhileRepeatLimit);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Current_While_Repeats, whileRepeats, WhileRepeatLimit);
             Console.ForegroundColor = ConsoleColor.Magenta;
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Header, labels.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Header, labels.Count);
             foreach ((string labelName, ulong address) in labels)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Line, labelName, address);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Line, labelName, address);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Label_Link_Header, labelLinks.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Link_Header, labelLinks.Count);
             foreach ((string labelName, (string target, string filePath, int line)) in labelLinks)
             {
                 Console.Error.WriteLine(
-                    Strings.Assembler_Debug_Directive_Label_Link_Line, labelName, target, filePath, line);
+                    Strings_Assembler.Debug_Directive_Label_Link_Line, labelName, target, filePath, line);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_LabelRef_Header, labelReferences.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_LabelRef_Header, labelReferences.Count);
             foreach ((string labelName, ulong insertOffset, _) in labelReferences)
             {
                 Console.Error.WriteLine(
-                    Strings.Assembler_Debug_Directive_LabelRef_Line, labelName, insertOffset);
+                    Strings_Assembler.Debug_Directive_LabelRef_Line, labelName, insertOffset);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Header, singleLineMacros.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Single_Line_Macro_Header, singleLineMacros.Count);
             foreach ((string macro, string replacement) in singleLineMacros)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Single_Line_Macro_Line, macro, replacement);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Single_Line_Macro_Line, macro, replacement);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Multi_Line_Macro_Header, multiLineMacros.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Multi_Line_Macro_Header, multiLineMacros.Count);
             foreach ((string macro, string[] replacement) in multiLineMacros)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Multi_Line_Macro_Line, macro, replacement.Length >= 1 ? replacement[0] : "");
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Multi_Line_Macro_Line, macro, replacement.Length >= 1 ? replacement[0] : "");
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Assembler_Variable_Header, assemblerVariables.Count);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Assembler_Variable_Header, assemblerVariables.Count);
             foreach ((string variable, ulong value) in assemblerVariables)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Assembler_Variable_Line, variable, value);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Assembler_Variable_Line, variable, value);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Repeat_Stack_Header);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Repeat_Stack_Header);
             foreach ((AssemblyPosition startPosition, ulong remainingIterations) in currentRepeatSections)
             {
                 string filePath;
@@ -578,9 +582,9 @@ namespace AssEmbly
                     filePath = BaseFilePath;
                     line = startPosition.BaseFileLine;
                 }
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Repeat_Stack_Line, filePath, line, remainingIterations);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Repeat_Stack_Line, filePath, line, remainingIterations);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_While_Stack_Header);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_While_Stack_Header);
             foreach (AssemblyPosition startPosition in currentWhileLoops)
             {
                 string filePath;
@@ -595,20 +599,20 @@ namespace AssEmbly
                     filePath = BaseFilePath;
                     line = startPosition.BaseFileLine;
                 }
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_While_Stack_Line, filePath, line);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_While_Stack_Line, filePath, line);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Header);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Macro_Stack_Header);
             foreach (MacroStackFrame macroFrame in macroStack)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Macro_Stack_Line, macroFrame.MacroName, macroFrame.RemainingLines);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Macro_Stack_Line, macroFrame.MacroName, macroFrame.RemainingLines);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Header);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Import_Stack_Header);
             foreach (ImportStackFrame importFrame in importStack)
             {
-                Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
+                Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Import_Stack_Line, importFrame.ImportPath, importFrame.CurrentLine, importFrame.TotalLines);
             }
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Import_Stack_Line, BaseFilePath, baseFileLine, baseFileLineTotal);
-            Console.Error.WriteLine(Strings.Assembler_Debug_Directive_Current_Extensions, usedExtensions);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Import_Stack_Line, BaseFilePath, baseFileLine, baseFileLineTotal);
+            Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Current_Extensions, usedExtensions);
             Console.ResetColor();
         }
 
@@ -624,10 +628,12 @@ namespace AssEmbly
 
                 if (!result)
                 {
+#if ASSEMBLER_WARNINGS
                     warnings.AddRange(warningGenerator.NextInstruction(
                         Array.Empty<byte>(), mnemonic, operands, preVariableLine,
                         currentFilePosition, lineIsLabelled, lineIsEntry, dynamicLines[lineIndex], importStack,
                         currentMacro?.MacroName, macroLineDepth));
+#endif
 
                     _ = GoToNextClosingDirective(
                         closingIfDirectives, out string[] matchedLine, false,
@@ -641,7 +647,7 @@ namespace AssEmbly
                         if (matchedLine.Length != 1)
                         {
                             throw new OperandException(
-                                string.Format(Strings.Assembler_Error_Closing_Directive_Operand_Count, matchedLine.Length - 1, matchedLine[0]));
+                                string.Format(Strings_Assembler.Error_Closing_Directive_Operand_Count, matchedLine.Length - 1, matchedLine[0]));
                         }
                         // ENDIF and ELSE don't require checking for another condition
                         break;
@@ -665,7 +671,7 @@ namespace AssEmbly
             {
                 if (++whileRepeats > WhileRepeatLimit)
                 {
-                    throw new WhileLimitExceededException(string.Format(Strings.Assembler_Error_WHILE_Limit_Exceeded, WhileRepeatLimit));
+                    throw new WhileLimitExceededException(string.Format(Strings_Assembler.Error_WHILE_Limit_Exceeded, WhileRepeatLimit));
                 }
                 currentWhileLoops.Push(GetCurrentPosition());
             }
@@ -681,11 +687,11 @@ namespace AssEmbly
         {
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ENDWHILE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ENDWHILE_Operand_Count, operands.Length));
             }
             if (!currentWhileLoops.TryPop(out AssemblyPosition position))
             {
-                throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
+                throw new EndingDirectiveException(string.Format(Strings_Assembler.Error_Opening_Directive_Missing, mnemonic));
             }
             SetCurrentPosition(position, true);
         }
@@ -698,7 +704,7 @@ namespace AssEmbly
             }
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ELSE_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ELSE_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
             _ = GoToNextClosingDirective(
@@ -714,7 +720,7 @@ namespace AssEmbly
             }
             if (operands.Length is < 2 or > 3)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ELSEIF_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ELSEIF_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
             _ = GoToNextClosingDirective(
@@ -730,14 +736,14 @@ namespace AssEmbly
             }
             if (operands.Length != 0)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_ENDIF_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_ENDIF_Operand_Count, operands.Length));
             }
             currentlyOpenIfBlocks--;
         }
 
         private void StateDirective_DanglingClosingDirective(string mnemonic, string[] operands, string preVariableLine)
         {
-            throw new EndingDirectiveException(string.Format(Strings.Assembler_Error_Opening_Directive_Missing, mnemonic));
+            throw new EndingDirectiveException(string.Format(Strings_Assembler.Error_Opening_Directive_Missing, mnemonic));
         }
 
         // DATA DIRECTIVES
@@ -746,22 +752,22 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_DAT_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_DAT_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_DAT_Operand_Type, operandType));
             }
             if (operands[0][0] == ':')
             {
-                throw new OperandException(Strings.Assembler_Error_DAT_Operand_Label_Reference);
+                throw new OperandException(Strings_Assembler.Error_DAT_Operand_Label_Reference);
             }
             byte[] parsedBytes = ParseLiteral(operands[0], true);
             if (operands[0][0] != '"' && parsedBytes[1..].Any(b => b != 0))
             {
                 throw new OperandException(
-                    string.Format(Strings.Assembler_Error_DAT_Operand_Too_Large, operands[0]));
+                    string.Format(Strings_Assembler.Error_DAT_Operand_Too_Large, operands[0]));
             }
             return operands[0][0] != '"' ? parsedBytes[..1] : parsedBytes;
         }
@@ -770,16 +776,16 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_PAD_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_PAD_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_PAD_Operand_Type, operandType));
             }
             if (operands[0][0] == ':')
             {
-                throw new OperandException(Strings.Assembler_Error_PAD_Operand_Label_Reference);
+                throw new OperandException(Strings_Assembler.Error_PAD_Operand_Label_Reference);
             }
             _ = ParseLiteral(operands[0], false, out ulong parsedNumber);
             // Generate an array of 0-bytes with the specified length
@@ -790,12 +796,12 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_NUM_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_NUM_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_NUM_Operand_Type, operandType));
             }
             if (operands[0][0] == ':')
             {
@@ -811,23 +817,23 @@ namespace AssEmbly
         {
             if (operands.Length != 1)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Count, operands.Length));
+                throw new OperandException(string.Format(Strings_Assembler.Error_IBF_Operand_Count, operands.Length));
             }
             OperandType operandType = DetermineOperandType(operands[0]);
             if (operandType != OperandType.Literal)
             {
-                throw new OperandException(string.Format(Strings.Assembler_Error_IBF_Operand_Type, operandType));
+                throw new OperandException(string.Format(Strings_Assembler.Error_IBF_Operand_Type, operandType));
             }
             if (operands[0][0] != '"')
             {
-                throw new OperandException(Strings.Assembler_Error_IBF_Operand_String);
+                throw new OperandException(Strings_Assembler.Error_IBF_Operand_String);
             }
             byte[] parsedBytes = ParseLiteral(operands[0], true);
             string importPath = Encoding.UTF8.GetString(parsedBytes);
             string resolvedPath = Path.GetFullPath(importPath);
             if (!File.Exists(resolvedPath))
             {
-                throw new ImportException(string.Format(Strings.Assembler_Error_IBF_File_Not_Exists, resolvedPath));
+                throw new ImportException(string.Format(Strings_Assembler.Error_IBF_File_Not_Exists, resolvedPath));
             }
             return File.ReadAllBytes(resolvedPath);
         }

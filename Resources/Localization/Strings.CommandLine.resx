@@ -1,0 +1,361 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Assemble_Error_Invalid_Error_Code" xml:space="preserve">
+    <value>"{0}" is not a valid error code to disable.</value>
+  </data>
+  <data name="Assemble_Error_Invalid_Suggestion_Code" xml:space="preserve">
+    <value>"{0}" is not a valid suggestion code to disable.</value>
+  </data>
+  <data name="Assemble_Error_Invalid_Warning_Code" xml:space="preserve">
+    <value>"{0}" is not a valid warning code to disable.</value>
+  </data>
+  <data name="Assemble_Error_Warning_Printout" xml:space="preserve">
+    <value>
+{0} {1:D4}{6} on line {2} in {3}
+    {4}
+{5}</value>
+  </data>
+  <data name="Assemble_Error_Warning_Printout_InMacro" xml:space="preserve">
+    <value> in macro {0}</value>
+  </data>
+  <data name="Assemble_Result_Header_Failed" xml:space="preserve">
+    <value>FAILED</value>
+  </data>
+  <data name="Assemble_Result_Header_Start" xml:space="preserve">
+    <value>
+Assembly </value>
+  </data>
+  <data name="Assemble_Result_Header_Success" xml:space="preserve">
+    <value>SUCCESS</value>
+  </data>
+  <data name="Assemble_Result_Success" xml:space="preserve">
+    <value>Processed {6} line(s) from {7} file(s) in {8:N0} milliseconds.
+{3} error(s), {4} warning(s), {5} suggestion(s).
+Program size: {0} bytes ({2} inc. header).
+Path: "{1}".</value>
+  </data>
+  <data name="Assemble_Result_Success_Compressed" xml:space="preserve">
+    <value>Processed {8} line(s) from {9} file(s) in {10:N0} milliseconds.
+{5} error(s), {6} warning(s), {7} suggestion(s).
+Program size: {0} bytes ({2} compressed [{3:P0}], {4} inc. header).
+Path: "{1}".</value>
+  </data>
+  <data name="Disassemble_Error_Unexpected" xml:space="preserve">
+    <value>An unexpected error occurred during disassembly:
+    {0}: {1}</value>
+  </data>
+  <data name="Disassemble_Success" xml:space="preserve">
+    <value>Program disassembled successfully. It can be found at: "{0}"</value>
+  </data>
+  <data name="Error_AAP_Feature_Incompatible" xml:space="preserve">
+    <value>This program uses features incompatible with the current version of AssEmbly.</value>
+  </data>
+  <data name="Error_Argument_Missing_Path_Assemble" xml:space="preserve">
+    <value>A path to the source code file to be assembled is required. Run 'AssEmbly help assemble' for more information.</value>
+  </data>
+  <data name="Error_Argument_Missing_Path_AssembleAndExecute" xml:space="preserve">
+    <value>A path to the source code file to be executed is required. Run 'AssEmbly help run' for more information.</value>
+  </data>
+  <data name="Error_Argument_Missing_Path_Debugger" xml:space="preserve">
+    <value>A path to the assembled program to be debugged is required. Run 'AssEmbly help debug' for more information.</value>
+  </data>
+  <data name="Error_Argument_Missing_Path_Disassemble" xml:space="preserve">
+    <value>A path to the program to be disassembled is required. Run 'AssEmbly help disassemble' for more information.</value>
+  </data>
+  <data name="Error_Argument_Missing_Path_Execute" xml:space="preserve">
+    <value>A path to the assembled program to be executed is required. Run 'AssEmbly help execute' for more information.</value>
+  </data>
+  <data name="Error_File_Not_Exists" xml:space="preserve">
+    <value>The specified file does not exist.</value>
+  </data>
+  <data name="Error_Invalid_AAP" xml:space="preserve">
+    <value>The given executable file is invalid. Make sure you're not attempting to load the source file instead of the executable. To run an executable built in AssEmbly v1.x.x, use the --v1-format parameter.</value>
+  </data>
+  <data name="Error_Invalid_Macro_Limit" xml:space="preserve">
+    <value>"{0}" is not a valid maximum number of macro expansions.</value>
+  </data>
+  <data name="Error_Invalid_Memory_Size" xml:space="preserve">
+    <value>"{0}" is not a valid number of bytes for memory size.</value>
+  </data>
+  <data name="Error_Invalid_Operation" xml:space="preserve">
+    <value>"{0}" is not a valid operation. Run 'AssEmbly help' to see a list of available operations.</value>
+  </data>
+  <data name="Error_Invalid_Variable_Value" xml:space="preserve">
+    <value>"{0}" is not a valid value for an assembler variable.</value>
+  </data>
+  <data name="Error_Invalid_While_Limit" xml:space="preserve">
+    <value>"{0}" is not a valid maximum number of while iterations.</value>
+  </data>
+  <data name="Error_Missing_Operation_Body" xml:space="preserve">
+    <value>An operation to perform is required. Run the 'help' operation for information on available operations.</value>
+  </data>
+  <data name="Error_Missing_Operation_Hint" xml:space="preserve">
+    <value>i.e. 'AssEmbly help'</value>
+  </data>
+  <data name="Error_Newer_Major_Build_Version" xml:space="preserve">
+    <value>Because the major release number is higher ({0} &gt; {1}), this program will not be executed. Use the -i or --ignore-newer-version parameter to override this.</value>
+  </data>
+  <data name="Error_Program_Load_Unexpected" xml:space="preserve">
+    <value>An unexpected error occurred while loading your program:
+    {0}: {1}</value>
+  </data>
+  <data name="Error_Runtime_Invalid_Address" xml:space="preserve">
+    <value>An instruction tried to access an invalid memory address.</value>
+  </data>
+  <data name="Error_Runtime_Known" xml:space="preserve">
+    <value>
+
+An error occurred executing your program:
+    {0}</value>
+  </data>
+  <data name="Error_Runtime_Zero_Divide" xml:space="preserve">
+    <value>An instruction attempted to divide by zero.</value>
+  </data>
+  <data name="Error_Unexpected_With_Type" xml:space="preserve">
+    <value>An unexpected error occurred:
+    {0}: {1}</value>
+  </data>
+  <data name="Help_Body" xml:space="preserve">
+    <value>Usage: 'AssEmbly &lt;operation&gt; [parameters]'
+Any command can take the '--no-header' or '-n' optional parameter to disable the copyright printout.
+Using the '--version' or '-v' optional parameter will print just the current version of AssEmbly then exit, regardless of other parameters.
+
+Run 'AssEmbly help [operation]' to see usage information and all the available options for a given operation.
+
+Single-character parameter options are denoted with a single dash and are case-sensitive.
+Multi-character parameter options are denoted with a double dash and are case-insensitive.
+Single-character parameter options can be combined after a single dash. For example, '-Eef' is equivalent to '-E -e -f'.
+A parameter with just two dashes (--) can be given to treat all subsequent parameters as regular positional parameters, even those beginning with a dash.
+
+Operations:</value>
+  </data>
+  <data name="Help_Description_Assemble" xml:space="preserve">
+    <value>Take a source file written in AssEmbly and assemble it in to an executable file.</value>
+  </data>
+  <data name="Help_Description_Debug" xml:space="preserve">
+    <value>Step through an assembled executable file, pausing before each instruction begins execution.</value>
+  </data>
+  <data name="Help_Description_Disassemble" xml:space="preserve">
+    <value>Generate an AssEmbly source code file from an already assembled executable.</value>
+  </data>
+  <data name="Help_Description_Execute" xml:space="preserve">
+    <value>Execute an already assembled executable file.</value>
+  </data>
+  <data name="Help_Description_Help" xml:space="preserve">
+    <value>Print this help text, or get help with a specific operation.</value>
+  </data>
+  <data name="Help_Description_License" xml:space="preserve">
+    <value>Print the full GPLv3 license text that this software is licensed under.</value>
+  </data>
+  <data name="Help_Description_REPL" xml:space="preserve">
+    <value>Run an AssEmbly REPL environment that lets you interactively run AssEmbly instructions.</value>
+  </data>
+  <data name="Help_Description_Run" xml:space="preserve">
+    <value>Assemble then execute a source file written in AssEmbly. The assembled program will be discarded after execution.</value>
+  </data>
+  <data name="Help_Operation_Assemble" xml:space="preserve">
+      <value>    assemble - {0}</value>
+  </data>
+  <data name="Help_Operation_Debug" xml:space="preserve">
+      <value>    debug - {0}</value>
+  </data>
+  <data name="Help_Operation_Disassemble" xml:space="preserve">
+      <value>    disassemble - {0}</value>
+  </data>
+  <data name="Help_Operation_Execute" xml:space="preserve">
+      <value>    execute - {0}</value>
+  </data>
+  <data name="Help_Operation_Help" xml:space="preserve">
+      <value>    help - {0}</value>
+  </data>
+  <data name="Help_Operation_License" xml:space="preserve">
+      <value>    license - {0}</value>
+  </data>
+  <data name="Help_Operation_REPL" xml:space="preserve">
+      <value>    repl - {0}</value>
+  </data>
+  <data name="Help_Operation_Run" xml:space="preserve">
+      <value>    run - {0}</value>
+  </data>
+  <data name="Help_Options_Assemble" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly assemble &lt;file-path&gt; [destination-path] [options]'
+ Options:
+    -D, --no-debug-file - Do not generate a debug information file with the executable.
+    -E|W|S, --no-errors|warnings|suggestions - Disable all messages with severity error, warning, or suggestion. Fatal errors cannot be disabled.
+    --disabled-errors|warnings|suggestions=xxxx,xxxx - Disable one or more specific messages with severity error, warning, or suggestion; and code xxxx. Fatal errors cannot be disabled. Formatted as a comma-separated list of message codes.
+    --macro-limit=123 - Set the limit of macro expansions that can occur on a single line.
+    --while-limit=123 - Set the limit of %WHILE loop iterations that can occur throughout the entire program.
+    --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
+    -c, --compress - Apply GZip compression to the resulting executable.
+    -s, --output-symbols - Save a symbol file that can be used to reference assembled code from another program with the original label names. Label names starting with an underscore (_) are ignored.
+    -e, --output-expanded - Save the fully expanded source file once assembly is completed. Useful for debugging macros and imports. Be aware that the expanded source file will not produce functionally identical output to the original, and may not even be a valid assemble-able program.
+    -f, --full-base-opcodes - Disable single-byte opcodes, therefore making all instructions in the base instruction set assemble to full three-byte opcodes.
+    --v1-call-stack - Specify that the program expects to use the old call stack behaviour from AssEmbly v1.x.x. Does not affect the program bytecode, but will set a flag in the header of the executable.
+    -1, --v1-format - Force the generated executable to be in the header-less format from v1.x.x.
+    --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
+    --disable-variables - Disable the expansion of assembler variables to ensure compatibility with pre-3.2.0 strings containing '@' signs.
+    --disable-escapes - Disable the use of escape sequences in strings; treat backslashes as literal characters instead. Ensures compatibility with pre-1.1.0 strings.
+    --disable-file-macros - Prevent macros with the names #FILE_PATH, #FILE_NAME, and #FOLDER_PATH from being automatically defined.</value>
+  </data>
+  <data name="Help_Options_Debug" xml:space="preserve">
+    <value>
+ Usage: Usage: 'AssEmbly debug &lt;file-path&gt; [debug-info-file-path] [options]'
+    Providing a debug info file will allow label names and original AssEmbly source lines to be made available.
+ Options:
+    --mem-size=123 - Sets the total size of memory available to the program in bytes.
+    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.</value>
+  </data>
+  <data name="Help_Options_Disassemble" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly disassemble &lt;file-path&gt; [destination-path] [options]'
+ Options:
+    -S, --no-strings - Don't attempt to locate and decode strings; keep them as raw bytes
+    -P, --no-pads - Don't attempt to locate uses of the %PAD directive; keep them as chains of HLT
+    -F, --no-floats - Don't attempt to detect floating point literal operands; keep them as integers
+    -G, --no-signed - Don't attempt to detect signed negative operands; keep them as positive integers
+    -f, --allow-full-base-opcodes - Allow data detected as fully qualified opcodes for the base instruction set to be interpreted as instructions instead of data. Re-assembly may not be byte-perfect.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format.
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.</value>
+  </data>
+  <data name="Help_Options_Execute" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly execute &lt;file-path&gt; [options]'
+ Options:
+    --mem-size=123 - Sets the total size of memory available to the program in bytes.
+    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    -1, --v1-format - Specifies that the given executable uses the v1.x.x header-less format. Also enables --v1-call-stack
+    -i, --ignore-newer-version - Force an executable to be loaded even if the major version is greater than the current major version. May cause issues.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.</value>
+  </data>
+  <data name="Help_Options_Help" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly help [operation]'</value>
+  </data>
+  <data name="Help_Options_License" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly license'</value>
+  </data>
+  <data name="Help_Options_REPL" xml:space="preserve">
+    <value>
+ Usage: 'AssEmbly repl [options]'
+ Options:
+    --mem-size=123 - Sets the total size of memory available to the REPL in bytes.
+    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    -u, --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    -a, --auto-echo - Automatically write inputted characters back to the console.</value>
+  </data>
+  <data name="Help_Options_Run" xml:space="preserve">
+    <value>
+ Usage: Usage: 'AssEmbly run &lt;file-path&gt; [options]'
+ Options:
+    --macro-limit=123 - Set the limit of macro expansions that can occur on a single line.
+    --while-limit=123 - Set the limit of %WHILE loop iterations that can occur throughout the entire program.
+    --define=VAR_WITH_VALUE:123,ZERO_VAR - Define one or more assembler variables. Formatted as a comma-separated list of variables, with the variable name and its value separated by a colon. Variables given without the colon and value will be defined with a value of 0.
+    --mem-size=123 - Sets the total size of memory available to the program in bytes.
+    --v1-call-stack - Use the old call stack behaviour from AssEmbly v1.x.x which pushes 3 registers when calling instead of 2.
+    --allow-old-directives - Enable the use of pre-3.2.0 directives without the '%' prefix.
+    --disable-variables - Disable the expansion of assembler variables to ensure compatibility with pre-3.2.0 strings containing '@' signs.
+    --disable-escapes - Disable the use of escape sequences in strings; treat backslashes as literal characters instead. Ensures compatibility with pre-1.1.0 strings.
+    --disable-file-macros - Prevent macros with the names #FILE_PATH, #FILE_NAME, and #FOLDER_PATH from being automatically defined.
+    --unmapped-stack - Disable stack/heap overlap protection. May cause hard to detect bugs.
+    --auto-echo - Automatically write inputted characters back to the console.</value>
+  </data>
+  <data name="License_Error" xml:space="preserve">
+    <value>There was an error accessing the LICENSE resource. Please go to &lt;https://www.gnu.org/licenses/gpl-3.0.html&gt; to see the license text.</value>
+  </data>
+  <data name="License_Header" xml:space="preserve">
+    <value>AssEmbly is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.</value>
+  </data>
+  <data name="Warning_Newer_Build_Version" xml:space="preserve">
+    <value>Warning: This program was assembled for a newer version of AssEmbly. It was built for version {0}.{1}.{2} - you have version {3}.{4}.{5}.</value>
+  </data>
+  <data name="Warning_Processor_Exit_External_Open" xml:space="preserve">
+    <value>
+Warning: Processor halted with an external assembly still open. You should use the ASMX_CLA instruction to close the currently open assembly before the program halts.</value>
+  </data>
+  <data name="Warning_Processor_Exit_File_Open" xml:space="preserve">
+    <value>
+Warning: Processor halted with a file still open. This may cause data to be incorrectly or only partially written. You should use the CFL instruction to close the currently open file before the program halts.</value>
+  </data>
+  <data name="Warning_Processor_Exit_Region_Mapped" xml:space="preserve">
+    <value>
+Warning: Processor halted with {0} memory region(s) still allocated. You should use the HEAP_FRE instruction to free all currently allocated regions before the program halts.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Exists_KeyValue" xml:space="preserve">
+    <value>A key/value argument with the name {0} already exists. The value has not been updated.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Exists_MultiCharacter" xml:space="preserve">
+    <value>The multi-character argument --{0} is given multiple times.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Exists_SingleCharacter" xml:space="preserve">
+    <value>The single-character argument -{0} is given multiple times.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Unconsumed_KeyValue" xml:space="preserve">
+    <value>Unrecognised key/value option: --{0}</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Unconsumed_MultiCharacter" xml:space="preserve">
+    <value>Unrecognised multi-character option: --{0}</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Unconsumed_Positional_Multiple" xml:space="preserve">
+    <value>{0} more positional arguments were given than were expected and have been ignored.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Unconsumed_Positional_Single" xml:space="preserve">
+    <value>{0} more positional argument was given than was expected and has been ignored.</value>
+  </data>
+  <data name="CommandLineArgs_Warning_Unconsumed_SingleCharacter" xml:space="preserve">
+    <value>Unrecognised single-character option: -{0}</value>
+  </data>
+</root>

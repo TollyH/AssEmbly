@@ -1,0 +1,563 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Debug_Directive_Assembler_Variable_Header" xml:space="preserve">
+    <value>
+{0} defined assembler variable(s):</value>
+  </data>
+  <data name="Debug_Directive_Assembler_Variable_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1:N0}</value>
+  </data>
+  <data name="Debug_Directive_Current_Extensions" xml:space="preserve">
+    <value>
+Current extensions used: {0}</value>
+  </data>
+  <data name="Debug_Directive_Current_If_Blocks" xml:space="preserve">
+    <value>Currently inside {0} %IF block(s).</value>
+  </data>
+  <data name="Debug_Directive_Current_While_Repeats" xml:space="preserve">
+    <value>{0} %WHILE repetitions toward limit of {1}</value>
+  </data>
+  <data name="Debug_Directive_Header" xml:space="preserve">
+    <value>
+%DEBUG directive on line {0} in {1}
+Program is currently {2:N0} bytes long.</value>
+  </data>
+  <data name="Debug_Directive_Header_Macro_Lines" xml:space="preserve">
+    <value>Currently {0} lines into macro expansion for current line.</value>
+  </data>
+  <data name="Debug_Directive_Import_Stack_Header" xml:space="preserve">
+    <value>
+Current import stack (deepest file first):</value>
+  </data>
+  <data name="Debug_Directive_Import_Stack_Line" xml:space="preserve">
+    <value>    {0} at line {1}/{2}</value>
+  </data>
+  <data name="Debug_Directive_Inside_Macro_Skip_Block" xml:space="preserve">
+    <value>Currently inside macro skip block. Macros will not be expanded until it is closed.</value>
+  </data>
+  <data name="Debug_Directive_Label_Header" xml:space="preserve">
+    <value>
+{0} label(s) currently defined:</value>
+  </data>
+  <data name="Debug_Directive_Label_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1:X16}</value>
+  </data>
+  <data name="Debug_Directive_Label_Link_Header" xml:space="preserve">
+    <value>
+{0} label link(s) currently defined:</value>
+  </data>
+  <data name="Debug_Directive_Label_Link_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1} (from {2} at line {3})</value>
+  </data>
+  <data name="Debug_Directive_LabelRef_Header" xml:space="preserve">
+    <value>
+{0} label reference(s) pending fill:</value>
+  </data>
+  <data name="Debug_Directive_LabelRef_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1:X16}</value>
+  </data>
+  <data name="Debug_Directive_Macro_Stack_Header" xml:space="preserve">
+    <value>
+Current macro stack (current macro first):</value>
+  </data>
+  <data name="Debug_Directive_Macro_Stack_Line" xml:space="preserve">
+    <value>    {0} with {1} lines remaining</value>
+  </data>
+  <data name="Debug_Directive_Multi_Line_Macro_Header" xml:space="preserve">
+    <value>
+{0} defined multi-line macro(s):</value>
+  </data>
+  <data name="Debug_Directive_Multi_Line_Macro_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1}...</value>
+  </data>
+  <data name="Debug_Directive_Repeat_Stack_Header" xml:space="preserve">
+    <value>
+Current repeat stack (deepest repeat first):</value>
+  </data>
+  <data name="Debug_Directive_Repeat_Stack_Line" xml:space="preserve">
+    <value>    {2} iterations remaining for repeat at line {1} of {0}</value>
+  </data>
+  <data name="Debug_Directive_Single_Line_Macro_Header" xml:space="preserve">
+    <value>
+{0} defined single-line macro(s):</value>
+  </data>
+  <data name="Debug_Directive_Single_Line_Macro_Line" xml:space="preserve">
+    <value>    {0} -&gt; {1}</value>
+  </data>
+  <data name="Debug_Directive_While_Stack_Header" xml:space="preserve">
+    <value>
+Current while stack (deepest while first):</value>
+  </data>
+  <data name="Debug_Directive_While_Stack_Line" xml:space="preserve">
+    <value>    Condition at line {1} of {0}</value>
+  </data>
+  <data name="Error_ANALYZER_Operand_Count" xml:space="preserve">
+    <value>The %ANALYZER directive requires 3 operands. {0} were given.</value>
+  </data>
+  <data name="Error_ANALYZER_Operand_First" xml:space="preserve">
+    <value>The first operand to the %ANALYZER directive must be one of 'error', 'warning' or 'suggestion'.</value>
+  </data>
+  <data name="Error_ANALYZER_Operand_Second" xml:space="preserve">
+    <value>The second operand to the %ANALYZER directive must be an integer.</value>
+  </data>
+  <data name="Error_ANALYZER_Operand_Third" xml:space="preserve">
+    <value>The third operand to the %ANALYZER directive must be one of '0', '1', or 'r'.</value>
+  </data>
+  <data name="Error_ASM_ONCE_Not_Imported" xml:space="preserve">
+    <value>The %ASM_ONCE directive cannot be used in the base file.</value>
+  </data>
+  <data name="Error_ASM_ONCE_Operand_Count" xml:space="preserve">
+    <value>The %ASM_ONCE directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_Character_Literal_Empty" xml:space="preserve">
+    <value>Character literals must contain at least 1 character.
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Character_Literal_Too_Long" xml:space="preserve">
+    <value>Character literals may only contain a single character. Did you mean to use double quotes for a string literal?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Circular_Import" xml:space="preserve">
+    <value>Circular import detected: attempted import from "{0}" when it is already in import stack.</value>
+  </data>
+  <data name="Error_Circular_Macro" xml:space="preserve">
+    <value>Circular macro detected: attempted to expand "{0}" when it is already in macro stack.</value>
+  </data>
+  <data name="Error_Closing_Directive_Missing" xml:space="preserve">
+    <value>End of file reached while processing block contents. Did you forget a closing directive?</value>
+  </data>
+  <data name="Error_Closing_Directive_Operand_Count" xml:space="preserve">
+    <value>The {1} directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_Conditional_Operand_Count" xml:space="preserve">
+    <value>The {0} directive requires 2 operands for the DEF and NDEF operations, or 3 for the numerical comparison operations. {1} were given.</value>
+  </data>
+  <data name="Error_Conditional_Operand_First" xml:space="preserve">
+    <value>"{1}" is not a recognised operation for the {0} directive.</value>
+  </data>
+  <data name="Error_Conditional_Operand_Second_Third_Label_Reference" xml:space="preserve">
+    <value>The second and third operands to the {0} directive cannot be a label reference.</value>
+  </data>
+  <data name="Error_Conditional_Operand_Second_Third_Type" xml:space="preserve">
+    <value>The second and third operands to the {0} directive must be literals.</value>
+  </data>
+  <data name="Error_Constant_Empty_Name" xml:space="preserve">
+    <value>Assembler constant names cannot be empty. To use an '@' sign in a string, escape it with a backslash.</value>
+  </data>
+  <data name="Error_Constant_Not_Exists" xml:space="preserve">
+    <value>An assembler constant with the name "{0}" does not exist. To use an '@' sign in a string, escape it with a backslash.</value>
+  </data>
+  <data name="Error_DAT_Operand_Count" xml:space="preserve">
+    <value>The %DAT directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_DAT_Operand_Label_Reference" xml:space="preserve">
+    <value>The literal operand to the %DAT directive cannot be a label reference.</value>
+  </data>
+  <data name="Error_DAT_Operand_Too_Large" xml:space="preserve">
+    <value>Numeric literal too large for %DAT, or is negative/floating point. 255 is the maximum value:
+    {0}</value>
+  </data>
+  <data name="Error_DAT_Operand_Type" xml:space="preserve">
+    <value>The operand to the %DAT directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_DEBUG_Operand_Count" xml:space="preserve">
+    <value>The %DEBUG directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_DEFINE_Operand_Count" xml:space="preserve">
+    <value>The %DEFINE directive requires 2 operands. {0} were given.</value>
+  </data>
+  <data name="Error_DEFINE_Operand_Type" xml:space="preserve">
+    <value>The second operand to the %DEFINE directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_DELMACRO_Not_Exists" xml:space="preserve">
+    <value>A macro with the name "{0}" does not exist.</value>
+  </data>
+  <data name="Error_DELMACRO_Operand_Count" xml:space="preserve">
+    <value>The %DELMACRO directive requires a single operand.</value>
+  </data>
+  <data name="Error_ELSE_Operand_Count" xml:space="preserve">
+    <value>The %ELSE directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_ELSEIF_Operand_Count" xml:space="preserve">
+    <value>The %ELSEIF directive requires 2 or 3 operands. {0} were given.</value>
+  </data>
+  <data name="Error_Empty_Operand" xml:space="preserve">
+    <value>Operands cannot be empty:
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_ENDIF_Missing" xml:space="preserve">
+    <value>End of file reached with a conditional block still open. Did you forget an %ENDIF directive?</value>
+  </data>
+  <data name="Error_ENDIF_Operand_Count" xml:space="preserve">
+    <value>The %ENDIF directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_ENDREPEAT_Missing" xml:space="preserve">
+    <value>End of file reached with a repeat block still open. Did you forget an %ENDREPEAT directive?</value>
+  </data>
+  <data name="Error_ENDREPEAT_Operand_Count" xml:space="preserve">
+    <value>The %ENDREPEAT directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_ENDWHILE_Missing" xml:space="preserve">
+    <value>End of file reached with a while block still open. Did you forget an %ENDWHILE directive?</value>
+  </data>
+  <data name="Error_ENDWHILE_Operand_Count" xml:space="preserve">
+    <value>The %ENDWHILE directive takes no operands. {0} were given.</value>
+  </data>
+  <data name="Error_Finalized" xml:space="preserve">
+    <value>This assembler has already been finalized. No more lines can be assembled.</value>
+  </data>
+  <data name="Error_IBF_File_Not_Exists" xml:space="preserve">
+    <value>The file "{0}" given to the %IBF directive could not be found.</value>
+  </data>
+  <data name="Error_IBF_Operand_Count" xml:space="preserve">
+    <value>The %IBF directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_IBF_Operand_String" xml:space="preserve">
+    <value>The literal operand to the %IBF directive must be a string.</value>
+  </data>
+  <data name="Error_IBF_Operand_Type" xml:space="preserve">
+    <value>The operand to the %IBF directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_IMP_File_Not_Exists" xml:space="preserve">
+    <value>The file "{0}" given to the %IMP directive could not be found.</value>
+  </data>
+  <data name="Error_IMP_Operand_Count" xml:space="preserve">
+    <value>The %IMP directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_IMP_Operand_String" xml:space="preserve">
+    <value>The literal operand to the %IMP directive must be a string.</value>
+  </data>
+  <data name="Error_IMP_Operand_Type" xml:space="preserve">
+    <value>The operand to the %IMP directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_Invalid_Escape_Sequence" xml:space="preserve">
+    <value>Unrecognised escape character '{0}'. Did you forget to escape the backslash?
+    {1}
+    {2}^</value>
+  </data>
+  <data name="Error_Invalid_Literal_Label" xml:space="preserve">
+    <value>Cannot convert a label definition to a literal address. Are you sure you meant to include the '&amp;'?
+    {0}
+     ^</value>
+  </data>
+  <data name="Error_Invalid_Mnemonic_Combo" xml:space="preserve">
+    <value>Unrecognised mnemonic and operand combination:
+    {0} {1}
+Consult the language reference for a list of all valid mnemonic/operand combinations.</value>
+  </data>
+  <data name="Error_Invalid_Severity" xml:space="preserve">
+    <value>Given severity is not valid.</value>
+  </data>
+  <data name="Error_Label_Already_Defined" xml:space="preserve">
+    <value>Label "{0}" has already been defined. Label names must be unique.</value>
+  </data>
+  <data name="Error_Label_Empty_Name" xml:space="preserve">
+    <value>Label names cannot be empty. Did you mean to include a colon here?</value>
+  </data>
+  <data name="Error_Label_Invalid_Character" xml:space="preserve">
+    <value>Invalid character in label:
+    {0}
+    {1}^
+Label names may not contain symbols other than underscores, and cannot start with a numeral.</value>
+  </data>
+  <data name="Error_Label_Not_Exists" xml:space="preserve">
+    <value>A label with the name "{0}" does not exist, but a reference was made to it. Have you missed a definition?</value>
+  </data>
+  <data name="Error_LABEL_OVERRIDE_Label_Reference_Also_Target" xml:space="preserve">
+    <value>Label references given as an operand to the %LABEL_OVERRIDE directive cannot also be a target of the directive. "{0}" was given as both.</value>
+  </data>
+  <data name="Error_LABEL_OVERRIDE_Operand_Count" xml:space="preserve">
+    <value>The %LABEL_OVERRIDE directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_LABEL_OVERRIDE_Operand_Type" xml:space="preserve">
+    <value>The operand to the %LABEL_OVERRIDE directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_Label_Spaces_Contained" xml:space="preserve">
+    <value>Label names cannot contain spaces.
+    {0} {1}
+    {2}^</value>
+  </data>
+  <data name="Error_Literal_Base_Prefix_Only" xml:space="preserve">
+    <value>Numeric literals with a base prefix (0x or 0b) must contain at least one digit after the prefix.</value>
+  </data>
+  <data name="Error_Literal_Floating_Point_Decimal_Only" xml:space="preserve">
+    <value>Floating point numeric literals must contain a digit on at least one side of the decimal point.</value>
+  </data>
+  <data name="Error_Literal_Invalid_Character" xml:space="preserve">
+    <value>Invalid character in numeric literal:
+    {0}
+    {1}^
+Did you forget a '0x' prefix before a hexadecimal number or put a digit other than 1 or 0 in a binary number?</value>
+  </data>
+  <data name="Error_Literal_Negative_Dash_Only" xml:space="preserve">
+    <value>Negative numeric literals must contain at least one digit.</value>
+  </data>
+  <data name="Error_Literal_Too_Large" xml:space="preserve">
+    <value>Numeric literal too large. {0:N0} is the maximum value:
+    {1}</value>
+  </data>
+  <data name="Error_Literal_Too_Many_Points" xml:space="preserve">
+    <value>Numeric literal contains more than one decimal point:
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Literal_Too_Small" xml:space="preserve">
+    <value>Numeric literal too small. {0:N0} is the minimum value:
+    {1}</value>
+  </data>
+  <data name="Error_Literal_Underscore_Only" xml:space="preserve">
+    <value>Numeric literals must contain at least one digit.</value>
+  </data>
+  <data name="Error_Macro_Disable_Block_Missing_Start" xml:space="preserve">
+    <value>End of macro disabling block found when not currently inside one. Macro disabling blocks can be started with '!&gt;'.</value>
+  </data>
+  <data name="Error_Macro_Disable_Block_Nested" xml:space="preserve">
+    <value>Start of macro disabling block found when already inside one. Macro disabling blocks cannot be nested.</value>
+  </data>
+  <data name="Error_Macro_Limit_Exceeded" xml:space="preserve">
+    <value>Macro expansion limit of {0} exceeded.</value>
+  </data>
+  <data name="Error_Macro_Missing_Parameter" xml:space="preserve">
+    <value>A parameter at index {0} is required for this macro, but was not given.</value>
+  </data>
+  <data name="Error_Macro_Name_Brackets" xml:space="preserve">
+    <value>Macro names cannot contain brackets.
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_MACRO_Operand_Count" xml:space="preserve">
+    <value>The %MACRO directive requires either one or two operands. {0} were given.</value>
+  </data>
+  <data name="Error_Macro_Param_No_Number" xml:space="preserve">
+    <value>Macro parameter is missing an index value. Use '$$' to insert a literal '$' into the parameter content.
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Macro_Params_Bad_First_Char" xml:space="preserve">
+    <value>Given macro parameter start index does not point to an opening bracket.</value>
+  </data>
+  <data name="Error_Macro_Params_Bad_StartIndex" xml:space="preserve">
+    <value>Macro parameter start index is outside the range of the given line.</value>
+  </data>
+  <data name="Error_Macro_Params_EndOfLine" xml:space="preserve">
+    <value>End of line found while processing macro parameters. Did you forget a closing bracket?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Macro_Params_Unescaped_Close" xml:space="preserve">
+    <value>Unescaped closing bracket found before end of line in macro parameter list. Use '\)' to have a literal closing bracket character inside a parameter.
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Message" xml:space="preserve">
+    <value>Error on line {0} in "{1}"
+    "{2}"</value>
+  </data>
+  <data name="Error_Message_Imported" xml:space="preserve">
+    <value>
+Imported on line {0} of "{1}"</value>
+  </data>
+  <data name="Error_Message_Macro_Stack" xml:space="preserve">
+    <value>
+
+Currently expanding the following macro(s): {0}</value>
+  </data>
+  <data name="Error_MESSAGE_Operand_Count" xml:space="preserve">
+    <value>The %MESSAGE directive requires either 1 or 2 operands. {0} were given.</value>
+  </data>
+  <data name="Error_MESSAGE_Operand_First" xml:space="preserve">
+    <value>The first operand to the %MESSAGE directive must be one of 'error', 'warning' or 'suggestion'.</value>
+  </data>
+  <data name="Error_MESSAGE_Operand_Second_String" xml:space="preserve">
+    <value>The second operand to the %MESSAGE directive must be a string.</value>
+  </data>
+  <data name="Error_MESSAGE_Operand_Second_Type" xml:space="preserve">
+    <value>The second operand to the %MESSAGE directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_Mnemonic_Operand_Space" xml:space="preserve">
+    <value>Mnemonics should be separated from operands with spaces, not commas:
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_NUM_Operand_Count" xml:space="preserve">
+    <value>The %NUM directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_NUM_Operand_Type" xml:space="preserve">
+    <value>The operand to the %NUM directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_On_Line" xml:space="preserve">
+    <value>Error on line {0} in {1}
+
+{2}</value>
+  </data>
+  <data name="Error_Opening_Directive_Missing" xml:space="preserve">
+    <value>"{0}" is a block ending directive, however there is no currently open instance of the block it closes.</value>
+  </data>
+  <data name="Error_Operand_Invalid" xml:space="preserve">
+    <value>Type of operand "{0}" could not be determined. Did you forget a colon before a label name or misspell a register name?</value>
+  </data>
+  <data name="Error_Operand_Whitespace" xml:space="preserve">
+    <value>Operands cannot contain whitespace. Did you forget a comma?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_PAD_Operand_Count" xml:space="preserve">
+    <value>The %PAD directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_PAD_Operand_Label_Reference" xml:space="preserve">
+    <value>The literal operand to the %PAD directive cannot be a label reference.</value>
+  </data>
+  <data name="Error_PAD_Operand_Type" xml:space="preserve">
+    <value>The operand to the %PAD directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_Quoted_Literal_EndOfLine" xml:space="preserve">
+    <value>End of line found while processing quoted literal. Did you forget a closing quote?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Quoted_Literal_Followed" xml:space="preserve">
+    <value>Non-whitespace characters found after quoted literal. Did you forget a comma?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Quoted_Literal_Following" xml:space="preserve">
+    <value>Quoted literal defined after non-whitespace characters. Did you forget a comma?:
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Quoted_Literal_Line_Length_One" xml:space="preserve">
+    <value>An opening quote mark cannot be the only character on a line.</value>
+  </data>
+  <data name="Error_REPEAT_Operand_Count" xml:space="preserve">
+    <value>The %REPEAT directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_REPEAT_Operand_Label_Reference" xml:space="preserve">
+    <value>The literal operand to the %REPEAT directive cannot be a label reference.</value>
+  </data>
+  <data name="Error_REPEAT_Operand_Signed_Or_Floating" xml:space="preserve">
+    <value>The literal operand to the %REPEAT directive cannot be negative or floating point.</value>
+  </data>
+  <data name="Error_REPEAT_Operand_Type" xml:space="preserve">
+    <value>The operand to the %REPEAT directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_REPEAT_Zero" xml:space="preserve">
+    <value>The literal operand to the %REPEAT directive cannot be zero.</value>
+  </data>
+  <data name="Error_STOP" xml:space="preserve">
+    <value>Assembly stopped by %STOP directive.</value>
+  </data>
+  <data name="Error_STOP_Operand_Count" xml:space="preserve">
+    <value>The %STOP directive requires either 1 or no operands. {0} were given.</value>
+  </data>
+  <data name="Error_STOP_Operand_First_String" xml:space="preserve">
+    <value>The operand to the %STOP directive must be a string.</value>
+  </data>
+  <data name="Error_STOP_Operand_First_Type" xml:space="preserve">
+    <value>The operand to the %STOP directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_String_Bad_First_Char" xml:space="preserve">
+    <value>Given string start index does not point to a quote mark.</value>
+  </data>
+  <data name="Error_String_Bad_StartIndex" xml:space="preserve">
+    <value>String start index is outside the range of the given line.</value>
+  </data>
+  <data name="Error_String_Followed_Internal" xml:space="preserve">
+    <value>String literal contains characters after closing quote mark.</value>
+  </data>
+  <data name="Error_String_Not_Allowed" xml:space="preserve">
+    <value>A string literal is not a valid operand in this context.</value>
+  </data>
+  <data name="Error_String_Too_Short" xml:space="preserve">
+    <value>Given line is less than two characters long, which is invalid.</value>
+  </data>
+  <data name="Error_UNDEFINE_Operand_Count" xml:space="preserve">
+    <value>The %UNDEFINE directive requires a single operand. {0} were given.</value>
+  </data>
+  <data name="Error_Unicode_Escape_4_Digits" xml:space="preserve">
+    <value>Unicode escape must be immediately followed a 4 digit unicode codepoint
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Unicode_Escape_8_Digits" xml:space="preserve">
+    <value>Unicode escape must be immediately followed a valid 8 digit unicode codepoint (0x00000000 - 0x0010ffff excluding 0x0000d800 - 0x0000dfff)
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Unicode_Escape_EndOfLine" xml:space="preserve">
+    <value>End of line reached when processing unicode escape
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Variable_Empty_Name" xml:space="preserve">
+    <value>Assembler variable names cannot be empty. To use an '@' sign in a string, escape it with a backslash.</value>
+  </data>
+  <data name="Error_Variable_Invalid_Character" xml:space="preserve">
+    <value>Invalid character in assembler variable name:
+    {0}
+    {1}^
+Assembler variable names may not contain symbols other than underscores.</value>
+  </data>
+  <data name="Error_Variable_Not_Exists" xml:space="preserve">
+    <value>An assembler variable with the name "{0}" does not exist. To use an '@' sign in a string, escape it with a backslash.</value>
+  </data>
+  <data name="Error_VAROP_Operand_Count" xml:space="preserve">
+    <value>The %VAROP directive requires 3 operands. {0} were given.</value>
+  </data>
+  <data name="Error_VAROP_Operand_First" xml:space="preserve">
+    <value>"{0}" is not a recognised operation for the %VAROP directive.</value>
+  </data>
+  <data name="Error_VAROP_Operand_Third_Label_Reference" xml:space="preserve">
+    <value>The third operand to the %VAROP directive cannot be a label reference.</value>
+  </data>
+  <data name="Error_VAROP_Operand_Third_Type" xml:space="preserve">
+    <value>The third operand to the %VAROP directive must be a literal. An operand of type {0} was provided.</value>
+  </data>
+  <data name="Error_VAROP_Operand_Third_Zero" xml:space="preserve">
+    <value>The third operand to the %VAROP directive cannot be zero when the first operand is DIV or REM.</value>
+  </data>
+  <data name="Error_WHILE_Limit_Exceeded" xml:space="preserve">
+    <value>%WHILE loop repeat limit of {0} exceeded.</value>
+  </data>
+</root>

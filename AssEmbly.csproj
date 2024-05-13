@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -16,8 +15,21 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;</DefineConstants>
+    <DefineConstants>$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;ASSEMBLER;ASSEMBLER_WARNINGS;PROCESSOR;DEBUGGER;DISASSEMBLER;CLI;</DefineConstants>
   </PropertyGroup>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('CLI'))">
+      <PropertyGroup>
+        <OutputType>Exe</OutputType>
+      </PropertyGroup>
+    </When>
+    <Otherwise>
+      <PropertyGroup>
+        <OutputType>Library</OutputType>
+      </PropertyGroup>
+    </Otherwise>
+  </Choose>
 
   <ItemGroup>
     <Compile Remove="Example Programs\C# Interop\**" />
@@ -28,6 +40,40 @@
     <None Remove="Test\**" />
   </ItemGroup>
 
+  <ItemGroup Condition="!$(DefineConstants.Contains(';ASSEMBLER;'))">
+    <Compile Remove="Assembler.cs" />
+    <Compile Remove="Assembler.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(DefineConstants.Contains(';ASSEMBLER_WARNINGS;'))">
+    <Compile Remove="AssemblerWarnings.cs" />
+    <Compile Remove="AssemblerWarnings.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(DefineConstants.Contains(';PROCESSOR;'))">
+    <Compile Remove="Processor.cs" />
+    <Compile Remove="Processor.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(DefineConstants.Contains(';DEBUGGER;'))">
+    <Compile Remove="Debugger.cs" />
+    <Compile Remove="Debugger.*.cs" />
+    <Compile Remove="DebugInfo.cs" />
+    <Compile Remove="DebugInfo.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(DefineConstants.Contains(';DISASSEMBLER;'))">
+    <Compile Remove="Disassembler.cs" />
+    <Compile Remove="Disassembler.*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="!$(DefineConstants.Contains(';CLI;'))">
+    <Compile Remove="Program.cs" />
+    <Compile Remove="Program.*.cs" />
+    <Compile Remove="CommandLineArgs.cs" />
+    <Compile Remove="CommandLineArgs.*.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <None Remove="LICENSE" />
   </ItemGroup>
@@ -36,15 +82,122 @@
     <EmbeddedResource Include="LICENSE" />
   </ItemGroup>
 
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';ASSEMBLER;'))">
+      <ItemGroup>
+        <Compile Update="Resources\Localization\Strings.Assembler.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Strings.Assembler.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\Localization\Strings.Assembler.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Strings.Assembler.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="Resources\Localization\Strings.Assembler.Designer.cs" />
+        <EmbeddedResource Remove="Resources\Localization\Strings.Assembler.resx" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';ASSEMBLER_WARNINGS;'))">
+      <ItemGroup>
+        <Compile Update="Resources\Localization\Strings.AssemblerWarnings.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Strings.AssemblerWarnings.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\Localization\Strings.AssemblerWarnings.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Strings.AssemblerWarnings.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="Resources\Localization\Strings.AssemblerWarnings.Designer.cs" />
+        <EmbeddedResource Remove="Resources\Localization\Strings.AssemblerWarnings.resx" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';PROCESSOR;'))">
+      <ItemGroup>
+        <Compile Update="Resources\Localization\Strings.Processor.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Strings.Processor.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\Localization\Strings.Processor.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Strings.Processor.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="Resources\Localization\Strings.Processor.Designer.cs" />
+        <EmbeddedResource Remove="Resources\Localization\Strings.Processor.resx" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';DEBUGGER;'))">
+      <ItemGroup>
+        <Compile Update="Resources\Localization\Strings.Debugger.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Strings.Debugger.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\Localization\Strings.Debugger.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Strings.Debugger.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="Resources\Localization\Strings.Debugger.Designer.cs" />
+        <EmbeddedResource Remove="Resources\Localization\Strings.Debugger.resx" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
+  <Choose>
+    <When Condition="$(DefineConstants.Contains(';CLI;'))">
+      <ItemGroup>
+        <Compile Update="Resources\Localization\Strings.CommandLine.Designer.cs">
+          <DesignTime>True</DesignTime>
+          <AutoGen>True</AutoGen>
+          <DependentUpon>Strings.CommandLine.resx</DependentUpon>
+        </Compile>
+        <EmbeddedResource Update="Resources\Localization\Strings.CommandLine.resx">
+          <Generator>ResXFileCodeGenerator</Generator>
+          <LastGenOutput>Strings.CommandLine.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Compile Remove="Resources\Localization\Strings.CommandLine.Designer.cs" />
+        <EmbeddedResource Remove="Resources\Localization\Strings.CommandLine.resx" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+
   <ItemGroup>
     <Compile Update="Resources\Localization\Strings.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="Resources\Localization\Strings.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>

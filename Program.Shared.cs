@@ -17,27 +17,77 @@ namespace AssEmbly
             }
             catch
             {
-                PrintFatalError(Strings.CLI_Error_Invalid_AAP);
+                PrintFatalError(Strings_CommandLine.Error_Invalid_AAP);
                 return null;
             }
             if ((file.Features & AAPFeatures.Incompatible) != 0)
             {
-                PrintFatalError(Strings.CLI_Error_AAP_Feature_Incompatible);
+                PrintFatalError(Strings_CommandLine.Error_AAP_Feature_Incompatible);
                 return null;
             }
             if (!ignoreNewerVersion && file.LanguageVersion > (version ?? new Version()))
             {
-                PrintWarning(Strings.CLI_Warning_Newer_Build_Version,
+                PrintWarning(Strings_CommandLine.Warning_Newer_Build_Version,
                     file.LanguageVersion.Major, file.LanguageVersion.Minor, file.LanguageVersion.Build, version?.Major, version?.Minor, version?.Build);
                 if (file.LanguageVersion.Major > version?.Major)
                 {
-                    PrintFatalError(Strings.CLI_Error_Newer_Major_Build_Version, file.LanguageVersion.Major, version.Major);
+                    PrintFatalError(Strings_CommandLine.Error_Newer_Major_Build_Version, file.LanguageVersion.Major, version.Major);
                     return null;
                 }
             }
             return file;
         }
 
+        public static bool CheckInputFileArg(string[] args, [Localizable(true)] string missingMessage)
+        {
+            if (args.Length < 2)
+            {
+                PrintFatalError(missingMessage);
+                return false;
+            }
+            if (!File.Exists(args[1]))
+            {
+                PrintFatalError(Strings_CommandLine.Error_File_Not_Exists);
+                return false;
+            }
+            return true;
+        }
+
+        public static (string ArgPath, string Filename) ResolveInputFilePath(string[] args)
+        {
+            string argPath = Path.GetFullPath(args[1]);
+            string parent = Path.GetDirectoryName(argPath)!;
+            string filename = Path.GetFileNameWithoutExtension(argPath);
+            Environment.CurrentDirectory = Path.GetFullPath(parent);
+            return (argPath, filename);
+        }
+
+        public static void PrintFatalError([Localizable(true)] string errorText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            PrintError(errorText, formatParams);
+#if !DEBUG
+            Environment.Exit(1);
+#endif
+        }
+
+        public static void PrintError([Localizable(true)] string errorText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(errorText, formatParams);
+            Console.ResetColor();
+        }
+
+        public static void PrintWarning([Localizable(true)] string warningText,
+            [Localizable(true)] params object?[]? formatParams)
+        {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine(warningText, formatParams);
+            Console.ResetColor();
+        }
+
+#if PROCESSOR
         public static Processor? LoadExecutableToProcessor(string appPath, ulong memSize,
             bool useV1Format, bool useV1CallStack, bool ignoreNewerVersion, bool mapStack, bool autoEcho)
         {
@@ -76,35 +126,11 @@ namespace AssEmbly
             }
             catch (Exception e)
             {
-                PrintFatalError(Strings.CLI_Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
+                PrintFatalError(Strings_CommandLine.Error_Program_Load_Unexpected, e.GetType().Name, e.Message);
 #if DEBUG
                 throw;
 #endif
             }
-        }
-
-        public static bool CheckInputFileArg(string[] args, [Localizable(true)] string missingMessage)
-        {
-            if (args.Length < 2)
-            {
-                PrintFatalError(missingMessage);
-                return false;
-            }
-            if (!File.Exists(args[1]))
-            {
-                PrintFatalError(Strings.CLI_Error_File_Not_Exists);
-                return false;
-            }
-            return true;
-        }
-
-        public static (string ArgPath, string Filename) ResolveInputFilePath(string[] args)
-        {
-            string argPath = Path.GetFullPath(args[1]);
-            string parent = Path.GetDirectoryName(argPath)!;
-            string filename = Path.GetFileNameWithoutExtension(argPath);
-            Environment.CurrentDirectory = Path.GetFullPath(parent);
-            return (argPath, filename);
         }
 
         public static ulong GetMemorySize(CommandLineArgs args)
@@ -113,66 +139,12 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(memSizeString, out ulong memSize))
                 {
-                    PrintFatalError(Strings.CLI_Error_Invalid_Memory_Size, memSizeString);
+                    PrintFatalError(Strings_CommandLine.Error_Invalid_Memory_Size, memSizeString);
                     return 0;
                 }
                 return memSize;
             }
             return DefaultMemorySize;
-        }
-
-        public static int GetMacroLimit(CommandLineArgs args)
-        {
-            if (args.TryGetKeyValueOption("macro-limit", out string? macroLimitString))
-            {
-                if (!int.TryParse(macroLimitString, out int macroLimit))
-                {
-                    PrintFatalError(Strings.CLI_Error_Invalid_Macro_Limit, macroLimitString);
-                    return -1;
-                }
-                return macroLimit;
-            }
-            return -1;
-        }
-
-        public static int GetWhileLimit(CommandLineArgs args)
-        {
-            if (args.TryGetKeyValueOption("while-limit", out string? whileLimitString))
-            {
-                if (!int.TryParse(whileLimitString, out int whileLimit))
-                {
-                    PrintFatalError(Strings.CLI_Error_Invalid_While_Limit, whileLimitString);
-                    return -1;
-                }
-                return whileLimit;
-            }
-            return -1;
-        }
-
-        public static List<(string Name, ulong Value)> GetVariableDefinitions(CommandLineArgs args)
-        {
-            if (args.TryGetKeyValueOption("define", out string? definitionString))
-            {
-                List<(string Name, ulong Value)> result = new();
-                foreach (string variableDefinition in definitionString.Split(','))
-                {
-                    string[] split = variableDefinition.Split(':', 2);
-                    ulong value = 0;
-                    if (split.Length == 2 && !ulong.TryParse(split[1], out value))
-                    {
-                        PrintFatalError(Strings.CLI_Error_Invalid_Variable_Value, split[1]);
-                        return new List<(string Name, ulong Value)>();
-                    }
-                    string name = split[0];
-                    if (name.Length == 0)
-                    {
-                        continue;
-                    }
-                    result.Add((name, value));
-                }
-                return result;
-            }
-            return new List<(string Name, ulong Value)>();
         }
 
         public static void OnExecutionException(Exception e, Processor processor)
@@ -183,15 +155,15 @@ namespace AssEmbly
                 string message = e switch
                 {
                     RuntimeException runtimeException => runtimeException.ConsoleMessage,
-                    DivideByZeroException => Strings.CLI_Error_Runtime_Zero_Divide,
+                    DivideByZeroException => Strings_CommandLine.Error_Runtime_Zero_Divide,
                     FileNotFoundException or DirectoryNotFoundException => e.Message,
-                    _ => Strings.CLI_Error_Runtime_Invalid_Address
+                    _ => Strings_CommandLine.Error_Runtime_Invalid_Address
                 };
-                PrintError(Strings.CLI_Error_Runtime_Known, message);
+                PrintError(Strings_CommandLine.Error_Runtime_Known, message);
             }
             else
             {
-                PrintError(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
+                PrintError(Strings_CommandLine.Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
             Console.ForegroundColor = ConsoleColor.Red;
             PrintRegisterStates(processor);
@@ -206,18 +178,18 @@ namespace AssEmbly
 
                 if (processor.IsFileOpen)
                 {
-                    PrintWarning(Strings.CLI_Warning_Processor_Exit_File_Open);
+                    PrintWarning(Strings_CommandLine.Warning_Processor_Exit_File_Open);
                 }
 #if EXTENSION_SET_EXTERNAL_ASM
                 if (processor.IsExternalOpen)
                 {
-                    PrintWarning(Strings.CLI_Warning_Processor_Exit_External_Open);
+                    PrintWarning(Strings_CommandLine.Warning_Processor_Exit_External_Open);
                 }
 #endif
 #if EXTENSION_SET_HEAP_ALLOCATE
                 if (processor.AnyRegionsMapped)
                 {
-                    PrintWarning(Strings.CLI_Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
+                    PrintWarning(Strings_CommandLine.Warning_Processor_Exit_Region_Mapped, processor.MappedMemoryRanges.Count - 2);
                 }
 #endif
             }
@@ -230,18 +202,6 @@ namespace AssEmbly
                 Environment.Exit(1);
                 return;
 #endif
-            }
-        }
-
-        public static void OnAssemblerException(Exception e)
-        {
-            if (e is AssemblerException assemblerException)
-            {
-                PrintError(assemblerException.ConsoleMessage);
-            }
-            else
-            {
-                PrintError(Strings.CLI_Error_Unexpected_With_Type, e.GetType().Name, e.Message);
             }
         }
 
@@ -281,30 +241,74 @@ namespace AssEmbly
                 Console.WriteLine();
             }
         }
-
-        public static void PrintFatalError([Localizable(true)] string errorText,
-            [Localizable(true)] params object?[]? formatParams)
-        {
-            PrintError(errorText, formatParams);
-#if !DEBUG
-            Environment.Exit(1);
 #endif
+
+#if ASSEMBLER
+        public static int GetMacroLimit(CommandLineArgs args)
+        {
+            if (args.TryGetKeyValueOption("macro-limit", out string? macroLimitString))
+            {
+                if (!int.TryParse(macroLimitString, out int macroLimit))
+                {
+                    PrintFatalError(Strings_CommandLine.Error_Invalid_Macro_Limit, macroLimitString);
+                    return -1;
+                }
+                return macroLimit;
+            }
+            return -1;
         }
 
-        public static void PrintError([Localizable(true)] string errorText,
-            [Localizable(true)] params object?[]? formatParams)
+        public static int GetWhileLimit(CommandLineArgs args)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(errorText, formatParams);
-            Console.ResetColor();
+            if (args.TryGetKeyValueOption("while-limit", out string? whileLimitString))
+            {
+                if (!int.TryParse(whileLimitString, out int whileLimit))
+                {
+                    PrintFatalError(Strings_CommandLine.Error_Invalid_While_Limit, whileLimitString);
+                    return -1;
+                }
+                return whileLimit;
+            }
+            return -1;
         }
 
-        public static void PrintWarning([Localizable(true)] string warningText,
-            [Localizable(true)] params object?[]? formatParams)
+        public static List<(string Name, ulong Value)> GetVariableDefinitions(CommandLineArgs args)
         {
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine(warningText, formatParams);
-            Console.ResetColor();
+            if (args.TryGetKeyValueOption("define", out string? definitionString))
+            {
+                List<(string Name, ulong Value)> result = new();
+                foreach (string variableDefinition in definitionString.Split(','))
+                {
+                    string[] split = variableDefinition.Split(':', 2);
+                    ulong value = 0;
+                    if (split.Length == 2 && !ulong.TryParse(split[1], out value))
+                    {
+                        PrintFatalError(Strings_CommandLine.Error_Invalid_Variable_Value, split[1]);
+                        return new List<(string Name, ulong Value)>();
+                    }
+                    string name = split[0];
+                    if (name.Length == 0)
+                    {
+                        continue;
+                    }
+                    result.Add((name, value));
+                }
+                return result;
+            }
+            return new List<(string Name, ulong Value)>();
         }
+
+        public static void OnAssemblerException(Exception e)
+        {
+            if (e is AssemblerException assemblerException)
+            {
+                PrintError(assemblerException.ConsoleMessage);
+            }
+            else
+            {
+                PrintError(Strings_CommandLine.Error_Unexpected_With_Type, e.GetType().Name, e.Message);
+            }
+        }
+#endif
     }
 }

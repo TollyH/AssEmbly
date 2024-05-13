@@ -72,7 +72,7 @@ namespace AssEmbly
             }
             catch (Exception exc)
             {
-                Program.PrintWarning(Strings.Debugger_Warning_Debug_Info_File, exc.GetType().Name, exc.Message);
+                Program.PrintWarning(Strings_Debugger.Warning_Debug_Info_File, exc.GetType().Name, exc.Message);
 #if DEBUG
                 throw;
 #endif
@@ -97,22 +97,22 @@ namespace AssEmbly
                 {
                     if (LoadedDebugInfoFile.Value.AddressLabels.TryGetValue(currentAddress, out string[]? labels))
                     {
-                        Console.Write(Strings.Debugger_Execution_Preface_Labels);
+                        Console.Write(Strings_Debugger.Execution_Preface_Labels);
                         Console.WriteLine(string.Join("\n    ", labels));
                         Console.WriteLine();
                     }
                     if (LoadedDebugInfoFile.Value.ImportLocations.TryGetValue(currentAddress, out string? importName))
                     {
-                        Console.Write(Strings.Debugger_Execution_Preface_Imports);
+                        Console.Write(Strings_Debugger.Execution_Preface_Imports);
                         Console.WriteLine(importName);
                         Console.WriteLine();
                     }
                     if (LoadedDebugInfoFile.Value.FileLineMap.TryGetValue(currentAddress, out FilePosition position))
                     {
-                        Console.WriteLine(Strings.Debugger_Execution_Position, position.File, position.Line);
+                        Console.WriteLine(Strings_Debugger.Execution_Position, position.File, position.Line);
                     }
                 }
-                Console.Write(Strings.Debugger_Execution_Preface_Header);
+                Console.Write(Strings_Debugger.Execution_Preface_Header);
                 Console.WriteLine(lineDisassembly);
                 Console.WriteLine();
             }
@@ -149,9 +149,9 @@ namespace AssEmbly
                     if (!foundChange)
                     {
                         foundChange = true;
-                        Console.WriteLine(Strings.REPL_Changed_Registers_Header);
+                        Console.WriteLine(Strings_Debugger.REPL_Changed_Registers_Header);
                     }
-                    Console.WriteLine(Strings.REPL_Changed_Registers_Line, Enum.GetName((Register)register), previousValue, value, previousValue, value);
+                    Console.WriteLine(Strings_Debugger.REPL_Changed_Registers_Line, Enum.GetName((Register)register), previousValue, value, previousValue, value);
                 }
             }
 
@@ -166,20 +166,20 @@ namespace AssEmbly
                     if (!foundChange)
                     {
                         foundChange = true;
-                        Console.Write(Strings.REPL_Changed_Flags_Header);
+                        Console.Write(Strings_Debugger.REPL_Changed_Flags_Header);
                     }
                     Console.Write(Strings.Generic_Single_Indented_Key_Value,
-                        (statusFlags & flag) == 0 ? Strings.REPL_Changed_Flags_Unset : Strings.REPL_Changed_Flags_Set, Enum.GetName(flag));
+                        (statusFlags & flag) == 0 ? Strings_Debugger.REPL_Changed_Flags_Unset : Strings_Debugger.REPL_Changed_Flags_Set, Enum.GetName(flag));
                 }
             }
             Console.WriteLine();
 
-            Console.WriteLine(Strings.REPL_Remaining_Memory, (uint)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rpo]);
+            Console.WriteLine(Strings_Debugger.REPL_Remaining_Memory, (uint)DebuggingProcessor.Memory.Length - DebuggingProcessor.Registers[(int)Register.rpo]);
         }
 
         public static void DisplayReplHeader()
         {
-            Console.WriteLine(Strings.REPL_Header);
+            Console.WriteLine(Strings_Debugger.REPL_Header);
         }
 
         public void StartDebugger()
@@ -215,7 +215,7 @@ namespace AssEmbly
                         {
                             Console.BackgroundColor = ConsoleColor.Red;
                             Console.ForegroundColor = ConsoleColor.Black;
-                            Console.Write(Strings.Debugger_Breakpoint_Hit, register, value);
+                            Console.Write(Strings_Debugger.Breakpoint_Hit, register, value);
                             Console.ResetColor();
                             breakForDebug = true;
                             break;
@@ -240,7 +240,7 @@ namespace AssEmbly
                     bool endCommandEntryLoop = false;
                     while (!endCommandEntryLoop && breakForDebug)
                     {
-                        Console.Write(InReplMode ? Strings.REPL_Command_Prompt : Strings.Debugger_Command_Prompt);
+                        Console.Write(InReplMode ? Strings_Debugger.REPL_Command_Prompt : Strings_Debugger.Command_Prompt);
                         string userInput = Console.ReadLine()!;
                         if (InReplMode)
                         {
@@ -303,15 +303,15 @@ namespace AssEmbly
                                     CommandDebugHelp();
                                     break;
                                 default:
-                                    Program.PrintError(Strings.Debugger_Error_Unrecognised_Command, command[0]);
+                                    Program.PrintError(Strings_Debugger.Error_Unrecognised_Command, command[0]);
                                     break;
                             }
                         }
                     }
                     if (DebuggingProcessor.Execute(false) && !InReplMode)
                     {
-                        Program.PrintWarning(Strings.Debugger_Warning_HLT_Reached);
-                        Console.Write(Strings.Debugger_Any_Key_Continue);
+                        Program.PrintWarning(Strings_Debugger.Warning_HLT_Reached);
+                        Console.Write(Strings_Debugger.Any_Key_Continue);
                         _ = Console.ReadKey(true);
                         Console.WriteLine();
                         StepInstructions = true;
@@ -346,17 +346,17 @@ namespace AssEmbly
                     ? 2 : command[1] == "dword" ? 4 : command[1] == "qword" ? 8 : 0U;
                 if (bytesToRead == 0)
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Size, command[1]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Size, command[1]);
                     return;
                 }
                 if (!ulong.TryParse(command[2], out ulong address))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Address, command[2]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Address, command[2]);
                     return;
                 }
                 if (address + bytesToRead > (ulong)DebuggingProcessor.Memory.LongLength)
                 {
-                    Program.PrintError(Strings.Debugger_Error_OutOfRange_Address, command[2]);
+                    Program.PrintError(Strings_Debugger.Error_OutOfRange_Address, command[2]);
                     return;
                 }
                 ulong value = 0;
@@ -364,11 +364,11 @@ namespace AssEmbly
                 {
                     value += (ulong)DebuggingProcessor.Memory[i] << (byte)((i - address) * 8);
                 }
-                Console.WriteLine(Strings.Debugger_Memory_Value, address, value, value, Convert.ToString((long)value, 2));
+                Console.WriteLine(Strings_Debugger.Memory_Value, address, value, value, Convert.ToString((long)value, 2));
             }
             else
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_2);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_2);
             }
         }
 
@@ -382,47 +382,47 @@ namespace AssEmbly
                     {
                         if (!ulong.TryParse(command[2], out ulong address))
                         {
-                            Program.PrintError(Strings.Debugger_Error_Invalid_Address, command[2]);
+                            Program.PrintError(Strings_Debugger.Error_Invalid_Address, command[2]);
                             return;
                         }
                         if (address >= (ulong)DebuggingProcessor.Memory.LongLength)
                         {
-                            Program.PrintError(Strings.Debugger_Error_OutOfRange_Address, command[2]);
+                            Program.PrintError(Strings_Debugger.Error_OutOfRange_Address, command[2]);
                             return;
                         }
                         if (!byte.TryParse(command[3], out byte value))
                         {
-                            Program.PrintError(Strings.Debugger_Error_Invalid_Byte_Value, command[3]);
+                            Program.PrintError(Strings_Debugger.Error_Invalid_Byte_Value, command[3]);
                             return;
                         }
                         DebuggingProcessor.Memory[address] = value;
-                        Console.WriteLine(Strings.Debugger_Success_Address_Value_Set, address, value);
+                        Console.WriteLine(Strings_Debugger.Success_Address_Value_Set, address, value);
                         break;
                     }
                     case "reg":
                     {
                         if (!Enum.TryParse(command[2], out Register register))
                         {
-                            Program.PrintError(Strings.Debugger_Error_Invalid_Register, command[2]);
+                            Program.PrintError(Strings_Debugger.Error_Invalid_Register, command[2]);
                             return;
                         }
                         if (!ulong.TryParse(command[3], out ulong value))
                         {
-                            Program.PrintError(Strings.Debugger_Error_Invalid_Register_Value, command[3]);
+                            Program.PrintError(Strings_Debugger.Error_Invalid_Register_Value, command[3]);
                             return;
                         }
                         DebuggingProcessor.Registers[(int)register] = value;
-                        Console.WriteLine(Strings.Debugger_Success_Register_Value_Set, Enum.GetName(register), value);
+                        Console.WriteLine(Strings_Debugger.Success_Register_Value_Set, Enum.GetName(register), value);
                         break;
                     }
                     default:
-                        Program.PrintError(Strings.Debugger_Error_Invalid_Location, command[1]);
+                        Program.PrintError(Strings_Debugger.Error_Invalid_Location, command[1]);
                         break;
                 }
             }
             else
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_3);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_3);
             }
         }
 
@@ -434,7 +434,7 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[1], out offset))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Offset, command[1]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Offset, command[1]);
                     return;
                 }
             }
@@ -442,13 +442,13 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[2], out limit))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Limit, command[1]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Limit, command[1]);
                     return;
                 }
             }
             if (command.Length is not 1 and > 3)
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_0to2);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_0to2);
                 return;
             }
             Console.ForegroundColor = ConsoleColor.Blue;
@@ -467,7 +467,7 @@ namespace AssEmbly
             Console.Write(Strings.Generic_Unmapped);
             Console.ResetColor();
             Console.WriteLine();
-            Console.Write(Strings.Debugger_MemoryMap_Header);
+            Console.Write(Strings_Debugger.MemoryMap_Header);
             ulong start = offset - (offset % 16);  // Ensure offset is a multiple of 16
             ulong end = (ulong)DebuggingProcessor.Memory.LongLength < (limit + start) ? (ulong)DebuggingProcessor.Memory.LongLength : (limit + start);
             bool writtenZeroFill = false;
@@ -487,10 +487,10 @@ namespace AssEmbly
                 }
                 writtenZeroFill = false;
 
-                Console.Write(Strings.Debugger_MemoryMap_FirstCol, rowStartAdr);
+                Console.Write(Strings_Debugger.MemoryMap_FirstCol, rowStartAdr);
                 for (ulong i = rowStartAdr; i < rowStartAdr + 16; i++)
                 {
-                    string valueStr = string.Format(Strings.Debugger_MemoryMap_Cell, DebuggingProcessor.Memory[i]);
+                    string valueStr = string.Format(Strings_Debugger.MemoryMap_Cell, DebuggingProcessor.Memory[i]);
 #if EXTENSION_SET_HEAP_ALLOCATE
                     // Being unmapped is the lowest priority colour, and should be completely replaced by any register colours
                     if (DebuggingProcessor.MappedMemoryRanges.All(mappedRange => !mappedRange.Contains((long)i)))
@@ -529,7 +529,7 @@ namespace AssEmbly
                     Console.ResetColor();
                     Console.Write(' ');
                 }
-                Console.Write(Strings.Debugger_MemoryMap_VerticalSep);
+                Console.Write(Strings_Debugger.MemoryMap_VerticalSep);
                 for (ulong i = rowStartAdr; i < rowStartAdr + 16; i++)
                 {
                     char value = (char)DebuggingProcessor.Memory[i];
@@ -563,24 +563,24 @@ namespace AssEmbly
             {
                 if (!ulong.TryParse(command[1], out limit))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Limit, command[1]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Limit, command[1]);
                     return;
                 }
             }
             else if (command.Length != 1)
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_0to1);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_0to1);
                 return;
             }
 
             if (DebuggingProcessor.Registers[(int)Register.rso] >= (ulong)DebuggingProcessor.Memory.LongLength)
             {
-                Program.PrintWarning(Strings.Debugger_Warning_Stack_Empty);
+                Program.PrintWarning(Strings_Debugger.Warning_Stack_Empty);
                 return;
             }
             if (DebuggingProcessor.Registers[(int)Register.rso] > DebuggingProcessor.Registers[(int)Register.rsb])
             {
-                Program.PrintWarning(Strings.Debugger_Warning_rso_GT_rsb);
+                Program.PrintWarning(Strings_Debugger.Warning_rso_GT_rsb);
                 return;
             }
 
@@ -595,14 +595,14 @@ namespace AssEmbly
                 if (i == currentStackOffset)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine(Strings.Debugger_Stack_CurrentFrame_Header);
+                    Console.WriteLine(Strings_Debugger.Stack_CurrentFrame_Header);
                     Console.ResetColor();
-                    Console.WriteLine(Strings.Debugger_Stack_Box_Top);
+                    Console.WriteLine(Strings_Debugger.Stack_Box_Top);
                 }
-                Console.Write(Strings.Debugger_Stack_CurrentFrame_Row, i, DebuggingProcessor.ReadMemoryQWord(i), currentStackBase - i);
+                Console.Write(Strings_Debugger.Stack_CurrentFrame_Row, i, DebuggingProcessor.ReadMemoryQWord(i), currentStackBase - i);
                 if (i == DebuggingProcessor.Registers[(int)Register.rso])
                 {
-                    Console.WriteLine(Strings.Debugger_Stack_Pointer_rso);
+                    Console.WriteLine(Strings_Debugger.Stack_Pointer_rso);
                 }
                 else
                 {
@@ -610,24 +610,24 @@ namespace AssEmbly
                 }
                 if (i + 8 >= currentStackBase)
                 {
-                    Console.WriteLine(Strings.Debugger_Stack_Box_Bottom);
+                    Console.WriteLine(Strings_Debugger.Stack_Box_Bottom);
                 }
             }
             if (currentStackBase + stackCallSize <= (ulong)DebuggingProcessor.Memory.LongLength)
             {
                 Console.ForegroundColor = ConsoleColor.Blue;
-                Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_Header);
+                Console.WriteLine(Strings_Debugger.Stack_ReturnInfo_Header);
                 Console.ResetColor();
-                Console.WriteLine(Strings.Debugger_Stack_Box_Top);
-                Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_First, currentStackBase, registerPushOrder[0], DebuggingProcessor.ReadMemoryQWord(currentStackBase));
-                Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_Second, currentStackBase + 8, registerPushOrder[1], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8));
+                Console.WriteLine(Strings_Debugger.Stack_Box_Top);
+                Console.WriteLine(Strings_Debugger.Stack_ReturnInfo_First, currentStackBase, registerPushOrder[0], DebuggingProcessor.ReadMemoryQWord(currentStackBase));
+                Console.WriteLine(Strings_Debugger.Stack_ReturnInfo_Second, currentStackBase + 8, registerPushOrder[1], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 8));
 #if V1_CALL_STACK_COMPAT
                 if (UseV1CallStack)
                 {
-                    Console.WriteLine(Strings.Debugger_Stack_ReturnInfo_Third, currentStackBase + 16, registerPushOrder[2], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16));
+                    Console.WriteLine(Strings_Debugger.Stack_ReturnInfo_Third, currentStackBase + 16, registerPushOrder[2], DebuggingProcessor.ReadMemoryQWord(currentStackBase + 16));
                 }
 #endif
-                Console.WriteLine(Strings.Debugger_Stack_Box_Bottom);
+                Console.WriteLine(Strings_Debugger.Stack_Box_Bottom);
 
                 ulong parentStackBase = DebuggingProcessor.ReadMemoryQWord(currentStackBase
 #if V1_CALL_STACK_COMPAT
@@ -649,20 +649,20 @@ namespace AssEmbly
                     if (i == currentStackBase + stackCallSize)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine(Strings.Debugger_Stack_ParentFrame_Header);
+                        Console.WriteLine(Strings_Debugger.Stack_ParentFrame_Header);
                         Console.ResetColor();
-                        Console.WriteLine(Strings.Debugger_Stack_Box_Top);
+                        Console.WriteLine(Strings_Debugger.Stack_Box_Top);
                     }
-                    Console.WriteLine(Strings.Debugger_Stack_ParentFrame_Row, i, DebuggingProcessor.ReadMemoryQWord(i), i - currentStackBase);
+                    Console.WriteLine(Strings_Debugger.Stack_ParentFrame_Row, i, DebuggingProcessor.ReadMemoryQWord(i), i - currentStackBase);
                     if (i + 8 >= parentStackBase)
                     {
-                        Console.WriteLine(Strings.Debugger_Stack_Box_Bottom);
+                        Console.WriteLine(Strings_Debugger.Stack_Box_Bottom);
                     }
                 }
             }
             else
             {
-                Program.PrintWarning(Strings.Debugger_Warning_Stack_Bottom);
+                Program.PrintWarning(Strings_Debugger.Warning_Stack_Bottom);
             }
         }
 
@@ -670,32 +670,32 @@ namespace AssEmbly
         {
             if (command.Length != 2)
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_1);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_1);
                 return;
             }
             if (!ulong.TryParse(command[1], out ulong decValue))
             {
-                Program.PrintError(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
+                Program.PrintError(Strings_Debugger.Error_Invalid_Convert_Value, command[1]);
                 return;
             }
-            Console.WriteLine(Strings.Debugger_Value_In_Hex, decValue, decValue);
+            Console.WriteLine(Strings_Debugger.Value_In_Hex, decValue, decValue);
         }
 
         private static void CommandHexadecimalToDecimal(string[] command)
         {
             if (command.Length != 2)
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_1);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_1);
                 return;
             }
             try
             {
                 ulong convertedValue = Convert.ToUInt64(command[1], 16);
-                Console.WriteLine(Strings.Debugger_Value_In_Decimal, command[1], convertedValue);
+                Console.WriteLine(Strings_Debugger.Value_In_Decimal, command[1], convertedValue);
             }
             catch
             {
-                Program.PrintError(Strings.Debugger_Error_Invalid_Convert_Value, command[1]);
+                Program.PrintError(Strings_Debugger.Error_Invalid_Convert_Value, command[1]);
             }
         }
 
@@ -703,7 +703,7 @@ namespace AssEmbly
         {
             if (command.Length == 1)
             {
-                Console.WriteLine(Strings.Debugger_Breakpoints_Header);
+                Console.WriteLine(Strings_Debugger.Breakpoints_Header);
                 foreach ((Register register, ulong value) in Breakpoints)
                 {
                     Console.WriteLine(Strings.Generic_Key_Value, register, value);
@@ -713,12 +713,12 @@ namespace AssEmbly
             {
                 if (!Enum.TryParse(command[2], out Register register))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Register, command[2]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Register, command[2]);
                     return;
                 }
                 if (!ulong.TryParse(command[3], out ulong value))
                 {
-                    Program.PrintError(Strings.Debugger_Error_Invalid_Break_Value, command[3]);
+                    Program.PrintError(Strings_Debugger.Error_Invalid_Break_Value, command[3]);
                     return;
                 }
                 switch (command[1].ToLower())
@@ -727,31 +727,31 @@ namespace AssEmbly
                         if (!Breakpoints.Contains((register, value)))
                         {
                             Breakpoints.Add((register, value));
-                            Console.WriteLine(Strings.Debugger_Success_Breakpoint, register, value);
+                            Console.WriteLine(Strings_Debugger.Success_Breakpoint, register, value);
                         }
                         else
                         {
-                            Program.PrintWarning(Strings.Debugger_Warning_Breakpoint_Exists, register, value);
+                            Program.PrintWarning(Strings_Debugger.Warning_Breakpoint_Exists, register, value);
                         }
                         break;
                     case "remove":
                         if (Breakpoints.RemoveAll(x => x.Register == register && x.Value == value) == 0)
                         {
-                            Program.PrintWarning(Strings.Debugger_Warning_Breakpoint_No_Matching);
+                            Program.PrintWarning(Strings_Debugger.Warning_Breakpoint_No_Matching);
                         }
                         else
                         {
-                            Console.WriteLine(Strings.Debugger_Success_Breakpoint_Remove, register, value);
+                            Console.WriteLine(Strings_Debugger.Success_Breakpoint_Remove, register, value);
                         }
                         break;
                     default:
-                        Program.PrintError(Strings.Debugger_Error_Invalid_Breakpoint_Action, command[1]);
+                        Program.PrintError(Strings_Debugger.Error_Invalid_Breakpoint_Action, command[1]);
                         break;
                 }
             }
             else
             {
-                Program.PrintError(Strings.Debugger_Error_Args_Required_Breakpoint);
+                Program.PrintError(Strings_Debugger.Error_Args_Required_Breakpoint);
             }
         }
 
@@ -780,7 +780,7 @@ namespace AssEmbly
                 }
             }
 
-            Console.WriteLine(Strings.Debugger_Heap_Stats_Main,
+            Console.WriteLine(Strings_Debugger.Heap_Stats_Main,
                 memorySize,
                 freeMemory,
                 freeBlocks.Count,
@@ -789,7 +789,7 @@ namespace AssEmbly
                 mappedRanges.Count - 2,
                 mappedRanges.Skip(1).SkipLast(1).Sum(m => m.Length),
                 stackSize,
-                DebuggingProcessor.MapStack ? "" : Strings.Debugger_Heap_Unmapped,
+                DebuggingProcessor.MapStack ? "" : Strings_Debugger.Heap_Unmapped,
                 programSize);
 
             // Generate visual map of stack allocation
@@ -797,20 +797,20 @@ namespace AssEmbly
             int padding = Console.WindowWidth / 12;
             int numberOfBars = Console.WindowWidth - padding;
             double bytesPerBar = (double)memorySize / numberOfBars;
-            Console.WriteLine(Strings.Debugger_Heap_Map_Header);
+            Console.WriteLine(Strings_Debugger.Heap_Map_Header);
             // Colour and block size key
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write('\u2588');
             Console.ResetColor();
-            Console.Write(Strings.Debugger_Heap_Map_Fully_Unmapped);
+            Console.Write(Strings_Debugger.Heap_Map_Fully_Unmapped);
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write('\u2588');
             Console.ResetColor();
-            Console.Write(Strings.Debugger_Heap_Map_Fully_Mapped);
+            Console.Write(Strings_Debugger.Heap_Map_Fully_Mapped);
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write('\u2588');
             Console.ResetColor();
-            Console.Write(Strings.Debugger_Heap_Map_Partially_Mapped, bytesPerBar);
+            Console.Write(Strings_Debugger.Heap_Map_Partially_Mapped, bytesPerBar);
             Console.WriteLine('\n');
             for (int i = 0; i < numberOfBars; i++)
             {
@@ -839,7 +839,7 @@ namespace AssEmbly
 
         private static void CommandDebugHelp()
         {
-            Console.WriteLine(Strings.Debugger_Help_Body);
+            Console.WriteLine(Strings_Debugger.Help_Body);
         }
 
         private bool ProcessReplInput(string userInput)
@@ -860,7 +860,7 @@ namespace AssEmbly
                     OperandType operandType = Assembler.DetermineOperandType(mnemonic, false);
                     if (operandType != OperandType.Address)
                     {
-                        throw new SyntaxError(Strings.REPL_Error_Label_Ampersand);
+                        throw new SyntaxError(Strings_Debugger.REPL_Error_Label_Ampersand);
                     }
                     string labelName = mnemonic[1..];
                     replLabels[labelName] = DebuggingProcessor.Registers[(int)Register.rpo];
@@ -874,7 +874,7 @@ namespace AssEmbly
                 {
                     if (!replLabels.TryGetValue(labelName, out ulong address))
                     {
-                        throw new LabelNameException(string.Format(Strings.REPL_Error_Label_Not_Exists, labelName));
+                        throw new LabelNameException(string.Format(Strings_Debugger.REPL_Error_Label_Not_Exists, labelName));
                     }
                     BinaryPrimitives.WriteUInt64LittleEndian(newBytes.AsSpan()[(int)addressOffset..], address);
                 }

@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="NonFatal_0000" xml:space="preserve">
+    <value>Manually emitted error.</value>
+  </data>
+  <data name="NonFatal_0001" xml:space="preserve">
+    <value>Instruction writes to the rpo register.</value>
+  </data>
+  <data name="NonFatal_0002" xml:space="preserve">
+    <value>Division by constant 0.</value>
+  </data>
+  <data name="NonFatal_0003" xml:space="preserve">
+    <value>File has an entry point explicitly defined, but the program is being assembled into v1 format which doesn't support them.</value>
+  </data>
+  <data name="NonFatal_0004" xml:space="preserve">
+    <value>Allocating constant 0 bytes.</value>
+  </data>
+  <data name="NonFatal_0005" xml:space="preserve">
+    <value>The given literal value does not correspond to a valid terminal colour.</value>
+  </data>
+  <data name="Suggestion_0000" xml:space="preserve">
+    <value>Manually emitted suggestion.</value>
+  </data>
+  <data name="Suggestion_0001" xml:space="preserve">
+    <value>Avoid use of NOP instruction.</value>
+  </data>
+  <data name="Suggestion_0002" xml:space="preserve">
+    <value>Use the `%PAD` directive instead of chaining `%DAT 0` directives.</value>
+  </data>
+  <data name="Suggestion_0003" xml:space="preserve">
+    <value>Put %IMP directives at the end of the file, unless the position of the directive is important given the file's contents.</value>
+  </data>
+  <data name="Suggestion_0004" xml:space="preserve">
+    <value>Put data at the end of the file, unless the position of the data is important.</value>
+  </data>
+  <data name="Suggestion_0005" xml:space="preserve">
+    <value>Use `TST {1}, {1}` instead of `CMP {1}, 0`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0006" xml:space="preserve">
+    <value>Use `XOR {1}, {1}` instead of `{0} {1}, 0`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0007" xml:space="preserve">
+    <value>Use `ICR {1}` instead of `ADD {1}, 1`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0008" xml:space="preserve">
+    <value>Use `DCR {1}` instead of `SUB {1}, 1`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0009" xml:space="preserve">
+    <value>Operation has no effect.</value>
+  </data>
+  <data name="Suggestion_0010" xml:space="preserve">
+    <value>Shift operation shifts by 64 bits or more, which will always shift out all bits.</value>
+  </data>
+  <data name="Suggestion_0011" xml:space="preserve">
+    <value>Remove leading 0 digits from denary number.</value>
+  </data>
+  <data name="Suggestion_0012" xml:space="preserve">
+    <value>Remove useless `%PAD 0` directive.</value>
+  </data>
+  <data name="Suggestion_0013" xml:space="preserve">
+    <value>Use `DCR {1}` instead of `ADD {1}, -1`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0014" xml:space="preserve">
+    <value>Use `ICR {1}` instead of `SUB {1}, -1`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0015" xml:space="preserve">
+    <value>Use `MVB {1}, {1}` instead of `AND {1}, 0xFF`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0016" xml:space="preserve">
+    <value>Use `MVW {1}, {1}` instead of `AND {1}, 0xFFFF`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0017" xml:space="preserve">
+    <value>Use `MVD {1}, {1}` instead of `AND {1}, 0xFFFFFFFF`, as it results in less bytes.</value>
+  </data>
+  <data name="Suggestion_0018" xml:space="preserve">
+    <value>Label "{0}" is defined but never used.</value>
+  </data>
+  <data name="Suggestion_0019" xml:space="preserve">
+    <value>%ASM_ONCE directive is unreachable, as it is not the first one in the file.</value>
+  </data>
+  <data name="Suggestion_0020" xml:space="preserve">
+    <value>Use the `HLT` instruction instead of `EXTD_HLT` when the exit code is always 0.</value>
+  </data>
+  <data name="Warning_0000" xml:space="preserve">
+    <value>Manually emitted warning.</value>
+  </data>
+  <data name="Warning_0001" xml:space="preserve">
+    <value>Data insertion is not directly preceded by an unconditional jump, return, or halt instruction.</value>
+  </data>
+  <data name="Warning_0002" xml:space="preserve">
+    <value>Jump/Call target address does not point to executable code.</value>
+  </data>
+  <data name="Warning_0003" xml:space="preserve">
+    <value>Jump/Call target address points to end of file, not executable code.</value>
+  </data>
+  <data name="Warning_0004" xml:space="preserve">
+    <value>Instruction writes to an address pointing to executable code.</value>
+  </data>
+  <data name="Warning_0005" xml:space="preserve">
+    <value>Instruction reads from an address pointing to executable code in a context that likely expects data.</value>
+  </data>
+  <data name="Warning_0006" xml:space="preserve">
+    <value>String insertion is not immediately followed by a 0 (null) byte.</value>
+  </data>
+  <data name="Warning_0007" xml:space="preserve">
+    <value>Numeric literal is too large for the given move instruction. Upper bits will be truncated at runtime.</value>
+  </data>
+  <data name="Warning_0008" xml:space="preserve">
+    <value>Unreachable code detected.</value>
+  </data>
+  <data name="Warning_0009" xml:space="preserve">
+    <value>Program runs to end of file without being terminated by an unconditional jump, return, or halt instruction.</value>
+  </data>
+  <data name="Warning_0010" xml:space="preserve">
+    <value>File import is not directly preceded by an unconditional jump, return, or halt instruction.</value>
+  </data>
+  <data name="Warning_0011" xml:space="preserve">
+    <value>Instruction writes to the rsf register.</value>
+  </data>
+  <data name="Warning_0012" xml:space="preserve">
+    <value>Instruction writes to the rsb register.</value>
+  </data>
+  <data name="Warning_0013" xml:space="preserve">
+    <value>Jump/Call target address points to itself, resulting in an unbreakable infinite loop.</value>
+  </data>
+  <data name="Warning_0014" xml:space="preserve">
+    <value>Unlabelled executable code found after data insertion.</value>
+  </data>
+  <data name="Warning_0015" xml:space="preserve">
+    <value>Code follows an imported file that is not terminated by unconditional jump, return, or halt instruction.</value>
+  </data>
+  <data name="Warning_0016" xml:space="preserve">
+    <value>Addresses are 64-bit values, however this move instruction moves less than 64 bits.</value>
+  </data>
+  <data name="Warning_0017" xml:space="preserve">
+    <value>Entry point does not point to executable code.</value>
+  </data>
+  <data name="Warning_0018" xml:space="preserve">
+    <value>Entry point points to an import.</value>
+  </data>
+  <data name="Warning_0019" xml:space="preserve">
+    <value>Signed literal given to an instruction that expects an unsigned literal.</value>
+  </data>
+  <data name="Warning_0020" xml:space="preserve">
+    <value>Floating point literal given to an instruction that expects an integer literal.</value>
+  </data>
+  <data name="Warning_0021" xml:space="preserve">
+    <value>Integer literal given to an instruction that expects a floating point literal. Put `.0` at the end of the literal to make it floating point.</value>
+  </data>
+  <data name="Warning_0022" xml:space="preserve">
+    <value>Value is too large for a signed instruction. This positive value will overflow into a negative one.</value>
+  </data>
+  <data name="Warning_0023" xml:space="preserve">
+    <value>Addresses are unsigned, however this operation is signed.</value>
+  </data>
+  <data name="Warning_0024" xml:space="preserve">
+    <value>Addresses are integers, however this operation is floating point.</value>
+  </data>
+  <data name="Warning_0025" xml:space="preserve">
+    <value>Use of an extension instruction when assembling to v1 format.</value>
+  </data>
+  <data name="Warning_0026" xml:space="preserve">
+    <value>%LABEL_OVERRIDE directive does not have any effect as it is not directly preceded by any label definitions.</value>
+  </data>
+  <data name="Warning_0027" xml:space="preserve">
+    <value>Addresses are always positive integers, but a negative or floating point literal was given as the label address to the %LABEL_OVERRIDE directive.</value>
+  </data>
+  <data name="Warning_0028" xml:space="preserve">
+    <value>The '@' prefix on the target assembler variable name is not required for this directive. Including it will result in the current value of the directive being used as the target variable name instead.</value>
+  </data>
+  <data name="Warning_0029" xml:space="preserve">
+    <value>The value of assembler variables is always interpreted as an integer, but the provided value is floating point.</value>
+  </data>
+  <data name="Warning_0030" xml:space="preserve">
+    <value>This assembler variable operation will not work as expected with negative values.</value>
+  </data>
+  <data name="Warning_0031" xml:space="preserve">
+    <value>Both operands to this comparison are numeric literals, so the result will never change.</value>
+  </data>
+</root>

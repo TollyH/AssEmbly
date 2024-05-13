@@ -34,21 +34,28 @@ namespace AssEmbly
         }
     }
 
-    // ASSEMBLER EXCEPTIONS
-
+#if ASSEMBLER
     /// <summary>
     /// Represents errors that occur during the assembly of an AssEmbly source file.
     /// </summary>
     public class AssemblerException : AssEmblyException
     {
+#if ASSEMBLER_WARNINGS
         public Warning WarningObject { get; set; }
+#else
+        public FilePosition Position { get; set; }
+#endif
 
         public AssemblerException(string message) : base(message) { }
         public AssemblerException(string message, int line, string file) : base(message)
         {
+#if ASSEMBLER_WARNINGS
             WarningObject = new Warning(
                 WarningSeverity.FatalError, 0000, new FilePosition(line, file),
                 "", Array.Empty<string>(), "", "", message);
+#else
+            Position = new FilePosition(line, file);
+#endif
         }
     }
 
@@ -150,9 +157,9 @@ namespace AssEmbly
         public WhileLimitExceededException(string message) : base(message) { }
         public WhileLimitExceededException(string message, int line, string file) : base(message, line, file) { }
     }
+#endif
 
-    // DEBUGGER EXCEPTIONS
-
+#if DEBUGGER
     /// <summary>
     /// Represents exceptions specific to the AssEmbly debugger.
     /// </summary>
@@ -176,9 +183,9 @@ namespace AssEmbly
         public DebugFileException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public DebugFileException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
+#endif
 
-    // RUNTIME EXCEPTIONS
-
+#if PROCESSOR
     /// <summary>
     /// Represents errors that occur during the execution of an AssEmbly program.
     /// </summary>
@@ -303,6 +310,7 @@ namespace AssEmbly
         public InvalidMemoryBlockException(string message, string consoleMessage) : base(message, consoleMessage) { }
         public InvalidMemoryBlockException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
+#endif
 #endif
 
     // AAP FORMAT EXCEPTIONS
