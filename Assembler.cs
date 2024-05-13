@@ -219,8 +219,10 @@ namespace AssEmbly
                 { "V1_CALL_STACK", () => usingV1Stack ? 1UL : 0UL },
                 { "IMPORT_DEPTH", () => (ulong)importStack.Count },
                 { "CURRENT_ADDRESS", () => (ulong)program.Count },
+                { "FULL_BASE_OPCODES", () => ForceFullOpcodes ? 1UL : 0UL },
                 { "OBSOLETE_DIRECTIVES", () => EnableObsoleteDirectives ? 1UL : 0UL },
                 { "ESCAPE_SEQUENCES", () => EnableEscapeSequences ? 1UL : 0UL },
+                { "FILE_PATH_MACROS", () => EnableFilePathMacros ? 1UL : 0UL },
                 {
                     "EXTENSION_SET_SIGNED_AVAIL", () =>
 #if EXTENSION_SET_SIGNED
