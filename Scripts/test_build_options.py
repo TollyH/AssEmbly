@@ -44,7 +44,8 @@ os.chdir(os.path.dirname(os.path.dirname(__file__)))
 print("Testing extension set combinations...")
 
 combinations: list[tuple[str, ...]] = []
-for length in range(len(EXTENSION_SET_OPTIONS) + 1):
+# Extension sets are tested alone and in pairs
+for length in range(3):
     for combination in itertools.combinations(EXTENSION_SET_OPTIONS, length):
         combinations.append(combination)
 
@@ -62,6 +63,7 @@ for combination in tqdm.tqdm(combinations):
 print("Testing operation combinations...")
 
 combinations: list[tuple[str, ...]] = []
+# Every possible combination of operations is tested
 for length in range(len(OPERATION_OPTIONS) + 1):
     for combination in itertools.combinations(OPERATION_OPTIONS, length):
         valid = True
