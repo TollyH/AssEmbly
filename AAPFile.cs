@@ -35,6 +35,9 @@ namespace AssEmbly
 #if EXTENSION_SET_TERMINAL
         ExtensionTerminal = 0b100000000,
 #endif
+#if DISPLACEMENT
+        PointerDisplacement = 0b1000000000,
+#endif
 
         All = None
 #if V1_CALL_STACK_COMPAT
@@ -63,6 +66,9 @@ namespace AssEmbly
 #endif
 #if EXTENSION_SET_TERMINAL
             | ExtensionTerminal
+#endif
+#if DISPLACEMENT
+            | PointerDisplacement
 #endif
         , Incompatible = ~All
     }

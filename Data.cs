@@ -8,7 +8,7 @@
         Pointer
     }
 
-    public enum Register
+    public enum Register : byte
     {
         rpo,  // Program Offset
         rso,  // Stack Offset
@@ -29,7 +29,7 @@
     }
 
     [Flags]
-    public enum StatusFlags
+    public enum StatusFlags : ulong
     {
         Zero = 0b1,
         Carry = 0b10,
@@ -44,10 +44,46 @@
 
         ZeroAndCarry = Zero | Carry,
 #if EXTENSION_SET_SIGNED
-        // Signed
         SignAndOverflow = Sign | Overflow,
 #endif
     }
+
+#if DISPLACEMENT
+    public enum DisplacementMode : byte
+    {
+        NoDisplacement = 0b00,
+        Constant = 0b01,
+        Register = 0b10,
+        ConstantAndRegister = 0b11
+    }
+
+    public enum DisplacementMultiplier : byte
+    {
+        x1 = 0b000,
+        x2 = 0b001,
+        x4 = 0b010,
+        x8 = 0b011,
+        x16 = 0b100,
+        x32 = 0b101,
+        x64 = 0b110,
+        x128 = 0b111
+    }
+
+    public enum PointerReadSize : byte
+    {
+        Byte = 0b00,
+        Word = 0b01,
+        DoubleWord = 0b10,
+        QuadWord = 0b11
+    }
+
+    public enum AddressReferenceType
+    {
+        LabelAddress,  // :XYZ
+        LabelLiteral,  // :&XYZ
+        LiteralAddress  // :123
+    }
+#endif
 
     /// <summary>
     /// Stores <see langword="static"/> data about AssEmbly, such as register and operand types, and mnemonic mappings.
