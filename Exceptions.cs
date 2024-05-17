@@ -46,8 +46,8 @@ namespace AssEmbly
         public FilePosition Position { get; set; }
 #endif
 
-        public AssemblerException(string message) : base(message) { }
-        public AssemblerException(string message, int line, string file) : base(message)
+        public AssemblerException([Localizable(true)] string message) : base(message) { }
+        public AssemblerException([Localizable(true)] string message, int line, string file) : base(message)
         {
 #if ASSEMBLER_WARNINGS
             WarningObject = new Warning(
@@ -64,8 +64,8 @@ namespace AssEmbly
     /// </summary>
     public class SyntaxError : AssemblerException
     {
-        public SyntaxError(string message) : base(message) { }
-        public SyntaxError(string message, int line, string file) : base(message, line, file) { }
+        public SyntaxError([Localizable(true)] string message) : base(message) { }
+        public SyntaxError([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -73,8 +73,8 @@ namespace AssEmbly
     /// </summary>
     public class OperandException : AssemblerException
     {
-        public OperandException(string message) : base(message) { }
-        public OperandException(string message, int line, string file) : base(message, line, file) { }
+        public OperandException([Localizable(true)] string message) : base(message) { }
+        public OperandException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -82,8 +82,8 @@ namespace AssEmbly
     /// </summary>
     public class ImportException : AssemblerException
     {
-        public ImportException(string message) : base(message) { }
-        public ImportException(string message, int line, string file) : base(message, line, file) { }
+        public ImportException([Localizable(true)] string message) : base(message) { }
+        public ImportException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -91,8 +91,8 @@ namespace AssEmbly
     /// </summary>
     public class OpcodeException : AssemblerException
     {
-        public OpcodeException(string message) : base(message) { }
-        public OpcodeException(string message, int line, string file) : base(message, line, file) { }
+        public OpcodeException([Localizable(true)] string message) : base(message) { }
+        public OpcodeException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -100,8 +100,8 @@ namespace AssEmbly
     /// </summary>
     public class LabelNameException : AssemblerException
     {
-        public LabelNameException(string message) : base(message) { }
-        public LabelNameException(string message, int line, string file) : base(message, line, file) { }
+        public LabelNameException([Localizable(true)] string message) : base(message) { }
+        public LabelNameException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -109,8 +109,8 @@ namespace AssEmbly
     /// </summary>
     public class MacroNameException : AssemblerException
     {
-        public MacroNameException(string message) : base(message) { }
-        public MacroNameException(string message, int line, string file) : base(message, line, file) { }
+        public MacroNameException([Localizable(true)] string message) : base(message) { }
+        public MacroNameException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -118,8 +118,8 @@ namespace AssEmbly
     /// </summary>
     public class VariableNameException : AssemblerException
     {
-        public VariableNameException(string message) : base(message) { }
-        public VariableNameException(string message, int line, string file) : base(message, line, file) { }
+        public VariableNameException([Localizable(true)] string message) : base(message) { }
+        public VariableNameException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -127,8 +127,8 @@ namespace AssEmbly
     /// </summary>
     public class EndingDirectiveException : AssemblerException
     {
-        public EndingDirectiveException(string message) : base(message) { }
-        public EndingDirectiveException(string message, int line, string file) : base(message, line, file) { }
+        public EndingDirectiveException([Localizable(true)] string message) : base(message) { }
+        public EndingDirectiveException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -136,8 +136,8 @@ namespace AssEmbly
     /// </summary>
     public class MacroExpansionException : AssemblerException
     {
-        public MacroExpansionException(string message) : base(message) { }
-        public MacroExpansionException(string message, int line, string file) : base(message, line, file) { }
+        public MacroExpansionException([Localizable(true)] string message) : base(message) { }
+        public MacroExpansionException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -145,8 +145,8 @@ namespace AssEmbly
     /// </summary>
     public class AssemblyStoppedException : AssemblerException
     {
-        public AssemblyStoppedException(string message) : base(message) { }
-        public AssemblyStoppedException(string message, int line, string file) : base(message, line, file) { }
+        public AssemblyStoppedException([Localizable(true)] string message) : base(message) { }
+        public AssemblyStoppedException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 
     /// <summary>
@@ -154,8 +154,8 @@ namespace AssEmbly
     /// </summary>
     public class WhileLimitExceededException : AssemblerException
     {
-        public WhileLimitExceededException(string message) : base(message) { }
-        public WhileLimitExceededException(string message, int line, string file) : base(message, line, file) { }
+        public WhileLimitExceededException([Localizable(true)] string message) : base(message) { }
+        public WhileLimitExceededException([Localizable(true)] string message, int line, string file) : base(message, line, file) { }
     }
 #endif
 
@@ -166,10 +166,10 @@ namespace AssEmbly
     public class DebuggerException : AssEmblyException
     {
         public DebuggerException() { }
-        public DebuggerException(string message) : base(message) { }
-        public DebuggerException(string message, Exception inner) : base(message, inner) { }
-        public DebuggerException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public DebuggerException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public DebuggerException([Localizable(true)] string message) : base(message) { }
+        public DebuggerException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public DebuggerException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public DebuggerException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -178,10 +178,10 @@ namespace AssEmbly
     public class DebugFileException : DebuggerException
     {
         public DebugFileException() { }
-        public DebugFileException(string message) : base(message) { }
-        public DebugFileException(string message, Exception inner) : base(message, inner) { }
-        public DebugFileException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public DebugFileException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public DebugFileException([Localizable(true)] string message) : base(message) { }
+        public DebugFileException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public DebugFileException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public DebugFileException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 #endif
 
@@ -192,10 +192,10 @@ namespace AssEmbly
     public class RuntimeException : AssEmblyException
     {
         public RuntimeException() { }
-        public RuntimeException(string message) : base(message) { }
-        public RuntimeException(string message, Exception inner) : base(message, inner) { }
-        public RuntimeException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public RuntimeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public RuntimeException([Localizable(true)] string message) : base(message) { }
+        public RuntimeException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public RuntimeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public RuntimeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -204,10 +204,10 @@ namespace AssEmbly
     public class InvalidOpcodeException : RuntimeException
     {
         public InvalidOpcodeException() { }
-        public InvalidOpcodeException(string message) : base(message) { }
-        public InvalidOpcodeException(string message, Exception inner) : base(message, inner) { }
-        public InvalidOpcodeException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public InvalidOpcodeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public InvalidOpcodeException([Localizable(true)] string message) : base(message) { }
+        public InvalidOpcodeException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public InvalidOpcodeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidOpcodeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -216,10 +216,10 @@ namespace AssEmbly
     public class ReadOnlyRegisterException : RuntimeException
     {
         public ReadOnlyRegisterException() { }
-        public ReadOnlyRegisterException(string message) : base(message) { }
-        public ReadOnlyRegisterException(string message, Exception inner) : base(message, inner) { }
-        public ReadOnlyRegisterException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public ReadOnlyRegisterException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public ReadOnlyRegisterException([Localizable(true)] string message) : base(message) { }
+        public ReadOnlyRegisterException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public ReadOnlyRegisterException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public ReadOnlyRegisterException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -229,10 +229,10 @@ namespace AssEmbly
     public class FileOperationException : RuntimeException
     {
         public FileOperationException() { }
-        public FileOperationException(string message) : base(message) { }
-        public FileOperationException(string message, Exception inner) : base(message, inner) { }
-        public FileOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public FileOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public FileOperationException([Localizable(true)] string message) : base(message) { }
+        public FileOperationException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public FileOperationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public FileOperationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
 #if EXTENSION_SET_EXTERNAL_ASM
@@ -242,10 +242,10 @@ namespace AssEmbly
     public class InvalidAssemblyException : RuntimeException
     {
         public InvalidAssemblyException() { }
-        public InvalidAssemblyException(string message) : base(message) { }
-        public InvalidAssemblyException(string message, Exception inner) : base(message, inner) { }
-        public InvalidAssemblyException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public InvalidAssemblyException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public InvalidAssemblyException([Localizable(true)] string message) : base(message) { }
+        public InvalidAssemblyException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public InvalidAssemblyException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidAssemblyException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -254,10 +254,10 @@ namespace AssEmbly
     public class InvalidFunctionException : RuntimeException
     {
         public InvalidFunctionException() { }
-        public InvalidFunctionException(string message) : base(message) { }
-        public InvalidFunctionException(string message, Exception inner) : base(message, inner) { }
-        public InvalidFunctionException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public InvalidFunctionException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public InvalidFunctionException([Localizable(true)] string message) : base(message) { }
+        public InvalidFunctionException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public InvalidFunctionException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidFunctionException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -267,10 +267,10 @@ namespace AssEmbly
     public class ExternalOperationException : RuntimeException
     {
         public ExternalOperationException() { }
-        public ExternalOperationException(string message) : base(message) { }
-        public ExternalOperationException(string message, Exception inner) : base(message, inner) { }
-        public ExternalOperationException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public ExternalOperationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public ExternalOperationException([Localizable(true)] string message) : base(message) { }
+        public ExternalOperationException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public ExternalOperationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public ExternalOperationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 #endif
 
@@ -281,10 +281,10 @@ namespace AssEmbly
     public class MemoryAllocationException : RuntimeException
     {
         public MemoryAllocationException() { }
-        public MemoryAllocationException(string message) : base(message) { }
-        public MemoryAllocationException(string message, Exception inner) : base(message, inner) { }
-        public MemoryAllocationException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public MemoryAllocationException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public MemoryAllocationException([Localizable(true)] string message) : base(message) { }
+        public MemoryAllocationException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public MemoryAllocationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public MemoryAllocationException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -293,10 +293,10 @@ namespace AssEmbly
     public class StackSizeException : RuntimeException
     {
         public StackSizeException() { }
-        public StackSizeException(string message) : base(message) { }
-        public StackSizeException(string message, Exception inner) : base(message, inner) { }
-        public StackSizeException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public StackSizeException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public StackSizeException([Localizable(true)] string message) : base(message) { }
+        public StackSizeException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public StackSizeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public StackSizeException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 
     /// <summary>
@@ -305,10 +305,10 @@ namespace AssEmbly
     public class InvalidMemoryBlockException : RuntimeException
     {
         public InvalidMemoryBlockException() { }
-        public InvalidMemoryBlockException(string message) : base(message) { }
-        public InvalidMemoryBlockException(string message, Exception inner) : base(message, inner) { }
-        public InvalidMemoryBlockException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public InvalidMemoryBlockException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public InvalidMemoryBlockException([Localizable(true)] string message) : base(message) { }
+        public InvalidMemoryBlockException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public InvalidMemoryBlockException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public InvalidMemoryBlockException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 #endif
 #endif
@@ -320,9 +320,9 @@ namespace AssEmbly
     public class AAPFormatException : AssEmblyException
     {
         public AAPFormatException() { }
-        public AAPFormatException(string message) : base(message) { }
-        public AAPFormatException(string message, Exception inner) : base(message, inner) { }
-        public AAPFormatException(string message, string consoleMessage) : base(message, consoleMessage) { }
-        public AAPFormatException(string message, string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
+        public AAPFormatException([Localizable(true)] string message) : base(message) { }
+        public AAPFormatException([Localizable(true)] string message, Exception inner) : base(message, inner) { }
+        public AAPFormatException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
+        public AAPFormatException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
 }

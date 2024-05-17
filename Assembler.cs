@@ -103,8 +103,8 @@ namespace AssEmbly
         private readonly List<byte> program = new();
         // Map of label names to final memory addresses
         private readonly Dictionary<string, ulong> labels = new();
-        // Map of label names that link to another label name, along with the file and line the link was made on
-        private readonly Dictionary<string, (string Target, string FilePath, int Line)> labelLinks = new();
+        // Map of label names that link to another label name, along with any displacement and the file and line the link was made on
+        private readonly Dictionary<string, (string Target, long Displacement, string FilePath, int Line)> labelLinks = new();
         // List of references to labels by name along with the address to insert the relevant address in to.
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
         private readonly List<(string LabelName, ulong Address, AssemblyPosition Position)> labelReferences = new();
@@ -279,6 +279,14 @@ namespace AssEmbly
                         0
 #endif
                 },
+                {
+                    "DISPLACEMENT_AVAIL", () =>
+#if DISPLACEMENT
+                        1
+#else
+                        0
+#endif
+                },
             };
 
             InitializeStateDirectives(out stateDirectives, out obsoleteStateDirectives);
@@ -353,7 +361,7 @@ namespace AssEmbly
                 throw new SyntaxError(Strings_Assembler.Error_Variable_Empty_Name);
             }
 
-            Match invalidMatch = Regex.Match(name, "[^A-Za-z0-9_]");
+            Match invalidMatch = ValidAddressCharsRegex().Match(name);
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(
@@ -409,7 +417,8 @@ namespace AssEmbly
         /// <remarks>
         /// If <paramref name="finalize"/> is <see langword="true"/>, label references will be resolved and final warning analyzers will be run.
         /// The assembler will no longer be able to assemble additional lines.
-        /// If <see langword="false"/>, uses of labels will be filled with 00 bytes, and warnings that require final warning analyzers will be missing.
+        /// If <see langword="false"/>, uses of labels will be filled with just their displacement,
+        /// and warnings that require final warning analyzers will be missing.
         /// </remarks>
         public AssemblyResult GetAssemblyResult(bool finalize)
         {
@@ -528,6 +537,14 @@ namespace AssEmbly
                         {
                             throw new SyntaxError(string.Format(Strings_Assembler.Error_Invalid_Literal_Label, rawLine));
                         }
+#if DISPLACEMENT
+                        int displacementIndex = mnemonic.IndexOf('[');
+                        if (displacementIndex != -1)
+                        {
+                            throw new SyntaxError(string.Format(
+                                Strings_Assembler.Error_Label_Definition_Displaced, mnemonic, new string(' ', displacementIndex)));
+                        }
+#endif
                         string labelName = mnemonic[1..];
                         if (labels.ContainsKey(labelName))
                         {
@@ -661,24 +678,62 @@ namespace AssEmbly
                 switch (operandTypes[i])
                 {
                     case OperandType.Register:
+                        // Convert register name to associated byte value
                         operandBytes.Add((byte)Enum.Parse<Register>(operands[i], true));
                         break;
                     case OperandType.Literal:
-                        if (operands[i].StartsWith(":&", StringComparison.OrdinalIgnoreCase))
+                        if (!operands[i].StartsWith(":&", StringComparison.OrdinalIgnoreCase))
                         {
+                            operandBytes.AddRange(ParseLiteral(operands[i], false));
+                        }
+                        else
+                        {
+#if DISPLACEMENT
+                            AddressReference addressReference = ParseAddressReference(operands[i]);
+                            // We know from DetermineOperandType that ReferenceType will be LabelLiteral
+                            referencedLabels.Add((addressReference.LabelName, (uint)operandBytes.Count));
+                            // Label location will be resolved later, just write the displacement for now
+                            byte[] displacementBytes = new byte[8];
+                            BinaryPrimitives.WriteInt64LittleEndian(displacementBytes,
+                                addressReference.Displaced ? addressReference.DisplacementConstant : 0);
+                            operandBytes.AddRange(displacementBytes);
+#else
                             referencedLabels.Add((operands[i][2..], (uint)operandBytes.Count));
                             for (int j = 0; j < 8; j++)
                             {
                                 // Label location will be resolved later, pad with 0s for now
                                 operandBytes.Add(0);
                             }
-                        }
-                        else
-                        {
-                            operandBytes.AddRange(ParseLiteral(operands[i], false));
+#endif
                         }
                         break;
                     case OperandType.Address:
+#if DISPLACEMENT
+                    {
+                        AddressReference addressReference = ParseAddressReference(operands[i]);
+                        if (addressReference.ReferenceType == AddressReferenceType.LiteralAddress)
+                        {
+                            byte[] addressBytes = new byte[8];
+                            ulong address = addressReference.Address;
+                            if (addressReference.Displaced)
+                            {
+                                // Displacement of addresses is done at assemble-time
+                                address += (ulong)addressReference.DisplacementConstant;
+                            }
+                            BinaryPrimitives.WriteUInt64LittleEndian(addressBytes, address);
+                            operandBytes.AddRange(addressBytes);
+                        }
+                        else  // AddressReferenceType.LabelAddress
+                        {
+                            referencedLabels.Add((addressReference.LabelName, (uint)operandBytes.Count));
+                            // Label location will be resolved later, just write the displacement for now
+                            byte[] displacementBytes = new byte[8];
+                            BinaryPrimitives.WriteInt64LittleEndian(displacementBytes,
+                                addressReference.Displaced ? addressReference.DisplacementConstant : 0);
+                            operandBytes.AddRange(displacementBytes);
+                        }
+                    }
+#else
                         if (operands[i][1] is >= '0' and <= '9')
                         {
                             // Literal address
@@ -694,10 +749,20 @@ namespace AssEmbly
                                 operandBytes.Add(0);
                             }
                         }
+#endif
                         break;
                     case OperandType.Pointer:
-                        // Convert register name to associated byte value
+#if DISPLACEMENT
+                        Pointer pointer = ParsePointer(operands[i]);
+                        operandBytes.AddRange(pointer.GetBytes());
+                        // Pointer read sizes other than 8-bytes ('Q') also set the displacement feature flag.
+                        if (pointer.Mode != DisplacementMode.NoDisplacement || pointer.ReadSize != PointerReadSize.QuadWord)
+                        {
+                            usedExtensions |= AAPFeatures.PointerDisplacement;
+                        }
+#else
                         operandBytes.Add((byte)Enum.Parse<Register>(operands[i][1..], true));
+#endif
                         break;
                 }
             }
@@ -798,6 +863,9 @@ namespace AssEmbly
             StringBuilder sb = new();
             int trailingWhitespace = -1;
             int stringEnd = -1;
+#if DISPLACEMENT
+            int displacementEnd = -1;
+#endif
             // Macro definitions have different syntax rules
             // - quotes don't create strings and operands can contain whitespace
             bool isMacro = false;
@@ -847,33 +915,63 @@ namespace AssEmbly
                         sb = new StringBuilder();
                         trailingWhitespace = -1;
                         stringEnd = -1;
+#if DISPLACEMENT
+                        displacementEnd = -1;
+#endif
                         continue;
                     }
                 }
-                if (trailingWhitespace != -1 && !isMacro)
+                if (!isMacro)
                 {
-                    throw new SyntaxError(
-                        string.Format(Strings_Assembler.Error_Operand_Whitespace, line, new string(' ', trailingWhitespace)));
-                }
-                if (stringEnd != -1 && !isMacro)
-                {
-                    throw new SyntaxError(
-                        string.Format(Strings_Assembler.Error_Quoted_Literal_Followed, line, new string(' ', i)));
-                }
-                if (c is '"' or '\'' && !isMacro)
-                {
-                    if (sb.Length != 0)
+                    if (trailingWhitespace != -1)
                     {
                         throw new SyntaxError(
-                            string.Format(Strings_Assembler.Error_Quoted_Literal_Following, line, new string(' ', i)));
+                            string.Format(Strings_Assembler.Error_Operand_Whitespace, line, new string(' ', trailingWhitespace)));
                     }
-                    if (line.Length < 2)
+                    if (stringEnd != -1)
                     {
-                        throw new SyntaxError(Strings_Assembler.Error_Quoted_Literal_Line_Length_One);
+                        throw new SyntaxError(
+                            string.Format(Strings_Assembler.Error_Quoted_Literal_Followed, line, new string(' ', i)));
                     }
-                    _ = sb.Append(PreParseStringLiteral(line, ref i, enableEscapeSequences));
-                    stringEnd = i;
-                    continue;
+#if DISPLACEMENT
+                    if (displacementEnd != -1)
+                    {
+                        throw new SyntaxError(
+                            string.Format(Strings_Assembler.Error_Displacement_Followed, line, new string(' ', i)));
+                    }
+#endif
+                    if (c is '"' or '\'')
+                    {
+                        if (sb.Length != 0)
+                        {
+                            throw new SyntaxError(
+                                string.Format(Strings_Assembler.Error_Quoted_Literal_Following, line, new string(' ', i)));
+                        }
+                        if (line.Length < 2)
+                        {
+                            throw new SyntaxError(Strings_Assembler.Error_Quoted_Literal_Line_Length_One);
+                        }
+                        _ = sb.Append(PreParseStringLiteral(line, ref i, enableEscapeSequences));
+                        stringEnd = i;
+                        continue;
+                    }
+#if DISPLACEMENT
+                    if (c == '[')
+                    {
+                        if (sb.Length == 0)
+                        {
+                            throw new SyntaxError(
+                                string.Format(Strings_Assembler.Error_Displacement_No_Preceding, line, new string(' ', i)));
+                        }
+                        if (line.Length < 2)
+                        {
+                            throw new SyntaxError(Strings_Assembler.Error_Displacement_Line_Length_One);
+                        }
+                        _ = sb.Append(PreParseDisplacement(line, ref i));
+                        displacementEnd = i;
+                        continue;
+                    }
+#endif
                 }
                 _ = sb.Append(c);
             }
@@ -910,11 +1008,11 @@ namespace AssEmbly
         {
             if (startIndex < 0 || startIndex >= line.Length)
             {
-                throw new IndexOutOfRangeException(Strings_Assembler.Error_String_Bad_StartIndex);
+                throw new IndexOutOfRangeException(Strings_Assembler.Error_Bad_StartIndex);
             }
             if (line.Length < 2)
             {
-                throw new ArgumentException(Strings_Assembler.Error_String_Too_Short);
+                throw new ArgumentException(Strings_Assembler.Error_Too_Short_LT2);
             }
             bool singleCharacterLiteral = false;
             bool containsHighSurrogate = false;  // Only used for character literals
@@ -1070,12 +1168,76 @@ namespace AssEmbly
             return sb.ToString();
         }
 
+#if DISPLACEMENT
         /// <summary>
-        /// Determine the type for a single operand.
+        /// Determine the ending position of a displacement component originating from either a pointer or address operand.
+        /// Removes any whitespace inside the displacement and ensures that the displacement is closed with a square bracket.
+        /// </summary>
+        /// <param name="line">The entire source line with the displacement contained.</param>
+        /// <param name="startIndex">
+        /// The index in the line to the opening square bracket.
+        /// It will be incremented automatically by this method to the index of the closing square bracket.
+        /// </param>
+        /// <returns>The processed displacement component, including opening and closing square brackets.</returns>
+        /// <remarks>
+        /// This method does not validate the contents of the displacement, only the surrounding square brackets.
+        /// Validation of the content is done by either <see cref="ParsePointer"/> or <see cref="ParseAddressReference"/>.
+        /// </remarks>
+        /// <exception cref="IndexOutOfRangeException">The given start index is outside the range of the given line.</exception>
+        /// <exception cref="ArgumentException">The given line is invalid.</exception>
+        /// <exception cref="SyntaxError">The displacement in the line is invalid.</exception>
+        public static string PreParseDisplacement(string line, ref int startIndex)
+        {
+            if (startIndex < 0 || startIndex >= line.Length)
+            {
+                throw new IndexOutOfRangeException(Strings_Assembler.Error_Bad_StartIndex);
+            }
+            if (line.Length < 2)
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Too_Short_LT2);
+            }
+            if (line[startIndex] != '[')
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Displacement_Bad_First_Char);
+            }
+
+            StringBuilder sb = new("[");
+            int i = startIndex;
+            while (true)
+            {
+                if (++i >= line.Length)
+                {
+                    throw new SyntaxError(
+                        string.Format(Strings_Assembler.Error_Displacement_EndOfLine, line, new string(' ', i - 1)));
+                }
+                char c = line[i];
+                if (char.IsWhiteSpace(c))
+                {
+                    continue;
+                }
+                if (c == ']')
+                {
+                    break;
+                }
+                _ = sb.Append(c);
+            }
+            startIndex = i;
+
+            _ = sb.Append(']');
+            return sb.ToString();
+        }
+#endif
+
+        /// <summary>
+        /// Determine the type for a single operand as returned by <see cref="ParseLine"/>.
         /// </summary>
         /// <param name="operand">A single operand with no comments or surrounding whitespace.</param>
         /// <param name="allowAddressLiteral">Whether the use of the literal address syntax (e.g :1024) is valid in this context.</param>
-        /// <remarks>Operands will also be validated here.</remarks>
+        /// <remarks>
+        /// Operands (except for displacements and strings) will also be validated here.
+        /// Displacements and strings are syntactically validated as a part of <see cref="ParseLine"/>,
+        /// and displacements are then further validated by <see cref="ParsePointer"/> or <see cref="ParseAddressReference"/>.
+        /// </remarks>
         /// <exception cref="SyntaxError">Thrown when an operand is badly formed.</exception>
         public static OperandType DetermineOperandType(string operand, bool allowAddressLiteral = true)
         {
@@ -1087,33 +1249,45 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings_Assembler.Error_Label_Empty_Name);
                     }
-                    int offset;
+
+                    int labelNameStart;
                     if (operand[1] == '&')
                     {
-                        offset = 2;
+                        labelNameStart = 2;
                         allowAddressLiteral = false;
                     }
                     else
                     {
-                        offset = 1;
+                        labelNameStart = 1;
                     }
-                    if (operand.Length <= offset)
+                    if (operand.Length <= labelNameStart)
                     {
                         throw new SyntaxError(Strings_Assembler.Error_Label_Empty_Name);
                     }
+
+#if DISPLACEMENT
+                    int labelNameEnd = operand.IndexOf('[');
+                    if (labelNameEnd == -1)
+                    {
+                        labelNameEnd = operand.Length;
+                    }
+#else
+                    int labelNameEnd = operand.Length;
+#endif
                     // Validating address literals with the same rules as labels has the intended
                     // side effect of disallowing negative and floating point literals
                     Match invalidMatch = allowAddressLiteral
-                        ? Regex.Match(operand[offset..], "[^A-Za-z0-9_]")
-                        : Regex.Match(operand[offset..], "^[0-9]|[^A-Za-z0-9_]");
-                    if (!invalidMatch.Success && operand[offset] is >= '0' and <= '9')
+                        ? ValidAddressCharsRegex().Match(operand[labelNameStart..labelNameEnd])
+                        : ValidLabelRegex().Match(operand[labelNameStart..labelNameEnd]);
+                    if (!invalidMatch.Success && operand[labelNameStart] is >= '0' and <= '9')
                     {
                         // Literal address reference - validate as a numeric literal
-                        ValidateNumericLiteral(operand[offset..]);
+                        ValidateNumericLiteral(operand[labelNameStart..labelNameEnd]);
                     }
                     // Operand is a label reference - will assemble down to address
                     return invalidMatch.Success
-                        ? throw new SyntaxError(string.Format(Strings_Assembler.Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + offset)))
+                        ? throw new SyntaxError(string.Format(
+                            Strings_Assembler.Error_Label_Invalid_Character, operand, new string(' ', invalidMatch.Index + labelNameStart)))
                         : operand[1] == '&' ? OperandType.Literal : OperandType.Address;
                 }
                 case (>= '0' and <= '9') or '-' or '.':
@@ -1125,9 +1299,38 @@ namespace AssEmbly
                     return OperandType.Literal;
                 default:
                 {
-                    int offset = operand[0] == '*' ? 1 : 0;
-                    return Enum.TryParse<Register>(operand[offset..], true, out _)
-                        ? operand[0] == '*' ? OperandType.Pointer : OperandType.Register
+                    int registerNameStart;
+                    if (operand[0] == '*')
+                    {
+                        registerNameStart = 1;
+                    }
+#if DISPLACEMENT
+                    else if (operand.Length >= 2 && operand[1] == '*')
+                    {
+                        if (operand[0] is not 'Q' and not 'D' and not 'W' and not 'B')
+                        {
+                            throw new SyntaxError(string.Format(
+                                Strings_Assembler.Error_Operand_Invalid_Pointer_Size, operand[0], operand));
+                        }
+                        registerNameStart = 2;
+                    }
+#endif
+                    else
+                    {
+                        registerNameStart = 0;
+                    }
+
+#if DISPLACEMENT
+                    int registerNameEnd = operand.IndexOf('[');
+                    if (registerNameEnd == -1)
+                    {
+                        registerNameEnd = operand.Length;
+                    }
+#else
+                    int registerNameEnd = operand.Length;
+#endif
+                    return Enum.TryParse<Register>(operand[registerNameStart..registerNameEnd], true, out _)
+                        ? registerNameStart != 0 ? OperandType.Pointer : OperandType.Register
                         : throw new SyntaxError(
                             string.Format(Strings_Assembler.Error_Operand_Invalid, operand));
                 }
@@ -1194,10 +1397,15 @@ namespace AssEmbly
         /// <summary>
         /// Parse an operand of literal type to its representation as bytes.
         /// </summary>
-        /// <remarks>Strings and integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/></remarks>
+        /// <remarks>
+        /// Integer size constraints will be validated here, all other validation should be done as a part of <see cref="DetermineOperandType"/>.
+        /// Strings are also converted to UTF-8 bytes by this method,
+        /// though only strings that have already been pre-parsed and validated by <see cref="PreParseStringLiteral"/> should be passed.
+        /// </remarks>
         /// <returns>The bytes representing the literal to be added to a program.</returns>
-        /// <exception cref="SyntaxError">Thrown when there are invalid characters in the literal or the literal is in an invalid format.</exception>
+        /// <exception cref="SyntaxError">Thrown when a string literal is given in an invalid context or an invalid format.</exception>
         /// <exception cref="OperandException">Thrown when the literal is too large for a single <see cref="ulong"/>.</exception>
+        /// <exception cref="FormatException">Thrown when there are invalid characters in a numeric literal or the numeric literal is in an invalid format.</exception>
         public static byte[] ParseLiteral(string operand, bool allowString)
         {
             return ParseLiteral(operand, allowString, out _);
@@ -1378,9 +1586,275 @@ namespace AssEmbly
             return formattedContent.ToString();
         }
 
+#if DISPLACEMENT
+        /// <summary>
+        /// Parse a pointer operand, including the pointer read size and displacement.
+        /// </summary>
+        /// <param name="pointer">
+        /// The pointer operand to parse, including the '*' character, and any displacement and size specifier.
+        /// </param>
+        /// <remarks>
+        /// The operand should first be validated with <see cref="DetermineOperandType"/> before being given to this method.
+        /// Any present displacements should be pre-parsed and validated by <see cref="PreParseDisplacement"/>
+        /// before being passed to this method. The contents of the displacement will be validated here.
+        /// </remarks>
+        /// <exception cref="SyntaxError">Thrown if the pointer is invalid.</exception>
+        public static Pointer ParsePointer(string pointer)
+        {
+            if (pointer.Length < 2)
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Too_Short_LT2);
+            }
+            int registerStartIndex;
+            if (pointer[0] == '*')
+            {
+                registerStartIndex = 1;
+            }
+            else if (pointer[1] == '*')
+            {
+                registerStartIndex = 2;
+            }
+            else
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Pointer_Bad_First_Char);
+            }
+
+            PointerReadSize readSize = pointer[0] switch
+            {
+                'Q' or '*' => PointerReadSize.QuadWord,
+                'D' => PointerReadSize.DoubleWord,
+                'W' => PointerReadSize.Word,
+                'B' => PointerReadSize.Byte,
+                _ => throw new SyntaxError(string.Format(
+                    Strings_Assembler.Error_Operand_Invalid_Pointer_Size, pointer[0], pointer))
+            };
+
+            // Parse any displacement on the pointer
+            int displacementIndex = pointer.IndexOf('[');
+            long displacementConstant = 0;
+            Register displacementRegister = default;
+            bool subtractRegister = false;
+            DisplacementMultiplier registerMultiplier = DisplacementMultiplier.x1;
+            DisplacementMode displacementMode = DisplacementMode.NoDisplacement;
+            if (displacementIndex == -1)
+            {
+                // There is no displacement, so treat the entire operand as part of the register name
+                displacementIndex = pointer.Length;
+            }
+            else
+            {
+                // Closing square bracket will always be the last character
+                string displacementContents = pointer[(displacementIndex + 1)..^1];
+
+                if (displacementContents[0] == '-')
+                {
+                    if (displacementContents.Length == 1)
+                    {
+                        throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
+                    }
+                    if (displacementContents[1] is (< '0' or > '9') and not '.')
+                    {
+                        // This is a register, not a numeric literal,
+                        // so the negative sign must be removed before parsing
+                        displacementContents = displacementContents[1..];
+                        subtractRegister = true;
+                    }
+                }
+
+                if (displacementContents[0] is (>= '0' and <= '9') or '.' or '-')
+                {
+                    // Displacement starts with a numeric literal, therefore that must be the only part to the displacement
+                    displacementMode = DisplacementMode.Constant;
+                    try
+                    {
+                        ValidateNumericLiteral(displacementContents);
+                    }
+                    catch (SyntaxError exc)
+                    {
+                        throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Pointer_Constant_Bad_Chars);
+                    }
+                    _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                    displacementConstant = (long)parsedNumber;
+                }
+                else
+                {
+                    // Displacement starts with a register
+                    int endIndex = DisplacementOperatorRegex().Match(displacementContents).Index;
+                    string registerName = displacementContents[..endIndex];
+                    if (!Enum.TryParse(registerName, true, out displacementRegister))
+                    {
+                        throw new SyntaxError(string.Format(Strings_Assembler.Error_Pointer_Displacement_Bad_Register, registerName));
+                    }
+
+                    if (endIndex < displacementContents.Length)
+                    {
+                        if (endIndex == displacementContents.Length - 1)
+                        {
+                            throw new SyntaxError(string.Format(
+                                Strings_Assembler.Error_Displacement_Pointer_Trailing_Operator,
+                                displacementContents, new string(' ', displacementContents.Length - 1)));
+                        }
+
+                        displacementContents = displacementContents[endIndex..];
+
+                        if (displacementContents[0] == '*')
+                        {
+                            // Register is followed by a multiplier
+                            endIndex = DisplacementConstantOperatorRegex().Match(displacementContents, 1).Index;
+                            string multiplier = displacementContents[1..endIndex];
+                            try
+                            {
+                                ValidateNumericLiteral(multiplier);
+                            }
+                            catch (SyntaxError exc)
+                            {
+                                throw new SyntaxError(
+                                    exc.Message + Strings_Assembler.Error_Displacement_Pointer_Multiplier_Bad_Chars);
+                            }
+                            _ = ParseLiteral(multiplier, false, out ulong parsedNumber);
+                            registerMultiplier = parsedNumber switch
+                            {
+                                1 => DisplacementMultiplier.x1,
+                                2 => DisplacementMultiplier.x2,
+                                4 => DisplacementMultiplier.x4,
+                                8 => DisplacementMultiplier.x8,
+                                16 => DisplacementMultiplier.x16,
+                                32 => DisplacementMultiplier.x32,
+                                64 => DisplacementMultiplier.x64,
+                                128 => DisplacementMultiplier.x128,
+                                _ => throw new SyntaxError(Strings_Assembler.Error_Displacement_Pointer_Bad_Multiplier)
+                            };
+                            displacementContents = displacementContents[endIndex..];
+                        }
+
+                        if (displacementContents.Length == 1)
+                        {
+                            throw new SyntaxError(string.Format(
+                                Strings_Assembler.Error_Displacement_Pointer_Trailing_Operator,
+                                displacementContents, new string(' ', displacementContents.Length - 1)));
+                        }
+
+                        if (displacementContents.Length > 0)
+                        {
+                            // There is an additional constant displacement as well as a register displacement
+                            displacementMode = DisplacementMode.ConstantAndRegister;
+                            if (displacementContents[0] == '+')
+                            {
+                                // Numeric literals are positive by default and cannot start with a '+' sign, so remove it
+                                displacementContents = displacementContents[1..];
+                            }
+                            try
+                            {
+                                ValidateNumericLiteral(displacementContents);
+                            }
+                            catch (SyntaxError exc)
+                            {
+                                throw new SyntaxError(
+                                    exc.Message + Strings_Assembler.Error_Displacement_Pointer_Register_Constant_Bad_Chars);
+                            }
+                            _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                            displacementConstant = (long)parsedNumber;
+                        }
+                        else
+                        {
+                            displacementMode = DisplacementMode.Register;
+                        }
+                    }
+                    else
+                    {
+                        displacementMode = DisplacementMode.Register;
+                    }
+                }
+            }
+
+            Register pointerRegister = Enum.Parse<Register>(pointer[registerStartIndex..displacementIndex], true);
+
+            return displacementMode switch
+            {
+                DisplacementMode.Constant => new Pointer(pointerRegister, readSize,
+                    displacementConstant),
+                DisplacementMode.Register => new Pointer(pointerRegister, readSize,
+                    displacementRegister, subtractRegister, registerMultiplier),
+                DisplacementMode.ConstantAndRegister => new Pointer(pointerRegister, readSize,
+                    displacementRegister, subtractRegister, registerMultiplier, displacementConstant),
+                _ => new Pointer(pointerRegister, readSize)
+            };
+        }
+
+        /// <summary>
+        /// Parse a label reference (:XYZ), label literal (:&XYZ), or literal address (:123) operand.
+        /// </summary>
+        /// <param name="addressReference">
+        /// The address operand to parse, including the ':' prefix and any displacement.
+        /// </param>
+        /// <remarks>
+        /// The operand should first be validated with <see cref="DetermineOperandType"/> before being given to this method.
+        /// Any present displacements should be pre-parsed and validated by <see cref="PreParseDisplacement"/>
+        /// before being passed to this method. The contents of the displacement will be validated here.
+        /// </remarks>
+        /// <exception cref="SyntaxError">Thrown if the address reference is invalid.</exception>
+        public static AddressReference ParseAddressReference(string addressReference)
+        {
+            if (addressReference.Length < 2)
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Too_Short_LT2);
+            }
+            if (addressReference[0] != ':')
+            {
+                throw new ArgumentException(Strings_Assembler.Error_Address_Bad_First_Char);
+            }
+
+            // Parse any displacement on the address reference
+            int displacementIndex = addressReference.IndexOf('[');
+            long displacementConstant = 0;
+            bool displaced = false;
+            if (displacementIndex == -1)
+            {
+                // There is no displacement, so treat the entire operand as part of the address/label name
+                displacementIndex = addressReference.Length;
+            }
+            else
+            {
+                displaced = true;
+                // Closing square bracket will always be the last character
+                string displacementContents = addressReference[(displacementIndex + 1)..^1];
+                try
+                {
+                    ValidateNumericLiteral(displacementContents);
+                }
+                catch (SyntaxError exc)
+                {
+                    throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Address_Bad_Chars);
+                }
+                _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                displacementConstant = (long)parsedNumber;
+            }
+
+            switch (addressReference[1])
+            {
+                case '&':
+                    // LabelLiteral
+                    return displaced
+                        ? new AddressReference(addressReference[2..displacementIndex], true, displacementConstant)
+                        : new AddressReference(addressReference[2..displacementIndex], true);
+                case >= '0' and <= '9':
+                    // LiteralAddress
+                    _ = ParseLiteral(addressReference[1..displacementIndex], false, out ulong address);
+                    return displaced
+                        ? new AddressReference(address, displacementConstant)
+                        : new AddressReference(address);
+                default:
+                    // LabelAddress
+                    return displaced
+                        ? new AddressReference(addressReference[1..displacementIndex], false, displacementConstant)
+                        : new AddressReference(addressReference[1..displacementIndex], false);
+            }
+        }
+#endif
+
         private void ResolveLabelReferences()
         {
-            foreach ((string labelLink, (string labelTarget, string filePath, int line)) in labelLinks)
+            foreach ((string labelLink, (string labelTarget, long displacement, string filePath, int line)) in labelLinks)
             {
                 if (!labels.TryGetValue(labelTarget, out ulong targetOffset))
                 {
@@ -1389,7 +1863,7 @@ namespace AssEmbly
                     exc.ConsoleMessage = string.Format(Strings_Assembler.Error_On_Line, line, filePath, exc.Message);
                     throw exc;
                 }
-                labels[labelLink] = targetOffset;
+                labels[labelLink] = targetOffset + (ulong)displacement;
             }
 
             foreach ((string labelName, ulong labelAddress) in labels)
@@ -1420,6 +1894,11 @@ namespace AssEmbly
                     HandleAssemblerException(exc);
                     throw exc;
                 }
+#if DISPLACEMENT
+                // Any displacement has already been written to the program,
+                // read it back and add it to the now resolved address
+                targetOffset += BinaryPrimitives.ReadUInt64LittleEndian(programSpan[(int)insertOffset..]);
+#endif
                 // Write the now known address of the label to where it is required within the program
                 BinaryPrimitives.WriteUInt64LittleEndian(programSpan[(int)insertOffset..], targetOffset);
             }
@@ -2046,10 +2525,10 @@ namespace AssEmbly
         private static void ValidateNumericLiteral(string operand)
         {
             Match invalidMatch = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-                ? Regex.Match(operand, "[^0-9A-Fa-f_](?<!^0[xX])")  // Hex
+                ? InvalidHexadecimalChars().Match(operand)  // Hex
                 : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
-                    ? Regex.Match(operand, "[^0-1_](?<!^0[bB])")  // Bin
-                    : Regex.Match(operand, @"[^0-9_\.](?<!^-)");  // Dec
+                    ? InvalidBinaryChars().Match(operand)  // Bin
+                    : InvalidDecimalChars().Match(operand);  // Dec
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
@@ -2079,15 +2558,39 @@ namespace AssEmbly
 
         private static void ValidateMacroName(string name)
         {
-            int index;
-            if ((index = name.IndexOf('(')) != -1)
+            int index = name.IndexOf('(');
+            if (index != -1)
             {
                 throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Name_Brackets, name, new string(' ', index)));
             }
-            if ((index = name.IndexOf(')')) != -1)
+            index = name.IndexOf(')');
+            if (index != -1)
             {
                 throw new SyntaxError(string.Format(Strings_Assembler.Error_Macro_Name_Brackets, name, new string(' ', index)));
             }
         }
+
+        [GeneratedRegex("[^A-Za-z0-9_]")]
+        private static partial Regex ValidAddressCharsRegex();
+
+        [GeneratedRegex("^[0-9]|[^A-Za-z0-9_]")]
+        private static partial Regex ValidLabelRegex();
+
+        [GeneratedRegex("[^0-9A-Fa-f_](?<!^0[xX])")]
+        private static partial Regex InvalidHexadecimalChars();
+
+        [GeneratedRegex("[^0-1_](?<!^0[bB])")]
+        private static partial Regex InvalidBinaryChars();
+
+        [GeneratedRegex(@"[^0-9_\.](?<!^-)")]
+        private static partial Regex InvalidDecimalChars();
+
+#if DISPLACEMENT
+        [GeneratedRegex("[*+-]|$")]
+        private static partial Regex DisplacementOperatorRegex();
+
+        [GeneratedRegex("[+-]|$")]
+        private static partial Regex DisplacementConstantOperatorRegex();
+#endif
     }
 }

@@ -862,6 +862,14 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings_Debugger.REPL_Error_Label_Ampersand);
                     }
+#if DISPLACEMENT
+                    int displacementIndex = mnemonic.IndexOf('[');
+                    if (displacementIndex != -1)
+                    {
+                        throw new SyntaxError(string.Format(
+                            Strings_Assembler.Error_Label_Definition_Displaced, mnemonic, new string(' ', displacementIndex)));
+                    }
+#endif
                     string labelName = mnemonic[1..];
                     replLabels[labelName] = DebuggingProcessor.Registers[(int)Register.rpo];
                     return false;

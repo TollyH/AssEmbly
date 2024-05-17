@@ -185,7 +185,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     {0} -&gt; {1} (from {2} at line {3}).
+        ///   Looks up a localized string similar to     {0} -&gt; {1}[{4}] (from {2} at line {3}).
         /// </summary>
         internal static string Debug_Directive_Label_Link_Line {
             get {
@@ -308,6 +308,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Given address reference does not start with a colon character..
+        /// </summary>
+        internal static string Error_Address_Bad_First_Char {
+            get {
+                return ResourceManager.GetString("Error_Address_Bad_First_Char", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The %ANALYZER directive requires 3 operands. {0} were given..
         /// </summary>
         internal static string Error_ANALYZER_Operand_Count {
@@ -358,6 +367,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Error_ASM_ONCE_Operand_Count {
             get {
                 return ResourceManager.GetString("Error_ASM_ONCE_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start index is outside the range of the given line..
+        /// </summary>
+        internal static string Error_Bad_StartIndex {
+            get {
+                return ResourceManager.GetString("Error_Bad_StartIndex", resourceCulture);
             }
         }
         
@@ -552,6 +570,117 @@ namespace AssEmbly.Resources.Localization {
         internal static string Error_DELMACRO_Operand_Count {
             get {
                 return ResourceManager.GetString("Error_DELMACRO_Operand_Count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Note that the displacement component of an address or label must be a single numeric literal..
+        /// </summary>
+        internal static string Error_Displacement_Address_Bad_Chars {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Address_Bad_Chars", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Given displacement start index does not point to an opening square bracket..
+        /// </summary>
+        internal static string Error_Displacement_Bad_First_Char {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Bad_First_Char", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to End of line found while processing displacement component. Did you forget a closing square bracket?
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Displacement_EndOfLine {
+            get {
+                return ResourceManager.GetString("Error_Displacement_EndOfLine", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-whitespace characters found after displacement component. Did you forget a comma?
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Displacement_Followed {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Followed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An opening square bracket cannot be the only character on a line..
+        /// </summary>
+        internal static string Error_Displacement_Line_Length_One {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Line_Length_One", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displacement component is defined without a preceding pointer or address reference. Did you mean to include the square bracket?
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Displacement_No_Preceding {
+            get {
+                return ResourceManager.GetString("Error_Displacement_No_Preceding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The register multiplier of a pointer displacement must be a power of two no larger than 128, i.e. 1, 2, 4, 8, 16, etc..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Bad_Multiplier {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Bad_Multiplier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Note that if the displacement component of a pointer starts with a numeric literal, the literal must be the only part to the displacement. Displacement by a register must come first if desired..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Constant_Bad_Chars {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Constant_Bad_Chars", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Note that a register displacement can only be multiplied by a single numeric literal..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Multiplier_Bad_Chars {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Multiplier_Bad_Chars", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Note that displacement by a register can only be followed by a single numeric literal with the + or - operators in order to also displace by a constant, and only register displacements can be multiplied..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Register_Constant_Bad_Chars {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Register_Constant_Bad_Chars", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Displacement ends with a trailing operator:
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Trailing_Operator {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Trailing_Operator", resourceCulture);
             }
         }
         
@@ -767,6 +896,17 @@ namespace AssEmbly.Resources.Localization {
         internal static string Error_Label_Already_Defined {
             get {
                 return ResourceManager.GetString("Error_Label_Already_Defined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Label definitions cannot have a displacement component.
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Label_Definition_Displaced {
+            get {
+                return ResourceManager.GetString("Error_Label_Definition_Displaced", resourceCulture);
             }
         }
         
@@ -1150,6 +1290,17 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid pointer size specifier. Size specifiers must be one of &apos;Q&apos;, &apos;D&apos;, &apos;W&apos;, or &apos;B&apos;.
+        ///    {1}
+        ///    ^.
+        /// </summary>
+        internal static string Error_Operand_Invalid_Pointer_Size {
+            get {
+                return ResourceManager.GetString("Error_Operand_Invalid_Pointer_Size", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Operands cannot contain whitespace. Did you forget a comma?
         ///    {0}
         ///    {1}^.
@@ -1188,6 +1339,24 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to One of the first or second characters of a pointer (but not both) must be an asterisk..
+        /// </summary>
+        internal static string Error_Pointer_Bad_First_Char {
+            get {
+                return ResourceManager.GetString("Error_Pointer_Bad_First_Char", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a recognised register name. Displacements can only contain registers and numeric literals..
+        /// </summary>
+        internal static string Error_Pointer_Displacement_Bad_Register {
+            get {
+                return ResourceManager.GetString("Error_Pointer_Displacement_Bad_Register", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of line found while processing quoted literal. Did you forget a closing quote?
         ///    {0}
         ///    {1}^.
@@ -1210,7 +1379,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Quoted literal defined after non-whitespace characters. Did you forget a comma?:
+        ///   Looks up a localized string similar to Quoted literal defined after non-whitespace characters. Did you forget a comma?
         ///    {0}
         ///    {1}^.
         /// </summary>
@@ -1320,15 +1489,6 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to String start index is outside the range of the given line..
-        /// </summary>
-        internal static string Error_String_Bad_StartIndex {
-            get {
-                return ResourceManager.GetString("Error_String_Bad_StartIndex", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to String literal contains characters after closing quote mark..
         /// </summary>
         internal static string Error_String_Followed_Internal {
@@ -1347,11 +1507,11 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Given line is less than two characters long, which is invalid..
+        ///   Looks up a localized string similar to Given string is less than two characters long, which is invalid..
         /// </summary>
-        internal static string Error_String_Too_Short {
+        internal static string Error_Too_Short_LT2 {
             get {
-                return ResourceManager.GetString("Error_String_Too_Short", resourceCulture);
+                return ResourceManager.GetString("Error_Too_Short_LT2", resourceCulture);
             }
         }
         

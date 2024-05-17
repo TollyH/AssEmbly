@@ -82,8 +82,8 @@ namespace AssEmbly
                             continue;
                         }
                         string argText = arg[2..];
-                        int equalsIndex;
-                        if ((equalsIndex = argText.IndexOf('=')) != -1)
+                        int equalsIndex = argText.IndexOf('=');
+                        if (equalsIndex != -1)
                         {
                             string argKey = argText[..equalsIndex];
                             if (!keyValueOptions.TryAdd(argKey, argText[(equalsIndex + 1)..]) && PrintWarnings)

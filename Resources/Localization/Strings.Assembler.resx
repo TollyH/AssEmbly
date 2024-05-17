@@ -86,7 +86,7 @@ Current import stack (deepest file first):</value>
 {0} label link(s) currently defined:</value>
   </data>
   <data name="Debug_Directive_Label_Link_Line" xml:space="preserve">
-    <value>    {0} -&gt; {1} (from {2} at line {3})</value>
+    <value>    {0} -&gt; {1}[{4}] (from {2} at line {3})</value>
   </data>
   <data name="Debug_Directive_LabelRef_Header" xml:space="preserve">
     <value>
@@ -463,7 +463,7 @@ Currently expanding the following macro(s): {0}</value>
     {1}^</value>
   </data>
   <data name="Error_Quoted_Literal_Following" xml:space="preserve">
-    <value>Quoted literal defined after non-whitespace characters. Did you forget a comma?:
+    <value>Quoted literal defined after non-whitespace characters. Did you forget a comma?
     {0}
     {1}^</value>
   </data>
@@ -500,8 +500,8 @@ Currently expanding the following macro(s): {0}</value>
   <data name="Error_String_Bad_First_Char" xml:space="preserve">
     <value>Given string start index does not point to a quote mark.</value>
   </data>
-  <data name="Error_String_Bad_StartIndex" xml:space="preserve">
-    <value>String start index is outside the range of the given line.</value>
+  <data name="Error_Bad_StartIndex" xml:space="preserve">
+    <value>Start index is outside the range of the given line.</value>
   </data>
   <data name="Error_String_Followed_Internal" xml:space="preserve">
     <value>String literal contains characters after closing quote mark.</value>
@@ -509,8 +509,8 @@ Currently expanding the following macro(s): {0}</value>
   <data name="Error_String_Not_Allowed" xml:space="preserve">
     <value>A string literal is not a valid operand in this context.</value>
   </data>
-  <data name="Error_String_Too_Short" xml:space="preserve">
-    <value>Given line is less than two characters long, which is invalid.</value>
+  <data name="Error_Too_Short_LT2" xml:space="preserve">
+    <value>Given string is less than two characters long, which is invalid.</value>
   </data>
   <data name="Error_UNDEFINE_Operand_Count" xml:space="preserve">
     <value>The %UNDEFINE directive requires a single operand. {0} were given.</value>
@@ -559,5 +559,69 @@ Assembler variable names may not contain symbols other than underscores.</value>
   </data>
   <data name="Error_WHILE_Limit_Exceeded" xml:space="preserve">
     <value>%WHILE loop repeat limit of {0} exceeded.</value>
+  </data>
+  <data name="Error_Operand_Invalid_Pointer_Size" xml:space="preserve">
+    <value>'{0}' is not a valid pointer size specifier. Size specifiers must be one of 'Q', 'D', 'W', or 'B'.
+    {1}
+    ^</value>
+  </data>
+  <data name="Error_Label_Definition_Displaced" xml:space="preserve">
+    <value>Label definitions cannot have a displacement component.
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Displacement_Line_Length_One" xml:space="preserve">
+    <value>An opening square bracket cannot be the only character on a line.</value>
+  </data>
+  <data name="Error_Displacement_No_Preceding" xml:space="preserve">
+    <value>Displacement component is defined without a preceding pointer or address reference. Did you mean to include the square bracket?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Displacement_Followed" xml:space="preserve">
+    <value>Non-whitespace characters found after displacement component. Did you forget a comma?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Displacement_Bad_First_Char" xml:space="preserve">
+    <value>Given displacement start index does not point to an opening square bracket.</value>
+  </data>
+  <data name="Error_Displacement_EndOfLine" xml:space="preserve">
+    <value>End of line found while processing displacement component. Did you forget a closing square bracket?
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Address_Bad_First_Char" xml:space="preserve">
+    <value>Given address reference does not start with a colon character.</value>
+  </data>
+  <data name="Error_Displacement_Address_Bad_Chars" xml:space="preserve">
+    <value>
+Note that the displacement component of an address or label must be a single numeric literal.</value>
+  </data>
+  <data name="Error_Pointer_Bad_First_Char" xml:space="preserve">
+    <value>One of the first or second characters of a pointer (but not both) must be an asterisk.</value>
+  </data>
+  <data name="Error_Pointer_Displacement_Bad_Register" xml:space="preserve">
+    <value>'{0}' is not a recognised register name. Displacements can only contain registers and numeric literals.</value>
+  </data>
+  <data name="Error_Displacement_Pointer_Constant_Bad_Chars" xml:space="preserve">
+    <value>
+Note that if the displacement component of a pointer starts with a numeric literal, the literal must be the only part to the displacement. Displacement by a register must come first if desired.</value>
+  </data>
+  <data name="Error_Displacement_Pointer_Trailing_Operator" xml:space="preserve">
+    <value>Displacement ends with a trailing operator:
+    {0}
+    {1}^</value>
+  </data>
+  <data name="Error_Displacement_Pointer_Register_Constant_Bad_Chars" xml:space="preserve">
+    <value>
+Note that displacement by a register can only be followed by a single numeric literal with the + or - operators in order to also displace by a constant, and only register displacements can be multiplied.</value>
+  </data>
+  <data name="Error_Displacement_Pointer_Bad_Multiplier" xml:space="preserve">
+    <value>The register multiplier of a pointer displacement must be a power of two no larger than 128, i.e. 1, 2, 4, 8, 16, etc.</value>
+  </data>
+  <data name="Error_Displacement_Pointer_Multiplier_Bad_Chars" xml:space="preserve">
+    <value>
+Note that a register displacement can only be multiplied by a single numeric literal.</value>
   </data>
 </root>

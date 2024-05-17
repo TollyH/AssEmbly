@@ -1,4 +1,5 @@
 ﻿using AssEmbly.Resources.Localization;
+using System.Buffers.Binary;
 using System.Text;
 
 namespace AssEmbly
@@ -176,20 +177,31 @@ namespace AssEmbly
             if (operands[0][0] == ':')
             {
                 // Label reference used as %LABEL_OVERRIDE operand
+                // It's possible we don't know the address of the label yet, so store it as a "link" to resolve later
+#if DISPLACEMENT
+                AddressReference addressReference = ParseAddressReference(operands[0]);
+                string linkedName = addressReference.LabelName;
+#else
+                string linkedName = operands[0][2..];
+#endif
                 foreach (string labelName in labelsToEdit)
                 {
-                    // It's possible we don't know the address of the label yet, so store it as a "link" to resolve later
-                    string linkedName = operands[0][2..];
                     if (labelName == linkedName)
                     {
                         throw new LabelNameException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
                     }
                     // If the target label is already a link, store link to the actual target instead of chaining links
-                    while (labelLinks.TryGetValue(linkedName, out (string Target, string FilePath, int Line) checkName))
+                    while (labelLinks.TryGetValue(linkedName, out (string Target, long, string, int) checkName))
                     {
                         linkedName = checkName.Target;
                     }
-                    labelLinks[labelName] = (linkedName, currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
+                    labelLinks[labelName] = (linkedName,
+#if DISPLACEMENT
+                        addressReference.Displaced ? addressReference.DisplacementConstant : 0,
+#else
+                        0,
+#endif
+                        currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
                 }
             }
             else
@@ -541,10 +553,10 @@ namespace AssEmbly
                 Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Line, labelName, address);
             }
             Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Link_Header, labelLinks.Count);
-            foreach ((string labelName, (string target, string filePath, int line)) in labelLinks)
+            foreach ((string labelName, (string target, long displacement, string filePath, int line)) in labelLinks)
             {
                 Console.Error.WriteLine(
-                    Strings_Assembler.Debug_Directive_Label_Link_Line, labelName, target, filePath, line);
+                    Strings_Assembler.Debug_Directive_Label_Link_Line, labelName, target, filePath, line, displacement);
             }
             Console.Error.WriteLine(Strings_Assembler.Debug_Directive_LabelRef_Header, labelReferences.Count);
             foreach ((string labelName, ulong insertOffset, _) in labelReferences)
@@ -806,9 +818,20 @@ namespace AssEmbly
             if (operands[0][0] == ':')
             {
                 // Label reference used as %NUM operand
+#if DISPLACEMENT
+                AddressReference addressReference = ParseAddressReference(operands[0]);
+                // We know from DetermineOperandType that ReferenceType will be LabelLiteral
+                referencedLabels.Add((addressReference.LabelName, 0));
+                // Label location will be resolved later, just write the displacement for now
+                byte[] displacementBytes = new byte[8];
+                BinaryPrimitives.WriteInt64LittleEndian(displacementBytes,
+                    addressReference.Displaced ? addressReference.DisplacementConstant : 0);
+                return displacementBytes;
+#else
                 referencedLabels.Add((operands[0][2..], 0));
                 // Label location will be resolved later, pad with 0s for now
                 return Enumerable.Repeat((byte)0, 8).ToArray();
+#endif
             }
             return ParseLiteral(operands[0], false);
         }

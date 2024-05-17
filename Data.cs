@@ -71,10 +71,10 @@
 
     public enum PointerReadSize : byte
     {
-        Byte = 0b00,
-        Word = 0b01,
-        DoubleWord = 0b10,
-        QuadWord = 0b11
+        QuadWord = 0b00,
+        DoubleWord = 0b01,
+        Word = 0b10,
+        Byte = 0b11
     }
 
     public enum AddressReferenceType

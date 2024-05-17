@@ -7,9 +7,6 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
-%ANALYZER suggestion, 0018, 0
-%ANALYZER suggestion, 0004, 0
-
 MVQ rg0, 69
 
 !>
@@ -40,11 +37,15 @@ JLT :LOOP
 
 HLT
 
+%ANALYZER suggestion, 0004, 0
+
 %NUM @!CURRENT_ADDRESS
 
 %DAT "Hello, world!\nEscape test complete\"Still string\0",
 %DAT                     0x42
 %NUM 1189998819991197253
+
+%ANALYZER suggestion, 0004, r
 
 %MACRO this@LineIsNowBlank,$1
 this@LineIsNowBlank()
@@ -58,12 +59,18 @@ this@LineIsNowBlank()
 :NOR_THIS
 %LABEL_OVERRIDE :&NOR_DOES_THIS
 
+%ANALYZER suggestion, 0004, 0
+
 %num :&THIS_DOESNT_POINT_HERE
 %nUm :&NOR_DOES_THIS
 %NuM :&NOR_THIS
 
+%ANALYZER suGGeStIoN, 4, R
+
 %MACRO CFL, ASMX_CLF
+%ANALYZER suGGeStIoN, 18, 0
 :thisLabelRemovesTheWarning
+%ANALYZER suggestion, 18, r
 CFL
 !CFL
 %DELMACRO CFL
@@ -120,11 +127,14 @@ DVR rg6, rg7, 456
 %DELMACRO 45
 %DELMACRO 56
 
+%analyzer SUGGESTION, 0018, 0
 :labels_are_case_sensitive
 :LABELS_ARE_CASE_SENSITIVE
 :LABELS_ARE_CASE_SENSITIVE_AND_CAN_OVERLAP
+%ANALYZER suggestion, 0018, r
 hlt
 
+%ANALYZER suggestion, 0004, 0
 %DAT "\@THIS_ASSEMBLER_VARIABLE_DOESNT_EXIST\0"
 %DEFINE THIS_ONE_DOES, 0x0123456789ABCDEF
 %DAT "ABCD@THIS_ONE_DOES'efg"
@@ -187,6 +197,8 @@ hlt
 
 %ENDIF
 
+%ANALYZER suggestion, 0004, r
+
 ; ASSEMBLER_VERSION_MAJOR < 3 || (ASSEMBLER_VERSION_MAJOR == 3 && ASSEMBLER_VERSION_MINOR < 2)
 %DEFINE _major_lt, @!ASSEMBLER_VERSION_MAJOR
 %VAROP CMP_LT, _major_lt, 3
@@ -202,10 +214,15 @@ hlt
     %STOP "Assembler version must be >=3.2.0 to support conditional assembly"
 %ENDIF
 
+%ANALYZER suggestion, 0018, 0
 :MORE_CODE
+%ANALYZER suggestion, 0018, r
 mvQ  RG0, :0x123456789
 MVq :0X123456789, 6969.69420
 HLT
+
+%ANALYZER suggestion, 0003, 0
+%ANALYZER suggestion, 0004, 0
 
 %NUM '🍭'
 %NUM '\U0001F36D'
@@ -288,6 +305,40 @@ InsertNoZeroPadding(0b1101101101001000101100111010111011011)
     %ENDIF
     %VAROP ADD, _counter, 1
 %ENDWHILE
+
+%ANALYZER suggestion, 0003, r
+%ANALYZER suggestion, 0004, r
+
+HLT
+
+%ANALYZER suggestion, 0018, 0
+:DISPLACEMENTS
+%ANALYZER suggestion, 0018, r
+MVQ rg0, *rg1
+MVQ rg1, Q*rg2
+MVQ rg2, D*rg3
+MVQ rg3, W*rg4
+MVQ rg4, B*rg5
+
+MVQ *rg1[1 ]   , rg0
+MVQ Q*rg2[  -2], rg1
+MVQ D*rg3[  3    ],rg2
+MVQ W*rg4[   -   4    ], rg3
+MVQ B*rg5[ 5], rg4
+
+MVQ rg0, *rg1[rg9]
+MVQ rg1, Q*rg2[-rg8 * 8]
+MVQ rg2, D*rg3[    r    g       7      *        12     8       ]
+MVQ rg3, W*rg4[   -      r   g   6  ]
+MVQ rg4, B*rg5[  r   g      5*4]
+
+MVQ *rg1[rg9-1 ]   , rg0
+MVQ Q*rg2[-rg8 * 8  +2], rg1
+MVQ D*rg3[    r    g       7      *        12     8       -   3    ],rg2
+MVQ W*rg4[   -      r   g   6+4    ], rg3
+MVQ B*rg5[  r   g      5*4 -5], rg4
+
+HLT
 
 ; Don't close this
 !>
