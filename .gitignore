@@ -377,8 +377,5 @@ FodyWeavers.xsd
 # Expanded AssEmbly source files
 *.exp.asm
 
-# AssEmbly symbol files
-*.sym.asm
-
 # HxD bin backup files
 *.bin.bak

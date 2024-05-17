@@ -1,5 +1,4 @@
 ﻿using System.Buffers.Binary;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,7 +11,6 @@ namespace AssEmbly
     public readonly record struct AssemblyResult
     (
         byte[] Program,
-        ImmutableDictionary<string, ulong> Labels,
 #if DEBUGGER
         string DebugInfo,
 #endif
@@ -447,7 +445,7 @@ namespace AssEmbly
                 resolvedImports, fileLineMap);
 #endif
             return new AssemblyResult(
-                programBytes, labels.ToImmutableDictionary(),
+                programBytes,
 #if DEBUGGER
                 debugInfo,
 #endif
