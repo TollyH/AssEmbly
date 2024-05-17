@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Text;
 
 namespace AssEmbly
 {
@@ -224,25 +225,49 @@ namespace AssEmbly
             OtherRegisterMultiplier = otherRegisterMultiplier;
         }
 
+        public Pointer(Span<byte> encodedBytes, out ulong byteCount)
+        {
+            Mode = GetDisplacementMode(encodedBytes[0]);
+            ReadSize = (PointerReadSize)((encodedBytes[0] >> 4) & 0b11);
+            PointerRegister = (Register)(encodedBytes[0] & 0b1111);
+
+            byteCount = Mode.GetByteCount();
+
+            switch (Mode)
+            {
+                case DisplacementMode.NoDisplacement:
+                default:
+                    return;
+                case DisplacementMode.Constant:
+                    DisplacementConstant = BinaryPrimitives.ReadInt64LittleEndian(encodedBytes[1..]);
+                    return;
+                case DisplacementMode.Register:
+                    OtherRegisterMultiplier = (DisplacementMultiplier)((encodedBytes[1] >> 4) & 0b111);
+                    OtherRegister = (Register)(encodedBytes[1] & 0b1111);
+                    SubtractOtherRegister = (encodedBytes[1] & 0b10000000) != 0;
+                    return;
+                case DisplacementMode.ConstantAndRegister:
+                    DisplacementConstant = BinaryPrimitives.ReadInt64LittleEndian(encodedBytes[1..]);
+                    OtherRegisterMultiplier = (DisplacementMultiplier)((encodedBytes[9] >> 4) & 0b111);
+                    OtherRegister = (Register)(encodedBytes[9] & 0b1111);
+                    SubtractOtherRegister = (encodedBytes[9] & 0b10000000) != 0;
+                    return;
+            }
+        }
+
         /// <summary>
         /// Get the byte representation of this pointer to store in an AssEmbly program.
         /// </summary>
         public byte[] GetBytes()
         {
-            byte[] bytes = new byte[Mode switch
-            {
-                DisplacementMode.NoDisplacement => 1,
-                DisplacementMode.Constant => 9,
-                DisplacementMode.Register => 2,
-                DisplacementMode.ConstantAndRegister => 10,
-                _ => 1
-            }];
+            byte[] bytes = new byte[Mode.GetByteCount()];
             Span<byte> byteSpan = bytes.AsSpan();
 
             bytes[0] = (byte)(((byte)Mode << 6) | ((byte)ReadSize << 4) | (byte)PointerRegister);
             switch (Mode)
             {
                 case DisplacementMode.NoDisplacement:
+                default:
                     break;
                 case DisplacementMode.Constant:
                     BinaryPrimitives.WriteInt64LittleEndian(byteSpan[1..], DisplacementConstant);
@@ -265,6 +290,11 @@ namespace AssEmbly
             }
 
             return bytes;
+        }
+
+        public static DisplacementMode GetDisplacementMode(byte firstByte)
+        {
+            return (DisplacementMode)(firstByte >> 6);
         }
 
         public bool Equals(Pointer other)
@@ -322,6 +352,72 @@ namespace AssEmbly
         public static bool operator !=(Pointer left, Pointer right)
         {
             return !left.Equals(right);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new();
+
+            // Read size ('Q' is the default so can be omitted)
+            if (ReadSize != PointerReadSize.QuadWord)
+            {
+                _ = sb.Append(ReadSize switch
+                {
+                    PointerReadSize.DoubleWord => 'D',
+                    PointerReadSize.Word => 'W',
+                    PointerReadSize.Byte => 'B',
+                    _ => '?'  // Invalid value - won't assemble
+                });
+            }
+
+            // Main register
+            _ = sb.Append('*').Append(PointerRegister);
+
+            // Displacement component
+            switch (Mode)
+            {
+                case DisplacementMode.NoDisplacement:
+                    break;
+                case DisplacementMode.Constant:
+                    _ = sb.Append('[')
+                        .Append(DisplacementConstant)
+                        .Append(']');
+                    break;
+                case DisplacementMode.Register:
+                    _ = sb.Append('[');
+                    if (SubtractOtherRegister)
+                    {
+                        _ = sb.Append('-');
+                    }
+                    _ = sb.Append(OtherRegister);
+                    if (OtherRegisterMultiplier != DisplacementMultiplier.x1)
+                    {
+                        _ = sb.Append(" * ")
+                            .Append(OtherRegisterMultiplier.GetMultiplierString());
+                    }
+                    _ = sb.Append(']');
+                    break;
+                case DisplacementMode.ConstantAndRegister:
+                    _ = sb.Append('[');
+                    if (SubtractOtherRegister)
+                    {
+                        _ = sb.Append('-');
+                    }
+                    _ = sb.Append(OtherRegister);
+                    if (OtherRegisterMultiplier != DisplacementMultiplier.x1)
+                    {
+                        _ = sb.Append(" * ").Append(OtherRegisterMultiplier.GetMultiplierString());
+                    }
+                    _ = sb.Append(DisplacementConstant >= 0 ? " + " : " - ")
+                        .Append(Math.Abs(DisplacementConstant))
+                        .Append(']');
+                    break;
+                default:
+                    _ = sb.Append("[?]");  // Invalid value - won't assemble
+                    break;
+            }
+
+            return sb.ToString();
         }
     }
 

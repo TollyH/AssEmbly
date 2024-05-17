@@ -24,5 +24,34 @@
         {
             return new Stack<T>(stack.Select(i => (T)i.Clone()).Reverse());
         }
+
+#if DISPLACEMENT
+        public static string GetMultiplierString(this DisplacementMultiplier multiplier)
+        {
+            return multiplier switch
+            {
+                DisplacementMultiplier.x2 => "2",
+                DisplacementMultiplier.x4 => "4",
+                DisplacementMultiplier.x8 => "8",
+                DisplacementMultiplier.x16 => "16",
+                DisplacementMultiplier.x32 => "32",
+                DisplacementMultiplier.x64 => "64",
+                DisplacementMultiplier.x128 => "128",
+                _ => "?"  // Invalid value - won't assemble
+            };
+        }
+
+        public static ulong GetByteCount(this DisplacementMode mode)
+        {
+            return mode switch
+            {
+                DisplacementMode.NoDisplacement => 1,
+                DisplacementMode.Constant => 9,
+                DisplacementMode.Register => 2,
+                DisplacementMode.ConstantAndRegister => 10,
+                _ => 0
+            };
+        }
+#endif
     }
 }

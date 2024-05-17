@@ -47,17 +47,12 @@ SUB rg4, 8367799640999031621
 %DAT 114
 %DAT 105
 %DAT 110
-%DAT 103
-HLT
-%DAT 66
-%DAT 69
-%DAT 150
-CAL :0x4D21083B99F34, *rpo  ; Address does not align to a disassembled instruction
-HLT
-%PAD 3
+ORR rpo, *rsb[1189998819991197253]
 WFN :0xD200000000000004  ; Address does not align to a disassembled instruction
-JEQ :0x4FF000000000000  ; Address does not align to a disassembled instruction
-%DAT 17
+JEQ :0x4D2000000000000  ; Address does not align to a disassembled instruction
+HLT
+%PAD 5
+ASMX_CLF
 CFL
 CFL
 NOP
@@ -143,23 +138,28 @@ HLT
 %DAT 105
 %DAT 105
 %DAT 52
-%DAT 139
-JLT :0x8ABEED000005292C  ; Address does not align to a disassembled instruction
-%DAT 247
+MVW rg2, W*rg6
+%DAT 41
+JEQ *rpo
+HLT
+%DAT 237
+RET *rg4[-rg1 * 128]
 %DAT 62
-%DAT 3
-POP rpo
+JMP W*rrv[rpo]
 MVQ rg0, :0x123456789  ; Address does not align to a disassembled instruction
 MVQ :0x123456789, 6969.6942  ; Address does not align to a disassembled instruction
 HLT
 %DAT 240
-%DAT 159
-MVW :0x8D9FF000000000AD, 9836955600246800557  ; Address does not align to a disassembled instruction
+MVQ *rg7[-rg7 * 4], 12505827593418702848
 HLT
-%PAD 4
-DFL :0x700000000008883  ; Address does not align to a disassembled instruction
-JLT :0x305C0B09A99BE20C  ; Address does not align to a disassembled instruction
+%PAD 3
+DFL :0xE300000000008883  ; Address does not align to a disassembled instruction
+%DAT 131
+MVW rpo, rpo
 HLT
+%PAD 2
+JNE *rg2
+JGT :0x305C0B09A99BE2  ; Address does not align to a disassembled instruction
 %DAT 44
 %DAT 44
 %DAT 32
@@ -233,37 +233,15 @@ JMP :0x204030403040301  ; Address does not align to a disassembled instruction
 WFX 16478
 OFL :0x140000000000003F  ; Address does not align to a disassembled instruction
 %DAT 64
-%DAT 190
-%DAT 159
-%DAT 26
+RET D*rg9[rg4 * 2]
 %DAT 47
 WFC 12575268
-%DAT 184
-%DAT 129
-%DAT 192
-%DAT 211
-%DAT 255
-%DAT 255
-%DAT 255
-%DAT 255
-%DAT 255
-%DAT 255
-%DAT 255
+CAL *rso[-rpo * 16], :0xFFFFFFFFFFFFFFD3  ; Address does not align to a disassembled instruction
 %DAT 42
 %DAT 84
 %DAT 118
 %DAT 152
-%DAT 15
-%DAT 219
-%DAT 117
-%DAT 22
-%DAT 105
-%DAT 27
-%DAT 254
-%DAT 254
-%DAT 253
-%DAT 254
-%DAT 253
+JGE D*rg5[-rg7 * 128 - 72621651633039755]
 %DAT 253
 %DAT 254
 %DAT 253
@@ -326,6 +304,28 @@ WFC 12575268
 %DAT 253
 %DAT 253
 %DAT 254
+HLT
+MVQ rg0, *rg1
+MVQ rg1, *rg2
+MVQ rg2, D*rg3
+MVQ rg3, W*rg4
+MVQ rg4, B*rg5
+MVQ *rg1[1], rg0
+MVQ *rg2[-2], rg1
+MVQ D*rg3[3], rg2
+MVQ W*rg4[-4], rg3
+MVQ B*rg5[5], rg4
+MVQ rg0, *rg1[rg9]
+MVQ rg1, *rg2[-rg8 * 8]
+MVQ rg2, D*rg3[rg7 * 128]
+MVQ rg3, W*rg4[-rg6]
+MVQ rg4, B*rg5[rg5 * 4]
+MVQ *rg1[rg9 - 1], rg0
+MVQ *rg2[-rg8 * 8 + 2], rg1
+MVQ D*rg3[rg7 * 128 - 3], rg2
+MVQ W*rg4[-rg6 + 4], rg3
+MVQ B*rg5[rg5 * 4 - 5], rg4
+HLT
 %DAT 255
 HLT
 NOP

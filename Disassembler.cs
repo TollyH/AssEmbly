@@ -200,6 +200,25 @@ namespace AssEmbly
                             totalBytes += 8;
                             break;
                         case OperandType.Pointer:
+#if DISPLACEMENT
+                            DisplacementMode mode = Pointer.GetDisplacementMode(instruction[(int)totalBytes]);
+                            if (mode.GetByteCount() + totalBytes >= (ulong)instruction.Length)
+                            {
+                                fallbackToDat = true;
+                                break;
+                            }
+
+                            Pointer pointer = new(instruction[(int)totalBytes..], out ulong pointerBytes);
+                            if (!Enum.IsDefined(pointer.Mode) || !Enum.IsDefined(pointer.PointerRegister)
+                                || !Enum.IsDefined(pointer.OtherRegister) || !Enum.IsDefined(pointer.ReadSize)
+                                || !Enum.IsDefined(pointer.OtherRegisterMultiplier))
+                            {
+                                fallbackToDat = true;
+                                break;
+                            }
+                            operandStrings.Add(pointer.ToString());
+                            totalBytes += pointerBytes;
+#else
                             if (Enum.IsDefined((Register)instruction[(int)totalBytes]))
                             {
                                 operandStrings.Add("*" + (Register)instruction[(int)totalBytes]);
@@ -209,6 +228,7 @@ namespace AssEmbly
                             {
                                 fallbackToDat = true;
                             }
+#endif
                             break;
                         default:
                             fallbackToDat = true;
