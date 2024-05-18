@@ -85,5 +85,30 @@
             Assert.AreEqual(0, references.Count, "Providing opcode with truncated literal operand produced unexpected address references");
             Assert.IsTrue(datFallback, "Providing opcode with truncated literal operand did not produce %DAT fallback");
         }
+
+        [TestMethod]
+        public void InvalidPointers()
+        {
+            string result = Disassembler.DisassembleProgram(
+                new byte[] { 0x13, 0x06, 0x47, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77 }, disassemblerOptions);
+            Assert.AreEqual("""
+                %DAT 19
+                %DAT 6
+                %DAT 71
+                %DAT 34
+                %DAT 51
+                %DAT 68
+                %DAT 85
+                %DAT 102
+                %DAT 119
+                """, result, "Providing opcode with truncated pointer operand did not produce correct program");
+
+            result = Disassembler.DisassembleProgram(
+                new byte[] { 0x13, 0x06, 0xC7, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 }, disassemblerOptions);
+            Assert.AreEqual("""
+                %DAT 19
+                JNE :0x88776655443322C7  ; Address does not align to a disassembled instruction
+                """, result, "Providing opcode with truncated pointer operand did not produce correct program");
+        }
     }
 }

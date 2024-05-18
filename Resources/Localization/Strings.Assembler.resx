@@ -615,7 +615,7 @@ Note that if the displacement component of a pointer starts with a numeric liter
   </data>
   <data name="Error_Displacement_Pointer_Register_Constant_Bad_Chars" xml:space="preserve">
     <value>
-Note that displacement by a register can only be followed by a single numeric literal with the + or - operators in order to also displace by a constant, and only register displacements can be multiplied.</value>
+Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators. Only register displacements can be multiplied.</value>
   </data>
   <data name="Error_Displacement_Pointer_Bad_Multiplier" xml:space="preserve">
     <value>The register multiplier of a pointer displacement must be a power of two no larger than 128, i.e. 1, 2, 4, 8, 16, etc.</value>
@@ -623,5 +623,15 @@ Note that displacement by a register can only be followed by a single numeric li
   <data name="Error_Displacement_Pointer_Multiplier_Bad_Chars" xml:space="preserve">
     <value>
 Note that a register displacement can only be multiplied by a single numeric literal.</value>
+  </data>
+  <data name="Error_Literal_Underscore_Start" xml:space="preserve">
+    <value>The first character of a numeric literal cannot be an underscore.
+    {0}
+    ^</value>
+  </data>
+  <data name="Error_Displacement_Empty" xml:space="preserve">
+    <value>Displacement components cannot be empty.
+    {0}
+    {1}^</value>
   </data>
 </root>

@@ -593,6 +593,17 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Displacement components cannot be empty.
+        ///    {0}
+        ///    {1}^.
+        /// </summary>
+        internal static string Error_Displacement_Empty {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Empty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to End of line found while processing displacement component. Did you forget a closing square bracket?
         ///    {0}
         ///    {1}^.
@@ -665,7 +676,7 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///Note that displacement by a register can only be followed by a single numeric literal with the + or - operators in order to also displace by a constant, and only register displacements can be multiplied..
+        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators. Only register displacements can be multiplied..
         /// </summary>
         internal static string Error_Displacement_Pointer_Register_Constant_Bad_Chars {
             get {
@@ -1054,6 +1065,17 @@ namespace AssEmbly.Resources.Localization {
         internal static string Error_Literal_Underscore_Only {
             get {
                 return ResourceManager.GetString("Error_Literal_Underscore_Only", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The first character of a numeric literal cannot be an underscore.
+        ///    {0}
+        ///    ^.
+        /// </summary>
+        internal static string Error_Literal_Underscore_Start {
+            get {
+                return ResourceManager.GetString("Error_Literal_Underscore_Start", resourceCulture);
             }
         }
         

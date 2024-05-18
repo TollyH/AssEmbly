@@ -9,6 +9,7 @@
             _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { ":LA BEL" }));
             _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { ":LA-BEL" }));
             _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { ":&LABEL" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { ":LABEL[22]" }));
             _ = Assert.ThrowsException<LabelNameException>(() => new Assembler("").AssembleLines(new[] { ":LABEL", ":LABEL" }));
 
             Assembler asm = new("");
@@ -108,6 +109,39 @@
             _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "MVQ rg0, @!" }));
             _ = Assert.ThrowsException<VariableNameException>(() => new Assembler("").AssembleLines(new[] { "MVQ rg0, @not_exists" }));
             _ = Assert.ThrowsException<VariableNameException>(() => new Assembler("").AssembleLines(new[] { "MVQ rg0, @!not_exists" }));
+        }
+
+        [TestMethod]
+        public void BadDisplacementSyntax()
+        {
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :12[]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :LABEL[]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :&LABEL[]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, *rg0[]" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :12[21" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :LABEL[21" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :&LABEL[21" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, *rg0[21" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :12[21]]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :LABEL[21]]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :&LABEL[21]]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, *rg0[21]]" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :12 [21]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :LABEL [21]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, :&LABEL [21]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0, *rg0 [21]" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "JMP rg0,[21]" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "[21]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "[]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "[" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "a[]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => new Assembler("").AssembleLines(new[] { "a[" }));
         }
 
         [TestMethod]

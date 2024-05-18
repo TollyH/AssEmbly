@@ -656,6 +656,7 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
+        /// <remarks>You should use <see cref="ParseLine"/> to separate the mnemonic and operands.</remarks>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
             out AAPFeatures usedExtensions, bool enableObsoleteDirectives = false, bool forceFullOpcode = false)
         {
@@ -799,6 +800,7 @@ namespace AssEmbly
         /// <returns>The assembled bytes, along with a list of label names and the offset the addresses of the labels need to be inserted into.</returns>
         /// <exception cref="OperandException">Thrown when a mnemonic is given an invalid number or type of operands.</exception>
         /// <exception cref="OpcodeException">Thrown when a particular combination of mnemonic and operand types is not recognised.</exception>
+        /// <remarks>You should use <see cref="ParseLine"/> to separate the mnemonic and operands.</remarks>
         public static (byte[], List<(string LabelName, ulong AddressOffset)>) AssembleStatement(string mnemonic, string[] operands,
             bool enableObsoleteDirectives = false, bool forceFullOpcode = false)
         {
@@ -1219,6 +1221,10 @@ namespace AssEmbly
                 }
                 _ = sb.Append(c);
             }
+            if (sb.Length <= 1)
+            {
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Displacement_Empty, line, new string(' ', startIndex)));
+            }
             startIndex = i;
 
             _ = sb.Append(']');
@@ -1389,7 +1395,7 @@ namespace AssEmbly
             }
             catch (OverflowException)
             {
-                throw new OperandException(operand.StartsWith('-')
+                throw new OperandException(negative
                     ? string.Format(Strings_Assembler.Error_Literal_Too_Small, long.MinValue, operand)
                     : string.Format(Strings_Assembler.Error_Literal_Too_Large, ulong.MaxValue, operand));
             }
@@ -1667,6 +1673,11 @@ namespace AssEmbly
                     if (displacementContents.Length == 1)
                     {
                         throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
+                    }
+                    if (displacementContents[1] == '-')
+                    {
+                        throw new SyntaxError(
+                            string.Format(Strings_Assembler.Error_Literal_Invalid_Character, displacementContents, ' '));
                     }
                     if (displacementContents[1] is (< '0' or > '9') and not '.')
                     {
@@ -2575,6 +2586,10 @@ namespace AssEmbly
             if (operand is "0x" or "0b")
             {
                 throw new SyntaxError(Strings_Assembler.Error_Literal_Base_Prefix_Only);
+            }
+            if (operand[0] == '_')
+            {
+                throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Underscore_Start, operand));
             }
         }
 
