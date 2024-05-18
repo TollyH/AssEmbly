@@ -1375,6 +1375,7 @@ namespace AssEmbly
                 operand = operand[1..];
                 negative = true;
             }
+            bool floating = operand.Contains('.');
             try
             {
                 // Hex (0x), Binary (0b), and Decimal literals are all supported
@@ -1382,7 +1383,7 @@ namespace AssEmbly
                     ? Convert.ToUInt64(operand[2..], 16)
                 : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
                     ? Convert.ToUInt64(operand[2..], 2)
-                : operand.Contains('.')
+                : floating
                     ? BitConverter.DoubleToUInt64Bits(Convert.ToDouble(operand))
                     : Convert.ToUInt64(operand);
             }
@@ -1394,7 +1395,15 @@ namespace AssEmbly
             }
             if (negative)
             {
-                parsedNumber = (ulong)-(long)parsedNumber;
+                if (floating)
+                {
+                    // Floats are made negative by setting the sign bit
+                    parsedNumber |= 0x8000000000000000;
+                }
+                else
+                {
+                    parsedNumber = (ulong)-(long)parsedNumber;
+                }
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);

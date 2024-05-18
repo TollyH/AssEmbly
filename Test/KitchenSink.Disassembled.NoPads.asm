@@ -19,8 +19,8 @@ HLT
 SUB rg4, 8367799640999031621
 %DAT "est complete\"Still strin"
 ORR rpo, *rsb[1189998819991197253]
-WFN :0xD200000000000004  ; Address does not align to a disassembled instruction
-JEQ :0x4D2000000000000  ; Address does not align to a disassembled instruction
+WFN :0x8F00000000000004  ; Address does not align to a disassembled instruction
+JNE :0x4A6000000000000  ; Address does not align to a disassembled instruction
 HLT
 HLT
 HLT
@@ -72,7 +72,7 @@ HLT
 RET *rg4[-rg1 * 128]
 %DAT ">"
 JMP W*rrv[rpo]
-MVQ rg0, :0x123456789  ; Address does not align to a disassembled instruction
+MVQ rg0, :0x123456820  ; Address does not align to a disassembled instruction
 MVQ :0x123456789, 4664385274516035810  ; Address does not align to a disassembled instruction
 HLT
 %DAT 240

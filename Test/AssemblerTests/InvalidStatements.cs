@@ -49,10 +49,8 @@
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "5-6" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0x5.6" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0X-5" }));
-            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "-0x5" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0b11011.11" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0b-100011101" }));
-            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "-0B110101101011" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0_b110101101011" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "_0b110101101011" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "_123" }));

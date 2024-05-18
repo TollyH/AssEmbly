@@ -181,8 +181,10 @@ namespace AssEmbly
 #if DISPLACEMENT
                 AddressReference addressReference = ParseAddressReference(operands[0]);
                 string linkedName = addressReference.LabelName;
+                long displacement = addressReference.Displaced ? addressReference.DisplacementConstant : 0;
 #else
                 string linkedName = operands[0][2..];
+                long displacement = 0;
 #endif
                 foreach (string labelName in labelsToEdit)
                 {
@@ -191,16 +193,12 @@ namespace AssEmbly
                         throw new LabelNameException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
                     }
                     // If the target label is already a link, store link to the actual target instead of chaining links
-                    while (labelLinks.TryGetValue(linkedName, out (string Target, long, string, int) checkName))
+                    while (labelLinks.TryGetValue(linkedName, out (string Target, long Displacement, string, int) checkName))
                     {
                         linkedName = checkName.Target;
+                        displacement += checkName.Displacement;
                     }
-                    labelLinks[labelName] = (linkedName,
-#if DISPLACEMENT
-                        addressReference.Displaced ? addressReference.DisplacementConstant : 0,
-#else
-                        0,
-#endif
+                    labelLinks[labelName] = (linkedName, displacement,
                         currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
                 }
             }

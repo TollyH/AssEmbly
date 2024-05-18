@@ -51,7 +51,7 @@ HLT
 this@LineIsNowBlank()
 
 :NOR_DOES_THIS
-%LABEL_OVERRIDE   :&THIS_DOESNT_POINT_HERE
+%LABEL_OVERRIDE   :&THIS_DOESNT_POINT_HERE[    3   7  6  ]
 
      :THIS_DOESNT_POINT_HERE     
 %LABEL_OVERRIDE   1234    ,
@@ -62,8 +62,8 @@ this@LineIsNowBlank()
 %ANALYZER suggestion, 0004, 0
 
 %num :&THIS_DOESNT_POINT_HERE
-%nUm :&NOR_DOES_THIS
-%NuM :&NOR_THIS
+%nUm :&NOR_DOES_THIS[69]
+%NuM :&NOR_THIS[ -  4      2        0     ]
 
 %ANALYZER suGGeStIoN, 4, R
 
@@ -217,7 +217,7 @@ hlt
 %ANALYZER suggestion, 0018, 0
 :MORE_CODE
 %ANALYZER suggestion, 0018, r
-mvQ  RG0, :0x123456789
+mvQ  RG0, :0x123456789[0  x  9 7]
 MVq :0X123456789, 6969.69420
 HLT
 
@@ -322,19 +322,19 @@ MVQ rg4, B*rg5
 
 MVQ *rg1[1 ]   , rg0
 MVQ Q*rg2[  -2], rg1
-MVQ D*rg3[  3    ],rg2
+MVQ D*rg3[  0  b  1  1 ],rg2
 MVQ W*rg4[   -   4    ], rg3
 MVQ B*rg5[ 5], rg4
 
 MVQ rg0, *rg1[rg9]
-MVQ rg1, Q*rg2[-rg8 * 8]
+MVQ rg1, Q*rg2[-rg8 * 0b1000]
 MVQ rg2, D*rg3[    r    g       7      *        12     8       ]
 MVQ rg3, W*rg4[   -      r   g   6  ]
 MVQ rg4, B*rg5[  r   g      5*4]
 
 MVQ *rg1[rg9-1 ]   , rg0
 MVQ Q*rg2[-rg8 * 8  +2], rg1
-MVQ D*rg3[    r    g       7      *        12     8       -   3    ],rg2
+MVQ D*rg3[    r    g       7      *        12     8       -   0 x  3    ],rg2
 MVQ W*rg4[   -      r   g   6+4    ], rg3
 MVQ B*rg5[  r   g      5*4 -5], rg4
 
