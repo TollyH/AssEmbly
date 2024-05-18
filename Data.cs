@@ -8,7 +8,7 @@
         Pointer
     }
 
-    public enum Register : byte
+    public enum Register
     {
         rpo,  // Program Offset
         rso,  // Stack Offset

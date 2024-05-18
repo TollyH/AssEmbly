@@ -1368,6 +1368,13 @@ namespace AssEmbly
                 return Encoding.UTF8.GetBytes(str);
             }
             operand = operand.Replace("_", "");
+            // Omit any '-' sign when parsing so we can support negative hex and binary literals (-0x & -0b)
+            bool negative = false;
+            if (operand[0] == '-')
+            {
+                operand = operand[1..];
+                negative = true;
+            }
             try
             {
                 // Hex (0x), Binary (0b), and Decimal literals are all supported
@@ -1377,8 +1384,6 @@ namespace AssEmbly
                     ? Convert.ToUInt64(operand[2..], 2)
                 : operand.Contains('.')
                     ? BitConverter.DoubleToUInt64Bits(Convert.ToDouble(operand))
-                : operand.StartsWith('-')
-                    ? (ulong)Convert.ToInt64(operand)
                     : Convert.ToUInt64(operand);
             }
             catch (OverflowException)
@@ -1386,6 +1391,10 @@ namespace AssEmbly
                 throw new OperandException(operand.StartsWith('-')
                     ? string.Format(Strings_Assembler.Error_Literal_Too_Small, long.MinValue, operand)
                     : string.Format(Strings_Assembler.Error_Literal_Too_Large, ulong.MaxValue, operand));
+            }
+            if (negative)
+            {
+                parsedNumber = (ulong)-(long)parsedNumber;
             }
             byte[] result = new byte[8];
             BinaryPrimitives.WriteUInt64LittleEndian(result, parsedNumber);
@@ -2522,6 +2531,16 @@ namespace AssEmbly
 
         private static void ValidateNumericLiteral(string operand)
         {
+            if (operand[0] == '-')
+            {
+                if (operand.Length == 1)
+                {
+                    throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
+                }
+                // Trim the negative sign for the purposes of validation
+                // - all numeric literals can have it
+                operand = operand[1..];
+            }
             Match invalidMatch = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
                 ? InvalidHexadecimalChars().Match(operand)  // Hex
                 : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
@@ -2532,13 +2551,9 @@ namespace AssEmbly
                 throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
             }
             // Edge-case syntax errors not detected by invalid character regular expressions
-            if ((operand[0] == '.' && operand.Length == 1) || operand == "-.")
+            if (operand[0] == '.' && operand.Length == 1)
             {
                 throw new SyntaxError(Strings_Assembler.Error_Literal_Floating_Point_Decimal_Only);
-            }
-            if (operand[0] == '-' && operand.Length == 1)
-            {
-                throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
             }
             if (operand.Equals("0x_", StringComparison.OrdinalIgnoreCase) || operand.Equals("0b_", StringComparison.OrdinalIgnoreCase))
             {
@@ -2580,7 +2595,7 @@ namespace AssEmbly
         [GeneratedRegex("[^0-1_](?<!^0[bB])")]
         private static partial Regex InvalidBinaryChars();
 
-        [GeneratedRegex(@"[^0-9_\.](?<!^-)")]
+        [GeneratedRegex(@"[^0-9_\.]")]
         private static partial Regex InvalidDecimalChars();
 
 #if DISPLACEMENT
