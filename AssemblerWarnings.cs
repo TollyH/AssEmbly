@@ -1101,7 +1101,8 @@ namespace AssEmbly
             List<Warning> warnings = new();
             // Iterate label definitions that are not present in the referenced labels set
             foreach ((string labelName, (FilePosition labelPosition, string? labelMacroName))
-                in labelDefinitionPositions.ExceptBy(referencedLabels, kv => kv.Key))
+                in labelDefinitionPositions.ExceptBy(referencedLabels, kv => kv.Key)
+                    .Where(kv => !kv.Key.Equals("ENTRY", StringComparison.OrdinalIgnoreCase)))
             {
                 string labelDefinitionText = ':' + labelName;
                 warnings.Add(new Warning(WarningSeverity.Suggestion, 0018, labelPosition,

@@ -7,6 +7,7 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
+:ENTRY
 MVQ rg0, 69
 
 !>
