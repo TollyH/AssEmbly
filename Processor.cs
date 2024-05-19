@@ -4149,6 +4149,7 @@ namespace AssEmbly
 #if DISPLACEMENT
             return GetPointerAddress(new Pointer(Memory.AsSpan()[(int)offset..], out byteCount));
 #else
+            byteCount = 1;
             return Registers[(int)ReadMemoryRegisterType(offset)];
 #endif
         }
