@@ -181,6 +181,10 @@
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "QQ*rg0" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "QD*rg4" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "BW*rg8" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "rg0[rg0*8]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Brg4[rg0*8]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Qrg8[rg0*8]" }));
         }
 
         [TestMethod]

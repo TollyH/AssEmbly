@@ -1325,7 +1325,8 @@ namespace AssEmbly
                     }
 
 #if DISPLACEMENT
-                    int registerNameEnd = operand.IndexOf('[');
+                    // Only consider displacements for pointers, not regular registers
+                    int registerNameEnd = registerNameStart != 0 ? operand.IndexOf('[') : operand.Length;
                     if (registerNameEnd == -1)
                     {
                         registerNameEnd = operand.Length;
