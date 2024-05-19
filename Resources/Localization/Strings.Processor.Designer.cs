@@ -521,6 +521,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0:X} is not a recognised extended base set move pointer address low opcode.
+        /// </summary>
+        internal static string Error_Opcode_Low_Extended_MovePointerAddress {
+            get {
+                return ResourceManager.GetString("Error_Opcode_Low_Extended_MovePointerAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0:X} is not a recognised external assembly extension set calling low opcode.
         /// </summary>
         internal static string Error_Opcode_Low_External_Call {

@@ -235,6 +235,7 @@ namespace AssEmbly
                 ulong mathend;
                 ulong result;
                 ulong remainder;
+                ulong byteCount;
                 int shiftAmount;
                 string filepath;
 #if EXTENSION_SET_SIGNED
@@ -270,7 +271,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
                                         break;
                                     case 0x3:  // JMP ptr (Unconditional Jump)
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0x4:  // JEQ adr (Jump If Equal To - Zero Flag Set)
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) != 0)
@@ -283,13 +284,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x5:  // JEQ ptr (Jump If Equal To - Zero Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x6:  // JNE adr (Jump If Not Equal To - Zero Flag Unset)
@@ -303,13 +305,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x7:  // JNE ptr (Jump If Not Equal To - Zero Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x8:  // JLT adr (Jump If Less Than - Carry Flag Set)
@@ -323,13 +326,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x9:  // JLT ptr (Jump If Less Than - Carry Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Carry) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xA:  // JLE adr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
@@ -343,13 +347,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xB:  // JLE ptr (Jump If Less Than or Equal To - Carry Flag Set or Zero Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.ZeroAndCarry) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xC:  // JGT adr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
@@ -363,13 +368,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xD:  // JGT ptr (Jump If Greater Than - Carry Flag Unset and Zero Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.ZeroAndCarry) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xE:  // JGE adr (Jump If Greater Than or Equal To - Carry Flag Unset)
@@ -383,13 +389,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xF:  // JGE ptr (Jump If Greater Than or Equal To - Carry Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Carry) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     default:
@@ -413,8 +420,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // ADD reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // ICR reg
                                         mathend = 1;
@@ -483,8 +490,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SUB reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // DCR reg
                                         mathend = 1;
@@ -553,8 +560,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MUL reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Multiplication, opcodeLow));
@@ -611,8 +618,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // DIV reg, ptr
-                                        result = initial / ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = initial / ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // DVR reg, reg, reg
                                         mathend = ReadMemoryRegister(operandStart + 2);
@@ -636,11 +643,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // DVR reg, reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 2);
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 2, out byteCount);
                                         result = initial / mathend;
                                         remainder = initial % mathend;
                                         WriteMemoryRegister(operandStart + 1, remainder);
-                                        Registers[(int)Register.rpo] += 3;
+                                        Registers[(int)Register.rpo] += byteCount + 2;
                                         break;
                                     case 0x8:  // REM reg, reg
                                         result = initial % ReadMemoryRegister(operandStart + 1);
@@ -655,8 +662,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // REM reg, ptr
-                                        result = initial % ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = initial % ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Division, opcodeLow));
@@ -707,9 +714,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SHL reg, ptr
-                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        shiftAmount = (int)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
                                         result = initial << shiftAmount;
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // SHR reg, reg
                                         shiftAmount = (int)ReadMemoryRegister(operandStart + 1);
@@ -727,9 +734,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // SHR reg, ptr
-                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        shiftAmount = (int)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
                                         result = initial >> shiftAmount;
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Shifting, opcodeLow));
@@ -802,8 +809,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // AND reg, ptr
-                                        result = initial & ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = initial & ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // ORR reg, reg
                                         result = initial | ReadMemoryRegister(operandStart + 1);
@@ -818,8 +825,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // ORR reg, ptr
-                                        result = initial | ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = initial | ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x8:  // XOR reg, reg
                                         result = initial ^ ReadMemoryRegister(operandStart + 1);
@@ -834,8 +841,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // XOR reg, ptr
-                                        result = initial ^ ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = initial ^ ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xC:  // NOT reg
                                         result = ~initial;
@@ -891,8 +898,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // TST reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // CMP reg, reg
                                         mathend = ReadMemoryRegister(operandStart + 1);
@@ -907,8 +914,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // CMP reg, ptr
-                                        mathend = ReadMemoryRegisterPointedQWord(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        mathend = ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_Comparison, opcodeLow));
@@ -983,8 +990,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MVB reg, ptr
-                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedByte(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (byte)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // MVB adr, reg
                                         WriteMemoryPointedByte(operandStart, (byte)(0xFF & ReadMemoryRegister(operandStart + 8)));
@@ -995,12 +1002,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x6:  // MVB ptr, reg
-                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x7:  // MVB ptr, lit
-                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // MVW reg, reg
                                         WriteMemoryRegister(operandStart, 0xFFFF & ReadMemoryRegister(operandStart + 1));
@@ -1015,8 +1022,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // MVW reg, ptr
-                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (ushort)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xC:  // MVW adr, reg
                                         WriteMemoryPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryRegister(operandStart + 8)));
@@ -1027,12 +1034,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xE:  // MVW ptr, reg
-                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xF:  // MVW ptr, lit
-                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_SmallMove, opcodeLow));
@@ -1054,8 +1061,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MVD reg, ptr
-                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedDWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (uint)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // MVD adr, reg
                                         WriteMemoryPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryRegister(operandStart + 8)));
@@ -1066,12 +1073,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x6:  // MVD ptr, reg
-                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x7:  // MVD ptr, lit
-                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // MVQ reg, reg
                                         WriteMemoryRegister(operandStart, ReadMemoryRegister(operandStart + 1));
@@ -1086,8 +1093,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // MVQ reg, ptr
-                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xC:  // MVQ adr, reg
                                         WriteMemoryPointedQWord(operandStart, ReadMemoryRegister(operandStart + 8));
@@ -1098,12 +1105,12 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xE:  // MVQ ptr, reg
-                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryRegister(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryRegister(operandStart + 1), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xF:  // MVQ ptr, lit
-                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 9;
+                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryQWord(operandStart + 1), out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_LargeMove, opcodeLow));
@@ -1128,9 +1135,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // PSH ptr
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, ReadMemoryRegisterPointedQWord(operandStart));
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
                                         Registers[(int)Register.rso] -= 8;
-                                        Registers[(int)Register.rpo]++;
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // POP reg
                                         WriteMemoryRegister(operandStart, ReadMemoryQWord(Registers[(int)Register.rso]));
@@ -1168,7 +1175,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0x2:  // CAL adr, reg
                                         Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + 8);
@@ -1213,7 +1220,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
                                         break;
                                     case 0x5:  // CAL adr, ptr
-                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedQWord(operandStart + 8);
+                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedNumber(operandStart + 8, out _);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
@@ -1238,7 +1245,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0x7:  // CAL ptr, lit
                                         Registers[(int)Register.rfp] = ReadMemoryQWord(operandStart + 1);
@@ -1252,7 +1259,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0x8:  // CAL ptr, adr
                                         Registers[(int)Register.rfp] = ReadMemoryPointedQWord(operandStart + 1);
@@ -1266,10 +1273,10 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0x9:  // CAL ptr, ptr
-                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedNumber(operandStart + 1, out _);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 2);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
@@ -1280,7 +1287,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
                                         break;
                                     case 0xA:  // RET
                                         Registers[(int)Register.rso] += stackCallSize;
@@ -1306,7 +1313,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rsb] = ReadMemoryQWord(Registers[(int)Register.rso] - 16);
                                         break;
                                     case 0xE:  // RET ptr
-                                        Registers[(int)Register.rrv] = ReadMemoryRegisterPointedQWord(operandStart);
+                                        Registers[(int)Register.rrv] = ReadMemoryRegisterPointedNumber(operandStart, out _);
                                         Registers[(int)Register.rso] += stackCallSize;
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(Registers[(int)Register.rso] - 8);
                                         Registers[(int)Register.rsb] = ReadMemoryQWord(Registers[(int)Register.rso] - 16);
@@ -1331,8 +1338,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // WCN ptr
-                                        Console.Write(ReadMemoryRegisterPointedQWord(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write(ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // WCB reg
                                         Console.Write(0xFF & ReadMemoryRegister(operandStart));
@@ -1347,8 +1354,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // WCB ptr
-                                        Console.Write(ReadMemoryRegisterPointedByte(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write(ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x8:  // WCX reg
                                         Console.Write(Strings.Generic_Hex_Value, 0xFF & ReadMemoryRegister(operandStart));
@@ -1363,34 +1370,34 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WCX ptr
-                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
                                     case 0xC:  // WCC reg
-                                        {
-                                            stdout.WriteByte((byte)(0xFF & ReadMemoryRegister(operandStart)));
-                                            Registers[(int)Register.rpo]++;
-                                            break;
-                                        }
+                                    {
+                                        stdout.WriteByte((byte)(0xFF & ReadMemoryRegister(operandStart)));
+                                        Registers[(int)Register.rpo]++;
+                                        break;
+                                    }
                                     case 0xD:  // WCC lit
-                                        {
-                                            stdout.WriteByte(Memory[operandStart]);
-                                            Registers[(int)Register.rpo] += 8;
-                                            break;
-                                        }
+                                    {
+                                        stdout.WriteByte(Memory[operandStart]);
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    }
                                     case 0xE:  // WCC adr
-                                        {
-                                            stdout.WriteByte(ReadMemoryPointedByte(operandStart));
-                                            Registers[(int)Register.rpo] += 8;
-                                            break;
-                                        }
+                                    {
+                                        stdout.WriteByte(ReadMemoryPointedByte(operandStart));
+                                        Registers[(int)Register.rpo] += 8;
+                                        break;
+                                    }
                                     case 0xF:  // WCC ptr
-                                        {
-                                            stdout.WriteByte(ReadMemoryRegisterPointedByte(operandStart));
-                                            Registers[(int)Register.rpo]++;
-                                            break;
-                                        }
+                                    {
+                                        stdout.WriteByte(ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
+                                        break;
+                                    }
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_ConsoleWrite, opcodeLow));
                                 }
@@ -1415,8 +1422,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // WFN ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedQWord(operandStart).ToString()));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedNumber(operandStart, out byteCount).ToString()));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // WFB reg
                                         fileWrite!.Write(Encoding.UTF8.GetBytes((0xFF & ReadMemoryRegister(operandStart)).ToString()));
@@ -1431,8 +1438,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // WFB ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedByte(operandStart).ToString()));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedByte(operandStart, out byteCount).ToString()));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x8:  // WFX reg
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(
@@ -1450,8 +1457,8 @@ namespace AssEmbly
                                         break;
                                     case 0xB:  // WFX ptr
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(
-                                            string.Format(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart))));
-                                        Registers[(int)Register.rpo]++;
+                                            string.Format(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart, out byteCount))));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0xC:  // WFC reg
                                         fileWrite!.Write((byte)(0xFF & ReadMemoryRegister(operandStart)));
@@ -1466,8 +1473,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xF:  // WFC ptr
-                                        fileWrite!.Write(ReadMemoryRegisterPointedByte(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_FileWrite, opcodeLow));
@@ -1501,8 +1508,8 @@ namespace AssEmbly
                                         {
                                             throw new FileOperationException(Strings_Processor.Error_File_Already_Open);
                                         }
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         openFile = new FileStream(filepath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                                         openFileSize = openFile.Length;
                                         fileWrite = new BinaryWriter(openFile, Encoding.UTF8);
@@ -1535,8 +1542,8 @@ namespace AssEmbly
                                         File.Delete(filepath);
                                         break;
                                     case 0x4:  // DFL ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         File.Delete(filepath);
                                         break;
                                     case 0x5:  // FEX reg, adr
@@ -1545,9 +1552,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x6:  // FEX reg, ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1, out byteCount);
                                         WriteMemoryRegister(operandStart, File.Exists(filepath) ? 1UL : 0UL);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x7:  // FSZ reg, adr
                                         filepath = ReadMemoryPointedString(operandStart + 1);
@@ -1555,9 +1562,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x8:  // FSZ reg, ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1, out byteCount);
                                         WriteMemoryRegister(operandStart, (ulong)new FileInfo(filepath).Length);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Base_FileOperation, opcodeLow));
@@ -1652,14 +1659,15 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x1:  // SIGN_JLT ptr (Jump If Less Than - Sign Flag != Overflow Flag)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
                                             is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x2:  // SIGN_JLE adr (Jump If Less Than or Equal To - Sign Flag != Overflow Flag or Zero Flag Set)
@@ -1675,15 +1683,16 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x3:  // SIGN_JLE ptr (Jump If Less Than or Equal To - Sign Flag != Overflow Flag or Zero Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
                                             is (ulong)StatusFlags.Sign or (ulong)StatusFlags.Overflow)
                                             || (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x4:  // SIGN_JGT adr (Jump If Greater Than - Sign Flag == Overflow Flag and Zero Flag Unset)
@@ -1699,15 +1708,16 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x5:  // SIGN_JGT ptr (Jump If Greater Than - Sign Flag == Overflow Flag and Zero Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if (((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
                                             is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
                                             && (Registers[(int)Register.rsf] & (ulong)StatusFlags.Zero) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x6:  // SIGN_JGE adr (Jump If Greater Than or Equal To - Sign Flag == Overflow Flag)
@@ -1722,14 +1732,15 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x7:  // SIGN_JGE ptr (Jump If Greater Than or Equal To - Sign Flag == Overflow Flag)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.SignAndOverflow)
                                             is not (ulong)StatusFlags.Sign and not (ulong)StatusFlags.Overflow)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0x8:  // SIGN_JSI adr (Jump If Sign Flag Set)
@@ -1743,13 +1754,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x9:  // SIGN_JSI ptr (Jump If Sign Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xA:  // SIGN_JNS adr (Jump If Sign Flag Unset)
@@ -1763,13 +1775,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xB:  // SIGN_JNS ptr (Jump If Sign Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Sign) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xC:  // SIGN_JOV adr (Jump If Overflow Flag Set)
@@ -1783,13 +1796,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xD:  // SIGN_JOV ptr (Jump If Overflow Flag Set)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) != 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     case 0xE:  // SIGN_JNO adr (Jump If Overflow Flag Unset)
@@ -1803,13 +1817,14 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0xF:  // SIGN_JNO ptr (Jump If Overflow Flag Unset)
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
                                         if ((Registers[(int)Register.rsf] & (ulong)StatusFlags.Overflow) == 0)
                                         {
-                                            Registers[(int)Register.rpo] = ReadMemoryRegister(operandStart);
+                                            Registers[(int)Register.rpo] = result;
                                         }
                                         else
                                         {
-                                            Registers[(int)Register.rpo] += 1;
+                                            Registers[(int)Register.rpo] += byteCount;
                                         }
                                         break;
                                     default:
@@ -1833,8 +1848,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_DIV reg, ptr
-                                        result = (ulong)(signedInitial / (long)ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = (ulong)(signedInitial / (long)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // SIGN_DVR reg, reg, reg
                                         signedMathend = (long)ReadMemoryRegister(operandStart + 2);
@@ -1858,11 +1873,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // SIGN_DVR reg, reg, ptr
-                                        signedMathend = (long)ReadMemoryRegisterPointedQWord(operandStart + 2);
+                                        signedMathend = (long)ReadMemoryRegisterPointedNumber(operandStart + 2, out byteCount);
                                         result = (ulong)(signedInitial / signedMathend);
                                         remainder = (ulong)(signedInitial % signedMathend);
                                         WriteMemoryRegister(operandStart + 1, remainder);
-                                        Registers[(int)Register.rpo] += 3;
+                                        Registers[(int)Register.rpo] += byteCount + 2;
                                         break;
                                     case 0x8:  // SIGN_REM reg, reg
                                         result = (ulong)(signedInitial % (long)ReadMemoryRegister(operandStart + 1));
@@ -1877,8 +1892,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // SIGN_REM reg, ptr
-                                        result = (ulong)(signedInitial % (long)ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        result = (ulong)(signedInitial % (long)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Division, opcodeLow));
@@ -1926,9 +1941,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_SHR reg, ptr
-                                        shiftAmount = (int)ReadMemoryRegisterPointedQWord(operandStart + 1);
+                                        shiftAmount = (int)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount);
                                         result = (ulong)((long)initial >> shiftAmount);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_Shifting, opcodeLow));
@@ -1996,8 +2011,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_MVB reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(sbyte)ReadMemoryRegisterPointedByte(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (ulong)(sbyte)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // SIGN_MVW reg, reg
                                         WriteMemoryRegister(operandStart, (ulong)(short)ReadMemoryRegister(operandStart + 1));
@@ -2012,8 +2027,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // SIGN_MVW reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(short)ReadMemoryRegisterPointedWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (ulong)(short)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_SmallMove, opcodeLow));
@@ -2035,8 +2050,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_MVD reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(int)ReadMemoryRegisterPointedDWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        WriteMemoryRegister(operandStart, (ulong)(int)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_LargeMove, opcodeLow));
@@ -2058,8 +2073,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // SIGN_WCN ptr
-                                        Console.Write((long)ReadMemoryRegisterPointedQWord(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write((long)ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // SIGN_WCB reg
                                         Console.Write((sbyte)ReadMemoryRegister(operandStart));
@@ -2074,8 +2089,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // SIGN_WCB ptr
-                                        Console.Write((sbyte)ReadMemoryRegisterPointedByte(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write((sbyte)ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_ConsoleWrite, opcodeLow));
@@ -2101,8 +2116,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // SIGN_WFN ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegisterPointedQWord(operandStart)).ToString()));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegisterPointedNumber(operandStart, out byteCount)).ToString()));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // SIGN_WFB reg
                                         fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegister(operandStart)).ToString()));
@@ -2117,8 +2132,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // SIGN_WFB ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegisterPointedByte(operandStart)).ToString()));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegisterPointedByte(operandStart, out byteCount)).ToString()));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Signed_FileWrite, opcodeLow));
@@ -2226,8 +2241,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_ADD reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Addition, opcodeLow));
@@ -2284,8 +2299,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_SUB reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Subtraction, opcodeLow));
@@ -2342,8 +2357,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_MUL reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Multiplication, opcodeLow));
@@ -2400,8 +2415,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_DIV reg, ptr
-                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingResult = floatingInitial / BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // FLPT_DVR reg, reg, reg
                                         floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 2));
@@ -2425,11 +2440,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 10;
                                         break;
                                     case 0x7:  // FLPT_DVR reg, reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 2));
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 2, out byteCount));
                                         floatingResult = floatingInitial / floatingMathend;
                                         remainder = BitConverter.DoubleToUInt64Bits(floatingInitial % floatingMathend);
                                         WriteMemoryRegister(operandStart + 1, remainder);
-                                        Registers[(int)Register.rpo] += 3;
+                                        Registers[(int)Register.rpo] += byteCount + 2;
                                         break;
                                     case 0x8:  // FLPT_REM reg, reg
                                         floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart + 1));
@@ -2444,8 +2459,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // FLPT_REM reg, ptr
-                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingResult = floatingInitial % BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Division, opcodeLow));
@@ -2518,8 +2533,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x9:  // FLPT_PTN reg, ptr
-                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingResult = Math.Atan2(floatingInitial, BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount)));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Trigonometry, opcodeLow));
@@ -2568,8 +2583,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_POW reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Exponentiation, opcodeLow));
@@ -2626,8 +2641,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_LOG reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Logarithm, opcodeLow));
@@ -2683,8 +2698,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FLPT_WCN ptr
-                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart, out byteCount)));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_ConsoleWrite, opcodeLow));
@@ -2710,8 +2725,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FLPT_WFN ptr
-                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
-                                        Registers[(int)Register.rpo]++;
+                                        fileWrite!.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart, out byteCount)).ToString(CultureInfo.InvariantCulture)));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_FileWrite, opcodeLow));
@@ -2914,8 +2929,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FLPT_CMP reg, ptr
-                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedQWord(operandStart + 1));
-                                        Registers[(int)Register.rpo] += 2;
+                                        floatingMathend = BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FloatingPoint_Comparison, opcodeLow));
@@ -3017,14 +3032,35 @@ namespace AssEmbly
                                         Registers[(ulong)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // EXTD_HLT ptr
-                                        result = ReadMemoryRegisterPointedQWord(operandStart);
-                                        Registers[(ulong)Register.rpo]++;
+                                        result = ReadMemoryRegisterPointedNumber(operandStart, out byteCount);
+                                        Registers[(ulong)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_Halt, opcodeLow));
                                 }
                                 Environment.ExitCode = (int)result;
                                 halt = true;
+                                break;
+                            case 0x30:  // Move Pointer Address
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // EXTD_MPA reg, ptr
+                                        WriteMemoryRegister(operandStart, ReadMemoryPointer(operandStart + 1, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 1;
+                                        break;
+                                    case 0x1:  // EXTD_MPA adr, ptr
+                                        WriteMemoryPointedQWord(operandStart, ReadMemoryPointer(operandStart + 8, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount + 8;
+                                        break;
+                                    case 0x2:  // EXTD_MPA ptr, ptr
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
+                                        WriteMemoryQWord(result, ReadMemoryPointer(operandStart + byteCount, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_MovePointerAddress, opcodeLow));
+                                }
                                 break;
                             default:
                                 throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Extended, opcodeHigh));
@@ -3077,8 +3113,8 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings_Processor.Error_Assembly_Already_Open);
                                         }
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         try
                                         {
                                             extLoadContext = new AssemblyLoadContext("AssEmblyExternal", true);
@@ -3139,8 +3175,8 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings_Processor.Error_Function_Already_Open);
                                         }
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         try
                                         {
                                             openExtFunction = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
@@ -3206,8 +3242,8 @@ namespace AssEmbly
                                         }
                                         break;
                                     case 0x1:  // ASMX_AEX reg, ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         testLoadContext = new AssemblyLoadContext("AssEmblyExternalTest", true);
                                         try
                                         {
@@ -3245,8 +3281,8 @@ namespace AssEmbly
                                         {
                                             throw new ExternalOperationException(Strings_Processor.Error_Assembly_Not_Open);
                                         }
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         try
                                         {
                                             MethodInfo? method = openExtAssembly.GetMethod(filepath, BindingFlags.Public | BindingFlags.Static, ExternalMethodParamTypes);
@@ -3296,8 +3332,8 @@ namespace AssEmbly
                                             break;
                                         case 0x4:  // ASMX_CAL ptr
                                             // null is used as obj parameter as method is static
-                                            _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryRegisterPointedQWord(operandStart) });
-                                            Registers[(int)Register.rpo]++;
+                                            _ = openExtFunction.Invoke(null, new object?[3] { Memory, Registers, ReadMemoryRegisterPointedNumber(operandStart, out byteCount) });
+                                            Registers[(int)Register.rpo] += byteCount;
                                             break;
                                         default:
                                             throw new InvalidOpcodeException(
@@ -3351,13 +3387,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // HEAP_ALC reg, ptr
-                                        result = AllocateMemory(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        result = AllocateMemory(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
                                         if (result == ulong.MaxValue)
                                         {
                                             throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
                                         }
                                         WriteMemoryRegister(operandStart, result);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // HEAP_TRY reg, reg
                                         result = AllocateMemory(ReadMemoryRegister(operandStart + 1));
@@ -3375,9 +3411,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // HEAP_TRY reg, ptr
-                                        result = AllocateMemory(ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        result = AllocateMemory(ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
                                         WriteMemoryRegister(operandStart, result);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
@@ -3427,7 +3463,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // HEAP_REA reg, ptr
-                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
                                         if (result == ulong.MaxValue)
                                         {
                                             throw new MemoryAllocationException(Strings_Processor.Error_Memory_Allocation);
@@ -3437,7 +3473,7 @@ namespace AssEmbly
                                             throw new InvalidMemoryBlockException(Strings_Processor.Error_Invalid_Memory_Block);
                                         }
                                         WriteMemoryRegister(operandStart, result);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // HEAP_TRE reg, reg
                                         result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegister(operandStart + 1));
@@ -3455,9 +3491,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // HEAP_TRE reg, ptr
-                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedQWord(operandStart + 1));
+                                        result = ReallocateMemory(ReadMemoryRegister(operandStart), ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
                                         WriteMemoryRegister(operandStart, result);
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(
@@ -3496,16 +3532,16 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x1:  // FSYS_CWD ptr
-                                        Environment.CurrentDirectory = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        Environment.CurrentDirectory = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x2:  // FSYS_GWD adr
                                         WriteMemoryPointedString(operandStart, Environment.CurrentDirectory);
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FSYS_GWD ptr
-                                        WriteMemoryRegisterPointedString(operandStart, Environment.CurrentDirectory);
-                                        Registers[(int)Register.rpo]++;
+                                        WriteMemoryRegisterPointedString(operandStart, Environment.CurrentDirectory, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_WorkingDir, opcodeLow));
@@ -3519,8 +3555,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x1:  // FSYS_CDR ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_CreateDir, opcodeLow));
@@ -3537,8 +3573,8 @@ namespace AssEmbly
                                         break;
                                     case 0x1:  // FSYS_DDR ptr
                                     case 0x3:  // FSYS_DDE ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_DeleteDir, opcodeLow));
@@ -3556,8 +3592,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x1:  // FSYS_DEX reg, ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_DirectoryExists, opcodeLow));
@@ -3576,20 +3612,21 @@ namespace AssEmbly
                                     case 0x1:  // FSYS_CPY adr, ptr
                                     case 0x5:  // FSYS_MOV adr, ptr
                                         destination = ReadMemoryPointedString(operandStart);
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 8);
-                                        Registers[(int)Register.rpo] += 9;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + 8, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x2:  // FSYS_CPY ptr, adr
                                     case 0x6:  // FSYS_MOV ptr, adr
-                                        destination = ReadMemoryRegisterPointedString(operandStart);
+                                        destination = ReadMemoryRegisterPointedString(operandStart, out byteCount);
                                         filepath = ReadMemoryPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 9;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x3:  // FSYS_CPY ptr, ptr
                                     case 0x7:  // FSYS_MOV ptr, ptr
-                                        destination = ReadMemoryRegisterPointedString(operandStart);
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += 2;
+                                        destination = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + byteCount, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_Move, opcodeLow));
@@ -3614,8 +3651,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // FSYS_BDL ptr
-                                        filepath = ReadMemoryRegisterPointedString(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_BeginListing, opcodeLow));
@@ -3633,16 +3670,16 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x1:  // FSYS_GNF ptr
-                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "");
-                                        Registers[(int)Register.rpo]++;
+                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "", out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x2:  // FSYS_GND adr
                                         WriteMemoryPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "");
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FSYS_GND ptr
-                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "");
-                                        Registers[(int)Register.rpo]++;
+                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "", out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_ListingGet, opcodeLow));
@@ -3658,8 +3695,8 @@ namespace AssEmbly
                                         break;
                                     case 0x1:  // FSYS_GCT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
-                                        Registers[(int)Register.rpo] += 2;
+                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x2:  // FSYS_GMT reg, adr
                                         WriteMemoryRegister(operandStart,
@@ -3668,8 +3705,8 @@ namespace AssEmbly
                                         break;
                                     case 0x3:  // FSYS_GMT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
-                                        Registers[(int)Register.rpo] += 2;
+                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // FSYS_GAT reg, adr
                                         WriteMemoryRegister(operandStart,
@@ -3678,8 +3715,8 @@ namespace AssEmbly
                                         break;
                                     case 0x5:  // FSYS_GAT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
-                                        Registers[(int)Register.rpo] += 2;
+                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_TimeGet, opcodeLow));
@@ -3694,9 +3731,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x1:  // FSYS_SCT ptr, reg
-                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x2:  // FSYS_SCT adr, lit
                                         File.SetCreationTimeUtc(ReadMemoryPointedString(operandStart),
@@ -3704,9 +3741,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x3:  // FSYS_SCT ptr, lit
-                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x4:  // FSYS_SMT adr, reg
                                         File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
@@ -3714,9 +3751,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x5:  // FSYS_SMT ptr, reg
-                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x6:  // FSYS_SMT adr, lit
                                         File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
@@ -3724,9 +3761,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x7:  // FSYS_SMT ptr, lit
-                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // FSYS_SAT adr, reg
                                         File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
@@ -3734,9 +3771,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x9:  // FSYS_SAT ptr, reg
-                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 2;
+                                        Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xA:  // FSYS_SAT adr, lit
                                         File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
@@ -3744,9 +3781,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xB:  // FSYS_SAT ptr, lit
-                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart),
+                                        File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
                                             UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
-                                        Registers[(int)Register.rpo] += 9;
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_TimeSet, opcodeLow));
@@ -3800,8 +3837,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // TERM_SCY ptr
-                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryRegisterPointedQWord(operandStart));
-                                        Registers[(int)Register.rpo]++;
+                                        Console.SetCursorPosition(Console.GetCursorPosition().Left, (int)ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // TERM_SCX reg
                                         Console.SetCursorPosition((int)ReadMemoryRegister(operandStart), Console.GetCursorPosition().Top);
@@ -3816,8 +3853,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // TERM_SCX ptr
-                                        Console.SetCursorPosition((int)ReadMemoryRegisterPointedQWord(operandStart), Console.GetCursorPosition().Top);
-                                        Registers[(int)Register.rpo]++;
+                                        Console.SetCursorPosition((int)ReadMemoryRegisterPointedNumber(operandStart, out byteCount), Console.GetCursorPosition().Top);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Terminal_SetPosition, opcodeLow));
@@ -3872,8 +3909,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // TERM_SFC ptr
-                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryRegisterPointedQWord(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        Console.ForegroundColor = (ConsoleColor)ReadMemoryRegisterPointedNumber(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // TERM_SBC reg
                                         Console.BackgroundColor = (ConsoleColor)ReadMemoryRegister(operandStart);
@@ -3888,8 +3925,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // TERM_SBC ptr
-                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryRegisterPointedQWord(operandStart);
-                                        Registers[(int)Register.rpo]++;
+                                        Console.BackgroundColor = (ConsoleColor)ReadMemoryRegisterPointedNumber(operandStart, out byteCount);
+                                        Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x8:  // TERM_RSC
                                         Console.ResetColor();
@@ -4104,39 +4141,95 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Read a byte from the memory address stored at the register type stored at the given memory offset.
+        /// Calculate the memory address of the stored pointer at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public byte ReadMemoryRegisterPointedByte(ulong offset)
+        public ulong ReadMemoryPointer(ulong offset, out ulong byteCount)
         {
+#if DISPLACEMENT
+            return GetPointerAddress(new Pointer(Memory.AsSpan()[(int)offset..], out byteCount));
+#else
+            return Registers[(int)ReadMemoryRegisterType(offset)];
+#endif
+        }
+
+        /// <summary>
+        /// Read a byte from the memory address stored in a pointer stored at the given memory offset.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public byte ReadMemoryRegisterPointedByte(ulong offset, out ulong byteCount)
+        {
+#if DISPLACEMENT
+            return Memory[ReadMemoryPointer(offset, out byteCount)];
+#else
+            byteCount = 1;
             return Memory[ReadMemoryRegister(offset)];
+#endif
         }
 
         /// <summary>
-        /// Read a word (16 bit, 2 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
+        /// Read a word (16 bit, 2 byte, unsigned integer) from the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ushort ReadMemoryRegisterPointedWord(ulong offset)
+        public ushort ReadMemoryRegisterPointedWord(ulong offset, out ulong byteCount)
         {
+#if DISPLACEMENT
+            return ReadMemoryWord(ReadMemoryPointer(offset, out byteCount));
+#else
+            byteCount = 1;
             return ReadMemoryWord(ReadMemoryRegister(offset));
+#endif
         }
 
         /// <summary>
-        /// Read a double word (32 bit, 4 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
+        /// Read a double word (32 bit, 4 byte, unsigned integer) from the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public uint ReadMemoryRegisterPointedDWord(ulong offset)
+        public uint ReadMemoryRegisterPointedDWord(ulong offset, out ulong byteCount)
         {
+#if DISPLACEMENT
+            return ReadMemoryDWord(ReadMemoryPointer(offset, out byteCount));
+#else
+            byteCount = 1;
             return ReadMemoryDWord(ReadMemoryRegister(offset));
+#endif
         }
 
         /// <summary>
-        /// Read a quad word (64 bit, 8 byte, unsigned integer) from the memory address stored at the register type stored at the given memory offset.
+        /// Read a quad word (64 bit, 8 byte, unsigned integer) from the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ulong ReadMemoryRegisterPointedQWord(ulong offset)
+        public ulong ReadMemoryRegisterPointedQWord(ulong offset, out ulong byteCount)
         {
+#if DISPLACEMENT
+            return ReadMemoryQWord(ReadMemoryPointer(offset, out byteCount));
+#else
+            byteCount = 1;
             return ReadMemoryQWord(ReadMemoryRegister(offset));
+#endif
+        }
+
+        /// <summary>
+        /// Read a number from the memory address stored in a pointer stored at the given memory offset, using the read size stored in the pointer.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong ReadMemoryRegisterPointedNumber(ulong offset, out ulong byteCount)
+        {
+#if DISPLACEMENT
+            Pointer ptr = new(Memory.AsSpan()[(int)offset..], out byteCount);
+            ulong address = GetPointerAddress(ptr);
+            return ptr.ReadSize switch
+            {
+                PointerReadSize.QuadWord => ReadMemoryQWord(address),
+                PointerReadSize.DoubleWord => ReadMemoryDWord(address),
+                PointerReadSize.Word => ReadMemoryWord(address),
+                PointerReadSize.Byte => Memory[address],
+                _ => 0
+            };
+#else
+            byteCount = 1;
+            return ReadMemoryQWord(ReadMemoryRegister(offset));
+#endif
         }
 
         /// <summary>
@@ -4188,13 +4281,18 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Read a null-terminated UTF-8 encoded string from the memory address stored at the register type stored at the given memory offset.
+        /// Read a null-terminated UTF-8 encoded string from the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         /// <remarks>A null terminator is a single 0x00 byte.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string ReadMemoryRegisterPointedString(ulong offset)
+        public string ReadMemoryRegisterPointedString(ulong offset, out ulong byteCount)
         {
+#if DISPLACEMENT
+            return ReadMemoryString(ReadMemoryPointer(offset, out byteCount));
+#else
+            byteCount = 1;
             return ReadMemoryString(ReadMemoryRegister(offset));
+#endif
         }
 
         /// <summary>
@@ -4249,39 +4347,59 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Write a byte to the memory address stored at the register type stored at the given memory offset.
+        /// Write a byte to the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteMemoryRegisterPointedByte(ulong offset, byte value)
+        public void WriteMemoryRegisterPointedByte(ulong offset, byte value, out ulong byteCount)
         {
+#if DISPLACEMENT
+            Memory[ReadMemoryPointer(offset, out byteCount)] = value;
+#else
+            byteCount = 1;
             Memory[ReadMemoryRegister(offset)] = value;
+#endif
         }
 
         /// <summary>
-        /// Write a word (16 bit, 2 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
+        /// Write a word (16 bit, 2 byte, unsigned integer) to the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteMemoryRegisterPointedWord(ulong offset, ushort value)
+        public void WriteMemoryRegisterPointedWord(ulong offset, ushort value, out ulong byteCount)
         {
+#if DISPLACEMENT
+            WriteMemoryWord(ReadMemoryPointer(offset, out byteCount), value);
+#else
+            byteCount = 1;
             WriteMemoryWord(ReadMemoryRegister(offset), value);
+#endif
         }
 
         /// <summary>
-        /// Write a double word (32 bit, 4 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
+        /// Write a double word (32 bit, 4 byte, unsigned integer) to the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteMemoryRegisterPointedDWord(ulong offset, uint value)
+        public void WriteMemoryRegisterPointedDWord(ulong offset, uint value, out ulong byteCount)
         {
+#if DISPLACEMENT
+            WriteMemoryDWord(ReadMemoryPointer(offset, out byteCount), value);
+#else
+            byteCount = 1;
             WriteMemoryDWord(ReadMemoryRegister(offset), value);
+#endif
         }
 
         /// <summary>
-        /// Write a quad word (64 bit, 8 byte, unsigned integer) to the memory address stored at the register type stored at the given memory offset.
+        /// Write a quad word (64 bit, 8 byte, unsigned integer) to the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteMemoryRegisterPointedQWord(ulong offset, ulong value)
+        public void WriteMemoryRegisterPointedQWord(ulong offset, ulong value, out ulong byteCount)
         {
+#if DISPLACEMENT
+            WriteMemoryQWord(ReadMemoryPointer(offset, out byteCount), value);
+#else
+            byteCount = 1;
             WriteMemoryQWord(ReadMemoryRegister(offset), value);
+#endif
         }
 
         /// <summary>
@@ -4333,13 +4451,18 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Write a null-terminated UTF-8 encoded string to the memory address stored at the register type stored at the given memory offset.
+        /// Write a null-terminated UTF-8 encoded string to the memory address stored in a pointer stored at the given memory offset.
         /// </summary>
         /// <remarks>A null terminator is a single 0x00 byte.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void WriteMemoryRegisterPointedString(ulong offset, string value)
+        public void WriteMemoryRegisterPointedString(ulong offset, string value, out ulong byteCount)
         {
+#if DISPLACEMENT
+            WriteMemoryString(ReadMemoryPointer(offset, out byteCount), value);
+#else
+            byteCount = 1;
             WriteMemoryString(ReadMemoryRegister(offset), value);
+#endif
         }
 
         /// <summary>
@@ -4351,5 +4474,27 @@ namespace AssEmbly
         {
             WriteMemoryString(ReadMemoryQWord(offset), value);
         }
+
+#if DISPLACEMENT
+        /// <summary>
+        /// Calculate the address of a pointer given the current state of this processor's registers.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ulong GetPointerAddress(Pointer ptr)
+        {
+            return ptr.Mode switch
+            {
+                DisplacementMode.NoDisplacement => Registers[(int)ptr.PointerRegister],
+                DisplacementMode.Constant => Registers[(int)ptr.PointerRegister]
+                    + (ulong)ptr.DisplacementConstant,
+                DisplacementMode.Register => Registers[(int)ptr.PointerRegister]
+                    + (Registers[(int)ptr.OtherRegister] * ptr.OtherRegisterMultiplier.GetMultiplier()),
+                DisplacementMode.ConstantAndRegister => Registers[(int)ptr.PointerRegister]
+                    + (Registers[(int)ptr.OtherRegister] * ptr.OtherRegisterMultiplier.GetMultiplier())
+                    + (ulong)ptr.DisplacementConstant,
+                _ => 0
+            };
+        }
+#endif
     }
 }

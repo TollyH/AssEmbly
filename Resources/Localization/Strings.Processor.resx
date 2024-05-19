@@ -328,4 +328,7 @@
   <data name="Error_Stack_Out_Of_Range" xml:space="preserve">
     <value>The rso register is outside the range of available memory</value>
   </data>
+  <data name="Error_Opcode_Low_Extended_MovePointerAddress" xml:space="preserve">
+    <value>{0:X} is not a recognised extended base set move pointer address low opcode</value>
+  </data>
 </root>
