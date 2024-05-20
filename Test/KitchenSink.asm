@@ -315,6 +315,8 @@ HLT
 %ANALYZER suggestion, 0018, 0
 :DISPLACEMENTS
 %ANALYZER suggestion, 0018, r
+%ANALYZER warning, 0032, 0
+%ANALYZER suggestion, 0021, 0
 MVQ rg0, *rg1
 MVQ rg1, Q*rg2
 MVQ rg2, D*rg3
@@ -338,6 +340,8 @@ MVQ Q*rg2[-rg8 * 8  +2], rg1
 MVQ D*rg3[    r    g       7      *        12     8       -   0 x  3    ],rg2
 MVQ W*rg4[   -      r   g   6+4    ], rg3
 MVQ B*rg5[  r   g      5*4 -5], rg4
+%ANALYZER warning, 0033, r
+%ANALYZER suggestion, 0021, r
 
 HLT
 

@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Text.RegularExpressions;
 
 namespace AssEmbly
 {
@@ -86,7 +87,7 @@ namespace AssEmbly
 
         private byte[] finalProgram = Array.Empty<byte>();
         private ulong entryPoint = 0;
-        private HashSet<string> referencedLabels = new();
+        private Dictionary<string, ulong> referencedLabels = new();
 
         /// <summary>
         /// Update the state of the class instance with the next instruction in the program being analyzed.
@@ -187,9 +188,11 @@ namespace AssEmbly
         /// </summary>
         /// <param name="finalProgram">The fully assembled program, with all label locations inserted.</param>
         /// <param name="entryPoint">The address that the program will start executing from.</param>
-        /// <param name="referencedLabels">A set of all label names referenced at any point by the program.</param>
+        /// <param name="referencedLabels">
+        /// A set of all label names referenced at any point by the program, mapped to the destination address.
+        /// </param>
         /// <returns>An array of any warnings caused by final analysis.</returns>
-        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint, HashSet<string> referencedLabels)
+        public Warning[] Finalize(byte[] finalProgram, ulong entryPoint, Dictionary<string, ulong> referencedLabels)
         {
             this.finalProgram = finalProgram;
             this.entryPoint = entryPoint;
@@ -253,6 +256,11 @@ namespace AssEmbly
                 { 0029, Analyzer_Rolling_Warning_0029 },
                 { 0030, Analyzer_Rolling_Warning_0030 },
                 { 0031, Analyzer_Rolling_Warning_0031 },
+#if DISPLACEMENT
+                { 0032, Analyzer_Rolling_Warning_0032 },
+                { 0033, Analyzer_Rolling_Warning_0033 },
+                { 0034, Analyzer_Rolling_Warning_0034 },
+#endif
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
             {
@@ -273,6 +281,11 @@ namespace AssEmbly
                 { 0017, Analyzer_Rolling_Suggestion_0017 },
                 { 0019, Analyzer_Rolling_Suggestion_0019 },
                 { 0020, Analyzer_Rolling_Suggestion_0020 },
+#if DISPLACEMENT
+                { 0021, Analyzer_Rolling_Suggestion_0021 },
+                { 0022, Analyzer_Rolling_Suggestion_0022 },
+                { 0023, Analyzer_Rolling_Suggestion_0023 },
+#endif
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -314,7 +327,7 @@ namespace AssEmbly
         private readonly Dictionary<string, int> lastExecutableLine = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpCallToAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> writesToAddress = new();
-        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> readsFromAddress = new();
+        private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, string Operand)> readsFromAddress = new();
         private readonly List<(FilePosition Position, string? MacroName, int MacroLineDepth, ulong Address)> jumpsCalls = new();
         private readonly Dictionary<string, int> firstAsmOnceLineInFiles = new();
 
@@ -397,11 +410,11 @@ namespace AssEmbly
                 {
                     writesToAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart));
                 }
-                if (readValueFromMemory.TryGetValue(instructionOpcode, out ulong[]? addressOpcodeOffsets))
+                if (readValueFromMemory.TryGetValue(instructionOpcode, out int[]? addressOpcodeIndices))
                 {
-                    foreach (ulong offset in addressOpcodeOffsets)
+                    foreach (int index in addressOpcodeIndices)
                     {
-                        readsFromAddress.Add((filePosition, macroName, macroLineDepth, currentAddress + operandStart + offset));
+                        readsFromAddress.Add((filePosition, macroName, macroLineDepth, operands[index]));
                     }
                 }
                 if (jumpCallToAddressOpcodes.Contains(instructionOpcode))
@@ -567,9 +580,19 @@ namespace AssEmbly
         {
             // Warning 0005: Instruction reads from an address pointing to executable code in a context that likely expects data.
             List<Warning> warnings = new();
-            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, ulong writeAddress) in readsFromAddress)
+            foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, string writeOperand) in readsFromAddress)
             {
-                ulong address = BinaryPrimitives.ReadUInt64LittleEndian(finalProgram.AsSpan()[(int)writeAddress..]);
+                AddressReference reference = Assembler.ParseAddressReference(writeOperand);
+                ulong address = reference.ReferenceType switch
+                {
+                    AddressReferenceType.LabelAddress
+                        or AddressReferenceType.LabelLiteral => referencedLabels[reference.LabelName],
+                    _ => reference.Address
+                };
+                if (reference.Displaced)
+                {
+                    address += (ulong)reference.DisplacementConstant;
+                }
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writePosition,
@@ -834,6 +857,28 @@ namespace AssEmbly
                     || mnemonic.Equals("%ELSE_IF", StringComparison.OrdinalIgnoreCase))
                 && operands.Length >= 3 && Assembler.ParseLine(preVariableLine).All(o => o[0] != '@');
         }
+
+#if DISPLACEMENT
+        private bool Analyzer_Rolling_Warning_0032()
+        {
+            // Warning 0032: Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer.
+            return newBytes.Length > 0 && !instructionIsData && pointerForAddress.TryGetValue(instructionOpcode, out int[]? operandIndices)
+                && operandIndices.Any(i => Assembler.ParsePointer(operands[i]).ReadSize != PointerReadSize.QuadWord);
+        }
+
+        private bool Analyzer_Rolling_Warning_0033()
+        {
+            // Warning 0033: Pointer size other than 64 bits (`*`/`Q*`) used in a floating point context.
+            return newBytes.Length > 0 && !instructionIsData && floatPointerRead.Contains(instructionOpcode)
+                && Assembler.ParsePointer(operands[1]).ReadSize != PointerReadSize.QuadWord;
+        }
+
+        private bool Analyzer_Rolling_Warning_0034()
+        {
+            // Warning 0034: Values in displacements are always interpreted as integers, but the provided value is floating point.
+            return newBytes.Length > 0 && !instructionIsData && operands.Any(o => FloatingPointDisplacementRegex().IsMatch(o));
+        }
+#endif
 
         private bool Analyzer_Rolling_Suggestion_0001()
         {
@@ -1101,7 +1146,7 @@ namespace AssEmbly
             List<Warning> warnings = new();
             // Iterate label definitions that are not present in the referenced labels set
             foreach ((string labelName, (FilePosition labelPosition, string? labelMacroName))
-                in labelDefinitionPositions.ExceptBy(referencedLabels, kv => kv.Key)
+                in labelDefinitionPositions.ExceptBy(referencedLabels.Keys, kv => kv.Key)
                     .Where(kv => !kv.Key.Equals("ENTRY", StringComparison.OrdinalIgnoreCase)))
             {
                 string labelDefinitionText = ':' + labelName;
@@ -1124,5 +1169,34 @@ namespace AssEmbly
             return newBytes.Length > 0 && !instructionIsData && instructionOpcode == new Opcode(0x03, 0x21) && operands[0][0] != ':'
                 && BinaryPrimitives.ReadUInt64LittleEndian(newBytes.AsSpan()[(int)operandStart..]) == 0;
         }
+
+#if DISPLACEMENT
+        private bool Analyzer_Rolling_Suggestion_0021()
+        {
+            // Suggestion 0021: Using the `Q*` pointer size specifier is unnecessary. Use just `*` instead - pointers read 64-bits by default.
+            return newBytes.Length > 0 && !instructionIsData && operands.Any(o => o.StartsWith("Q*", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0022()
+        {
+            // Suggestion 0022: Using the `* 1` register multiplier is unnecessary. Register displacements are not multiplied by default.
+            return newBytes.Length > 0 && !instructionIsData && operands.Any(o => RegisterMultiplierX1Regex().IsMatch(o));
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0023()
+        {
+            // Suggestion 0023: A displacement constant of 0 has no effect.
+            return newBytes.Length > 0 && !instructionIsData && operands.Any(o => ConstantZeroDisplacementRegex().IsMatch(o));
+        }
+
+        [GeneratedRegex(@"\[.*(?:[0-9]?\.[0-9]|[0-9]\.[0-9]?)")]
+        private static partial Regex FloatingPointDisplacementRegex();
+
+        [GeneratedRegex(@"\[.+\*(?:0[BbXx])?0*1(?![0-9a-fA-FBbXx])")]
+        private static partial Regex RegisterMultiplierX1Regex();
+
+        [GeneratedRegex(@"\[(?:.*[+\-])?(?:0[BbXx])?0+(?![0-9a-fA-FBbXx])")]
+        private static partial Regex ConstantZeroDisplacementRegex();
+#endif
     }
 }

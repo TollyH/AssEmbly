@@ -430,7 +430,7 @@ namespace AssEmbly
                 IEnumerable<string> labelNameReferences = labelReferences.Select(l => l.LabelName);
                 IEnumerable<string> labelNameLinks = labelLinks.Values.Select(l => l.Target);
                 warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint,
-                    labelNameReferences.Union(labelNameLinks).ToHashSet()));
+                    labelNameReferences.Union(labelNameLinks).ToDictionary(l => l, l => labels[l])));
 #endif
                 Finalized = true;
             }
@@ -1810,7 +1810,7 @@ namespace AssEmbly
         }
 
         /// <summary>
-        /// Parse a label reference (:XYZ), label literal (:&XYZ), or literal address (:123) operand.
+        /// Parse a label reference (:XYZ), label literal (:&amp;XYZ), or literal address (:123) operand.
         /// </summary>
         /// <param name="addressReference">
         /// The address operand to parse, including the ':' prefix and any displacement.
@@ -2563,10 +2563,10 @@ namespace AssEmbly
                 operand = operand[1..];
             }
             Match invalidMatch = operand.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-                ? InvalidHexadecimalChars().Match(operand)  // Hex
+                ? InvalidHexadecimalCharsRegex().Match(operand)  // Hex
                 : operand.StartsWith("0b", StringComparison.OrdinalIgnoreCase)
-                    ? InvalidBinaryChars().Match(operand)  // Bin
-                    : InvalidDecimalChars().Match(operand);  // Dec
+                    ? InvalidBinaryCharsRegex().Match(operand)  // Bin
+                    : InvalidDecimalCharsRegex().Match(operand);  // Dec
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(string.Format(Strings_Assembler.Error_Literal_Invalid_Character, operand, new string(' ', invalidMatch.Index)));
@@ -2615,13 +2615,13 @@ namespace AssEmbly
         private static partial Regex ValidLabelRegex();
 
         [GeneratedRegex("[^0-9A-Fa-f_](?<!^0[xX])")]
-        private static partial Regex InvalidHexadecimalChars();
+        private static partial Regex InvalidHexadecimalCharsRegex();
 
         [GeneratedRegex("[^0-1_](?<!^0[bB])")]
-        private static partial Regex InvalidBinaryChars();
+        private static partial Regex InvalidBinaryCharsRegex();
 
         [GeneratedRegex(@"[^0-9_\.]")]
-        private static partial Regex InvalidDecimalChars();
+        private static partial Regex InvalidDecimalCharsRegex();
 
 #if DISPLACEMENT
         [GeneratedRegex("[*+-]|$")]

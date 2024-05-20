@@ -297,101 +297,180 @@
         /// <summary>
         /// Every opcode that reads a value from memory as data, mapped to the byte offsets of the operands that are the memory addresses (not including the opcode).
         /// </summary>
-        internal static readonly Dictionary<Opcode, ulong[]> readValueFromMemory = new()
+        internal static readonly Dictionary<Opcode, int[]> readValueFromMemory = new()
         {
-            { new Opcode(0x00, 0x12), new ulong[] { 1 } },  // ADD reg, adr
-            { new Opcode(0x00, 0x22), new ulong[] { 1 } },  // SUB reg, adr
-            { new Opcode(0x00, 0x32), new ulong[] { 1 } },  // MUL reg, adr
-            { new Opcode(0x00, 0x42), new ulong[] { 1 } },  // DIV reg, adr
-            { new Opcode(0x00, 0x46), new ulong[] { 2 } },  // DVR reg, reg, adr
-            { new Opcode(0x00, 0x4A), new ulong[] { 1 } },  // REM reg, adr
-            { new Opcode(0x00, 0x52), new ulong[] { 1 } },  // SHL reg, adr
-            { new Opcode(0x00, 0x56), new ulong[] { 1 } },  // SHR reg, adr
-            { new Opcode(0x00, 0x62), new ulong[] { 1 } },  // AND reg, adr
-            { new Opcode(0x00, 0x66), new ulong[] { 1 } },  // ORR reg, adr
-            { new Opcode(0x00, 0x6A), new ulong[] { 1 } },  // XOR reg, adr
-            { new Opcode(0x00, 0x72), new ulong[] { 1 } },  // TST reg, adr
-            { new Opcode(0x00, 0x76), new ulong[] { 1 } },  // CMP reg, adr
-            { new Opcode(0x00, 0x82), new ulong[] { 1 } },  // MVB reg, adr
-            { new Opcode(0x00, 0x8A), new ulong[] { 1 } },  // MVW reg, adr
-            { new Opcode(0x00, 0x92), new ulong[] { 1 } },  // MVD reg, adr
-            { new Opcode(0x00, 0x9A), new ulong[] { 1 } },  // MVQ reg, adr
-            { new Opcode(0x00, 0xA2), new ulong[] { 0 } },  // PSH adr
-            { new Opcode(0x00, 0xB4), new ulong[] { 8 } },  // CAL adr, adr
-            { new Opcode(0x00, 0xB8), new ulong[] { 1 } },  // CAL ptr, adr
-            { new Opcode(0x00, 0xBD), new ulong[] { 0 } },  // RET adr
-            { new Opcode(0x00, 0xC2), new ulong[] { 0 } },  // WCN adr
-            { new Opcode(0x00, 0xC6), new ulong[] { 0 } },  // WCB adr
-            { new Opcode(0x00, 0xCA), new ulong[] { 0 } },  // WCX adr
-            { new Opcode(0x00, 0xCE), new ulong[] { 0 } },  // WCC adr
-            { new Opcode(0x00, 0xD2), new ulong[] { 0 } },  // WFN adr
-            { new Opcode(0x00, 0xD6), new ulong[] { 0 } },  // WFB adr
-            { new Opcode(0x00, 0xDA), new ulong[] { 0 } },  // WFX adr
-            { new Opcode(0x00, 0xDE), new ulong[] { 0 } },  // WFC adr
-            { new Opcode(0x00, 0xE0), new ulong[] { 0 } },  // OFL adr
-            { new Opcode(0x00, 0xE3), new ulong[] { 0 } },  // DFL adr
-            { new Opcode(0x00, 0xE5), new ulong[] { 1 } },  // FEX reg, adr
-            { new Opcode(0x00, 0xE7), new ulong[] { 1 } },  // FSZ reg, adr
+            { new Opcode(0x00, 0x12), new[] { 1 } },  // ADD reg, adr
+            { new Opcode(0x00, 0x22), new[] { 1 } },  // SUB reg, adr
+            { new Opcode(0x00, 0x32), new[] { 1 } },  // MUL reg, adr
+            { new Opcode(0x00, 0x42), new[] { 1 } },  // DIV reg, adr
+            { new Opcode(0x00, 0x46), new[] { 2 } },  // DVR reg, reg, adr
+            { new Opcode(0x00, 0x4A), new[] { 1 } },  // REM reg, adr
+            { new Opcode(0x00, 0x52), new[] { 1 } },  // SHL reg, adr
+            { new Opcode(0x00, 0x56), new[] { 1 } },  // SHR reg, adr
+            { new Opcode(0x00, 0x62), new[] { 1 } },  // AND reg, adr
+            { new Opcode(0x00, 0x66), new[] { 1 } },  // ORR reg, adr
+            { new Opcode(0x00, 0x6A), new[] { 1 } },  // XOR reg, adr
+            { new Opcode(0x00, 0x72), new[] { 1 } },  // TST reg, adr
+            { new Opcode(0x00, 0x76), new[] { 1 } },  // CMP reg, adr
+            { new Opcode(0x00, 0x82), new[] { 1 } },  // MVB reg, adr
+            { new Opcode(0x00, 0x8A), new[] { 1 } },  // MVW reg, adr
+            { new Opcode(0x00, 0x92), new[] { 1 } },  // MVD reg, adr
+            { new Opcode(0x00, 0x9A), new[] { 1 } },  // MVQ reg, adr
+            { new Opcode(0x00, 0xA2), new[] { 0 } },  // PSH adr
+            { new Opcode(0x00, 0xB4), new[] { 1 } },  // CAL adr, adr
+            { new Opcode(0x00, 0xB8), new[] { 1 } },  // CAL ptr, adr
+            { new Opcode(0x00, 0xBD), new[] { 0 } },  // RET adr
+            { new Opcode(0x00, 0xC2), new[] { 0 } },  // WCN adr
+            { new Opcode(0x00, 0xC6), new[] { 0 } },  // WCB adr
+            { new Opcode(0x00, 0xCA), new[] { 0 } },  // WCX adr
+            { new Opcode(0x00, 0xCE), new[] { 0 } },  // WCC adr
+            { new Opcode(0x00, 0xD2), new[] { 0 } },  // WFN adr
+            { new Opcode(0x00, 0xD6), new[] { 0 } },  // WFB adr
+            { new Opcode(0x00, 0xDA), new[] { 0 } },  // WFX adr
+            { new Opcode(0x00, 0xDE), new[] { 0 } },  // WFC adr
+            { new Opcode(0x00, 0xE0), new[] { 0 } },  // OFL adr
+            { new Opcode(0x00, 0xE3), new[] { 0 } },  // DFL adr
+            { new Opcode(0x00, 0xE5), new[] { 1 } },  // FEX reg, adr
+            { new Opcode(0x00, 0xE7), new[] { 1 } },  // FSZ reg, adr
 
-            { new Opcode(0x01, 0x12), new ulong[] { 1 } },  // SIGN_DIV reg, adr
-            { new Opcode(0x01, 0x16), new ulong[] { 2 } },  // SIGN_DVR reg, reg, adr
-            { new Opcode(0x01, 0x1A), new ulong[] { 1 } },  // SIGN_REM reg, adr
-            { new Opcode(0x01, 0x22), new ulong[] { 1 } },  // SIGN_SHL reg, adr
-            { new Opcode(0x01, 0x32), new ulong[] { 1 } },  // SIGN_MVB reg, adr
-            { new Opcode(0x01, 0x36), new ulong[] { 1 } },  // SIGN_MVW reg, adr
-            { new Opcode(0x01, 0x42), new ulong[] { 1 } },  // SIGN_MVD reg, adr
-            { new Opcode(0x01, 0x52), new ulong[] { 0 } },  // SIGN_WCN adr
-            { new Opcode(0x01, 0x56), new ulong[] { 0 } },  // SIGN_WCB adr
-            { new Opcode(0x01, 0x62), new ulong[] { 0 } },  // SIGN_WFN adr
-            { new Opcode(0x01, 0x66), new ulong[] { 0 } },  // SIGN_WFB adr
+            { new Opcode(0x01, 0x12), new[] { 1 } },  // SIGN_DIV reg, adr
+            { new Opcode(0x01, 0x16), new[] { 2 } },  // SIGN_DVR reg, reg, adr
+            { new Opcode(0x01, 0x1A), new[] { 1 } },  // SIGN_REM reg, adr
+            { new Opcode(0x01, 0x22), new[] { 1 } },  // SIGN_SHL reg, adr
+            { new Opcode(0x01, 0x32), new[] { 1 } },  // SIGN_MVB reg, adr
+            { new Opcode(0x01, 0x36), new[] { 1 } },  // SIGN_MVW reg, adr
+            { new Opcode(0x01, 0x42), new[] { 1 } },  // SIGN_MVD reg, adr
+            { new Opcode(0x01, 0x52), new[] { 0 } },  // SIGN_WCN adr
+            { new Opcode(0x01, 0x56), new[] { 0 } },  // SIGN_WCB adr
+            { new Opcode(0x01, 0x62), new[] { 0 } },  // SIGN_WFN adr
+            { new Opcode(0x01, 0x66), new[] { 0 } },  // SIGN_WFB adr
 
-            { new Opcode(0x02, 0x02), new ulong[] { 1 } },  // FLPT_ADD reg, adr
-            { new Opcode(0x02, 0x12), new ulong[] { 1 } },  // FLPT_SUB reg, adr
-            { new Opcode(0x02, 0x22), new ulong[] { 1 } },  // FLPT_MUL reg, adr
-            { new Opcode(0x02, 0x32), new ulong[] { 1 } },  // FLPT_DIV reg, adr
-            { new Opcode(0x02, 0x36), new ulong[] { 2 } },  // FLPT_DVR reg, reg, adr
-            { new Opcode(0x02, 0x3A), new ulong[] { 1 } },  // FLPT_REM reg, adr
-            { new Opcode(0x02, 0x48), new ulong[] { 1 } },  // FLPT_PTN reg, adr
-            { new Opcode(0x02, 0x52), new ulong[] { 1 } },  // FLPT_POW reg, adr
-            { new Opcode(0x02, 0x62), new ulong[] { 1 } },  // FLPT_LOG reg, adr
-            { new Opcode(0x02, 0x72), new ulong[] { 0 } },  // FLPT_WCN adr
-            { new Opcode(0x02, 0x82), new ulong[] { 0 } },  // FLPT_WFN adr
-            { new Opcode(0x02, 0xD2), new ulong[] { 1 } },  // FLPT_CMP reg, adr
+            { new Opcode(0x02, 0x02), new[] { 1 } },  // FLPT_ADD reg, adr
+            { new Opcode(0x02, 0x12), new[] { 1 } },  // FLPT_SUB reg, adr
+            { new Opcode(0x02, 0x22), new[] { 1 } },  // FLPT_MUL reg, adr
+            { new Opcode(0x02, 0x32), new[] { 1 } },  // FLPT_DIV reg, adr
+            { new Opcode(0x02, 0x36), new[] { 2 } },  // FLPT_DVR reg, reg, adr
+            { new Opcode(0x02, 0x3A), new[] { 1 } },  // FLPT_REM reg, adr
+            { new Opcode(0x02, 0x48), new[] { 1 } },  // FLPT_PTN reg, adr
+            { new Opcode(0x02, 0x52), new[] { 1 } },  // FLPT_POW reg, adr
+            { new Opcode(0x02, 0x62), new[] { 1 } },  // FLPT_LOG reg, adr
+            { new Opcode(0x02, 0x72), new[] { 0 } },  // FLPT_WCN adr
+            { new Opcode(0x02, 0x82), new[] { 0 } },  // FLPT_WFN adr
+            { new Opcode(0x02, 0xD2), new[] { 1 } },  // FLPT_CMP reg, adr
 
-            { new Opcode(0x04, 0x20), new ulong[] { 1 } },  // ASMX_AEX reg, adr
-            { new Opcode(0x04, 0x22), new ulong[] { 1 } },  // ASMX_FEX reg, adr
+            { new Opcode(0x04, 0x20), new[] { 1 } },  // ASMX_AEX reg, adr
+            { new Opcode(0x04, 0x22), new[] { 1 } },  // ASMX_FEX reg, adr
 
-            { new Opcode(0x05, 0x02), new ulong[] { 1 } },  // HEAP_ALC reg, adr
-            { new Opcode(0x05, 0x06), new ulong[] { 1 } },  // HEAP_TRY reg, adr
-            { new Opcode(0x05, 0x12), new ulong[] { 1 } },  // HEAP_REA reg, adr
-            { new Opcode(0x05, 0x16), new ulong[] { 1 } },  // HEAP_TRE reg, adr
+            { new Opcode(0x05, 0x02), new[] { 1 } },  // HEAP_ALC reg, adr
+            { new Opcode(0x05, 0x06), new[] { 1 } },  // HEAP_TRY reg, adr
+            { new Opcode(0x05, 0x12), new[] { 1 } },  // HEAP_REA reg, adr
+            { new Opcode(0x05, 0x16), new[] { 1 } },  // HEAP_TRE reg, adr
 
-            { new Opcode(0x06, 0x00), new ulong[] { 0 } },  // FSYS_CWD adr
-            { new Opcode(0x06, 0x10), new ulong[] { 0 } },  // FSYS_CDR adr
-            { new Opcode(0x06, 0x20), new ulong[] { 0 } },  // FSYS_DDR adr
-            { new Opcode(0x06, 0x22), new ulong[] { 0 } },  // FSYS_DDE adr
-            { new Opcode(0x06, 0x30), new ulong[] { 1 } },  // FSYS_DEX reg, adr
-            { new Opcode(0x06, 0x40), new ulong[] { 0, 8 } },  // FSYS_CPY adr, adr
-            { new Opcode(0x06, 0x41), new ulong[] { 0 } },  // FSYS_CPY adr, ptr
-            { new Opcode(0x06, 0x42), new ulong[] { 1 } },  // FSYS_CPY ptr, adr
-            { new Opcode(0x06, 0x44), new ulong[] { 0, 8 } },  // FSYS_MOV adr, adr
-            { new Opcode(0x06, 0x45), new ulong[] { 0 } },  // FSYS_MOV adr, ptr
-            { new Opcode(0x06, 0x46), new ulong[] { 1 } },  // FSYS_MOV ptr, adr
-            { new Opcode(0x06, 0x51), new ulong[] { 0 } },  // FSYS_BDL adr
-            { new Opcode(0x06, 0x70), new ulong[] { 1 } },  // FSYS_GCT reg, adr
-            { new Opcode(0x06, 0x72), new ulong[] { 1 } },  // FSYS_GMT reg, adr
-            { new Opcode(0x06, 0x74), new ulong[] { 1 } },  // FSYS_GAT reg, adr
-            { new Opcode(0x06, 0x80), new ulong[] { 0 } },  // FSYS_SCT adr, reg
-            { new Opcode(0x06, 0x82), new ulong[] { 0 } },  // FSYS_SCT adr, lit
-            { new Opcode(0x06, 0x84), new ulong[] { 0 } },  // FSYS_SMT adr, reg
-            { new Opcode(0x06, 0x86), new ulong[] { 0 } },  // FSYS_SMT adr, lit
-            { new Opcode(0x06, 0x88), new ulong[] { 0 } },  // FSYS_SAT adr, reg
-            { new Opcode(0x06, 0x8A), new ulong[] { 0 } },  // FSYS_SAT adr, lit
+            { new Opcode(0x06, 0x00), new[] { 0 } },  // FSYS_CWD adr
+            { new Opcode(0x06, 0x10), new[] { 0 } },  // FSYS_CDR adr
+            { new Opcode(0x06, 0x20), new[] { 0 } },  // FSYS_DDR adr
+            { new Opcode(0x06, 0x22), new[] { 0 } },  // FSYS_DDE adr
+            { new Opcode(0x06, 0x30), new[] { 1 } },  // FSYS_DEX reg, adr
+            { new Opcode(0x06, 0x40), new[] { 0, 1 } },  // FSYS_CPY adr, adr
+            { new Opcode(0x06, 0x41), new[] { 0 } },  // FSYS_CPY adr, ptr
+            { new Opcode(0x06, 0x42), new[] { 1 } },  // FSYS_CPY ptr, adr
+            { new Opcode(0x06, 0x44), new[] { 0, 1 } },  // FSYS_MOV adr, adr
+            { new Opcode(0x06, 0x45), new[] { 0 } },  // FSYS_MOV adr, ptr
+            { new Opcode(0x06, 0x46), new[] { 1 } },  // FSYS_MOV ptr, adr
+            { new Opcode(0x06, 0x51), new[] { 0 } },  // FSYS_BDL adr
+            { new Opcode(0x06, 0x70), new[] { 1 } },  // FSYS_GCT reg, adr
+            { new Opcode(0x06, 0x72), new[] { 1 } },  // FSYS_GMT reg, adr
+            { new Opcode(0x06, 0x74), new[] { 1 } },  // FSYS_GAT reg, adr
+            { new Opcode(0x06, 0x80), new[] { 0 } },  // FSYS_SCT adr, reg
+            { new Opcode(0x06, 0x82), new[] { 0 } },  // FSYS_SCT adr, lit
+            { new Opcode(0x06, 0x84), new[] { 0 } },  // FSYS_SMT adr, reg
+            { new Opcode(0x06, 0x86), new[] { 0 } },  // FSYS_SMT adr, lit
+            { new Opcode(0x06, 0x88), new[] { 0 } },  // FSYS_SAT adr, reg
+            { new Opcode(0x06, 0x8A), new[] { 0 } },  // FSYS_SAT adr, lit
 
-            { new Opcode(0x07, 0x22), new ulong[] { 0 } },  // TERM_SCY adr
-            { new Opcode(0x07, 0x26), new ulong[] { 0 } },  // TERM_SCX adr
-            { new Opcode(0x07, 0x52), new ulong[] { 0 } },  // TERM_SFC adr
-            { new Opcode(0x07, 0x56), new ulong[] { 0 } },  // TERM_SBC adr
+            { new Opcode(0x07, 0x22), new[] { 0 } },  // TERM_SCY adr
+            { new Opcode(0x07, 0x26), new[] { 0 } },  // TERM_SCX adr
+            { new Opcode(0x07, 0x52), new[] { 0 } },  // TERM_SFC adr
+            { new Opcode(0x07, 0x56), new[] { 0 } },  // TERM_SBC adr
+        };
+
+        /// <summary>
+        /// All instructions that only use the address of a pointer, not the value at that address, thereby making the read size irrelevant.
+        /// Includes instructions that write to the pointer address or that read a string from the address.
+        /// Mapped to the indices of the pointer operands (not including the opcode).
+        /// </summary>
+        internal static readonly Dictionary<Opcode, int[]> pointerForAddress = new()
+        {
+            { new Opcode(0x00, 0x03), new[] { 0 } },
+            { new Opcode(0x00, 0x05), new[] { 0 } },
+            { new Opcode(0x00, 0x07), new[] { 0 } },
+            { new Opcode(0x00, 0x09), new[] { 0 } },
+            { new Opcode(0x00, 0x0B), new[] { 0 } },
+            { new Opcode(0x00, 0x0D), new[] { 0 } },
+            { new Opcode(0x00, 0x0F), new[] { 0 } },
+            { new Opcode(0x00, 0xB1), new[] { 0 } },
+            { new Opcode(0x00, 0xB6), new[] { 0 } },
+            { new Opcode(0x00, 0xB7), new[] { 0 } },
+            { new Opcode(0x00, 0xB8), new[] { 0 } },
+            { new Opcode(0x00, 0xB9), new[] { 0 } },
+
+            { new Opcode(0x01, 0x01), new[] { 0 } },
+            { new Opcode(0x01, 0x03), new[] { 0 } },
+            { new Opcode(0x01, 0x05), new[] { 0 } },
+            { new Opcode(0x01, 0x07), new[] { 0 } },
+            { new Opcode(0x01, 0x09), new[] { 0 } },
+            { new Opcode(0x01, 0x0B), new[] { 0 } },
+            { new Opcode(0x01, 0x0D), new[] { 0 } },
+            { new Opcode(0x01, 0x0F), new[] { 0 } },
+
+            { new Opcode(0x03, 0x30), new[] { 1 } },
+            { new Opcode(0x03, 0x31), new[] { 1 } },
+            { new Opcode(0x03, 0x32), new[] { 0, 1 } },
+
+            { new Opcode(0x00, 0xE1), new[] { 0 } },
+            { new Opcode(0x00, 0xE4), new[] { 0 } },
+            { new Opcode(0x00, 0xE6), new[] { 1 } },
+            { new Opcode(0x00, 0xE8), new[] { 1 } },
+
+            { new Opcode(0x04, 0x01), new[] { 0 } },
+            { new Opcode(0x04, 0x03), new[] { 0 } },
+            { new Opcode(0x04, 0x21), new[] { 1 } },
+            { new Opcode(0x04, 0x23), new[] { 1 } },
+
+            { new Opcode(0x06, 0x01), new[] { 0 } },
+            { new Opcode(0x06, 0x11), new[] { 0 } },
+            { new Opcode(0x06, 0x21), new[] { 0 } },
+            { new Opcode(0x06, 0x23), new[] { 0 } },
+            { new Opcode(0x06, 0x31), new[] { 1 } },
+            { new Opcode(0x06, 0x41), new[] { 1 } },
+            { new Opcode(0x06, 0x45), new[] { 1 } },
+            { new Opcode(0x06, 0x42), new[] { 1 } },
+            { new Opcode(0x06, 0x46), new[] { 1 } },
+            { new Opcode(0x06, 0x43), new[] { 0, 1 } },
+            { new Opcode(0x06, 0x47), new[] { 0, 1 } },
+            { new Opcode(0x06, 0x52), new[] { 0 } },
+            { new Opcode(0x06, 0x71), new[] { 1 } },
+            { new Opcode(0x06, 0x73), new[] { 1 } },
+            { new Opcode(0x06, 0x75), new[] { 1 } },
+            { new Opcode(0x06, 0x81), new[] { 0 } },
+            { new Opcode(0x06, 0x83), new[] { 0 } },
+            { new Opcode(0x06, 0x85), new[] { 0 } },
+            { new Opcode(0x06, 0x87), new[] { 0 } },
+            { new Opcode(0x06, 0x89), new[] { 0 } },
+            { new Opcode(0x06, 0x8B), new[] { 0 } },
+
+            { new Opcode(0x00, 0x86), new[] { 0 } },
+            { new Opcode(0x00, 0x87), new[] { 0 } },
+            { new Opcode(0x00, 0x8E), new[] { 0 } },
+            { new Opcode(0x00, 0x8F), new[] { 0 } },
+            { new Opcode(0x00, 0x96), new[] { 0 } },
+            { new Opcode(0x00, 0x97), new[] { 0 } },
+            { new Opcode(0x00, 0x9E), new[] { 0 } },
+            { new Opcode(0x00, 0x9F), new[] { 0 } },
+
+            { new Opcode(0x06, 0x03), new[] { 0 } },
+            { new Opcode(0x06, 0x61), new[] { 0 } },
+            { new Opcode(0x06, 0x63), new[] { 0 } },
         };
 
         /// <summary>
@@ -729,6 +808,24 @@
             new Opcode(0x02, 0x71),  // FLPT_WCN reg, lit
             new Opcode(0x02, 0x81),  // FLPT_WFN reg, lit
             new Opcode(0x02, 0xD1),  // FLPT_CMP reg, lit
+        };
+        /// <summary>
+        /// All opcodes that read a pointer as a floating point value. The pointer is always the second operand
+        /// </summary>
+        internal static readonly HashSet<Opcode> floatPointerRead = new()
+        {
+            new Opcode(0x02, 0x03),  // FLPT_ADD reg, ptr
+            new Opcode(0x02, 0x13),  // FLPT_SUB reg, ptr
+            new Opcode(0x02, 0x23),  // FLPT_MUL reg, ptr
+            new Opcode(0x02, 0x33),  // FLPT_DIV reg, ptr
+            new Opcode(0x02, 0x37),  // FLPT_DVR reg, ptr
+            new Opcode(0x02, 0x3B),  // FLPT_REM reg, ptr
+            new Opcode(0x02, 0x49),  // FLPT_PTN reg, ptr
+            new Opcode(0x02, 0x53),  // FLPT_POW reg, ptr
+            new Opcode(0x02, 0x63),  // FLPT_LOG reg, ptr
+            new Opcode(0x02, 0x73),  // FLPT_WCN reg, ptr
+            new Opcode(0x02, 0x83),  // FLPT_WFN reg, ptr
+            new Opcode(0x02, 0xD3),  // FLPT_CMP reg, ptr
         };
 
         /// <summary>

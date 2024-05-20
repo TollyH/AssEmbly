@@ -51,6 +51,9 @@ namespace AssEmbly
             { 0029, Strings_AssemblerWarnings.Warning_0029 },
             { 0030, Strings_AssemblerWarnings.Warning_0030 },
             { 0031, Strings_AssemblerWarnings.Warning_0031 },
+            { 0032, Strings_AssemblerWarnings.Warning_0032 },
+            { 0033, Strings_AssemblerWarnings.Warning_0033 },
+            { 0034, Strings_AssemblerWarnings.Warning_0034 },
         };
 
         [Localizable(true)]
@@ -77,6 +80,9 @@ namespace AssEmbly
             { 0018, Strings_AssemblerWarnings.Suggestion_0018 },
             { 0019, Strings_AssemblerWarnings.Suggestion_0019 },
             { 0020, Strings_AssemblerWarnings.Suggestion_0020 },
+            { 0021, Strings_AssemblerWarnings.Suggestion_0021 },
+            { 0022, Strings_AssemblerWarnings.Suggestion_0022 },
+            { 0023, Strings_AssemblerWarnings.Suggestion_0023 },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)

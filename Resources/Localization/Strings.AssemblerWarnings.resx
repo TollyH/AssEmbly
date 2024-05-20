@@ -216,4 +216,22 @@
   <data name="Warning_0031" xml:space="preserve">
     <value>Both operands to this comparison are numeric literals, so the result will never change.</value>
   </data>
+  <data name="Warning_0032" xml:space="preserve">
+    <value>Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer.</value>
+  </data>
+  <data name="Warning_0033" xml:space="preserve">
+    <value>Pointer size other than 64 bits (`*`/`Q*`) used in a floating point context.</value>
+  </data>
+  <data name="Warning_0034" xml:space="preserve">
+    <value>Values in displacements are always interpreted as integers, but the provided value is floating point.</value>
+  </data>
+  <data name="Suggestion_0021" xml:space="preserve">
+    <value>Using the `Q*` pointer size specifier is unnecessary. Use just `*` instead - pointers read 64-bits by default.</value>
+  </data>
+  <data name="Suggestion_0022" xml:space="preserve">
+    <value>Using the `* 1` register multiplier is unnecessary. Register displacements are not multiplied by default.</value>
+  </data>
+  <data name="Suggestion_0023" xml:space="preserve">
+    <value>A displacement constant of 0 has no effect.</value>
+  </data>
 </root>

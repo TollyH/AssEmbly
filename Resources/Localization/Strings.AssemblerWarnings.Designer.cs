@@ -304,6 +304,33 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Using the `Q*` pointer size specifier is unnecessary. Use just `*` instead - pointers read 64-bits by default..
+        /// </summary>
+        internal static string Suggestion_0021 {
+            get {
+                return ResourceManager.GetString("Suggestion_0021", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Using the `* 1` register multiplier is unnecessary. Register displacements are not multiplied by default..
+        /// </summary>
+        internal static string Suggestion_0022 {
+            get {
+                return ResourceManager.GetString("Suggestion_0022", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A displacement constant of 0 has no effect..
+        /// </summary>
+        internal static string Suggestion_0023 {
+            get {
+                return ResourceManager.GetString("Suggestion_0023", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string Warning_0000 {
@@ -588,6 +615,33 @@ namespace AssEmbly.Resources.Localization {
         internal static string Warning_0031 {
             get {
                 return ResourceManager.GetString("Warning_0031", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer..
+        /// </summary>
+        internal static string Warning_0032 {
+            get {
+                return ResourceManager.GetString("Warning_0032", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pointer size other than 64 bits (`*`/`Q*`) used in a floating point context..
+        /// </summary>
+        internal static string Warning_0033 {
+            get {
+                return ResourceManager.GetString("Warning_0033", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Values in displacements are always interpreted as integers, but the provided value is floating point..
+        /// </summary>
+        internal static string Warning_0034 {
+            get {
+                return ResourceManager.GetString("Warning_0034", resourceCulture);
             }
         }
     }
