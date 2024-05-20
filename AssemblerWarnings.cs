@@ -582,6 +582,7 @@ namespace AssEmbly
             List<Warning> warnings = new();
             foreach ((FilePosition writePosition, string? writeMacroName, int writeMacroLineDepth, string writeOperand) in readsFromAddress)
             {
+#if DISPLACEMENT
                 AddressReference reference = Assembler.ParseAddressReference(writeOperand);
                 ulong address = reference.ReferenceType switch
                 {
@@ -593,6 +594,17 @@ namespace AssEmbly
                 {
                     address += (ulong)reference.DisplacementConstant;
                 }
+#else
+                ulong address;
+                if (writeOperand[1] is >= '0' and <= '9')
+                {
+                    Assembler.ParseLiteral(writeOperand[1..], false, out address);
+                }
+                else
+                {
+                    address = referencedLabels[writeOperand[1..]];
+                }
+#endif
                 if (executableAddresses.Contains(address) && address < currentAddress)
                 {
                     warnings.Add(new Warning(WarningSeverity.Warning, 0005, writePosition,
