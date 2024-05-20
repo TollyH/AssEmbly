@@ -1311,7 +1311,7 @@ namespace AssEmbly
 #if DISPLACEMENT
                     else if (operand.Length >= 2 && operand[1] == '*')
                     {
-                        if (operand[0] is not 'Q' and not 'D' and not 'W' and not 'B')
+                        if (char.ToUpperInvariant(operand[0]) is not 'Q' and not 'D' and not 'W' and not 'B')
                         {
                             throw new SyntaxError(string.Format(
                                 Strings_Assembler.Error_Operand_Invalid_Pointer_Size, operand[0], operand));
@@ -1642,7 +1642,7 @@ namespace AssEmbly
                 throw new ArgumentException(Strings_Assembler.Error_Pointer_Bad_First_Char);
             }
 
-            PointerReadSize readSize = pointer[0] switch
+            PointerReadSize readSize = char.ToUpperInvariant(pointer[0]) switch
             {
                 'Q' or '*' => PointerReadSize.QuadWord,
                 'D' => PointerReadSize.DoubleWord,
