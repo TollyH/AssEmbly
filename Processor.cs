@@ -3619,7 +3619,7 @@ namespace AssEmbly
                                     case 0x6:  // FSYS_MOV ptr, adr
                                         destination = ReadMemoryRegisterPointedString(operandStart, out byteCount);
                                         filepath = ReadMemoryPointedString(operandStart + 1);
-                                        Registers[(int)Register.rpo] += byteCount + 1;
+                                        Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x3:  // FSYS_CPY ptr, ptr
                                     case 0x7:  // FSYS_MOV ptr, ptr
