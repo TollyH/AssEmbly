@@ -1,4 +1,5 @@
 ﻿using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace AssEmbly
@@ -182,6 +183,7 @@ namespace AssEmbly
         public readonly bool SubtractOtherRegister;
         public readonly DisplacementMultiplier OtherRegisterMultiplier;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Register pointerRegister, PointerReadSize readSize)
         {
             Mode = DisplacementMode.NoDisplacement;
@@ -189,6 +191,7 @@ namespace AssEmbly
             ReadSize = readSize;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Register pointerRegister, PointerReadSize readSize, long displacementConstant)
         {
             Mode = DisplacementMode.Constant;
@@ -198,6 +201,7 @@ namespace AssEmbly
             DisplacementConstant = displacementConstant;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Register pointerRegister, PointerReadSize readSize,
             Register otherRegister, bool subtract, DisplacementMultiplier otherRegisterMultiplier)
         {
@@ -210,6 +214,7 @@ namespace AssEmbly
             OtherRegisterMultiplier = otherRegisterMultiplier;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Register pointerRegister, PointerReadSize readSize,
             Register otherRegister, bool subtract, DisplacementMultiplier otherRegisterMultiplier,
             long displacementConstant)
@@ -225,6 +230,7 @@ namespace AssEmbly
             OtherRegisterMultiplier = otherRegisterMultiplier;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Span<byte> encodedBytes, out ulong byteCount)
         {
             Mode = GetDisplacementMode(encodedBytes[0]);
@@ -258,6 +264,7 @@ namespace AssEmbly
         /// <summary>
         /// Get the byte representation of this pointer to store in an AssEmbly program.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] GetBytes()
         {
             byte[] bytes = new byte[Mode.GetByteCount()];
@@ -292,11 +299,13 @@ namespace AssEmbly
             return bytes;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static DisplacementMode GetDisplacementMode(byte firstByte)
         {
             return (DisplacementMode)(firstByte >> 6);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Pointer other)
         {
             if (Mode != other.Mode)
@@ -354,6 +363,7 @@ namespace AssEmbly
             return !left.Equals(right);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             StringBuilder sb = new();
