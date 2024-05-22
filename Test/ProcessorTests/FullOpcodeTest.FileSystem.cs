@@ -2,7 +2,7 @@
 
 namespace AssEmbly.Test.ProcessorTests
 {
-    public partial class FullOpcodeTest
+    public static partial class FullOpcodeTest
     {
         [TestClass]
         public class FileSystemExtensionSet
@@ -649,152 +649,442 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_BDL()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x50 });
+                _ = testProcessor.Execute(false);
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("directoryListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("fileListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.AreEqual(3UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_BDL_Address()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x51, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryString(0x140, "Listing Folder");
+                _ = testProcessor.Execute(false);
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("directoryListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("fileListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_BDL_Pointer()
             {
-                throw new NotImplementedException();
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg6] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x52, (int)Register.rg6 });
+                testProcessor.WriteMemoryString(0x140, "Listing Folder");
+                _ = testProcessor.Execute(false);
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("directoryListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.IsTrue(((IEnumerator<string>?)typeof(Processor).GetField("fileListing", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(testProcessor))?.MoveNext(), "Instruction did not start listing");
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GNF_Address()
             {
-                throw new NotImplementedException();
+                using Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x06, 0x60, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xFF, 0x06, 0x60, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xFF, 0x06, 0x60, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                });
+                using IEnumerator<string> enumerator = Directory.EnumerateFiles("Listing Folder").GetEnumerator();
+                typeof(Processor).GetField("fileListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("file 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("file 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(22UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GNF_Pointer()
             {
-                throw new NotImplementedException();
+                using Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x06, 0x61, (int)Register.rg8,
+                    0xFF, 0x06, 0x61, (int)Register.rg8,
+                    0xFF, 0x06, 0x61, (int)Register.rg8
+                });
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                using IEnumerator<string> enumerator = Directory.EnumerateFiles("Listing Folder").GetEnumerator();
+                typeof(Processor).GetField("fileListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("file 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("file 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GND_Address()
             {
-                throw new NotImplementedException();
+                using Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x06, 0x62, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xFF, 0x06, 0x62, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0xFF, 0x06, 0x62, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+                });
+                using IEnumerator<string> enumerator = Directory.EnumerateDirectories("Listing Folder").GetEnumerator();
+                typeof(Processor).GetField("directoryListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("folder 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("folder 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(22UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GND_Pointer()
             {
-                throw new NotImplementedException();
+                using Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[]
+                {
+                    0xFF, 0x06, 0x63, (int)Register.rg8,
+                    0xFF, 0x06, 0x63, (int)Register.rg8,
+                    0xFF, 0x06, 0x63, (int)Register.rg8
+                });
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                using IEnumerator<string> enumerator = Directory.EnumerateDirectories("Listing Folder").GetEnumerator();
+                typeof(Processor).GetField("directoryListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("folder 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("folder 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GCT_Register_Address()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetCreationTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x70, (int)Register.rg7, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GCT_Register_Pointer()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetCreationTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x71, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GMT_Register_Address()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetLastWriteTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x72, (int)Register.rg7, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GMT_Register_Pointer()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetLastWriteTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x73, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GAT_Register_Address()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetLastAccessTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x74, (int)Register.rg7, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_GAT_Register_Pointer()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+                DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
+                File.SetLastAccessTimeUtc("copyfile", randomDateTime);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x75, (int)Register.rg7, (int)Register.rg8 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual((ulong)randomTimestamp, testProcessor.Registers[(int)Register.rg7], "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SCT_Address_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x80, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetCreationTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SCT_Pointer_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x81, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetCreationTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SCT_Address_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x82, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetCreationTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(19UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SCT_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x83, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(4, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetCreationTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SMT_Address_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x84, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastWriteTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SMT_Pointer_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x85, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastWriteTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SMT_Address_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x86, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastWriteTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(19UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SMT_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x87, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(4, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastWriteTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SAT_Address_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x88, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastAccessTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SAT_Pointer_Register()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x89, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastAccessTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(5UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SAT_Address_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x8A, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastAccessTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(19UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 
             [TestMethod]
             public void FSYS_SAT_Pointer_Literal()
             {
-                throw new NotImplementedException();
+                int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
+
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg8] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x8B, (int)Register.rg8 });
+                testProcessor.WriteMemoryQWord(4, (ulong)randomTimestamp);
+                testProcessor.WriteMemoryString(0x140, "copyfile");
+                _ = testProcessor.Execute(false);
+                Assert.AreEqual(randomTimestamp, (int)(File.GetLastAccessTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
+                Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
+
+            private static readonly Random rng = new();
         }
     }
 }

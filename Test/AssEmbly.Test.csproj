@@ -49,6 +49,18 @@
     <None Update="KitchenSink.Disassembled.NoStrings.asm">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Listing Folder\file 1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Listing Folder\file 2">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Listing Folder\folder 1\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Listing Folder\folder 2\.gitkeep">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="test-empty.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -64,6 +76,11 @@
     <None Include="..\Example Programs\**\*.asm" Link="Example Programs\%(RecursiveDir)\%(Filename)%(Extension)">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Listing Folder\folder 1\" />
+    <Folder Include="Listing Folder\folder 2\" />
   </ItemGroup>
 
 </Project>

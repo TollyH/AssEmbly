@@ -18,8 +18,6 @@ namespace AssEmbly
             new Type[3] { typeof(byte[]), typeof(ulong[]), typeof(ulong?) };
 #endif
 
-        public static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
         public readonly byte[] Memory;
         public readonly ulong[] Registers;
 
@@ -3666,19 +3664,19 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FSYS_GNF adr
-                                        WriteMemoryPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "");
+                                        WriteMemoryPointedString(operandStart, fileListing.MoveNext() ? Path.GetFileName(fileListing.Current) : "");
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x1:  // FSYS_GNF ptr
-                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? fileListing.Current : "", out byteCount);
+                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? Path.GetFileName(fileListing.Current) : "", out byteCount);
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x2:  // FSYS_GND adr
-                                        WriteMemoryPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "");
+                                        WriteMemoryPointedString(operandStart, directoryListing.MoveNext() ? Path.GetFileName(directoryListing.Current) : "");
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FSYS_GND ptr
-                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? directoryListing.Current : "", out byteCount);
+                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? Path.GetFileName(directoryListing.Current) : "", out byteCount);
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
@@ -3690,32 +3688,32 @@ namespace AssEmbly
                                 {
                                     case 0x0:  // FSYS_GCT reg, adr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryPointedString(operandStart + 1)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x1:  // FSYS_GCT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x2:  // FSYS_GMT reg, adr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryPointedString(operandStart + 1)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // FSYS_GMT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // FSYS_GAT reg, adr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryPointedString(operandStart + 1)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryPointedString(operandStart + 1)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x5:  // FSYS_GAT reg, ptr
                                         WriteMemoryRegister(operandStart,
-                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - UnixEpoch).TotalSeconds);
+                                            (ulong)(long)(File.GetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart + 1, out byteCount)) - DateTime.UnixEpoch).TotalSeconds);
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
@@ -3727,62 +3725,62 @@ namespace AssEmbly
                                 {
                                     case 0x0:  // FSYS_SCT adr, reg
                                         File.SetCreationTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x1:  // FSYS_SCT ptr, reg
                                         File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x2:  // FSYS_SCT adr, lit
                                         File.SetCreationTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x3:  // FSYS_SCT ptr, lit
                                         File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x4:  // FSYS_SMT adr, reg
                                         File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x5:  // FSYS_SMT ptr, reg
                                         File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x6:  // FSYS_SMT adr, lit
                                         File.SetLastWriteTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x7:  // FSYS_SMT ptr, lit
                                         File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // FSYS_SAT adr, reg
                                         File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x9:  // FSYS_SAT ptr, reg
                                         File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xA:  // FSYS_SAT adr, lit
                                         File.SetLastAccessTimeUtc(ReadMemoryPointedString(operandStart),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 8)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 8)));
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xB:  // FSYS_SAT ptr, lit
                                         File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            UnixEpoch + TimeSpan.FromSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:

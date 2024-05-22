@@ -1,6 +1,6 @@
 ﻿namespace AssEmbly.Test.ProcessorTests
 {
-    public partial class FullOpcodeTest
+    public static partial class FullOpcodeTest
     {
         [TestClass]
         public class MemoryAllocationExtensionSet

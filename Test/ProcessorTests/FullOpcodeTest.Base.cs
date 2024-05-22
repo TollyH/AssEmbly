@@ -2,8 +2,7 @@ using System.Text;
 
 namespace AssEmbly.Test.ProcessorTests
 {
-    [TestClass]
-    public partial class FullOpcodeTest
+    public static partial class FullOpcodeTest
     {
         [TestClass]
         public class BaseInstructionSet
