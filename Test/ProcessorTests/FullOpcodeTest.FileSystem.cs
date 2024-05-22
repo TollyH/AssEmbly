@@ -698,12 +698,12 @@ namespace AssEmbly.Test.ProcessorTests
                 using IEnumerator<string> enumerator = Directory.EnumerateFiles("Listing Folder").GetEnumerator();
                 typeof(Processor).GetField("fileListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("file 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                string first = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("file 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                string second = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(22UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -711,6 +711,11 @@ namespace AssEmbly.Test.ProcessorTests
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
                 Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                if (first == second || (first is not "file 1" and not "file 2") || (second is not "file 1" and not "file 2"))
+                {
+                    Assert.Fail("Instruction did not get next file");
+                }
             }
 
             [TestMethod]
@@ -727,12 +732,12 @@ namespace AssEmbly.Test.ProcessorTests
                 using IEnumerator<string> enumerator = Directory.EnumerateFiles("Listing Folder").GetEnumerator();
                 typeof(Processor).GetField("fileListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("file 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                string first = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("file 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
+                string second = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -740,6 +745,11 @@ namespace AssEmbly.Test.ProcessorTests
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                if (first == second || (first is not "file 1" and not "file 2") || (second is not "file 1" and not "file 2"))
+                {
+                    Assert.Fail("Instruction did not get next file");
+                }
             }
 
             [TestMethod]
@@ -755,12 +765,12 @@ namespace AssEmbly.Test.ProcessorTests
                 using IEnumerator<string> enumerator = Directory.EnumerateDirectories("Listing Folder").GetEnumerator();
                 typeof(Processor).GetField("directoryListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("folder 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                string first = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("folder 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                string second = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(22UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -768,6 +778,11 @@ namespace AssEmbly.Test.ProcessorTests
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
                 Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                if (first == second || (first is not "folder 1" and not "folder 2") || (second is not "folder 1" and not "folder 2"))
+                {
+                    Assert.Fail("Instruction did not get next file");
+                }
             }
 
             [TestMethod]
@@ -784,12 +799,12 @@ namespace AssEmbly.Test.ProcessorTests
                 using IEnumerator<string> enumerator = Directory.EnumerateDirectories("Listing Folder").GetEnumerator();
                 typeof(Processor).GetField("directoryListing", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(testProcessor, enumerator);
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("folder 1", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                string first = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 _ = testProcessor.Execute(false);
-                Assert.AreEqual("folder 2", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
+                string second = testProcessor.ReadMemoryString(0x140);
                 Assert.AreEqual(8UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
@@ -797,6 +812,11 @@ namespace AssEmbly.Test.ProcessorTests
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+
+                if (first == second || (first is not "folder 1" and not "folder 2") || (second is not "folder 1" and not "folder 2"))
+                {
+                    Assert.Fail("Instruction did not get next file");
+                }
             }
 
             [TestMethod]
