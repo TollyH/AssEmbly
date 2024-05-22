@@ -83,6 +83,7 @@ namespace AssEmbly
             { 0021, Strings_AssemblerWarnings.Suggestion_0021 },
             { 0022, Strings_AssemblerWarnings.Suggestion_0022 },
             { 0023, Strings_AssemblerWarnings.Suggestion_0023 },
+            { 0024, Strings_AssemblerWarnings.Suggestion_0024 },
         };
 
         public static Dictionary<int, string> GetMessagesForSeverity(WarningSeverity severity)

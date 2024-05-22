@@ -234,4 +234,7 @@
   <data name="Suggestion_0023" xml:space="preserve">
     <value>A displacement constant of 0 has no effect.</value>
   </data>
+  <data name="Suggestion_0024" xml:space="preserve">
+    <value>Use `MVQ` instead of `EXTD_MPA` when the source pointer has no displacement.</value>
+  </data>
 </root>

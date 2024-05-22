@@ -472,6 +472,14 @@
             { new Opcode(0x06, 0x61), new[] { 0 } },
             { new Opcode(0x06, 0x63), new[] { 0 } },
         };
+        /// <summary>
+        /// All instructions that use the address in a pointer as a literal value instead of as an address.
+        /// The pointer is always the second operand.
+        /// </summary>
+        internal static readonly HashSet<Opcode> pointerAddressAsLiteral = new()
+        {
+            new Opcode(0x03, 0x30), new Opcode(0x03, 0x31), new Opcode(0x03, 0x32),
+        };
 
         /// <summary>
         /// Directives that result in data (non-code bytes) being inserted into the assembly.

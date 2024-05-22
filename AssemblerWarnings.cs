@@ -286,6 +286,7 @@ namespace AssEmbly
                 { 0022, Analyzer_Rolling_Suggestion_0022 },
                 { 0023, Analyzer_Rolling_Suggestion_0023 },
 #endif
+                { 0024, Analyzer_Rolling_Suggestion_0024 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -1200,7 +1201,16 @@ namespace AssEmbly
             // Suggestion 0023: A displacement constant of 0 has no effect.
             return newBytes.Length > 0 && !instructionIsData && operands.Any(o => ConstantZeroDisplacementRegex().IsMatch(o));
         }
+#endif
 
+        private bool Analyzer_Rolling_Suggestion_0024()
+        {
+            // Suggestion 0024: Use `MVQ` instead of `EXTD_MPA` when the source pointer has no displacement.
+            return newBytes.Length > 0 && !instructionIsData && pointerAddressAsLiteral.Contains(instructionOpcode)
+                && !operands[1].Contains('[');
+        }
+
+#if DISPLACEMENT
         [GeneratedRegex(@"\[.*(?:[0-9]?\.[0-9]|[0-9]\.[0-9]?)")]
         private static partial Regex FloatingPointDisplacementRegex();
 

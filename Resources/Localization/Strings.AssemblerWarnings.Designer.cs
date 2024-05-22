@@ -331,6 +331,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use `MVQ` instead of `EXTD_MPA` when the source pointer has no displacement..
+        /// </summary>
+        internal static string Suggestion_0024 {
+            get {
+                return ResourceManager.GetString("Suggestion_0024", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string Warning_0000 {
