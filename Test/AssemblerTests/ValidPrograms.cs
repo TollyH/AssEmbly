@@ -21,7 +21,9 @@
         [TestMethod]
         public void ExampleProgramsNoErrors()
         {
+            string startDirectory = Environment.CurrentDirectory;
             Environment.CurrentDirectory = "Example Programs";
+
             foreach (string asmFile in Directory.EnumerateFiles(".", "*.asm", SearchOption.AllDirectories))
             {
                 if (asmFile.EndsWith(".ext.asm", StringComparison.OrdinalIgnoreCase))
@@ -37,6 +39,8 @@
                 Assert.AreNotEqual(0, result.Program.Length, "Example program \"{0}\" should not be empty", asmFile);
                 Assert.AreEqual(0, result.Warnings.Length, "Example program \"{0}\" should not return any warnings", asmFile);
             }
+
+            Environment.CurrentDirectory = startDirectory;
         }
 
         [TestMethod]
