@@ -217,7 +217,7 @@
     <value>Both operands to this comparison are numeric literals, so the result will never change.</value>
   </data>
   <data name="Warning_0032" xml:space="preserve">
-    <value>Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer.</value>
+    <value>Explicit pointer size specified in a context that does not read the memory contents of the pointer.</value>
   </data>
   <data name="Warning_0033" xml:space="preserve">
     <value>Pointer size other than 64 bits (`*`/`Q*`) used in a floating point context.</value>
@@ -236,5 +236,8 @@
   </data>
   <data name="Suggestion_0024" xml:space="preserve">
     <value>Use `MVQ` instead of `EXTD_MPA` when the source pointer has no displacement.</value>
+  </data>
+  <data name="Warning_0035" xml:space="preserve">
+    <value>Pointer read size does not match the size of this move instruction. The pointer read size will be ignored.</value>
   </data>
 </root>

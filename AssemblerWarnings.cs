@@ -260,6 +260,7 @@ namespace AssEmbly
                 { 0032, Analyzer_Rolling_Warning_0032 },
                 { 0033, Analyzer_Rolling_Warning_0033 },
                 { 0034, Analyzer_Rolling_Warning_0034 },
+                { 0035, Analyzer_Rolling_Warning_0035 },
 #endif
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
@@ -874,9 +875,9 @@ namespace AssEmbly
 #if DISPLACEMENT
         private bool Analyzer_Rolling_Warning_0032()
         {
-            // Warning 0032: Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer.
+            // Warning 0032: Explicit pointer size specified in a context that does not read the memory contents of the pointer.
             return newBytes.Length > 0 && !instructionIsData && pointerForAddress.TryGetValue(instructionOpcode, out int[]? operandIndices)
-                && operandIndices.Any(i => Assembler.ParsePointer(operands[i]).ReadSize != PointerReadSize.QuadWord);
+                && operandIndices.Any(i => operands[i][0] != '*');
         }
 
         private bool Analyzer_Rolling_Warning_0033()
@@ -890,6 +891,13 @@ namespace AssEmbly
         {
             // Warning 0034: Values in displacements are always interpreted as integers, but the provided value is floating point.
             return newBytes.Length > 0 && !instructionIsData && operands.Any(o => FloatingPointDisplacementRegex().IsMatch(o));
+        }
+
+        private bool Analyzer_Rolling_Warning_0035()
+        {
+            // Warning 0035: Pointer read size does not match the size of this move instruction. The pointer read size will be ignored.
+            return newBytes.Length > 0 && !instructionIsData && moveInstructionPointerReadSizes.TryGetValue(instructionOpcode, out PointerReadSize readSize)
+                && Assembler.ParsePointer(operands[1]).ReadSize != readSize;
         }
 #endif
 

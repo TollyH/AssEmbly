@@ -58,7 +58,7 @@ MVW *rg1, HeaderField
 ADD rg1, 2
 
 ; Width
-MVD rg0, *rfp
+MVD rg0, D*rfp
 MVQ rg5, rg0
 MUL rg5, 3
 ADD rfp, 4
@@ -75,7 +75,7 @@ XOR rg4, rg4
 :FUNC_BITMAP_ENCODE_ROUNDED
 
 ; Height
-MVD rg3, *rfp
+MVD rg3, D*rfp
 ADD rfp, 4
 
 ; Byte size of file
@@ -151,7 +151,7 @@ JGE :FUNC_BITMAP_ENCODE_PIXELS_LOOP_END
 ; Red, green, and blue need to be reversed
 ADD rfp, 2
 %REPEAT 3
-    MVB rg0, *rfp
+    MVB rg0, B*rfp
     MVB *rg1, rg0
     ICR rg1
     DCR rfp
@@ -216,7 +216,7 @@ MVQ rg1, *rg1
 
 ; Calculate size of and allocate memory for file data
 ; Width
-MVD rg0, *rg1
+MVD rg0, D*rg1
 MUL rg0, 3
 MVQ rg3, rg0
 REM rg3, 4  ; Bitmap rows must be divisible by 4 bytes
@@ -227,7 +227,7 @@ SUB rg0, rg3
 ; Height
 MVQ rg3, rg1
 ADD rg3, 4
-MVD rg3, *rg3
+MVD rg3, D*rg3
 ; Total pixel bytes
 MUL rg0, rg3
 ADD rg0, @TotalHeaderSize

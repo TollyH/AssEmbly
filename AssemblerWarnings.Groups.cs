@@ -844,5 +844,30 @@
             new Opcode(0x07, 0x51),
             new Opcode(0x07, 0x55)
         };
+
+#if DISPLACEMENT
+        /// <summary>
+        /// The expected pointer read sizes of all move instructions that have a pointer as their source.
+        /// The source pointer is always the second operand.
+        /// </summary>
+        internal static readonly Dictionary<Opcode, PointerReadSize> moveInstructionPointerReadSizes = new()
+        {
+            // MVB
+            { new Opcode(0x00, 0x83), PointerReadSize.Byte },
+            // MVW
+            { new Opcode(0x00, 0x8B), PointerReadSize.Word },
+            // MVD
+            { new Opcode(0x00, 0x93), PointerReadSize.DoubleWord },
+            // MVQ
+            { new Opcode(0x00, 0x9B), PointerReadSize.QuadWord },
+
+            // SIGN_MVB
+            { new Opcode(0x01, 0x33), PointerReadSize.Byte },
+            // SIGN_MVW
+            { new Opcode(0x01, 0x37), PointerReadSize.Word },
+            // SIGN_MVD
+            { new Opcode(0x01, 0x43), PointerReadSize.DoubleWord },
+        };
+#endif
     }
 }

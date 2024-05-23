@@ -73,7 +73,7 @@ MVQ rg6, rg4
 MUL rg6, rg7
 ADD rg6, rg5
 ADD rg6, rg1  ; Convert index to image pointer
-MVB rg0, *rg6
+MVB rg0, B*rg6
 TST rg0, rg0
 JZO :FIND_EXPANDED_ROWS_END  ; Reached end of file
 CMP rg0, '#'
@@ -101,7 +101,7 @@ MVQ rg6, rg4
 MUL rg6, rg7
 ADD rg6, rg5
 ADD rg6, rg1  ; Convert index to image pointer
-MVB rg0, *rg6
+MVB rg0, B*rg6
 CMP rg0, '\n'
 JEQ :FIND_EXPANDED_COLUMNS_END  ; Reached end of file
 CMP rg0, '#'
@@ -138,7 +138,7 @@ XOR rg8, rg8
 ; Check if passed any expanded rows
 MVQ rg0, rg2
 ADD rg0, rg6
-MVB rg0, *rg0
+MVB rg0, B*rg0
 CMP rg0, 0xFF  ; Check for terminator
 JEQ :FIND_GALAXIES_X_LOOP
 CMP rg4, rg0
@@ -148,7 +148,7 @@ ICR rg6
 ; Check if passed any expanded columns
 MVQ rg0, rg3
 ADD rg0, rg8
-MVB rg0, *rg0
+MVB rg0, B*rg0
 CMP rg0, 0xFF  ; Check for terminator
 JEQ :SKIP_ICR_PASSED_COLUMNS
 CMP rg5, rg0
@@ -160,7 +160,7 @@ MVQ rg0, rg4
 MUL rg0, rg7
 ADD rg0, rg5
 ADD rg0, rg1  ; Convert index to image pointer
-MVB rg0, *rg0
+MVB rg0, B*rg0
 TST rg0, rg0
 JZO :FIND_GALAXIES_END  ; Reached end of file
 CMP rg0, '\n'

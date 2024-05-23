@@ -16,7 +16,7 @@ CAL :FUNC_INPUT, rg7
 MVQ rg2, rg7
 :NUM_1_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
-MVB rg3, *rg2
+MVB rg3, B*rg2
 TST rg3, rg3  ; Check for 0-byte terminator
 JZO :NUM_1_READ_LOOP_END
 CMP rg3, '-'  ; Check for negative sign
@@ -43,7 +43,7 @@ XOR rg6, rg6
 MVQ rg2, rg7
 :NUM_2_READ_LOOP
 ; Parse the first input from ASCII to decimal in rg0
-MVB rg3, *rg2
+MVB rg3, B*rg2
 TST rg3, rg3  ; Check for 0-byte terminator
 JZO :NUM_2_READ_LOOP_END
 CMP rg3, '-'  ; Check for negative sign

@@ -7,7 +7,7 @@
 ; Address of string given as parameter is in rfp
 PSH rg0  ; Preserve value of rg0
 :FUNC_PRINT_LOOP
-MVB rg0, *rfp  ; Move contents of address stored in rfp to rg0
+MVB rg0, B*rfp  ; Move contents of address stored in rfp to rg0
 TST rg0, rg0  ; Check if rg0 is 0
 JZO :FUNC_PRINT_RETURN  ; If it is, return from subroutine
 ICR rfp  ; Otherwise, increment source address by 1

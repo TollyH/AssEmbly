@@ -21,7 +21,7 @@ MVQ rg2, :&LINE_STORE
 ; rg4 - power counter
 ; rg5 - power result
 ; rg6 - digit base value
-MVB rg3, *rg2
+MVB rg3, B*rg2
 
 ; Raise 5 to the power of current digit place
 MVQ rg5, 5.0

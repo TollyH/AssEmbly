@@ -988,7 +988,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MVB reg, ptr
-                                        WriteMemoryRegister(operandStart, (byte)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedByte(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // MVB adr, reg
@@ -1020,7 +1020,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // MVW reg, ptr
-                                        WriteMemoryRegister(operandStart, (ushort)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedWord(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xC:  // MVW adr, reg
@@ -1059,7 +1059,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // MVD reg, ptr
-                                        WriteMemoryRegister(operandStart, (uint)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedDWord(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // MVD adr, reg
@@ -1091,7 +1091,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0xB:  // MVQ reg, ptr
-                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, ReadMemoryRegisterPointedQWord(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xC:  // MVQ adr, reg
@@ -2009,7 +2009,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_MVB reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(sbyte)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, (ulong)(sbyte)ReadMemoryRegisterPointedByte(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x4:  // SIGN_MVW reg, reg
@@ -2025,7 +2025,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x7:  // SIGN_MVW reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(short)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, (ulong)(short)ReadMemoryRegisterPointedWord(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:
@@ -2048,7 +2048,7 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 9;
                                         break;
                                     case 0x3:  // SIGN_MVD reg, ptr
-                                        WriteMemoryRegister(operandStart, (ulong)(int)ReadMemoryRegisterPointedNumber(operandStart + 1, out byteCount));
+                                        WriteMemoryRegister(operandStart, (ulong)(int)ReadMemoryRegisterPointedDWord(operandStart + 1, out byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     default:

@@ -40,9 +40,9 @@ ICR rg5
 ICR rg4
 CMP rg5, rg1
 JGE :CHARACTER_LOOP
-MVB rg8, *rg5
+MVB rg8, B*rg5
 :INNER_LOOP_2
-MVB rg3, *rg2
+MVB rg3, B*rg2
 CMP rg3, rg8
 JEQ :CHARACTER_LOOP
 ICR rg2

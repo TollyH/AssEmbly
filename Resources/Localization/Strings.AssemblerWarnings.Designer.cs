@@ -628,7 +628,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pointer size other than 64 bits (`*`/`Q*`) used in a context that does not read the memory contents of the pointer..
+        ///   Looks up a localized string similar to Explicit pointer size specified in a context that does not read the memory contents of the pointer..
         /// </summary>
         internal static string Warning_0032 {
             get {
@@ -651,6 +651,15 @@ namespace AssEmbly.Resources.Localization {
         internal static string Warning_0034 {
             get {
                 return ResourceManager.GetString("Warning_0034", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pointer read size does not match the size of this move instruction. The pointer read size will be ignored..
+        /// </summary>
+        internal static string Warning_0035 {
+            get {
+                return ResourceManager.GetString("Warning_0035", resourceCulture);
             }
         }
     }

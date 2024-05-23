@@ -28,15 +28,15 @@ SUB rg1, rg2
 DIV rg1, 2
 ADD rg1, rg2
 MVQ rg3, rg1
-MVB rg6, *rg2
-MVB rg7, *rg3
+MVB rg6, B*rg2
+MVB rg7, B*rg3
 :COMPARE_LOOP
 CMP rg6, rg7
 JEQ :COMPARISON_EQUAL
 CMP rg3, rg4
 JEQ :NEXT_COMPARTMENT_ONE  ; Reached end of second compartment
 ICR rg3
-MVB rg7, *rg3
+MVB rg7, B*rg3
 JMP :COMPARE_LOOP
 :NEXT_COMPARTMENT_ONE
 ; Move back to beginning of second compartment
@@ -44,9 +44,9 @@ JMP :COMPARE_LOOP
 ICR rg2
 CMP rg2, rg1
 JEQ :COMPARE_END  ; End of first compartment reached, no match found
-MVB rg6, *rg2
+MVB rg6, B*rg2
 MVQ rg3, rg1
-MVB rg7, *rg3
+MVB rg7, B*rg3
 JMP :COMPARE_LOOP
 :COMPARISON_EQUAL
 CMP rg6, 'a'  ; Is letter lowercase?
@@ -89,9 +89,9 @@ JEQ :NEWLINE
 ; Search for character in counter table
 CMP rg1, rg2
 JGE :NOT_FOUND
-MVB rg5, *rg1
+MVB rg5, B*rg1
 ICR rg1
-MVB rg6, *rg1
+MVB rg6, B*rg1
 ICR rg1
 CMP rg5, rg0
 JNE :FIND_LOOP
@@ -125,9 +125,9 @@ MVQ rg1, :&LINE_STORE
 ; Find the character that was present on all three lines, adding its value to the total
 CMP rg1, rg2
 JGE :RESET  ; No characters appeared three times (shouldn't happen)
-MVB rg5, *rg1
+MVB rg5, B*rg1
 ICR rg1
-MVB rg6, *rg1
+MVB rg6, B*rg1
 ICR rg1
 CMP rg6, 3
 JLT :FIND_THREE_LOOP

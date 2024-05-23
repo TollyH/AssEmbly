@@ -52,13 +52,13 @@ ADD rg1, 8
 MVQ rg1, *rg1
 
 ; Check that magic bytes are present and correct
-MVD rg0, *rfp
+MVD rg0, D*rfp
 ADD rfp, 4
 CMP rg0, MagicBytes
 JNE :QOI_DECODE_EXIT
 
 ; Width (stored in big endian)
-MVD rg4, *rfp
+MVD rg4, D*rfp
 SHL rg4, 32
 EXTD_BSW rg4
 ADD rfp, 4
@@ -69,7 +69,7 @@ ADD rg1, 4
 PSH rg4
 
 ; Height (stored in big endian)
-MVD rg4, *rfp
+MVD rg4, D*rfp
 SHL rg4, 32
 EXTD_BSW rg4
 ADD rfp, 4
@@ -80,7 +80,7 @@ POP rg0
 MUL rg4, rg0
 
 ; Channels
-MVB rg0, *rfp
+MVB rg0, B*rfp
 CMP rg0, 3
 JEQ :QOI_DECODE_VALID_CHANNELS
 CMP rg0, 4
@@ -91,7 +91,7 @@ ICR rfp
 ICR rg1
 
 ; Colorspace
-MVB rg0, *rfp
+MVB rg0, B*rfp
 TST rg0, rg0
 JZO :QOI_DECODE_VALID_COLORSPACE
 CMP rg0, 1
@@ -175,7 +175,7 @@ JGE :QOI_DECODE_PIXELS_DECODER_LOOP_END
 CMP rfp, rg2
 JGE :QOI_DECODE_PIXELS_DECODER_LOOP_END
 ; process chunk
-MVB rg5, *rfp
+MVB rg5, B*rfp
 CMP rg5, 0b11111110
 JEQ :QOI_DECODE_PIXELS_QOI_OP_RGB
 CMP rg5, 0b11111111
@@ -194,7 +194,7 @@ JEQ :QOI_DECODE_PIXELS_QOI_OP_RUN
 ; Red, green, blue
 %REPEAT 3
     ICR rfp
-    MVB rg0, *rfp
+    MVB rg0, B*rfp
     MVB *rg1, rg0
     ICR rg1
 %ENDREPEAT
@@ -210,17 +210,17 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 ; Red, green, blue, alpha
 %REPEAT 4
     ICR rfp
-    MVB rg0, *rfp
+    MVB rg0, B*rfp
     MVB *rg1, rg0
     ICR rg1
 %ENDREPEAT
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_INDEX
-MVB rg0, *rfp
+MVB rg0, B*rfp
 MUL rg0, 4 ; Multiply hash index by 4 as pixels are 4 bytes wide
 ADD rg0, rso
-MVD rg0, *rg0
+MVD rg0, D*rg0
 MVD *rg1, rg0
 ADD rg1, 4
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
@@ -322,7 +322,7 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_OP_JUMP_END
 SUB rg1, 4
-MVD rg3, *rg1
+MVD rg3, D*rg1
 ADD rg1, 4
 PSH rfp
 CAL :FUNC_QOI_HASH, rg3
@@ -388,13 +388,13 @@ CFL
 MVQ rg0, rg3
 ADD rg0, 4
 ; Width
-MVD rg1, *rg0
+MVD rg1, D*rg0
 ; Convert big endian to little endian
 SHL rg1, 32
 EXTD_BSW rg1
 ; Height
 ADD rg0, 4
-MVD rg0, *rg0
+MVD rg0, D*rg0
 ; Convert big endian to little endian
 SHL rg0, 32
 EXTD_BSW rg0
