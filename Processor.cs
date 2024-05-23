@@ -3059,9 +3059,8 @@ namespace AssEmbly
                                         break;
                                     case 0x2:  // EXTD_MPA ptr, ptr
                                         result = ReadMemoryPointer(operandStart, out byteCount);
-                                        Registers[(int)Register.rpo] += byteCount;
-                                        WriteMemoryQWord(result, ReadMemoryPointer(operandStart + byteCount, out byteCount));
-                                        Registers[(int)Register.rpo] += byteCount;
+                                        WriteMemoryQWord(result, ReadMemoryPointer(operandStart + byteCount, out initial));
+                                        Registers[(int)Register.rpo] += byteCount + initial;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_MovePointerAddress, opcodeLow));
@@ -3629,9 +3628,8 @@ namespace AssEmbly
                                     case 0x3:  // FSYS_CPY ptr, ptr
                                     case 0x7:  // FSYS_MOV ptr, ptr
                                         destination = ReadMemoryRegisterPointedString(operandStart, out byteCount);
-                                        Registers[(int)Register.rpo] += byteCount;
-                                        filepath = ReadMemoryRegisterPointedString(operandStart + byteCount, out byteCount);
-                                        Registers[(int)Register.rpo] += byteCount;
+                                        filepath = ReadMemoryRegisterPointedString(operandStart + byteCount, out initial);
+                                        Registers[(int)Register.rpo] += byteCount + initial;
                                         break;
                                     default:
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_FileSystem_Move, opcodeLow));
