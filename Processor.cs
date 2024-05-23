@@ -1000,11 +1000,13 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x6:  // MVB ptr, reg
-                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Memory[result] = (byte)(0xFF & ReadMemoryRegister(operandStart + byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x7:  // MVB ptr, lit
-                                        WriteMemoryRegisterPointedByte(operandStart, (byte)(0xFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Memory[result] = (byte)(0xFF & ReadMemoryQWord(operandStart + byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // MVW reg, reg
@@ -1032,11 +1034,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xE:  // MVW ptr, reg
-                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        WriteMemoryWord(ReadMemoryPointer(operandStart, out byteCount), (ushort)(0xFFFF & ReadMemoryRegister(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xF:  // MVW ptr, lit
-                                        WriteMemoryRegisterPointedWord(operandStart, (ushort)(0xFFFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        WriteMemoryWord(ReadMemoryPointer(operandStart, out byteCount), (ushort)(0xFFFF & ReadMemoryQWord(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
@@ -1071,11 +1073,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0x6:  // MVD ptr, reg
-                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryRegister(operandStart + 1)), out byteCount);
+                                        WriteMemoryDWord(ReadMemoryPointer(operandStart, out byteCount), (uint)(0xFFFFFFFF & ReadMemoryRegister(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x7:  // MVD ptr, lit
-                                        WriteMemoryRegisterPointedDWord(operandStart, (uint)(0xFFFFFFFF & ReadMemoryQWord(operandStart + 1)), out byteCount);
+                                        WriteMemoryDWord(ReadMemoryPointer(operandStart, out byteCount), (uint)(0xFFFFFFFF & ReadMemoryQWord(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // MVQ reg, reg
@@ -1103,11 +1105,11 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] += 16;
                                         break;
                                     case 0xE:  // MVQ ptr, reg
-                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryRegister(operandStart + 1), out byteCount);
+                                        WriteMemoryQWord(ReadMemoryPointer(operandStart, out byteCount), ReadMemoryRegister(operandStart + byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xF:  // MVQ ptr, lit
-                                        WriteMemoryRegisterPointedQWord(operandStart, ReadMemoryQWord(operandStart + 1), out byteCount);
+                                        WriteMemoryQWord(ReadMemoryPointer(operandStart, out byteCount), ReadMemoryQWord(operandStart + byteCount));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
@@ -1163,7 +1165,8 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
                                         break;
                                     case 0x1:  // CAL ptr
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 1);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + byteCount);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
@@ -1173,7 +1176,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
+                                        Registers[(int)Register.rpo] = result;
                                         break;
                                     case 0x2:  // CAL adr, reg
                                         Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + 8);
@@ -1232,8 +1235,9 @@ namespace AssEmbly
                                         Registers[(int)Register.rpo] = ReadMemoryQWord(operandStart);
                                         break;
                                     case 0x6:  // CAL ptr, reg
-                                        Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + 1);
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 2);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Registers[(int)Register.rfp] = ReadMemoryRegister(operandStart + byteCount);
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + byteCount + 1);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
@@ -1243,11 +1247,12 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
+                                        Registers[(int)Register.rpo] = result;
                                         break;
                                     case 0x7:  // CAL ptr, lit
-                                        Registers[(int)Register.rfp] = ReadMemoryQWord(operandStart + 1);
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Registers[(int)Register.rfp] = ReadMemoryQWord(operandStart + byteCount);
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + byteCount + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
@@ -1257,11 +1262,12 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
+                                        Registers[(int)Register.rpo] = result;
                                         break;
                                     case 0x8:  // CAL ptr, adr
-                                        Registers[(int)Register.rfp] = ReadMemoryPointedQWord(operandStart + 1);
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 9);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Registers[(int)Register.rfp] = ReadMemoryPointedQWord(operandStart + byteCount);
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + byteCount + 8);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
@@ -1271,11 +1277,12 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
+                                        Registers[(int)Register.rpo] = result;
                                         break;
                                     case 0x9:  // CAL ptr, ptr
-                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedNumber(operandStart + 1, out _);
-                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + 2);
+                                        result = ReadMemoryPointer(operandStart, out byteCount);
+                                        Registers[(int)Register.rfp] = ReadMemoryRegisterPointedNumber(operandStart + byteCount, out initial);
+                                        WriteMemoryQWord(Registers[(int)Register.rso] - 8, operandStart + byteCount + initial);
                                         WriteMemoryQWord(Registers[(int)Register.rso] - 16, Registers[(int)Register.rsb]);
 #if V1_CALL_STACK_COMPAT
                                         if (UseV1CallStack)
@@ -1285,7 +1292,7 @@ namespace AssEmbly
 #endif
                                         Registers[(int)Register.rso] -= stackCallSize;
                                         Registers[(int)Register.rsb] = Registers[(int)Register.rso];
-                                        Registers[(int)Register.rpo] = ReadMemoryPointer(operandStart, out _);
+                                        Registers[(int)Register.rpo] = result;
                                         break;
                                     case 0xA:  // RET
                                         Registers[(int)Register.rso] += stackCallSize;
@@ -3616,7 +3623,7 @@ namespace AssEmbly
                                     case 0x2:  // FSYS_CPY ptr, adr
                                     case 0x6:  // FSYS_MOV ptr, adr
                                         destination = ReadMemoryRegisterPointedString(operandStart, out byteCount);
-                                        filepath = ReadMemoryPointedString(operandStart + 1);
+                                        filepath = ReadMemoryPointedString(operandStart + byteCount);
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x3:  // FSYS_CPY ptr, ptr
@@ -3730,7 +3737,7 @@ namespace AssEmbly
                                         break;
                                     case 0x1:  // FSYS_SCT ptr, reg
                                         File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x2:  // FSYS_SCT adr, lit
@@ -3740,7 +3747,7 @@ namespace AssEmbly
                                         break;
                                     case 0x3:  // FSYS_SCT ptr, lit
                                         File.SetCreationTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x4:  // FSYS_SMT adr, reg
@@ -3750,7 +3757,7 @@ namespace AssEmbly
                                         break;
                                     case 0x5:  // FSYS_SMT ptr, reg
                                         File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0x6:  // FSYS_SMT adr, lit
@@ -3760,7 +3767,7 @@ namespace AssEmbly
                                         break;
                                     case 0x7:  // FSYS_SMT ptr, lit
                                         File.SetLastWriteTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     case 0x8:  // FSYS_SAT adr, reg
@@ -3770,7 +3777,7 @@ namespace AssEmbly
                                         break;
                                     case 0x9:  // FSYS_SAT ptr, reg
                                         File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryRegister(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 1;
                                         break;
                                     case 0xA:  // FSYS_SAT adr, lit
@@ -3780,7 +3787,7 @@ namespace AssEmbly
                                         break;
                                     case 0xB:  // FSYS_SAT ptr, lit
                                         File.SetLastAccessTimeUtc(ReadMemoryRegisterPointedString(operandStart, out byteCount),
-                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + 1)));
+                                            DateTime.UnixEpoch.AddSeconds((long)ReadMemoryQWord(operandStart + byteCount)));
                                         Registers[(int)Register.rpo] += byteCount + 8;
                                         break;
                                     default:
