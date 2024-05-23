@@ -168,11 +168,11 @@
                     0xFF, 0x03, 0x30, (int)Register.rg6,
                     ((int)DisplacementMode.ConstantAndRegister << 6) | (int)Register.rg7,
                     0x40, 0x30, 0x20, 0x10, 0x00, 0x00, 0x00, 0x00,
-                    ((int)DisplacementMultiplier.x2 << 4) | (int)Register.rg8
+                    0b10000000 | ((int)DisplacementMultiplier.x2 << 4) | (int)Register.rg8
                 });
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(14UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(0x30609200UL, testProcessor.Registers[(int)Register.rg6], "Instruction did not produce correct result");
+                Assert.AreEqual(0xFFFFFFFFEFDFD100UL, testProcessor.Registers[(int)Register.rg6], "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
             }
 

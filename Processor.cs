@@ -4481,18 +4481,29 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong GetPointerAddress(Pointer ptr)
         {
-            return ptr.Mode switch
+            switch (ptr.Mode)
             {
-                DisplacementMode.NoDisplacement => Registers[(int)ptr.PointerRegister],
-                DisplacementMode.Constant => Registers[(int)ptr.PointerRegister]
-                    + (ulong)ptr.DisplacementConstant,
-                DisplacementMode.Register => Registers[(int)ptr.PointerRegister]
-                    + (Registers[(int)ptr.OtherRegister] * ptr.OtherRegisterMultiplier.GetMultiplier()),
-                DisplacementMode.ConstantAndRegister => Registers[(int)ptr.PointerRegister]
-                    + (Registers[(int)ptr.OtherRegister] * ptr.OtherRegisterMultiplier.GetMultiplier())
-                    + (ulong)ptr.DisplacementConstant,
-                _ => 0
-            };
+                case DisplacementMode.NoDisplacement:
+                    return Registers[(int)ptr.PointerRegister];
+                case DisplacementMode.Constant:
+                    return Registers[(int)ptr.PointerRegister] + (ulong)ptr.DisplacementConstant;
+                case DisplacementMode.Register:
+                    ulong otherRegisterValue = Registers[(int)ptr.OtherRegister];
+                    if (ptr.SubtractOtherRegister)
+                    {
+                        otherRegisterValue = (ulong)-(long)otherRegisterValue;
+                    }
+                    return Registers[(int)ptr.PointerRegister] + (otherRegisterValue << (int)ptr.OtherRegisterMultiplier);
+                case DisplacementMode.ConstantAndRegister:
+                    otherRegisterValue = Registers[(int)ptr.OtherRegister];
+                    if (ptr.SubtractOtherRegister)
+                    {
+                        otherRegisterValue = (ulong)-(long)otherRegisterValue;
+                    }
+                    return Registers[(int)ptr.PointerRegister] + (otherRegisterValue << (int)ptr.OtherRegisterMultiplier) + (ulong)ptr.DisplacementConstant;
+                default:
+                    return 0;
+            }
         }
 #endif
     }

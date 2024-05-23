@@ -53,22 +53,6 @@
                 _ => 0
             };
         }
-
-        public static ulong GetMultiplier(this DisplacementMultiplier multiplier)
-        {
-            return multiplier switch
-            {
-                DisplacementMultiplier.x1 => 1,
-                DisplacementMultiplier.x2 => 2,
-                DisplacementMultiplier.x4 => 4,
-                DisplacementMultiplier.x8 => 8,
-                DisplacementMultiplier.x16 => 16,
-                DisplacementMultiplier.x32 => 32,
-                DisplacementMultiplier.x64 => 64,
-                DisplacementMultiplier.x128 => 128,
-                _ => 0
-            };
-        }
 #endif
     }
 }
