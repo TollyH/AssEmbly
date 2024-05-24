@@ -2,7 +2,7 @@
 
 Applies to versions: `3.2.0`
 
-Last revised: 2024-04-08
+Last revised: 2024-05-24
 
 ## Introduction
 
@@ -239,7 +239,7 @@ Consider the following example:
 ```text
 :AREA_1
 WCC '\n'
-MVQ rg0, :AREA_1  ; Move whatever is stored at :AREA_1 in memory to rg0
+MVB rg0, :AREA_1  ; Move the byte stored at :AREA_1 in memory to rg0
 ```
 
 > Here `:AREA_1` will point to the **first byte** (i.e. the start of the **opcode**) of the **directly subsequent assemble-able line** — in this case `WCC`. The second operand to `MVQ` will become the address that `WCC` is stored at in memory, `0` if it is the first instruction in the file. As `MVQ` is the instruction to move to a destination from a source, `rg0` will contain `0xCD` after the instruction executes (`0xCD` being the opcode for `WCC <Literal>`).
