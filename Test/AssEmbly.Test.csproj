@@ -73,7 +73,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Example Programs\**\*.asm" Link="Example Programs\%(RecursiveDir)\%(Filename)%(Extension)">
+    <None Include="..\Example Programs\**\*.asm" Exclude="..\Example Programs\**\*.dis.asm" Link="Example Programs\%(RecursiveDir)\%(Filename)%(Extension)">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

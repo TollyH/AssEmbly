@@ -1,4 +1,4 @@
-MVQ rg0, 69
+MVQ rg0, 69.0
 :ADDR_A
 ADD rg0, 10
 CMP rg0, 420

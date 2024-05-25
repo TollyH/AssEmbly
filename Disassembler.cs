@@ -168,7 +168,7 @@ namespace AssEmbly
                                 double floatingValue = BinaryPrimitives.ReadDoubleLittleEndian(instruction[(int)totalBytes..]);
                                 if (Math.Abs(floatingValue) is >= 0.0000000000000001 and <= ulong.MaxValue)
                                 {
-                                    operandStrings.Add(floatingValue.ToString(CultureInfo.InvariantCulture));
+                                    operandStrings.Add(floatingValue.ToString(".0###############"));
                                     totalBytes += 8;
                                     break;
                                 }
