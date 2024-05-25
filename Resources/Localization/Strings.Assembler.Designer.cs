@@ -185,7 +185,7 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to     {0} -&gt; {1}[{4}] (from {2} at line {3}).
+        ///   Looks up a localized string similar to     {0} -&gt; {1}[{4}] (from {2} at line {3}) - additionally displaced by {5}.
         /// </summary>
         internal static string Debug_Directive_Label_Link_Line {
             get {
@@ -626,6 +626,27 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Label literal displacements can themselves be displaced by nesting square brackets, not through the use of +/- signs..
+        /// </summary>
+        internal static string Error_Displacement_Label_Invalid {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Label_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Label literal displacement components cannot be negated.
+        ///    {0}
+        ///    ^.
+        /// </summary>
+        internal static string Error_Displacement_LabelLiteral_Negated {
+            get {
+                return ResourceManager.GetString("Error_Displacement_LabelLiteral_Negated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An opening square bracket cannot be the only character on a line..
         /// </summary>
         internal static string Error_Displacement_Line_Length_One {
@@ -646,11 +667,29 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Addresses inside displacement components must be label literals (i.e. use the :&amp; prefix)..
+        /// </summary>
+        internal static string Error_Displacement_Not_LabelLiteral {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Not_LabelLiteral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The register multiplier of a pointer displacement must be a power of two no larger than 128, i.e. 1, 2, 4, 8, 16, etc..
         /// </summary>
         internal static string Error_Displacement_Pointer_Bad_Multiplier {
             get {
                 return ResourceManager.GetString("Error_Displacement_Pointer_Bad_Multiplier", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; is not a recognised register name. Displacements can only contain registers and numeric literals..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Bad_Register {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Bad_Register", resourceCulture);
             }
         }
         
@@ -666,6 +705,26 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
+        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators, or by a label literal with only the + operator. Only register displacements can be multiplied. Label literals displacements can be displaced by nesting square brackets, not by following them a +/- sign..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Label_Invalid {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Label_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
+        ///Note that if the displacement component of a pointer starts with a label literal, the literal must be the only part to the displacement. Label literal displacements can themselves be displaced by nesting square brackets, not through the use of +/- signs. Displacement by a register must come first if desired..
+        /// </summary>
+        internal static string Error_Displacement_Pointer_Label_Start_Invalid {
+            get {
+                return ResourceManager.GetString("Error_Displacement_Pointer_Label_Start_Invalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 
         ///Note that a register displacement can only be multiplied by a single numeric literal..
         /// </summary>
         internal static string Error_Displacement_Pointer_Multiplier_Bad_Chars {
@@ -676,7 +735,7 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators. Only register displacements can be multiplied..
+        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric or label literal with one of the + or - operators. Only register displacements can be multiplied..
         /// </summary>
         internal static string Error_Displacement_Pointer_Register_Constant_Bad_Chars {
             get {
@@ -1366,15 +1425,6 @@ namespace AssEmbly.Resources.Localization {
         internal static string Error_Pointer_Bad_First_Char {
             get {
                 return ResourceManager.GetString("Error_Pointer_Bad_First_Char", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;{0}&apos; is not a recognised register name. Displacements can only contain registers and numeric literals..
-        /// </summary>
-        internal static string Error_Pointer_Displacement_Bad_Register {
-            get {
-                return ResourceManager.GetString("Error_Pointer_Displacement_Bad_Register", resourceCulture);
             }
         }
         

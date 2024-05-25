@@ -177,6 +177,11 @@ namespace AssEmbly
 
         // Constant + ConstantAndRegister only
         public readonly long DisplacementConstant;
+        /// <remarks>
+        /// This will always be empty when reading a pointer from assembled bytes.
+        /// It is only relevant when assembling a pointer from source code.
+        /// </remarks>
+        public readonly string[] DisplacementLabels;
 
         // Register + ConstantAndRegister only
         public readonly Register OtherRegister;
@@ -189,16 +194,19 @@ namespace AssEmbly
             Mode = DisplacementMode.NoDisplacement;
             PointerRegister = pointerRegister;
             ReadSize = readSize;
+
+            DisplacementLabels = Array.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Pointer(Register pointerRegister, PointerReadSize readSize, long displacementConstant)
+        public Pointer(Register pointerRegister, PointerReadSize readSize, long displacementConstant, string[] displacementLabels)
         {
             Mode = DisplacementMode.Constant;
             PointerRegister = pointerRegister;
             ReadSize = readSize;
 
             DisplacementConstant = displacementConstant;
+            DisplacementLabels = displacementLabels;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -212,18 +220,21 @@ namespace AssEmbly
             OtherRegister = otherRegister;
             SubtractOtherRegister = subtract;
             OtherRegisterMultiplier = otherRegisterMultiplier;
+
+            DisplacementLabels = Array.Empty<string>();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pointer(Register pointerRegister, PointerReadSize readSize,
             Register otherRegister, bool subtract, DisplacementMultiplier otherRegisterMultiplier,
-            long displacementConstant)
+            long displacementConstant, string[] displacementLabels)
         {
             Mode = DisplacementMode.ConstantAndRegister;
             PointerRegister = pointerRegister;
             ReadSize = readSize;
 
             DisplacementConstant = displacementConstant;
+            DisplacementLabels = displacementLabels;
 
             OtherRegister = otherRegister;
             SubtractOtherRegister = subtract;
@@ -236,6 +247,8 @@ namespace AssEmbly
             Mode = GetDisplacementMode(encodedBytes[0]);
             ReadSize = (PointerReadSize)((encodedBytes[0] >> 4) & 0b11);
             PointerRegister = (Register)(encodedBytes[0] & 0b1111);
+
+            DisplacementLabels = Array.Empty<string>();
 
             byteCount = Mode.GetByteCount();
 
@@ -444,6 +457,7 @@ namespace AssEmbly
         // All reference types
         public readonly bool Displaced;
         public readonly long DisplacementConstant;
+        public readonly string[] DisplacementLabels;
 
         public AddressReference(string labelName, bool literal)
         {
@@ -454,9 +468,10 @@ namespace AssEmbly
             LabelName = labelName;
 
             Displaced = false;
+            DisplacementLabels = Array.Empty<string>();
         }
 
-        public AddressReference(string labelName, bool literal, long displacementConstant)
+        public AddressReference(string labelName, bool literal, long displacementConstant, string[] displacementLabels)
         {
             ReferenceType = literal
                 ? AddressReferenceType.LabelLiteral
@@ -466,6 +481,7 @@ namespace AssEmbly
 
             Displaced = true;
             DisplacementConstant = displacementConstant;
+            DisplacementLabels = displacementLabels;
         }
 
         public AddressReference(ulong address)
@@ -476,9 +492,10 @@ namespace AssEmbly
             Address = address;
 
             Displaced = false;
+            DisplacementLabels = Array.Empty<string>();
         }
 
-        public AddressReference(ulong address, long displacementConstant)
+        public AddressReference(ulong address, long displacementConstant, string[] displacementLabels)
         {
             ReferenceType = AddressReferenceType.LiteralAddress;
 
@@ -487,6 +504,7 @@ namespace AssEmbly
 
             Displaced = true;
             DisplacementConstant = displacementConstant;
+            DisplacementLabels = displacementLabels;
         }
 
         public bool Equals(AddressReference other)

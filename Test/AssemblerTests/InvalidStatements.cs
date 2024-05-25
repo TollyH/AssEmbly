@@ -174,6 +174,18 @@
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "B*rg4[rg0**8-6]" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Q*rg8[rg0**8-7]" }));
 
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "*rg0[:]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "D*rg0[:&]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "B*rg4[:LABEL]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "B*rg4[-:&LABEL]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Q*rg8[:12345]" }));
+
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "*rg0[rg2+:]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "D*rg0[rg4+:&]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "B*rg4[rg4*8+:LABEL]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "B*rg4[rg4-:&LABEL]" }));
+            _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Q*rg8[rg4+:12345]" }));
+
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("JMP", new[] { "rg0", "X*rg0" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Y*rg4" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("WCN", new[] { "rg0", "Z*rg8" }));

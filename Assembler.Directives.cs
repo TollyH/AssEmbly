@@ -186,6 +186,7 @@ namespace AssEmbly
                 string linkedName = operands[0][2..];
                 long displacement = 0;
 #endif
+                List<string> labelDisplacements = new();
                 foreach (string labelName in labelsToEdit)
                 {
                     if (labelName == linkedName)
@@ -193,12 +194,15 @@ namespace AssEmbly
                         throw new LabelNameException(string.Format(Strings_Assembler.Error_LABEL_OVERRIDE_Label_Reference_Also_Target, labelName));
                     }
                     // If the target label is already a link, store link to the actual target instead of chaining links
-                    while (labelLinks.TryGetValue(linkedName, out (string Target, long Displacement, string, int) checkName))
+                    while (labelLinks.TryGetValue(linkedName,
+                        out (string Target, long Displacement, string[] LabelDisplacements, string, int) checkName))
                     {
                         linkedName = checkName.Target;
                         displacement += checkName.Displacement;
+                        labelDisplacements.AddRange(checkName.LabelDisplacements);
                     }
-                    labelLinks[labelName] = (linkedName, displacement,
+                    labelDisplacements.AddRange(addressReference.DisplacementLabels);
+                    labelLinks[labelName] = (linkedName, displacement, labelDisplacements.ToArray(),
                         currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
                 }
             }
@@ -551,10 +555,10 @@ namespace AssEmbly
                 Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Line, labelName, address);
             }
             Console.Error.WriteLine(Strings_Assembler.Debug_Directive_Label_Link_Header, labelLinks.Count);
-            foreach ((string labelName, (string target, long displacement, string filePath, int line)) in labelLinks)
+            foreach ((string labelName, (string target, long displacement, string[] labelDisplacements, string filePath, int line)) in labelLinks)
             {
                 Console.Error.WriteLine(
-                    Strings_Assembler.Debug_Directive_Label_Link_Line, labelName, target, filePath, line, displacement);
+                    Strings_Assembler.Debug_Directive_Label_Link_Line, labelName, target, filePath, line, displacement, string.Join(',', labelDisplacements));
             }
             Console.Error.WriteLine(Strings_Assembler.Debug_Directive_LabelRef_Header, labelReferences.Count);
             foreach ((string labelName, ulong insertOffset, _) in labelReferences)
@@ -820,6 +824,7 @@ namespace AssEmbly
                 AddressReference addressReference = ParseAddressReference(operands[0]);
                 // We know from DetermineOperandType that ReferenceType will be LabelLiteral
                 referencedLabels.Add((addressReference.LabelName, 0));
+                referencedLabels.AddRange(addressReference.DisplacementLabels.Select(n => (n, 0UL)));
                 // Label location will be resolved later, just write the displacement for now
                 byte[] displacementBytes = new byte[8];
                 BinaryPrimitives.WriteInt64LittleEndian(displacementBytes,

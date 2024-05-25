@@ -44,7 +44,22 @@ HLT
 
 %DAT "Hello, world!\nEscape test complete\"Still string\0",
 %DAT                     0x42
-%NUM 1189998819991197253
+
+:LINK_VAL1
+%LABEL_OVERRIDE 9990000000000000
+:LINK_VAL2
+%LABEL_OVERRIDE 8810000000000
+:LINK_VAL3
+%LABEL_OVERRIDE 1180000000000000000
+
+:VAL1
+%LABEL_OVERRIDE :&LINK_VAL1[:&LINK_VAL2[:&LINK_VAL3]]
+:VAL2
+%LABEL_OVERRIDE 9991190000
+:VAL3
+%LABEL_OVERRIDE 7253
+
+%NUM :&VAL1[:&VAL2[:&VAL3]]
 
 %ANALYZER suggestion, 0004, r
 
@@ -147,6 +162,8 @@ hlt
 %ELSE
     %PAD 12
 %ENDIF
+
+
 
 %MACRO EmbeddedIf
     %IF GT, $0!, 5
@@ -312,6 +329,11 @@ InsertNoZeroPadding(0b1101101101001000101100111010111011011)
 
 HLT
 
+:DISPLACEMENT_LABEL_1
+%LABEL_OVERRIDE 1
+:DISPLACEMENT_LABEL_2
+%LABEL_OVERRIDE 2
+
 %ANALYZER suggestion, 0018, 0
 :DISPLACEMENTS
 %ANALYZER suggestion, 0018, r
@@ -328,7 +350,7 @@ MVQ *rg1[1 ]   , rg0
 MVQ q*rg2[  -2], rg1
 MVQ D*rg3[  0  b  1  1 ],rg2
 MVQ W*rg4[   -   4    ], rg3
-MVQ b*rg5[ 5], rg4
+MVQ b*rg5[  : &  DISPLAC EMENT_LAB  EL_  1   [    : &DIS  PLACEMENT_LAB EL_2 [  2 ] ] ], rg4
 
 MVQ rg0, *rg1[rg9]
 MVQ rg1, Q*rg2[-rg8 * 0b1000]
@@ -339,7 +361,9 @@ MVQ rg4, B*rg5[  r   g      5*4]
 MVQ *rg1[rg9-1 ]   , rg0
 MVQ Q*rg2[-rg8 * 8  +2], rg1
 MVQ D*rg3[    r    g       7      *        12     8       -   0 x  3    ],rg2
-MVQ w*rg4[   -      r   g   6+4    ], rg3
+%ANALYZER suggestion, 0022, 0
+MVQ w*rg4[   -      r   g   6*1+:&DISPLACEMENT_LABEL_1[:&DISPLACEMENT_LABEL_2[1]]    ], rg3
+%ANALYZER suggestion, 0022, r
 MVQ B*rg5[  r   g      5*4 -5], rg4
 %ANALYZER warning, 0032, r
 %ANALYZER warning, 0035, r

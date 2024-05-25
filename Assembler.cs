@@ -101,8 +101,8 @@ namespace AssEmbly
         private readonly List<byte> program = new();
         // Map of label names to final memory addresses
         private readonly Dictionary<string, ulong> labels = new();
-        // Map of label names that link to another label name, along with any displacement and the file and line the link was made on
-        private readonly Dictionary<string, (string Target, long Displacement, string FilePath, int Line)> labelLinks = new();
+        // Map of label names that link to another label name, along with any constant displacement/displacement by labels and the file and line the link was made on
+        private readonly Dictionary<string, (string Target, long Displacement, string[] LabelDisplacements, string FilePath, int Line)> labelLinks = new();
         // List of references to labels by name along with the address to insert the relevant address in to.
         // Also has the line and path to the file (if imported) that the reference was assembled from for use in error messages.
         private readonly List<(string LabelName, ulong Address, AssemblyPosition Position)> labelReferences = new();
@@ -359,7 +359,7 @@ namespace AssEmbly
                 throw new SyntaxError(Strings_Assembler.Error_Variable_Empty_Name);
             }
 
-            Match invalidMatch = ValidAddressCharsRegex().Match(name);
+            Match invalidMatch = InvalidAddressCharsRegex().Match(name);
             if (invalidMatch.Success)
             {
                 throw new SyntaxError(
@@ -429,8 +429,9 @@ namespace AssEmbly
 #if ASSEMBLER_WARNINGS
                 IEnumerable<string> labelNameReferences = labelReferences.Select(l => l.LabelName);
                 IEnumerable<string> labelNameLinks = labelLinks.Values.Select(l => l.Target);
+                IEnumerable<string> labelNameDisplacements = labelLinks.Values.SelectMany(l => l.LabelDisplacements);
                 warnings.AddRange(warningGenerator.Finalize(programBytes, entryPoint,
-                    labelNameReferences.Union(labelNameLinks).ToDictionary(l => l, l => labels[l])));
+                    labelNameReferences.Union(labelNameLinks).Union(labelNameDisplacements).ToDictionary(l => l, l => labels[l])));
 #endif
                 Finalized = true;
             }
@@ -691,6 +692,8 @@ namespace AssEmbly
                             AddressReference addressReference = ParseAddressReference(operands[i]);
                             // We know from DetermineOperandType that ReferenceType will be LabelLiteral
                             referencedLabels.Add((addressReference.LabelName, (uint)operandBytes.Count));
+                            referencedLabels.AddRange(
+                                addressReference.DisplacementLabels.Select(n => (n, (ulong)operandBytes.Count)));
                             // Label location will be resolved later, just write the displacement for now
                             byte[] displacementBytes = new byte[8];
                             BinaryPrimitives.WriteInt64LittleEndian(displacementBytes,
@@ -710,6 +713,8 @@ namespace AssEmbly
 #if DISPLACEMENT
                     {
                         AddressReference addressReference = ParseAddressReference(operands[i]);
+                        referencedLabels.AddRange(
+                            addressReference.DisplacementLabels.Select(n => (n, (ulong)operandBytes.Count)));
                         if (addressReference.ReferenceType == AddressReferenceType.LiteralAddress)
                         {
                             byte[] addressBytes = new byte[8];
@@ -753,6 +758,10 @@ namespace AssEmbly
                     case OperandType.Pointer:
 #if DISPLACEMENT
                         Pointer pointer = ParsePointer(operands[i]);
+                        // If the pointer references labels it must have a constant component,
+                        // and pointer constant components always start at the second byte of the pointer
+                        referencedLabels.AddRange(
+                            pointer.DisplacementLabels.Select(n => (n, (ulong)operandBytes.Count + 1)));
                         operandBytes.AddRange(pointer.GetBytes());
                         // Pointer read sizes other than 8-bytes ('Q') also set the displacement feature flag.
                         if (pointer.Mode != DisplacementMode.NoDisplacement || pointer.ReadSize != PointerReadSize.QuadWord)
@@ -1203,6 +1212,7 @@ namespace AssEmbly
 
             StringBuilder sb = new("[");
             int i = startIndex;
+            int openBrackets = 1;
             while (true)
             {
                 if (++i >= line.Length)
@@ -1215,9 +1225,13 @@ namespace AssEmbly
                 {
                     continue;
                 }
-                if (c == ']')
+                if (c == ']' && --openBrackets == 0)
                 {
                     break;
+                }
+                if (c == '[')
+                {
+                    openBrackets++;
                 }
                 _ = sb.Append(c);
             }
@@ -1281,8 +1295,8 @@ namespace AssEmbly
                     // Validating address literals with the same rules as labels has the intended
                     // side effect of disallowing negative and floating point literals
                     Match invalidMatch = allowAddressLiteral
-                        ? ValidAddressCharsRegex().Match(operand[labelNameStart..labelNameEnd])
-                        : ValidLabelRegex().Match(operand[labelNameStart..labelNameEnd]);
+                        ? InvalidAddressCharsRegex().Match(operand[labelNameStart..labelNameEnd])
+                        : InvalidLabelRegex().Match(operand[labelNameStart..labelNameEnd]);
                     if (!invalidMatch.Success && operand[labelNameStart] is >= '0' and <= '9')
                     {
                         // Literal address reference - validate as a numeric literal
@@ -1616,6 +1630,9 @@ namespace AssEmbly
         /// <param name="pointer">
         /// The pointer operand to parse, including the '*' character, and any displacement and size specifier.
         /// </param>
+        /// <param name="labelReferences">
+        /// An array of label names that should have their addresses added to the constant component of the returned pointer.
+        /// </param>
         /// <remarks>
         /// The operand should first be validated with <see cref="DetermineOperandType"/> before being given to this method.
         /// Any present displacements should be pre-parsed and validated by <see cref="PreParseDisplacement"/>
@@ -1655,6 +1672,7 @@ namespace AssEmbly
             // Parse any displacement on the pointer
             int displacementIndex = pointer.IndexOf('[');
             long displacementConstant = 0;
+            List<string> labelReferences = new();
             Register displacementRegister = default;
             bool subtractRegister = false;
             DisplacementMultiplier registerMultiplier = DisplacementMultiplier.x1;
@@ -1675,10 +1693,15 @@ namespace AssEmbly
                     {
                         throw new SyntaxError(Strings_Assembler.Error_Literal_Negative_Dash_Only);
                     }
-                    if (displacementContents[1] == '-')
+                    if (displacementContents[1] is '-')
                     {
                         throw new SyntaxError(
                             string.Format(Strings_Assembler.Error_Literal_Invalid_Character, displacementContents, ' '));
+                    }
+                    if (displacementContents[1] is ':')
+                    {
+                        throw new SyntaxError(
+                            string.Format(Strings_Assembler.Error_Displacement_LabelLiteral_Negated, displacementContents));
                     }
                     if (displacementContents[1] is (< '0' or > '9') and not '.')
                     {
@@ -1689,20 +1712,46 @@ namespace AssEmbly
                     }
                 }
 
-                if (displacementContents[0] is (>= '0' and <= '9') or '.' or '-')
+                if (displacementContents[0] is (>= '0' and <= '9') or '.' or '-' or ':')
                 {
-                    // Displacement starts with a numeric literal, therefore that must be the only part to the displacement
+                    // Displacement starts with a constant, therefore that must be the only part to the displacement
                     displacementMode = DisplacementMode.Constant;
-                    try
+                    if (displacementContents[0] == ':')
                     {
-                        ValidateNumericLiteral(displacementContents);
+                        // The displacement is by a label literal.
+                        AddressReference addressReference;
+                        try
+                        {
+                            addressReference = ParseAddressReference(displacementContents);
+                        }
+                        catch (SyntaxError exc)
+                        {
+                            throw new SyntaxError(
+                                exc.Message + Strings_Assembler.Error_Displacement_Pointer_Label_Start_Invalid);
+                        }
+                        if (addressReference.ReferenceType != AddressReferenceType.LabelLiteral)
+                        {
+                            throw new SyntaxError(Strings_Assembler.Error_Displacement_Not_LabelLiteral);
+                        }
+                        labelReferences.AddRange(addressReference.DisplacementLabels);
+                        labelReferences.Add(addressReference.LabelName);
+                        displacementConstant = addressReference.DisplacementConstant;
                     }
-                    catch (SyntaxError exc)
+                    else
                     {
-                        throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Pointer_Constant_Bad_Chars);
+                        // The displacement is by a numeric constant.
+                        try
+                        {
+                            ValidateNumericLiteral(displacementContents);
+                        }
+                        catch (SyntaxError exc)
+                        {
+                            throw new SyntaxError(
+                                exc.Message + Strings_Assembler.Error_Displacement_Pointer_Constant_Bad_Chars);
+                        }
+                        _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                        displacementConstant = (long)parsedNumber;
                     }
-                    _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
-                    displacementConstant = (long)parsedNumber;
                 }
                 else
                 {
@@ -1711,7 +1760,8 @@ namespace AssEmbly
                     string registerName = displacementContents[..endIndex];
                     if (!Enum.TryParse(registerName, true, out displacementRegister))
                     {
-                        throw new SyntaxError(string.Format(Strings_Assembler.Error_Pointer_Displacement_Bad_Register, registerName));
+                        throw new SyntaxError(
+                            string.Format(Strings_Assembler.Error_Displacement_Pointer_Bad_Register, registerName));
                     }
 
                     if (endIndex < displacementContents.Length)
@@ -1771,17 +1821,49 @@ namespace AssEmbly
                                 // Numeric literals are positive by default and cannot start with a '+' sign, so remove it
                                 displacementContents = displacementContents[1..];
                             }
-                            try
+
+                            if (displacementContents[0] == ':')
                             {
-                                ValidateNumericLiteral(displacementContents);
+                                // The displacement is by a label literal.
+                                AddressReference addressReference;
+                                try
+                                {
+                                    addressReference = ParseAddressReference(displacementContents);
+                                }
+                                catch (SyntaxError exc)
+                                {
+                                    throw new SyntaxError(
+                                        exc.Message + Strings_Assembler.Error_Displacement_Pointer_Label_Invalid);
+                                }
+                                if (addressReference.ReferenceType != AddressReferenceType.LabelLiteral)
+                                {
+                                    throw new SyntaxError(Strings_Assembler.Error_Displacement_Not_LabelLiteral);
+                                }
+                                labelReferences.AddRange(addressReference.DisplacementLabels);
+                                labelReferences.Add(addressReference.LabelName);
+                                displacementConstant = addressReference.DisplacementConstant;
                             }
-                            catch (SyntaxError exc)
+                            else
                             {
-                                throw new SyntaxError(
-                                    exc.Message + Strings_Assembler.Error_Displacement_Pointer_Register_Constant_Bad_Chars);
+                                if (displacementContents.Length >= 2
+                                    && displacementContents[0] == '-' && displacementContents[1] == ':')
+                                {
+                                    throw new SyntaxError(
+                                        string.Format(Strings_Assembler.Error_Displacement_LabelLiteral_Negated, displacementContents));
+                                }
+                                // The displacement is by a numeric constant.
+                                try
+                                {
+                                    ValidateNumericLiteral(displacementContents);
+                                }
+                                catch (SyntaxError exc)
+                                {
+                                    throw new SyntaxError(
+                                        exc.Message + Strings_Assembler.Error_Displacement_Pointer_Register_Constant_Bad_Chars);
+                                }
+                                _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                                displacementConstant = (long)parsedNumber;
                             }
-                            _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
-                            displacementConstant = (long)parsedNumber;
                         }
                         else
                         {
@@ -1800,11 +1882,12 @@ namespace AssEmbly
             return displacementMode switch
             {
                 DisplacementMode.Constant => new Pointer(pointerRegister, readSize,
-                    displacementConstant),
+                    displacementConstant, labelReferences.ToArray()),
                 DisplacementMode.Register => new Pointer(pointerRegister, readSize,
                     displacementRegister, subtractRegister, registerMultiplier),
                 DisplacementMode.ConstantAndRegister => new Pointer(pointerRegister, readSize,
-                    displacementRegister, subtractRegister, registerMultiplier, displacementConstant),
+                    displacementRegister, subtractRegister, registerMultiplier,
+                    displacementConstant, labelReferences.ToArray()),
                 _ => new Pointer(pointerRegister, readSize)
             };
         }
@@ -1815,6 +1898,9 @@ namespace AssEmbly
         /// <param name="addressReference">
         /// The address operand to parse, including the ':' prefix and any displacement.
         /// </param>
+        /// <param name="newLabelReferences">
+        /// An array of label names that should have their addresses added to the displacement component of the returned pointer.
+        /// </param>
         /// <remarks>
         /// The operand should first be validated with <see cref="DetermineOperandType"/> before being given to this method.
         /// Any present displacements should be pre-parsed and validated by <see cref="PreParseDisplacement"/>
@@ -1823,18 +1909,23 @@ namespace AssEmbly
         /// <exception cref="SyntaxError">Thrown if the address reference is invalid.</exception>
         public static AddressReference ParseAddressReference(string addressReference)
         {
-            if (addressReference.Length < 2)
-            {
-                throw new ArgumentException(Strings_Assembler.Error_Too_Short_LT2);
-            }
             if (addressReference[0] != ':')
             {
                 throw new ArgumentException(Strings_Assembler.Error_Address_Bad_First_Char);
             }
 
+            if (addressReference.Length < 2)
+            {
+                throw new SyntaxError(Strings_Assembler.Error_Label_Empty_Name);
+            }
+
+            // Will throw an error if address is invalid
+            _ = DetermineOperandType(addressReference);
+
             // Parse any displacement on the address reference
             int displacementIndex = addressReference.IndexOf('[');
             long displacementConstant = 0;
+            List<string> newLabelReferences = new();
             bool displaced = false;
             if (displacementIndex == -1)
             {
@@ -1846,16 +1937,40 @@ namespace AssEmbly
                 displaced = true;
                 // Closing square bracket will always be the last character
                 string displacementContents = addressReference[(displacementIndex + 1)..^1];
-                try
+                if (displacementContents[0] == ':')
                 {
-                    ValidateNumericLiteral(displacementContents);
+                    // The displacement is by a label literal.
+                    AddressReference nestedAddressReference;
+                    try
+                    {
+                        nestedAddressReference = ParseAddressReference(displacementContents);
+                    }
+                    catch (SyntaxError exc)
+                    {
+                        throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Label_Invalid);
+                    }
+                    if (nestedAddressReference.ReferenceType != AddressReferenceType.LabelLiteral)
+                    {
+                        throw new SyntaxError(Strings_Assembler.Error_Displacement_Not_LabelLiteral);
+                    }
+                    newLabelReferences.AddRange(nestedAddressReference.DisplacementLabels);
+                    newLabelReferences.Add(nestedAddressReference.LabelName);
+                    displacementConstant = nestedAddressReference.DisplacementConstant;
                 }
-                catch (SyntaxError exc)
+                else
                 {
-                    throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Address_Bad_Chars);
+                    // The displacement is by a numeric constant.
+                    try
+                    {
+                        ValidateNumericLiteral(displacementContents);
+                    }
+                    catch (SyntaxError exc)
+                    {
+                        throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Address_Bad_Chars);
+                    }
+                    _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
+                    displacementConstant = (long)parsedNumber;
                 }
-                _ = ParseLiteral(displacementContents, false, out ulong parsedNumber);
-                displacementConstant = (long)parsedNumber;
             }
 
             switch (addressReference[1])
@@ -1863,18 +1978,20 @@ namespace AssEmbly
                 case '&':
                     // LabelLiteral
                     return displaced
-                        ? new AddressReference(addressReference[2..displacementIndex], true, displacementConstant)
+                        ? new AddressReference(addressReference[2..displacementIndex], true,
+                            displacementConstant, newLabelReferences.ToArray())
                         : new AddressReference(addressReference[2..displacementIndex], true);
                 case >= '0' and <= '9':
                     // LiteralAddress
                     _ = ParseLiteral(addressReference[1..displacementIndex], false, out ulong address);
                     return displaced
-                        ? new AddressReference(address, displacementConstant)
+                        ? new AddressReference(address, displacementConstant, newLabelReferences.ToArray())
                         : new AddressReference(address);
                 default:
                     // LabelAddress
                     return displaced
-                        ? new AddressReference(addressReference[1..displacementIndex], false, displacementConstant)
+                        ? new AddressReference(addressReference[1..displacementIndex], false,
+                            displacementConstant, newLabelReferences.ToArray())
                         : new AddressReference(addressReference[1..displacementIndex], false);
             }
         }
@@ -1882,7 +1999,7 @@ namespace AssEmbly
 
         private void ResolveLabelReferences()
         {
-            foreach ((string labelLink, (string labelTarget, long displacement, string filePath, int line)) in labelLinks)
+            foreach ((string labelLink, (string labelTarget, long displacement, string[] otherLabels, string filePath, int line)) in labelLinks)
             {
                 if (!labels.TryGetValue(labelTarget, out ulong targetOffset))
                 {
@@ -1892,6 +2009,18 @@ namespace AssEmbly
                     throw exc;
                 }
                 labels[labelLink] = targetOffset + (ulong)displacement;
+
+                foreach (string labelDisplacement in otherLabels)
+                {
+                    if (!labels.TryGetValue(labelDisplacement, out targetOffset))
+                    {
+                        LabelNameException exc = new(
+                            string.Format(Strings_Assembler.Error_Label_Not_Exists, labelDisplacement), line, filePath);
+                        exc.ConsoleMessage = string.Format(Strings_Assembler.Error_On_Line, line, filePath, exc.Message);
+                        throw exc;
+                    }
+                    labels[labelLink] += targetOffset;
+                }
             }
 
             foreach ((string labelName, ulong labelAddress) in labels)
@@ -2609,10 +2738,10 @@ namespace AssEmbly
         }
 
         [GeneratedRegex("[^A-Za-z0-9_]")]
-        private static partial Regex ValidAddressCharsRegex();
+        private static partial Regex InvalidAddressCharsRegex();
 
         [GeneratedRegex("^[0-9]|[^A-Za-z0-9_]")]
-        private static partial Regex ValidLabelRegex();
+        private static partial Regex InvalidLabelRegex();
 
         [GeneratedRegex("[^0-9A-Fa-f_](?<!^0[xX])")]
         private static partial Regex InvalidHexadecimalCharsRegex();

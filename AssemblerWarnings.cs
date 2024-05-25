@@ -595,6 +595,7 @@ namespace AssEmbly
                 if (reference.Displaced)
                 {
                     address += (ulong)reference.DisplacementConstant;
+                    address += reference.DisplacementLabels.Aggregate(0UL, (a, n) => a + referencedLabels[n]);
                 }
 #else
                 ulong address;
