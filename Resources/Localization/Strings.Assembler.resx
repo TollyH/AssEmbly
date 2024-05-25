@@ -596,7 +596,7 @@ Assembler variable names may not contain symbols other than underscores.</value>
   </data>
   <data name="Error_Displacement_Address_Bad_Chars" xml:space="preserve">
     <value>
-Note that the displacement component of an address or label must be a single numeric literal.</value>
+Note that the displacement component of an address or label must be a single numeric or label literal.</value>
   </data>
   <data name="Error_Pointer_Bad_First_Char" xml:space="preserve">
     <value>One of the first or second characters of a pointer (but not both) must be an asterisk.</value>

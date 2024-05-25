@@ -575,7 +575,7 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///Note that the displacement component of an address or label must be a single numeric literal..
+        ///Note that the displacement component of an address or label must be a single numeric or label literal..
         /// </summary>
         internal static string Error_Displacement_Address_Bad_Chars {
             get {
