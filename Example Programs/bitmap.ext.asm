@@ -47,21 +47,15 @@ PSH rg4
 PSH rg5
 
 ; Get stack parameters
-MVQ rg2, rsb
-ADD rg2, 24
-MVQ rg1, *rg2
-; Second param
-SUB rg2, 8
-MVQ rg2, *rg2
+MVQ rg1, *rsb[24]
+MVQ rg2, *rsb[16]
 
 MVW *rg1, HeaderField
 ADD rg1, 2
 
 ; Width
-MVD rg0, D*rfp
-MVQ rg5, rg0
+MVD rg5, D*rfp
 MUL rg5, 3
-ADD rfp, 4
 ; Calculate padding for end of each line (bytes of each line must be divisible by 4)
 MVQ rg4, rg5
 MVQ rg0, rg5
@@ -75,8 +69,7 @@ XOR rg4, rg4
 :FUNC_BITMAP_ENCODE_ROUNDED
 
 ; Height
-MVD rg3, D*rfp
-ADD rfp, 4
+MVD rg3, D*rfp[4]
 
 ; Byte size of file
 ; Row bytes
@@ -86,57 +79,43 @@ ADD rg0, rg4
 MUL rg0, rg3
 ADD rg0, @TotalHeaderSize
 MVD *rg1, rg0
-ADD rg1, 4
-
-; Reserved bytes
-ADD rg1, 4
 
 ; Offset of pixel data
-MVD *rg1, @TotalHeaderSize
-ADD rg1, 4
+MVD *rg1[8], @TotalHeaderSize
 
-MVD *rg1, @InfoHeaderSize
-ADD rg1, 4
+MVD *rg1[12], @InfoHeaderSize
 
 ; Width
 DIV rg5, 3
-MVD *rg1, rg5
+MVD *rg1[16], rg5
 MUL rg5, 3
-ADD rg1, 4
 
 ; Height
 SIGN_NEG rg3  ; Height is negative to store from top-to-bottom
-MVD *rg1, rg3
-ADD rg1, 4
+MVD *rg1[20], rg3
 
 ; Color planes
-MVW *rg1, 1
-ADD rg1, 2
+MVW *rg1[24], 1
 
 ; Bits per pixel
-MVW *rg1, 24
-ADD rg1, 2
+MVW *rg1[26], 24
 
 ; No compression
-MVD *rg1, 0
-ADD rg1, 4
+MVD *rg1[28], 0
 
 ; Dummy image size
-MVD *rg1, 0
-ADD rg1, 4
+MVD *rg1[32], 0
 
 ; Horizontal and vertical pixels per metre
-%REPEAT 2
-    MVD *rg1, 2834
-    ADD rg1, 4
-%ENDREPEAT
+MVD *rg1[36], 2834
+MVD *rg1[40], 2834
 
 ; Dummy palette/important colours size
-MVQ *rg1, 0
-ADD rg1, 8
+MVQ *rg1[44], 0
 
 ; Skip to input pixel data
-ADD rfp, 2
+ADD rfp, 10
+ADD rg1, 52
 
 ; rg3 - source data end pointer
 MVQ rg3, rfp
@@ -207,12 +186,8 @@ PSH rg4
 MVQ rg4, rfp
 
 ; Get stack parameters
-MVQ rg1, rsb
-ADD rg1, 24
-MVQ rg2, *rg1
-; Second param
-SUB rg1, 8
-MVQ rg1, *rg1
+MVQ rg1, *rsb[16]
+MVQ rg2, *rsb[24]
 
 ; Calculate size of and allocate memory for file data
 ; Width
@@ -224,12 +199,8 @@ JZO :FUNC_BITMAP_ENCODE_FILE_NO_ROUND
 ADD rg0, 4
 SUB rg0, rg3
 :FUNC_BITMAP_ENCODE_FILE_NO_ROUND
-; Height
-MVQ rg3, rg1
-ADD rg3, 4
-MVD rg3, D*rg3
 ; Total pixel bytes
-MUL rg0, rg3
+MUL rg0, D*rg1[4]  ; Height
 ADD rg0, @TotalHeaderSize
 HEAP_ALC rg3, rg0
 

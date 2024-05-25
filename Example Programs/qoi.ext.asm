@@ -45,61 +45,51 @@ PSH rg3
 XOR rg3, rg3
 
 ; Get stack parameters
-MVQ rg1, rsb
-ADD rg1, 16
-MVQ rg2, *rg1
-ADD rg1, 8
-MVQ rg1, *rg1
+MVQ rg2, *rsb[16]
+MVQ rg1, *rsb[24]
 
 ; Check that magic bytes are present and correct
 MVD rg0, D*rfp
-ADD rfp, 4
 CMP rg0, MagicBytes
 JNE :QOI_DECODE_EXIT
 
 ; Width (stored in big endian)
-MVD rg4, D*rfp
+MVD rg4, D*rfp[4]
 SHL rg4, 32
 EXTD_BSW rg4
-ADD rfp, 4
 
 MVD *rg1, rg4
-ADD rg1, 4
 ; Store width in stack to multiply after height is read
 PSH rg4
 
 ; Height (stored in big endian)
-MVD rg4, D*rfp
+MVD rg4, D*rfp[8]
 SHL rg4, 32
 EXTD_BSW rg4
-ADD rfp, 4
 
-MVD *rg1, rg4
-ADD rg1, 4
+MVD *rg1[4], rg4
 POP rg0
 MUL rg4, rg0
 
 ; Channels
-MVB rg0, B*rfp
+MVB rg0, B*rfp[12]
 CMP rg0, 3
 JEQ :QOI_DECODE_VALID_CHANNELS
 CMP rg0, 4
 JNE :QOI_DECODE_EXIT
 :QOI_DECODE_VALID_CHANNELS
-MVB *rg1, rg0
-ICR rfp
-ICR rg1
+MVB *rg1[8], rg0
 
 ; Colorspace
-MVB rg0, B*rfp
+MVB rg0, B*rfp[13]
 TST rg0, rg0
 JZO :QOI_DECODE_VALID_COLORSPACE
 CMP rg0, 1
 JNE :QOI_DECODE_EXIT
 :QOI_DECODE_VALID_COLORSPACE
-MVB *rg1, rg0
-ICR rfp
-ICR rg1
+MVB *rg1[9], rg0
+ADD rfp, 14
+ADD rg1, 10
 
 ; Pixels
 PSH rg4
@@ -148,25 +138,21 @@ PSH rg7
 MVD rg3, 0xFF000000
 
 ; Get stack parameters
-MVQ rg4, rsb
-ADD rg4, 16
-MVQ rg2, *rg4
+MVQ rg2, *rsb[16]
 ADD rg2, rfp  ; Convert length to the end index + 1
-ADD rg4, 8
-MVQ rg1, *rg4
-ADD rg4, 8
-MVQ rg4, *rg4
+MVQ rg1, *rsb[24]
+MVQ rg4, *rsb[32]
 ; Convert length to the end index + 1
 MUL rg4, 4
 ADD rg4, rg1
 
-; Initialise 256 byte array in stack (64 pixels) for color index
-MVQ rg0, rso
-SUB rg0, 256
+; Initialise 256 byte array in stack (64 4-byte pixels / 32 8-byte numbers) for color index
+XOR rg0, rg0
 :QOI_DECODE_PIXELS_ZERO_ARRAY_LOOP
 PSH 0
-CMP rso, rg0
-JGT :QOI_DECODE_PIXELS_ZERO_ARRAY_LOOP
+ICR rg0
+CMP rg0, 32
+JLT :QOI_DECODE_PIXELS_ZERO_ARRAY_LOOP
 
 :QOI_DECODE_PIXELS_DECODER_LOOP
 ; while pixel pointer < pixel count && data pointer 
@@ -218,16 +204,14 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_INDEX
 MVB rg0, B*rfp
-MUL rg0, 4 ; Multiply hash index by 4 as pixels are 4 bytes wide
-ADD rg0, rso
-MVD rg0, D*rg0
+MVD rg0, D*rso[rg0 * 4]  ; Pixels are 4-bytes wide
 MVD *rg1, rg0
 ADD rg1, 4
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_DIFF
 ; Red
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b00110000
 SHR rg0, 4
 SUB rg0, 2
@@ -236,7 +220,7 @@ ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Green
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b00001100
 SHR rg0, 2
 SUB rg0, 2
@@ -247,7 +231,7 @@ ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Blue
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b00000011
 SUB rg0, 2
 MVQ rg6, rg3
@@ -266,12 +250,12 @@ JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_LUMA
 ; rg6 - green diff
-MVQ rg6, *rfp
+MVB rg6, B*rfp
 AND rg6, 0b00111111
 SUB rg6, 32
 ICR rfp
 ; Red
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b11110000
 SHR rg0, 4
 SUB rg0, 8
@@ -288,7 +272,7 @@ ADD rg0, rg6
 MVB *rg1, rg0
 ICR rg1
 ; Blue
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b00001111
 SUB rg0, 8
 MVQ rg7, rg3
@@ -307,7 +291,7 @@ ICR rg1
 JMP :QOI_DECODE_PIXELS_OP_JUMP_END
 
 :QOI_DECODE_PIXELS_QOI_OP_RUN
-MVQ rg0, *rfp
+MVB rg0, B*rfp
 AND rg0, 0b00111111
 ICR rg0
 :QOI_DECODE_PIXELS_QOI_OP_RUN_LOOP
@@ -327,10 +311,7 @@ ADD rg1, 4
 PSH rfp
 CAL :FUNC_QOI_HASH, rg3
 POP rfp
-MVQ rg0, rrv
-MUL rg0, 4  ; Multiply hash index by 4 as pixels are 4 bytes wide
-ADD rg0, rso
-MVD *rg0, rg3
+MVD *rso[rrv * 4], rg3  ; Pixels are 4-bytes wide
 ICR rfp
 JMP :QOI_DECODE_PIXELS_DECODER_LOOP
 :QOI_DECODE_PIXELS_DECODER_LOOP_END
@@ -385,16 +366,13 @@ JMP :FUNC_QOI_DECODE_FILE_READ_LOOP
 CFL
 
 ; Calculate the size of and allocate memory for decoded image
-MVQ rg0, rg3
-ADD rg0, 4
 ; Width
-MVD rg1, D*rg0
+MVD rg1, D*rg3[4]
 ; Convert big endian to little endian
 SHL rg1, 32
 EXTD_BSW rg1
 ; Height
-ADD rg0, 4
-MVD rg0, D*rg0
+MVD rg0, D*rg3[8]
 ; Convert big endian to little endian
 SHL rg0, 32
 EXTD_BSW rg0

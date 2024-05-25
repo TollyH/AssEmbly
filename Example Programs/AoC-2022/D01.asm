@@ -17,9 +17,8 @@ TST rg1, rg1  ; Did we already have newline?
 JNE :RESET_INTERS
 :NEW_ELF
 ; Start new elf - store current total
-MVQ *rg4, rg3
+MVQ *rg4[rg5 * 8], rg3
 ICR rg5
-ADD rg4, 8
 XOR rg1, rg1
 XOR rg3, rg3
 TST rsf, _ffe  ; End of file?
@@ -44,68 +43,58 @@ CFL
 ; rg2 - current elf
 ; rg4 - elf memory offset
 ; rg5 - number of elves
-MVQ rg4, :&TOTALS
 XOR rg2, rg2
 XOR rg1, rg1
-; Lower values as they'll be raised again
-SUB rg4, 8
-DCR rg2
 :MAX_LOOP
-ADD rg4, 8  ; Move onto next elf
-ICR rg2
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :NEXT_PART
-CMP rg1, *rg4  ; Is the value we're checking greater than the current maximum?
+CMP rg1, *rg4[rg2 * 8]  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX  ; (i.e. the current maximum is less than)
+ICR rg2  ; Move onto next elf
 JMP :MAX_LOOP
 :UPDATE_MAX
-MVQ rg1, *rg4
+MVQ rg1, *rg4[rg2 * 8]
+ICR rg2  ; Move onto next elf
 JMP :MAX_LOOP
 :NEXT_PART
 WCN rg1
 WCC '\n'  ; Newline
 
 ; rg6 - Second highest
-MVQ rg4, :&TOTALS
 XOR rg2, rg2
-; Lower values as they'll be raised again
-SUB rg4, 8
+; Lower value as it'll be raised again
 DCR rg2
 :MAX_LOOP_2
-ADD rg4, 8  ; Move onto next elf
-ICR rg2
+ICR rg2  ; Move onto next elf
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :THIRD_HIGHEST
-CMP rg6, *rg4  ; Is the value we're checking greater than the current maximum?
+CMP rg6, *rg4[rg2 * 8]  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX_2  ; (i.e. the current maximum is less than)
 JMP :MAX_LOOP_2
 :UPDATE_MAX_2
-CMP rg1, *rg4  ; If we've found the highest - don't update - we want the second highest
+CMP rg1, *rg4[rg2 * 8]  ; If we've found the highest - don't update - we want the second highest
 JEQ :MAX_LOOP_2
-MVQ rg6, *rg4
+MVQ rg6, *rg4[rg2 * 8]
 JMP :MAX_LOOP_2
 
 :THIRD_HIGHEST
 ; rg7 - Third highest
-MVQ rg4, :&TOTALS
 XOR rg2, rg2
-; Lower values as they'll be raised again
-SUB rg4, 8
+; Lower value as it'll be raised again
 DCR rg2
 :MAX_LOOP_3
-ADD rg4, 8  ; Move onto next elf
-ICR rg2
+ICR rg2  ; Move onto next elf
 CMP rg2, rg5  ; Have we reached end of elf list?
 JGE :END
-CMP rg7, *rg4  ; Is the value we're checking greater than the current maximum?
+CMP rg7, *rg4[rg2 * 8]  ; Is the value we're checking greater than the current maximum?
 JLT :UPDATE_MAX_3  ; (i.e. the current maximum is less than)
 JMP :MAX_LOOP_3
 :UPDATE_MAX_3
-CMP rg1, *rg4  ; If we've found the highest - don't update - we want the third highest
+CMP rg1, *rg4[rg2 * 8]  ; If we've found the highest - don't update - we want the third highest
 JEQ :MAX_LOOP_3
-CMP rg6, *rg4  ; If we've found the second highest - don't update - we want the third highest
+CMP rg6, *rg4[rg2 * 8]  ; If we've found the second highest - don't update - we want the third highest
 JEQ :MAX_LOOP_3
-MVQ rg7, *rg4
+MVQ rg7, *rg4[rg2 * 8]
 JMP :MAX_LOOP_3
 
 :END

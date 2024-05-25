@@ -3,25 +3,21 @@
 OFL :FILE_PATH
 ; rg0 - sum of line values
 ; rg1 - current line length / loop counter
-; rg2 - line store offset
 ; rg3 - current character
 XOR rg1, rg1
-MVQ rg2, :&LINE_STORE
 :READ_LOOP
 RFC rg3
 CMP rg3, '\n'  ; Newline?
-JEQ :LINE_END
+JEQ :FROM_SNAFU_LOOP
+MVB *rg1[:&LINE_STORE], rg3
 ICR rg1
-MVB *rg2, rg3
-ICR rg2
 JMP :READ_LOOP
-:LINE_END
-MVQ rg2, :&LINE_STORE
 :FROM_SNAFU_LOOP
+; rg2 - loop counter
 ; rg4 - power counter
 ; rg5 - power result
 ; rg6 - digit base value
-MVB rg3, B*rg2
+MVB rg3, B*rg2[:&LINE_STORE]
 
 ; Raise 5 to the power of current digit place
 MVQ rg5, 5.0
@@ -62,7 +58,7 @@ TST rsf, _ffe  ; End of file?
 JNZ :TO_SNAFU
 ; Reset counters
 XOR rg1, rg1
-MVQ rg2, :&LINE_STORE
+XOR rg2, rg2
 JMP :READ_LOOP
 
 :TO_SNAFU

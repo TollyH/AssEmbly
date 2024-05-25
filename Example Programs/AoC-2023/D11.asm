@@ -1,7 +1,16 @@
 %MACRO _ffe, 0b100
 
-%MACRO EXPANSION_FACTOR_PART_1, 2
-%MACRO EXPANSION_FACTOR_PART_2, 1000000
+; Don't define variables if they already exist (i.e. they were defined through command line)
+%IF NDEF, EXPANSION_FACTOR_PART_1
+    %DEFINE EXPANSION_FACTOR_PART_1, 2
+%ENDIF
+; Don't define variables if they already exist (i.e. they were defined through command line)
+%IF NDEF, EXPANSION_FACTOR_PART_2
+    %DEFINE EXPANSION_FACTOR_PART_2, 1000000
+%ENDIF
+
+%VAROP SUB, EXPANSION_FACTOR_PART_1, 1
+%VAROP SUB, EXPANSION_FACTOR_PART_2, 1
 
 ; Don't define variables if they already exist (i.e. they were defined through command line)
 %IF NDEF, MAX_EXPANDED
@@ -30,28 +39,29 @@
     %STOP "MAX_GALAXIES must be 1 or more"
 %ENDIF
 
+; Galaxies are in the format (part_1_x, part_2_x, part_1_y, part_2_y)
+%DEFINE GALAXIES_ARRAY_SIZE, @MAX_GALAXIES
+%VAROP MUL, GALAXIES_ARRAY_SIZE, 32
+
 ; rg0 - read character
 ; rg1 - image pointer
-; rg2 - current write pointer
-; rg3 - read characters count
+; rg2 - current write index
 ; rg7 - characters per line
 HEAP_ALC rg1, @MAX_INPUT_LEN
-MVQ rg2, rg1
 OFL :FILE_PATH
 :READ_LOOP
 RFC rg0
 TST rsf, _ffe
 JNZ :READ_END  ; End of file reached
-MVB *rg2, rg0
+MVB *rg1[rg2], rg0
 ICR rg2
-ICR rg3
 TST rg7, rg7  ; Only update length of one line if it isn't set yet
 JNZ :READ_LOOP
 CMP rg0, '\n'
 JEQ :WRITE_PER_LINE_CHARS
 JMP :READ_LOOP
 :WRITE_PER_LINE_CHARS
-MVQ rg7, rg3
+MVQ rg7, rg2
 JMP :READ_LOOP
 :READ_END
 CFL
@@ -72,8 +82,7 @@ MVQ rg9, rg2
 MVQ rg6, rg4
 MUL rg6, rg7
 ADD rg6, rg5
-ADD rg6, rg1  ; Convert index to image pointer
-MVB rg0, B*rg6
+MVB rg0, B*rg1[rg6]
 TST rg0, rg0
 JZO :FIND_EXPANDED_ROWS_END  ; Reached end of file
 CMP rg0, '#'
@@ -100,8 +109,7 @@ MVQ rg9, rg3
 MVQ rg6, rg4
 MUL rg6, rg7
 ADD rg6, rg5
-ADD rg6, rg1  ; Convert index to image pointer
-MVB rg0, B*rg6
+MVB rg0, B*rg1[rg6]
 CMP rg0, '\n'
 JEQ :FIND_EXPANDED_COLUMNS_END  ; Reached end of file
 CMP rg0, '#'
@@ -122,9 +130,8 @@ MVB *rg9, 0xFF  ; Write terminator
 
 ; rg9 - current galaxy pointer
 ; galaxies are in the format (part_1_x, part_2_x, part_1_y, part_2_y)
-MVQ rg0, @MAX_GALAXIES
+MVQ rg0, @GALAXIES_ARRAY_SIZE
 ICR rg0
-MUL rg0, 32
 HEAP_ALC rg9, rg0
 PSH rg9
 
@@ -136,9 +143,7 @@ XOR rg6, rg6
 XOR rg8, rg8
 :FIND_GALAXIES_Y_LOOP
 ; Check if passed any expanded rows
-MVQ rg0, rg2
-ADD rg0, rg6
-MVB rg0, B*rg0
+MVB rg0, B*rg2[rg6]
 CMP rg0, 0xFF  ; Check for terminator
 JEQ :FIND_GALAXIES_X_LOOP
 CMP rg4, rg0
@@ -146,9 +151,7 @@ JLT :FIND_GALAXIES_X_LOOP
 ICR rg6
 :FIND_GALAXIES_X_LOOP
 ; Check if passed any expanded columns
-MVQ rg0, rg3
-ADD rg0, rg8
-MVB rg0, B*rg0
+MVB rg0, B*rg3[rg8]
 CMP rg0, 0xFF  ; Check for terminator
 JEQ :SKIP_ICR_PASSED_COLUMNS
 CMP rg5, rg0
@@ -159,8 +162,7 @@ ICR rg8
 MVQ rg0, rg4
 MUL rg0, rg7
 ADD rg0, rg5
-ADD rg0, rg1  ; Convert index to image pointer
-MVB rg0, B*rg0
+MVB rg0, B*rg1[rg0]
 TST rg0, rg0
 JZO :FIND_GALAXIES_END  ; Reached end of file
 CMP rg0, '\n'
@@ -168,29 +170,25 @@ JEQ :FIND_GALAXIES_NEXT  ; Reached end of line
 CMP rg0, '#'
 JNE :FIND_GALAXIES_INCREMENT
 ; part 1 x
-MVQ rg0, EXPANSION_FACTOR_PART_1
-DCR rg0
+MVQ rg0, @EXPANSION_FACTOR_PART_1
 MUL rg0, rg8
 ADD rg0, rg5
 MVQ *rg9, rg0
 ADD rg9, 8
 ; part 2 x
-MVQ rg0, EXPANSION_FACTOR_PART_2
-DCR rg0
+MVQ rg0, @EXPANSION_FACTOR_PART_2
 MUL rg0, rg8
 ADD rg0, rg5
 MVQ *rg9, rg0
 ADD rg9, 8
 ; part 1 y
-MVQ rg0, EXPANSION_FACTOR_PART_1
-DCR rg0
+MVQ rg0, @EXPANSION_FACTOR_PART_1
 MUL rg0, rg6
 ADD rg0, rg4
 MVQ *rg9, rg0
 ADD rg9, 8
 ; part 2 y
-MVQ rg0, EXPANSION_FACTOR_PART_2
-DCR rg0
+MVQ rg0, @EXPANSION_FACTOR_PART_2
 MUL rg0, rg6
 ADD rg0, rg4
 MVQ *rg9, rg0
@@ -215,62 +213,37 @@ HEAP_FRE rg3
 ; rg2 - second galaxy index
 ; rg3 - sum (pt 1)
 ; rg4 - sum (pt 2)
-; rg5 - first galaxy address
-; rg6 - second galaxy address
-; rg7 - temp value
 XOR rg1, rg1
 MVQ rg2, 1
 XOR rg3, rg3
 XOR rg4, rg4
 :GALAXY_PAIRS_LOOP
 ; Calculate first galaxy index and read it
-MVQ rg5, rg1
-MUL rg5, 32
-ADD rg5, rg9
-MVQ rg0, *rg5
+MVQ rg0, *rg9[rg1 * 32]
 CMP rg0, 0xFFFFFFFFFFFFFFFF  ; Reached end of galaxy list
 JEQ :GALAXY_PAIRS_END
 ; Calculate second galaxy index and read it
-MVQ rg6, rg2
-MUL rg6, 32
-ADD rg6, rg9
-MVQ rg0, *rg6
+MVQ rg0, *rg9[rg2 * 32]
 CMP rg0, 0xFFFFFFFFFFFFFFFF  ; Reached end of galaxy list
 JEQ :GALAXY_PAIRS_NEXT
 ; abs(first.part_one_x - second.part_one_x)
-MVQ rg0, *rg5
-MVQ rg7, *rg6
-SUB rg0, rg7
+MVQ rg0, *rg9[rg1 * 32]
+SUB rg0, *rg9[rg2 * 32]
 CAL :FUNC_ABS, rg0
 ADD rg3, rrv
 ; abs(first.part_one_y - second.part_one_y)
-MVQ rg0, rg5
-ADD rg0, 16  ; 2 values
-MVQ rg0, *rg0
-MVQ rg7, rg6
-ADD rg7, 16  ; 2 values
-MVQ rg7, *rg7
-SUB rg0, rg7
+MVQ rg0, *rg9[rg1 * 32 + 16]
+SUB rg0, *rg9[rg2 * 32 + 16]
 CAL :FUNC_ABS, rg0
 ADD rg3, rrv
 ; abs(first.part_two_x - second.part_two_x)
-MVQ rg0, rg5
-ADD rg0, 8  ; 1 value
-MVQ rg0, *rg0
-MVQ rg7, rg6
-ADD rg7, 8  ; 1 value
-MVQ rg7, *rg7
-SUB rg0, rg7
+MVQ rg0, *rg9[rg1 * 32 + 8]
+SUB rg0, *rg9[rg2 * 32 + 8]
 CAL :FUNC_ABS, rg0
 ADD rg4, rrv
 ; abs(first.part_two_y - second.part_two_y)
-MVQ rg0, rg5
-ADD rg0, 24  ; 3 values
-MVQ rg0, *rg0
-MVQ rg7, rg6
-ADD rg7, 24  ; 3 values
-MVQ rg7, *rg7
-SUB rg0, rg7
+MVQ rg0, *rg9[rg1 * 32 + 24]
+SUB rg0, *rg9[rg2 * 32 + 24]
 CAL :FUNC_ABS, rg0
 ADD rg4, rrv
 ; Move to next pair
