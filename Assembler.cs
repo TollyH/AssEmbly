@@ -1947,6 +1947,11 @@ namespace AssEmbly
                     }
                     catch (SyntaxError exc)
                     {
+                        if (exc.Message.EndsWith(Strings_Assembler.Error_Displacement_Label_Invalid, StringComparison.Ordinal))
+                        {
+                            // Don't repeat the appended error note when error is nested
+                            throw;
+                        }
                         throw new SyntaxError(exc.Message + Strings_Assembler.Error_Displacement_Label_Invalid);
                     }
                     if (nestedAddressReference.ReferenceType != AddressReferenceType.LabelLiteral)
@@ -1956,6 +1961,12 @@ namespace AssEmbly
                     newLabelReferences.AddRange(nestedAddressReference.DisplacementLabels);
                     newLabelReferences.Add(nestedAddressReference.LabelName);
                     displacementConstant = nestedAddressReference.DisplacementConstant;
+                }
+                else if (displacementContents.Length >= 2
+                    && displacementContents[0] == '-' && displacementContents[1] == ':')
+                {
+                    throw new SyntaxError(
+                        string.Format(Strings_Assembler.Error_Displacement_LabelLiteral_Negated, displacementContents));
                 }
                 else
                 {
