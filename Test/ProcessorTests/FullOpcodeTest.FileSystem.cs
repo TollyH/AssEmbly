@@ -5,6 +5,7 @@ namespace AssEmbly.Test.ProcessorTests
     public static partial class FullOpcodeTest
     {
         [TestClass]
+        [DoNotParallelize]
         public class FileSystemExtensionSet
         {
             [TestMethod]

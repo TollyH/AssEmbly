@@ -201,7 +201,9 @@ namespace AssEmbly
                         displacement += checkName.Displacement;
                         labelDisplacements.AddRange(checkName.LabelDisplacements);
                     }
+#if DISPLACEMENT
                     labelDisplacements.AddRange(addressReference.DisplacementLabels);
+#endif
                     labelLinks[labelName] = (linkedName, displacement, labelDisplacements.ToArray(),
                         currentImport?.ImportPath ?? BaseFilePath, currentImport?.CurrentLine ?? baseFileLine);
                 }
