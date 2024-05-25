@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace AssEmbly.Test.ProcessorTests
 {
@@ -823,6 +824,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_GCT_Register_Address()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
                 DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
                 File.SetCreationTimeUtc("copyfile", randomDateTime);
@@ -839,6 +845,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_GCT_Register_Pointer()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
                 DateTime randomDateTime = DateTime.UnixEpoch.AddSeconds(randomTimestamp);
                 File.SetCreationTimeUtc("copyfile", randomDateTime);
@@ -922,6 +933,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_SCT_Address_Register()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
@@ -937,6 +953,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_SCT_Pointer_Register()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
@@ -953,6 +974,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_SCT_Address_Literal()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
@@ -968,6 +994,11 @@ namespace AssEmbly.Test.ProcessorTests
             [TestMethod]
             public void FSYS_SCT_Pointer_Literal()
             {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    // Creation time is unreliable on non-windows platforms
+                    return;
+                }
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
