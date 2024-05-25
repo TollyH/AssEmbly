@@ -705,7 +705,7 @@ namespace AssEmbly.Resources.Localization {
         
         /// <summary>
         ///   Looks up a localized string similar to 
-        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators, or by a label literal with only the + operator. Only register displacements can be multiplied. Label literals displacements can be displaced by nesting square brackets, not by following them a +/- sign..
+        ///Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators, or by a label literal with only the + operator. Only register displacements can be multiplied. Label literal displacements can themselves be displaced by nesting square brackets, not through the use of +/- signs..
         /// </summary>
         internal static string Error_Displacement_Pointer_Label_Invalid {
             get {

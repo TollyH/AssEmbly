@@ -643,7 +643,7 @@ Note that if the displacement component of a pointer starts with a label literal
   </data>
   <data name="Error_Displacement_Pointer_Label_Invalid" xml:space="preserve">
     <value>
-Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators, or by a label literal with only the + operator. Only register displacements can be multiplied. Label literals displacements can be displaced by nesting square brackets, not by following them a +/- sign.</value>
+Note that when displacing by a register and a constant, the register must be followed by a single numeric literal with one of the + or - operators, or by a label literal with only the + operator. Only register displacements can be multiplied. Label literal displacements can themselves be displaced by nesting square brackets, not through the use of +/- signs.</value>
   </data>
   <data name="Error_Displacement_Label_Invalid" xml:space="preserve">
     <value>
