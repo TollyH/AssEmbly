@@ -9,6 +9,10 @@
     padding: 1em;
 }
 
+#TOC > ul {
+    padding-bottom: 1em;
+}
+
 body {
     padding-right: 4em;
     padding-left: 24em;
