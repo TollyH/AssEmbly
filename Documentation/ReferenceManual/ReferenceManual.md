@@ -1,8 +1,8 @@
 # AssEmbly Reference Manual
 
-Applies to versions: `3.2.0`
+Applies to versions: `4.0.0`
 
-Last revised: 2024-05-24
+Last revised: 2024-05-26
 
 ## Introduction
 
@@ -43,21 +43,21 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 
 ## Technical Information
 
-|                              |                                                                 |
-|------------------------------|-----------------------------------------------------------------|
-| Bits                         | 64 (registers, operands & addresses)                            |
-| Word Size                    | 8 bytes (64-bits – called a Quad Word for consistency with x86) |
-| Minimum Addressable Unit     | Byte (8-bits)                                                   |
-| Register Count               | 16 (10 general purpose)                                         |
-| Architecture Type            | Register–memory                                                 |
-| Endianness                   | Little                                                          |
-| Signed Number Representation | Two's Complement                                                |
-| Branching                    | Condition code (status register)                                |
-| Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)        |
-| Operand Size                 | 1 byte (registers, pointers) / 8 bytes (literals, addresses)    |
-| Instruction Size             | 1 byte – 17 bytes (current) / unlimited (theoretical)           |
-| Instruction Count            | 329 opcodes (114 unique operations)                             |
-| Text Encoding                | UTF-8                                                           |
+|                              |                                                                            |
+|------------------------------|----------------------------------------------------------------------------|
+| Bits                         | 64 (registers, operands & addresses)                                       |
+| Word Size                    | 8 bytes (64-bits – called a Quad Word for consistency with x86)            |
+| Minimum Addressable Unit     | Byte (8-bits)                                                              |
+| Register Count               | 16 (10 general purpose)                                                    |
+| Architecture Type            | Register–memory                                                            |
+| Endianness                   | Little                                                                     |
+| Signed Number Representation | Two's Complement                                                           |
+| Branching                    | Condition code (status register)                                           |
+| Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)                   |
+| Operand Size                 | 1 byte (registers) / 8 bytes (literals, addresses) / 1–10 bytes (pointers) |
+| Instruction Size             | 1 byte – 23 bytes (current) / unlimited (theoretical)                      |
+| Instruction Count            | 410 opcodes (153 unique operations)                                        |
+| Text Encoding                | UTF-8                                                                      |
 
 ## Basic Syntax
 
