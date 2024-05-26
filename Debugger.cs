@@ -88,7 +88,7 @@ namespace AssEmbly
                 string lineDisassembly = LoadedDebugInfoFile is null
                     || !LoadedDebugInfoFile.Value.AssembledInstructions.TryGetValue(currentAddress, out string? inst)
                         ? Disassembler.DisassembleInstruction(
-                            DebuggingProcessor.Memory.AsSpan()[(int)currentAddress..], disassemblerOptions, false).Line
+                            new ReadOnlySpan<byte>(DebuggingProcessor.Memory)[(int)currentAddress..], disassemblerOptions, false).Line
                         : inst;
 
                 Console.WriteLine();

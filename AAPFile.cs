@@ -104,7 +104,7 @@ namespace AssEmbly
             {
                 throw new AAPFormatException(Strings.AAP_Error_Invalid_Bad_Header);
             }
-            Span<byte> byteSpan = executable.AsSpan();
+            ReadOnlySpan<byte> byteSpan = new(executable);
 
             int major = BinaryPrimitives.ReadInt32LittleEndian(byteSpan[8..]);
             int minor = BinaryPrimitives.ReadInt32LittleEndian(byteSpan[12..]);

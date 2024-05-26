@@ -1595,6 +1595,7 @@ namespace AssEmbly
                                                         // The program input isn't connected to a terminal,
                                                         // so we can't wait for a pressed key - read the stdin stream directly instead
                                                         pressedKeyChar = (char)Console.Read();
+                                                        inputCharacter += pressedKeyChar;
                                                     }
                                                     else
                                                     {
@@ -4115,7 +4116,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ushort ReadMemoryWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt16LittleEndian(Memory.AsSpan()[(int)offset..]);
+            return BinaryPrimitives.ReadUInt16LittleEndian(new ReadOnlySpan<byte>(Memory)[(int)offset..]);
         }
 
         /// <summary>
@@ -4124,7 +4125,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadMemoryDWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt32LittleEndian(Memory.AsSpan()[(int)offset..]);
+            return BinaryPrimitives.ReadUInt32LittleEndian(new ReadOnlySpan<byte>(Memory)[(int)offset..]);
         }
 
         /// <summary>
@@ -4133,7 +4134,7 @@ namespace AssEmbly
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong ReadMemoryQWord(ulong offset)
         {
-            return BinaryPrimitives.ReadUInt64LittleEndian(Memory.AsSpan()[(int)offset..]);
+            return BinaryPrimitives.ReadUInt64LittleEndian(new ReadOnlySpan<byte>(Memory)[(int)offset..]);
         }
 
         /// <summary>
@@ -4161,7 +4162,7 @@ namespace AssEmbly
         public ulong ReadMemoryPointer(ulong offset, out ulong byteCount)
         {
 #if DISPLACEMENT
-            return GetPointerAddress(new Pointer(Memory.AsSpan()[(int)offset..], out byteCount));
+            return GetPointerAddress(new Pointer(new ReadOnlySpan<byte>(Memory)[(int)offset..], out byteCount));
 #else
             byteCount = 1;
             return Registers[(int)ReadMemoryRegisterType(offset)];
@@ -4231,7 +4232,7 @@ namespace AssEmbly
         public ulong ReadMemoryRegisterPointedNumber(ulong offset, out ulong byteCount)
         {
 #if DISPLACEMENT
-            Pointer ptr = new(Memory.AsSpan()[(int)offset..], out byteCount);
+            Pointer ptr = new(new ReadOnlySpan<byte>(Memory)[(int)offset..], out byteCount);
             ulong address = GetPointerAddress(ptr);
             return ptr.ReadSize switch
             {

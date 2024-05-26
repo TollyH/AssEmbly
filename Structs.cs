@@ -18,7 +18,7 @@ namespace AssEmbly
         /// <param name="offset">The index in <paramref name="bytes"/> to start parsing from.</param>
         /// <returns>An opcode based on the parsed value from <paramref name="bytes"/> at <paramref name="offset"/>.</returns>
         /// <remarks><paramref name="offset"/> will be incremented to the index of the end of the opcode by this method.</remarks>
-        public static Opcode ParseBytes(Span<byte> bytes, ref ulong offset)
+        public static Opcode ParseBytes(ReadOnlySpan<byte> bytes, ref ulong offset)
         {
             return bytes[(int)offset] == FullyQualifiedMarker
                 ? new Opcode(bytes[(int)++offset], bytes[(int)++offset])
@@ -178,10 +178,10 @@ namespace AssEmbly
         // Constant + ConstantAndRegister only
         public readonly long DisplacementConstant;
         /// <remarks>
-        /// This will always be empty when reading a pointer from assembled bytes.
+        /// This will be null only when reading a pointer from assembled bytes.
         /// It is only relevant when assembling a pointer from source code.
         /// </remarks>
-        public readonly string[] DisplacementLabels;
+        public readonly string[]? DisplacementLabels;
 
         // Register + ConstantAndRegister only
         public readonly Register OtherRegister;
@@ -242,13 +242,11 @@ namespace AssEmbly
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Pointer(Span<byte> encodedBytes, out ulong byteCount)
+        public Pointer(ReadOnlySpan<byte> encodedBytes, out ulong byteCount)
         {
             Mode = GetDisplacementMode(encodedBytes[0]);
             ReadSize = (PointerReadSize)((encodedBytes[0] >> 4) & 0b11);
             PointerRegister = (Register)(encodedBytes[0] & 0b1111);
-
-            DisplacementLabels = Array.Empty<string>();
 
             byteCount = Mode.GetByteCount();
 

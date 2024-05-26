@@ -33,7 +33,7 @@ namespace AssEmbly
             while (offset < (ulong)program.LongLength)
             {
                 (string line, ulong additionalOffset, List<ulong> referencedAddresses, bool datFallback) =
-                    DisassembleInstruction(program.AsSpan()[(int)offset..], options, true);
+                    DisassembleInstruction(new ReadOnlySpan<byte>(program)[(int)offset..], options, true);
 
                 foreach (ulong address in referencedAddresses)
                 {
@@ -98,7 +98,7 @@ namespace AssEmbly
         /// </param>
         /// <returns>(Disassembled line, Number of bytes instruction was, Referenced addresses [if present], Used %DAT directive)</returns>
         public static (string Line, ulong AdditionalOffset, List<ulong> References, bool DatFallback) DisassembleInstruction(
-            Span<byte> instruction, DisassemblerOptions options, bool useLabelNames)
+            ReadOnlySpan<byte> instruction, DisassemblerOptions options, bool useLabelNames)
         {
             if (instruction.Length == 0)
             {

@@ -1,4 +1,6 @@
-﻿namespace AssEmbly
+﻿using System.Runtime.CompilerServices;
+
+namespace AssEmbly
 {
     public static class Extensions
     {
@@ -42,6 +44,7 @@
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong GetByteCount(this DisplacementMode mode)
         {
             return mode switch

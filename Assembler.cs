@@ -761,7 +761,7 @@ namespace AssEmbly
                         // If the pointer references labels it must have a constant component,
                         // and pointer constant components always start at the second byte of the pointer
                         referencedLabels.AddRange(
-                            pointer.DisplacementLabels.Select(n => (n, (ulong)operandBytes.Count + 1)));
+                            pointer.DisplacementLabels!.Select(n => (n, (ulong)operandBytes.Count + 1)));
                         operandBytes.AddRange(pointer.GetBytes());
                         // Pointer read sizes other than 8-bytes ('Q') also set the displacement feature flag.
                         if (pointer.Mode != DisplacementMode.NoDisplacement || pointer.ReadSize != PointerReadSize.QuadWord)
