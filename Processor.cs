@@ -1584,17 +1584,28 @@ namespace AssEmbly
                                             {
                                                 // There are no remaining queued UTF-8 bytes, so get the next character from the console.
                                                 string inputCharacter = "";
-                                                ConsoleKeyInfo pressedKey;
+                                                char pressedKeyChar;
                                                 // C# gives us a single part of a UTF-16 surrogate pair if something outside the BMP is typed (i.e. an emoji).
                                                 // If we detect the start of a surrogate pair, get another character as well to have the full character
                                                 // to be converted to UTF-8.
                                                 do
                                                 {
-                                                    pressedKey = Console.ReadKey(true);
-                                                    // By default pressing enter will get \r, we want \n
-                                                    inputCharacter += pressedKey.Key == ConsoleKey.Enter
-                                                        ? '\n' : pressedKey.KeyChar;
-                                                } while (char.IsHighSurrogate(pressedKey.KeyChar));
+                                                    if (Console.IsInputRedirected)
+                                                    {
+                                                        // The program input isn't connected to a terminal,
+                                                        // so we can't wait for a pressed key - read the stdin stream directly instead
+                                                        pressedKeyChar = (char)Console.Read();
+                                                    }
+                                                    else
+                                                    {
+                                                        ConsoleKeyInfo pressedKey = Console.ReadKey(true);
+                                                        pressedKeyChar = pressedKey.KeyChar;
+                                                        // By default pressing enter will get \r, we want \n
+                                                        inputCharacter += pressedKey.Key == ConsoleKey.Enter
+                                                            ? '\n'
+                                                            : pressedKeyChar;
+                                                    }
+                                                } while (char.IsHighSurrogate(pressedKeyChar));
                                                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(inputCharacter);
                                                 currentByte = utf8Bytes[0];
 
