@@ -3681,19 +3681,59 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FSYS_GNF adr
-                                        WriteMemoryPointedString(operandStart, fileListing.MoveNext() ? Path.GetFileName(fileListing.Current) : "");
+                                        if (fileListing.MoveNext())
+                                        {
+                                            filepath = Path.GetFileName(fileListing.Current);
+                                            Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                        }
+                                        else
+                                        {
+                                            filepath = "";
+                                            Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                        }
+                                        WriteMemoryPointedString(operandStart, filepath);
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x1:  // FSYS_GNF ptr
-                                        WriteMemoryRegisterPointedString(operandStart, fileListing.MoveNext() ? Path.GetFileName(fileListing.Current) : "", out byteCount);
+                                        if (fileListing.MoveNext())
+                                        {
+                                            filepath = Path.GetFileName(fileListing.Current);
+                                            Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                        }
+                                        else
+                                        {
+                                            filepath = "";
+                                            Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                        }
+                                        WriteMemoryRegisterPointedString(operandStart, filepath, out byteCount);
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x2:  // FSYS_GND adr
-                                        WriteMemoryPointedString(operandStart, directoryListing.MoveNext() ? Path.GetFileName(directoryListing.Current) : "");
+                                        if (directoryListing.MoveNext())
+                                        {
+                                            filepath = Path.GetFileName(directoryListing.Current);
+                                            Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                        }
+                                        else
+                                        {
+                                            filepath = "";
+                                            Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                        }
+                                        WriteMemoryPointedString(operandStart, filepath);
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FSYS_GND ptr
-                                        WriteMemoryRegisterPointedString(operandStart, directoryListing.MoveNext() ? Path.GetFileName(directoryListing.Current) : "", out byteCount);
+                                        if (directoryListing.MoveNext())
+                                        {
+                                            filepath = Path.GetFileName(directoryListing.Current);
+                                            Registers[(int)Register.rsf] &= ~(ulong)StatusFlags.Zero;
+                                        }
+                                        else
+                                        {
+                                            filepath = "";
+                                            Registers[(int)Register.rsf] |= (ulong)StatusFlags.Zero;
+                                        }
+                                        WriteMemoryRegisterPointedString(operandStart, filepath, out byteCount);
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:

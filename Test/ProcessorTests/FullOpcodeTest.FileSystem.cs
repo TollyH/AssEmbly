@@ -712,7 +712,7 @@ namespace AssEmbly.Test.ProcessorTests
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
                 Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 if (first == second || (first is not "file 1" and not "file 2") || (second is not "file 1" and not "file 2"))
                 {
@@ -746,7 +746,7 @@ namespace AssEmbly.Test.ProcessorTests
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next file");
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 if (first == second || (first is not "file 1" and not "file 2") || (second is not "file 1" and not "file 2"))
                 {
@@ -779,7 +779,7 @@ namespace AssEmbly.Test.ProcessorTests
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
                 Assert.AreEqual(33UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 if (first == second || (first is not "folder 1" and not "folder 2") || (second is not "folder 1" and not "folder 2"))
                 {
@@ -813,7 +813,7 @@ namespace AssEmbly.Test.ProcessorTests
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual("", testProcessor.ReadMemoryString(0x140), "Instruction did not get next folder");
                 Assert.AreEqual(12UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.AreEqual((ulong)StatusFlags.Zero, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
 
                 if (first == second || (first is not "folder 1" and not "folder 2") || (second is not "folder 1" and not "folder 2"))
                 {
