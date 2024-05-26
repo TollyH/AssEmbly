@@ -38,6 +38,9 @@ Every AAP file contains 64-bits of feature flags that identify which features a 
 | 4   | The program bytes are compressed with GZip compression                                          |
 | 5   | Program uses instructions from the External Assembly Extension Set                              |
 | 6   | Program uses instructions from the Memory Allocation Extension Set                              |
+| 7   | Program uses instructions from the File System Extension Set                                    |
+| 8   | Program uses instructions from the Terminal Extension Set                                       |
+| 9   | Program uses pointer displacement or pointer read sizes less than 64 bits                       |
 
 The remaining bits are currently unused, and should always be set to `0`.
 
@@ -48,15 +51,18 @@ This table charts the availability of each feature flag on each major version of
 > [!WARNING]
 > Additional instructions may be added to existing extension sets by new versions. A version having a tick below only indicates that the extension set existed in some form within that version, not that it necessarily supports *all* instructions currently in the set. See the reference manual for a full list of instructions and what AssEmbly version they were added in.
 
-| Feature                                      | v1 | v2 | v3 |
-|----------------------------------------------|----|----|----|
-| Choice between v1 and v2+ calling convention | ❌ | ✔️ | ✔️ |
-| Signed Extension Set                         | ❌ | ✔️ | ✔️ |
-| Floating Point Extension Set                 | ❌ | ✔️ | ✔️ |
-| Extended Base Set                            | ❌ | ✔️ | ✔️ |
-| GZip Compression                             | ❌ | ❌ | ✔️ |
-| External Assembly Extension Set              | ❌ | ❌ | ✔️ |
-| Memory Allocation Extension Set              | ❌ | ❌ | ✔️ |
+| Feature                                      | v1 | v2 | v3 | v4 |
+|----------------------------------------------|----|----|----|----|
+| Choice between v1 and v2+ calling convention | ❌ | ✔️ | ✔️ | ✔️ |
+| Signed Extension Set                         | ❌ | ✔️ | ✔️ | ✔️ |
+| Floating Point Extension Set                 | ❌ | ✔️ | ✔️ | ✔️ |
+| Extended Base Set                            | ❌ | ✔️ | ✔️ | ✔️ |
+| GZip Compression                             | ❌ | ❌ | ✔️ | ✔️ |
+| External Assembly Extension Set              | ❌ | ❌ | ✔️ | ✔️ |
+| Memory Allocation Extension Set              | ❌ | ❌ | ✔️ | ✔️ |
+| File System Extension Set                    | ❌ | ❌ | ❌ | ✔️ |
+| Terminal Extension Set                       | ❌ | ❌ | ❌ | ✔️ |
+| Pointer Displacement                         | ❌ | ❌ | ❌ | ✔️ |
 
 ## AAP Format Version History
 

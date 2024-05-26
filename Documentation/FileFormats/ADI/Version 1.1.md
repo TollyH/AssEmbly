@@ -1,13 +1,10 @@
-# ADI File Format Version 1.0
+# ADI File Format Version 1.1
 
-This document describes version `1.0` of the ADI file format, used by version `3.2.0` of AssEmbly.
-
-> [!WARNING]
-> This format version has been discontinued since AssEmbly version `4.0.0`
+This document describes version `1.1` of the ADI file format, used by all versions of AssEmbly from `4.0.0` onwards.
 
 ## Table of Contents
 
-- [ADI File Format Version 1.0](#adi-file-format-version-10)
+- [ADI File Format Version 1.1](#adi-file-format-version-11)
   - [Table of Contents](#table-of-contents)
   - [File Layout](#file-layout)
     - [Section 1 - Assembled Instructions](#section-1---assembled-instructions)
@@ -133,20 +130,20 @@ For example:
 
 ### Section 4 - File and Line Mapping
 
-Section 4 maps addresses to the line number and file path that they were assembled from. The address is encoded as a 0-indexed 16-digit uppercase hexadecimal number with no prefix. The line number is encoded as a 1-indexed denary number with an arbitrary number of digits, always followed immediately by a colon `:`. The file path is then omitted if the line was from the initial (base) file, or inserted as the fully qualified literal text of the path if it was from an imported file. The address and the line number are separated by an `@` sign with a single space on either side. Each entry is stored on its own line, and there should be no blank line between the final entry and the end of the section. Each address must be unique.
+Section 4 maps addresses to the line number and file path that they were assembled from. The address is encoded as a 0-indexed 16-digit uppercase hexadecimal number with no prefix. The line number is encoded as a 1-indexed denary number with an arbitrary number of digits, always followed immediately by a colon `:`. The file path is then inserted immediately after the colon as the fully qualified literal text of the path. The format of the path is platform-specific with no restrictions on what characters can be included, with the exception of the `CR` (`0x0D`) and `LF` (`0x0A`) characters, which may not appear inside a file path regardless of platform. The address and the line number are separated by an `@` sign with a single space on either side. Each entry is stored on its own line, and there should be no blank line between the final entry and the end of the section. Each address must be unique.
 
 For example:
 
 ```text
 [4]: File and Line Mapping
 ===============================================================================
-0000000000000000 @ 4:
-0000000000000011 @ 7:
-0000000000000022 @ 8:
-000000000000002C @ 9:
-000000000000002F @ 10:
-0000000000000038 @ 11:
-0000000000000049 @ 12:
+0000000000000000 @ 4:C:\path\to\base_file.asm
+0000000000000011 @ 7:C:\path\to\base_file.asm
+0000000000000022 @ 8:C:\path\to\base_file.asm
+000000000000002C @ 9:C:\path\to\base_file.asm
+000000000000002F @ 10:C:\path\to\base_file.asm
+0000000000000038 @ 11:C:\path\to\base_file.asm
+0000000000000049 @ 12:C:\path\to\base_file.asm
 000000000000019A @ 7:C:\path\to\input.ext.asm
 000000000000019C @ 9:C:\path\to\input.ext.asm
 000000000000019E @ 10:C:\path\to\input.ext.asm
@@ -168,10 +165,8 @@ The format version of ADI files is contained in plain-text in the file header.
 |----------------|------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------|
 | `0.1`          | `pre-1.0.0`            | `pre-1.0.0`           | -                                                                                                                              |
 | `0.2`          | `pre-1.0.0`            | `3.1.0`               | Added the address that each import starts on in section 3                                                                      |
-| `1.0`          | `3.2.0`                | *current*             | Added a fourth section mapping addresses to a line number in a source file. Changed the newline sequence to `LF` from `CR LF`. |
-
-> [!CAUTION]
-> This version of the ADI format is not used by the current version of AssEmbly. Please see the newest ADI format documentation for the fully updated version history.
+| `1.0`          | `3.2.0`                | `3.2.0`               | Added a fourth section mapping addresses to a line number in a source file. Changed the newline sequence to `LF` from `CR LF`. |
+| `1.1`          | `4.0.0`                | *current*             | The path of the base file is now specified explicitly in section 4. Added clarification on path formats.                       |
 
 ---
 
