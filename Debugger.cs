@@ -884,6 +884,11 @@ namespace AssEmbly
                     {
                         throw new LabelNameException(string.Format(Strings_Debugger.REPL_Error_Label_Not_Exists, labelName));
                     }
+#if DISPLACEMENT
+                    // Any displacement has already been written to the program,
+                    // read it back and add it to the resolved label address
+                    address += BinaryPrimitives.ReadUInt64LittleEndian(new ReadOnlySpan<byte>(newBytes)[(int)addressOffset..]);
+#endif
                     BinaryPrimitives.WriteUInt64LittleEndian(newBytes.AsSpan()[(int)addressOffset..], address);
                 }
 
