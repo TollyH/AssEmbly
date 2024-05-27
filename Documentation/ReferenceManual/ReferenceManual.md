@@ -2,7 +2,7 @@
 
 Applies to versions: `4.0.0`
 
-Last revised: 2024-05-26
+Last revised: 2024-05-27
 
 ## Introduction
 
@@ -254,7 +254,7 @@ WCX :AREA_1  ; Will write "CA" to the console
 
 > `:AREA_1` will store the memory address `9`, as `WCC '\n'` occupies `9` bytes. Note that `CA` (the opcode for `WCX <Address>`) will be written to the console, *not* `9`, as the processor is accessing the byte in memory *at* the address — *not* the address itself.
 
-If, when referencing a label, you want to utilise the address of the label *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, and before the label name.
+If, when referencing a label, you want to utilise the address of the label *itself*, rather than the value in memory at that address, insert an ampersand (`&`) after the colon, and before the label name. This is called a **label literal**.
 
 For example:
 
@@ -282,7 +282,7 @@ WCX :0b1001  ; Will write "CA" to the console
 
 ### Pointer
 
-Memory can also be accessed by using the current value of a register as a memory address. In AssEmbly, this is called a **pointer**, though it is often also called **indirect addressing**. Simply prefix a register name with an asterisk (`*`) to treat the contents of the register as a location to store to, read from, or jump to — instead of a number to operate on. Just like registers, pointers occupy a single byte in memory after assembly.
+Memory can also be accessed by using the current value of a register as a memory address. In AssEmbly, this is called a **pointer**, though it is often also called **indirect addressing**. Simply prefix a register name with an asterisk (`*`) to treat the contents of the register as a location to store to, read from, or jump to — instead of a number to operate on. Just like registers, pointers by default occupy a single byte in memory after assembly - unless they are displaced as explained in the following section on displacement.
 
 For example:
 
@@ -295,6 +295,189 @@ MVQ rg1, *rg0  ; Move the item in memory (0xCD) at the address (0) in rg0 to rg1
 
 > `rg1` will contain `0xCD` after the third instruction finishes.
 
+#### Read Sizes
+
+By default, all instructions that use a pointer to read a number from memory will read 8 bytes (64 bits) starting at the pointer's address. You can change the number of bytes that will be read by prefixing the pointer with a **size specifier**: `D` for 4 bytes (32 bits), `W` for 2 bytes (16 bits), and `B` for 1 byte (8 bits). There is also a `Q` size specifier for 8 bytes, however it is never necessary to use this, as pointers already read 64 bits by default. These size specifiers are case-insensitive, so `q`, `d`, `w`, and `b` will also be recognised.
+
+There should be no space between the size specifier and the pointer, for example: `D*rg0`, `W*rsb`, and `B*rg6`.
+
+Using read size specifiers on pointers that are used as a write destination, string address, or that otherwise do not result in memory being read will have no effect and as such read specifiers should not be used in these contexts.
+
+#### Displacement
+
+Pointer operands can optionally be **displaced**, which allows you to access memory at a different address relative to the pointer without modifying the value stored in the register itself. This is achieved by putting the value to displace by in square brackets (`[]`) directly after the pointer - this value will then be added or subtracted from the value stored in the pointer register to get the address in memory to access. Displacement can be done by a constant amount, by the value of a register, or by a combination of both. Both register and numeric constant displacements can be subtracted instead of added by prefixing them with a negative (`-`) sign.
+
+The value of a register displacement component can optionally be multiplied by any power of 2 between 1 and 128 before it is added to the pointer register. To do this, follow the register with a multiplication sign (`*`) and the number to multiply by, which can be any one of: `1`, `2`, `4`, `8`, `16`, `32`, `64`, or `128`, in denary, `0x` prefixed hexadecimal, or `0b` prefixed binary. Multiplications by `1` have no effect and are the default, so shouldn't be explicitly written. Constants cannot be multiplied.
+
+If displacing by both a register and a constant, the register (including any multiplication) must come first, separated from the constant with either the plus (`+`) or minus (`-`) operator depending on whether the constant is to be added or subtracted from the value of the register. No more than one register and constant can be provided.
+
+Displacement constants can be either a numeric literal or a label literal (a label prefixed with `:&`). Numeric literals can be any supported base: denary, `0x` prefixed hexadecimal, or `0b` prefixed binary. Label literals behave nearly identically to numeric literals, with the exception that they cannot be prefixed with a `-` sign to negate or subtract them. The address stored in the label is used as the literal value to add to the pointer register. This value can itself also be displaced by following the label literal immediately with another set of square brackets. Label literals can only be displaced by constant values (either label or numeric literals), not by registers, as the displacement value is calculated at the time of assembly, unlike pointers which are displaced by the processor at runtime. If a label literal is displaced by another label literal, that nested label literal can *also* be displaced. The displacement of label literals can be nested to a theoretically infinite depth.
+
+To get the displaced address of a pointer without actually accessing the memory at that address, the `EXTD_MPA` instruction can be used. This instruction calculates the address of a displaced pointer given as the second operand, and moves the result into the first operand. It does not read any data from memory, therefore the calculated address value does not actually have to be a valid address.
+
+All whitespace inside square brackets is ignored by the assembler, so you can separate the different displacement components with any amount of spaces that you wish. Displacement can be performed on pointers both with and without explicit read size specifiers.
+
+Some examples of displacement:
+
+```text
+; Assume a label named :LABEL is defined at address 8 for these examples
+MVQ rg0, 10  ; Set rg0 to 10
+MVQ rg1, 6  ; Set rg1 to 6
+
+EXTD_MPA rg2, *rg0[rg1]  ; rg1 is added to rg0 to produce 16
+; rg2 is now 16 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[-rg1]  ; rg1 is subtracted from rg0 to produce 4
+; rg2 is now 4 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[22]  ; 22 is added to rg0 to produce 32
+; rg2 is now 32 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[-0xA]  ; 10 is subtracted from rg0 to produce 0
+; rg2 is now 0 - rg0 and rg1 remain unchanged
+
+EXTD_MPA rg2, *rg0[rg1 + 22]  ; rg1 and 22 are added to rg0 to produce 38
+; rg2 is now 38 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[-rg1 * 4 + 22]  ; rg1 is multiplied by 4 then subtracted from rg0 and 22 is then added to rg0 to produce 8
+; rg2 is now 8 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[rg1 * 16 - 0x5A]  ; rg1 is multiplied by 16 then added to rg0 and 90 is then subtracted from rg0 to produce 16
+; rg2 is now 16 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[-rg1 - 3]  ; rg1 and 3 are subtracted from rg0 to produce 1
+; rg2 is now 1 - rg0 and rg1 remain unchanged
+
+EXTD_MPA rg2, *rg0[:&LABEL]  ; 8 is added to rg0 to produce 18
+; rg2 is now 18 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[rg1 + :&LABEL]  ; rg1 and 8 are added to rg0 to produce 24
+; rg2 is now 24 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[:&LABEL[5]]  ; 8 and 5 are added to rg0 to produce 23
+; rg2 is now 23 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[rg1 + :&LABEL[5]]  ; rg1, 8, and 5 are added to rg0 to produce 29
+; rg2 is now 29 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[rg1 + :&LABEL[:&LABEL[5]]]  ; rg1, 8, 8, and 5 are added to rg0 to produce 37
+; rg2 is now 37 - rg0 and rg1 remain unchanged
+EXTD_MPA rg2, *rg0[rg1 * 8 + :&LABEL[:&LABEL[5]]]  ; rg1 is multiplied by 8 then added to rg0, and 8, 8, and 5 are added to rg0 to produce 79
+; rg2 is now 79 - rg0 and rg1 remain unchanged
+```
+
+Label addresses, label literals, and address literals can also be displaced outside of pointer displacements if desired. These displacements are still performed at assemble-time, so cannot involve register values.
+
+For example:
+
+```text
+; Continue to assume a label named :LABEL is defined at address 8
+
+MVQ rg2, :&LABEL[10]  ; Adds 10 to 8 and moves the resulting address into rg2
+; rg2 is now 18
+MVQ rg2, :&LABEL[:&LABEL]  ; Adds 8 to 8 and moves the resulting address into rg2
+; rg2 is now 16
+MVQ rg2, :&LABEL[:&LABEL[10]]  ; Adds 10 to 8, then 8 again and moves the resulting address into rg2
+; rg2 is now 26
+
+MVQ rg2, :LABEL[10]  ; Adds 10 to 8 and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 18
+MVQ rg2, :LABEL[:&LABEL]  ; Adds 8 to 8 and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 16
+MVQ rg2, :LABEL[:&LABEL[10]]  ; Adds 10 to 8, then 8 again and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 26
+
+MVQ rg2, :10[10]  ; Adds 10 to 8 and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 18
+MVQ rg2, :0xA[:&LABEL]  ; Adds 8 to 8 and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 16
+MVQ rg2, :0b1010[:&LABEL[10]]  ; Adds 10 to 8, then 8 again and moves the value in memory at the resulting address into rg2
+; rg2 is now the value in memory at address 26
+```
+
+#### Pointer Encoding
+
+Pointers are assembled into `1` to `10` bytes depending on if and how they are displaced. The first, always present byte of a pointer stores the base register in the lower 4 bits, the read size in the next 2 bits, and the displacement mode in the upper 2 bits. See the following section on registers for the bits that each register encodes to.
+
+The mode and read sizes are encoded like so:
+
+```text
+Pointer Byte 1: MMSSRRRR
+M = Mode
+S = Read Size
+R = Register
+
+Modes
+=============
+00 = No Displacement (Pointer encoded in 1 byte)
+01 = Constant (Pointer encoded in 9 bytes)
+10 = Register (Pointer encoded in 2 bytes)
+11 = Constant and Register (Pointer encoded in 10 bytes)
+
+Read Sizes
+=============
+00 = 8 bytes (64 bits)
+01 = 4 bytes (32 bits)
+10 = 2 bytes (16 bits)
+11 = 1 byte (8 bits)
+```
+
+If the pointer has no displacement component, then the pointer encoding stops after the first byte. Otherwise, the remaining bytes encode the pointer's displacement component.
+
+Constant displacements are encoded as a single 8 byte (64 bit), two's complement, little endian, signed integer number (signed numbers and little endian are explained in later sections).
+
+Register displacements are encoded as a single byte with the register itself in the lower 4 bits, the multiplier in the next 3 bits, and a subtraction flag in the highest bit, like so:
+
+```text
+Pointer Register Displacement Byte: SMMMRRRR
+S = Subtraction Flag (0 = Add, 1 = Subtract)
+M = Multiplier
+R = Register
+
+Multipliers
+=============
+000 = x1
+001 = x2
+010 = x4
+011 = x8
+100 = x16
+101 = x32
+110 = x64
+111 = x128
+```
+
+If a pointer has both a constant and a register displacement, the constant displacement is encoded first, followed immediately by the encoded register displacement.
+
+Some examples of pointer encoding (result bytes are in hexadecimal):
+
+```text
+*rg0 = 06 (00|00|0110)
+           ^  ^  ^
+           |  |  rg0
+           |  8 bytes
+           No Displacement
+
+W*rg1 = 27 (00|10|0111)
+            ^  ^  ^
+            |  |  rg1
+            |  2 bytes
+            No Displacement
+
+D*rg1[rg3] = 97 09 (10|01|0111, 0|000|1001)
+                    ^  ^  ^     ^ ^   ^
+                    |  |  rg1   | x1  rg3
+                    |  4 bytes  Addition
+                    Register Displacement
+
+D*rso[-rg8 * 8] = 91 BE (10|01|0001, 1|011|1110)
+                         ^  ^  ^     ^ ^   ^
+                         |  |  rso   | x8  rg8
+                         |  4 bytes  Subtraction
+                         Register Displacement
+
+B*rso[66] = 71 42 00 00 00 00 00 00 00 (01|11|0001, ...)
+                                        ^  ^  ^   
+                                        |  |  rso 
+                                        |  1 byte
+                                        Constant Displacement
+
+*rsb[-rg6 * 64 - 66] = C2 BE FF FF FF FF FF FF FF EC (11|00|0010, ..., 1|110|1100)
+                                                      ^  ^  ^          ^ ^   ^
+                                                      |  |  rsb        | x64 rg6
+                                                      |  8 bytes       Subtraction
+                                                      Constant and Register Displacement
+```
+
 ## Registers
 
 As with most modern architectures, operations in AssEmbly are almost always performed on **registers**. Each register contains a 64-bit number and has a unique, pre-assigned name. They are stored separately from the processor's memory, therefore cannot be referenced by an address, only by name. There are 16 of them in AssEmbly, 10 of which are *general purpose*, meaning they are free to be used for whatever you wish. All general purpose registers start with a value of `0`. The remaining six have special purposes within the architecture, so should be used with care.
@@ -303,24 +486,24 @@ Please be aware that to understand the full operation and purpose for some regis
 
 ### Register Table
 
-| Byte | Symbol | Writeable | Full Name           | Purpose                                                                    |
-|------|--------|-----------|---------------------|----------------------------------------------------------------------------|
-| 0x00 | rpo    | No        | Program Offset      | Stores the memory address of the current location in memory being executed |
-| 0x01 | rso    | Yes       | Stack Offset        | Stores the memory address of the highest non-popped item on the stack      |
-| 0x02 | rsb    | Yes       | Stack Base          | Stores the memory address of the bottom of the current stack frame         |
-| 0x03 | rsf    | Yes       | Status Flags        | Stores bits representing the status of certain instructions                |
-| 0x04 | rrv    | Yes       | Return Value        | Stores the return value of the last executed subroutine                    |
-| 0x05 | rfp    | Yes       | Fast Pass Parameter | Stores a single parameter passed to a subroutine                           |
-| 0x06 | rg0    | Yes       | General 0           | *General purpose*                                                          |
-| 0x07 | rg1    | Yes       | General 1           | *General purpose*                                                          |
-| 0x08 | rg2    | Yes       | General 2           | *General purpose*                                                          |
-| 0x09 | rg3    | Yes       | General 3           | *General purpose*                                                          |
-| 0x0A | rg4    | Yes       | General 4           | *General purpose*                                                          |
-| 0x0B | rg5    | Yes       | General 5           | *General purpose*                                                          |
-| 0x0C | rg6    | Yes       | General 6           | *General purpose*                                                          |
-| 0x0D | rg7    | Yes       | General 7           | *General purpose*                                                          |
-| 0x0E | rg8    | Yes       | General 8           | *General purpose*                                                          |
-| 0x0F | rg9    | Yes       | General 9           | *General purpose*                                                          |
+| Byte | Bits | Symbol | Writeable | Full Name           | Purpose                                                                    |
+|------|------|--------|-----------|---------------------|----------------------------------------------------------------------------|
+| 0x00 | 0000 | rpo    | No        | Program Offset      | Stores the memory address of the current location in memory being executed |
+| 0x01 | 0001 | rso    | Yes       | Stack Offset        | Stores the memory address of the highest non-popped item on the stack      |
+| 0x02 | 0010 | rsb    | Yes       | Stack Base          | Stores the memory address of the bottom of the current stack frame         |
+| 0x03 | 0011 | rsf    | Yes       | Status Flags        | Stores bits representing the status of certain instructions                |
+| 0x04 | 0100 | rrv    | Yes       | Return Value        | Stores the return value of the last executed subroutine                    |
+| 0x05 | 0101 | rfp    | Yes       | Fast Pass Parameter | Stores a single parameter passed to a subroutine                           |
+| 0x06 | 0110 | rg0    | Yes       | General 0           | *General purpose*                                                          |
+| 0x07 | 0111 | rg1    | Yes       | General 1           | *General purpose*                                                          |
+| 0x08 | 1000 | rg2    | Yes       | General 2           | *General purpose*                                                          |
+| 0x09 | 1001 | rg3    | Yes       | General 3           | *General purpose*                                                          |
+| 0x0A | 1010 | rg4    | Yes       | General 4           | *General purpose*                                                          |
+| 0x0B | 1011 | rg5    | Yes       | General 5           | *General purpose*                                                          |
+| 0x0C | 1100 | rg6    | Yes       | General 6           | *General purpose*                                                          |
+| 0x0D | 1101 | rg7    | Yes       | General 7           | *General purpose*                                                          |
+| 0x0E | 1110 | rg8    | Yes       | General 8           | *General purpose*                                                          |
+| 0x0F | 1111 | rg9    | Yes       | General 9           | *General purpose*                                                          |
 
 ### rpo - Program Offset
 
