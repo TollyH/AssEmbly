@@ -1,0 +1,111 @@
+body {
+    margin: 2em;
+    font-family: sans-serif;
+}
+
+.monospace {
+    font-family: monospace;
+}
+
+.large {
+    font-size: larger;
+}
+
+.x-large {
+    font-size: x-large;
+}
+
+.hidden {
+    display: none;
+}
+
+.page-section {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.vertical-center {
+    display: flex;
+    align-items: center;
+}
+
+.margin {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.pad {
+    padding: 0.25em;
+}
+
+.bottom-margin {
+    margin-bottom: 1em;
+}
+
+.bit {
+    display: flex;
+    float: left;
+    width: 2em;
+    height: 2em;
+    border: 1px gray solid;
+    font-family: monospace;
+    margin-left: 0;
+    margin-right: 0;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+}
+
+.hex-input {
+    display: inline;
+    border: none;
+    font-family: inherit;
+}
+
+.red {
+    background-color: #ff9d9d;
+}
+
+.green {
+    background-color: #9dff9d;
+}
+
+.blue {
+    background-color: #9d9dff;
+}
+
+.grey {
+    background-color: #cacaca;
+}
+
+.red:hover {
+    background-color: #ef8d8d;
+}
+
+.green:hover {
+    background-color: #8def9d;
+}
+
+.blue:hover {
+    background-color: #8d8def;
+}
+
+.grey:hover {
+    background-color: #bababa;
+}
+
+.red:active {
+    background-color: #df7d7d;
+}
+
+.green:active {
+    background-color: #7ddf7d;
+}
+
+.blue:active {
+    background-color: #7d7ddf;
+}
+
+.grey:active {
+    background-color: #aaaaaa;
+}
