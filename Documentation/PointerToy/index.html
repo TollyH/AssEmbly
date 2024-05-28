@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AssEmbly Pointer Toy</title>
+        <link rel="stylesheet" href="styles.css"/>
+        <script src="script.js"></script>
+    </head>
+    <body>
+        <h1>AssEmbly Pointer Toy</h1>
+        <div class="page-section">
+            <h2>Disassembled Pointer</h2>
+            <div id="pointer-assembly-text" class="monospace x-large bottom-margin">This webpage requires JavaScript to work</div>
+            <div class="margin">
+                <b>Mode:</b> <span id="pointer-mode"></span>
+            </div>
+            <div class="margin">
+                <b>Read Size:</b> <span id="pointer-read-size"></span>
+            </div>
+            <div class="margin">
+                <b>Length:</b> <span id="pointer-length"></span>
+            </div>
+            <h2>Assembled Bytes</h2>
+            <div id="pointer-assembly-bytes" class="monospace large">00</div>
+        </div>
+        <h2>Pointer Bits</h2>
+        <div id="pointer-first-byte" class="page-section">
+            <h3>First Byte</h3>
+            <div class="vertical-center">
+                <span id="pointer-first-byte-bits">
+                    <div class="bit red" role="button">0</div>
+                    <div class="bit red" role="button">0</div>
+                    <div class="bit green" role="button">0</div>
+                    <div class="bit green" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                </span>
+                <span class="monospace large pad">
+                    = 0x<input id="pointer-first-byte-hex" class="hex-input grey pad" size="2" maxlength="2" value="00"/>
+                </span>
+            </div>
+        </div>
+        <div id="pointer-constant" class="page-section hidden">
+            <h3>Constant</h3>
+            <div class="vertical-center">
+                <span id="pointer-constant-bits">
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                </span>
+                <span class="monospace large pad">
+                    = 0x<input id="pointer-constant-hex" class="hex-input grey pad" size="16" maxlength="16" value="0000000000000000"/>
+                </span>
+            </div>
+        </div>
+        <div id="pointer-register-byte" class="page-section hidden">
+            <h3>Register</h3>
+            <div class="vertical-center">
+                <span id="pointer-register-bits">
+                    <div class="bit red" role="button">0</div>
+                    <div class="bit green" role="button">0</div>
+                    <div class="bit green" role="button">0</div>
+                    <div class="bit green" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                    <div class="bit blue" role="button">0</div>
+                </span>
+                <span class="monospace large pad">
+                    = 0x<input id="pointer-register-hex" class="hex-input grey pad" size="2" maxlength="2" value="00"/>
+                </span>
+            </div>
+        </div>
+    </body>
+</html>

@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - Documentation/ReferenceManual/**
+      - Documentation/PointerToy/**
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -37,7 +38,13 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Setup PanDoc
         uses: pandoc/actions/setup@main
-      - name: Build documentation HTML
+      - name: Setup Node.js 18.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - name: Install dependencies
+        run: npm install -g typescript
+      - name: Build Reference Manual HTML
         run: |
           mkdir ./Documentation/ReferenceManual/Build
           pandoc -s ./Documentation/ReferenceManual/ReferenceManual.md \
@@ -47,12 +54,18 @@ jobs:
           -H ./Documentation/ReferenceManual/ReferenceManual.HtmlHeader.html \
           -o ./Documentation/ReferenceManual/Build/ReferenceManual.html \
           --metadata pagetitle="AssEmbly Reference Manual"
-          cp ./Documentation/ReferenceManual/Build/ReferenceManual.html ./Documentation/ReferenceManual/Build/index.html
+      - name: Build Pointer Toy
+        run: tsc -p ./Documentation/PointerToy/
+      - name: Copy artifacts
+        run: |
+          mkdir ./Documentation/PagesArtifacts
+          cp ./Documentation/ReferenceManual/Build/ReferenceManual.html ./Documentation/PagesArtifacts/index.html
+          cp ./Documentation/PointerToy/ ./Documentation/PagesArtifacts/PointerToy/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the built reference manual HTML
-          path: './Documentation/ReferenceManual/Build/'
+          # Upload the built reference manual and pointer toy HTML
+          path: './Documentation/PagesArtifacts/'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
