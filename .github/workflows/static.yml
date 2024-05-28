@@ -8,6 +8,7 @@ on:
     paths:
       - Documentation/ReferenceManual/**
       - Documentation/PointerToy/**
+      - .github/workflows/static.yml
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -60,7 +61,7 @@ jobs:
         run: |
           mkdir ./Documentation/PagesArtifacts
           cp ./Documentation/ReferenceManual/Build/ReferenceManual.html ./Documentation/PagesArtifacts/index.html
-          cp ./Documentation/PointerToy/ ./Documentation/PagesArtifacts/PointerToy/
+          cp -r ./Documentation/PointerToy/ ./Documentation/PagesArtifacts/PointerToy/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
