@@ -3490,6 +3490,13 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `HEAP_TRY`    | O                | X              | X              |
 | `HEAP_REA`    | O                | X              | X              |
 | `HEAP_TRE`    | O                | X              | X              |
+| `FSYS_SCT`    | X                | O              | X              |
+| `FSYS_SMT`    | X                | O              | X              |
+| `FSYS_SAT`    | X                | O              | X              |
+| `TERM_SCY`    | O                | X              | X              |
+| `TERM_SCX`    | O                | X              | X              |
+| `TERM_SFC`    | O                | X              | X              |
+| `TERM_SBC`    | O                | X              | X              |
 
 1. Signed integers *can* still be used with `SHR`, though it will perform a logical shift, not an arithmetic one, which may or may not be what you desire. See the section on Arithmetic Right Shifting for the difference.
 2. Bitwise operations on signed integers will treat the sign bit like any other, there is no special logic involving it.
@@ -3509,122 +3516,157 @@ Instructions that don't take any data or are otherwise not applicable have been 
   - For zero flag, set if the result is equal to 0, otherwise unset (for floating point operations, `-0` is considered equal to `0` and will set the zero flag)
   - For sign flag, set if the most significant bit of the result is set, otherwise unset
 
-| Instruction   | Zero | Carry                                                    | File End                       | Sign | Overflow                              |
-|---------------|------|----------------------------------------------------------|--------------------------------|------|---------------------------------------|
-| `HLT`         | X    | X                                                        | X                              | X    | X                                     |
-| `NOP`         | X    | X                                                        | X                              | X    | X                                     |
-| `JMP`         | X    | X                                                        | X                              | X    | X                                     |
-| `JEQ` / `JZO` | X    | X                                                        | X                              | X    | X                                     |
-| `JNE` / `JNZ` | X    | X                                                        | X                              | X    | X                                     |
-| `JLT` / `JCA` | X    | X                                                        | X                              | X    | X                                     |
-| `JLE`         | X    | X                                                        | X                              | X    | X                                     |
-| `JGT`         | X    | X                                                        | X                              | X    | X                                     |
-| `JGE` / `JNC` | X    | X                                                        | X                              | X    | X                                     |
-| `ADD`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `ICR`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `SUB`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `DCR`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `MUL`         | STD  | (Result is unrepresentable as both unsigned and signed)  | X                              | STD  | 0                                     |
-| `DIV`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `DVR`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `REM`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SHL`         | STD  | (Any `1` bit was shifted past MSB)                       | X                              | STD  | 0                                     |
-| `SHR`         | STD  | (Any `1` bit was shifted past LSB)                       | X                              | STD  | 0                                     |
-| `AND`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `ORR`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `XOR`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `NOT`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `RNG`         | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `TST`         | STD  | X                                                        | X                              | STD  | X                                     |
-| `CMP`         | STD  | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) |
-| `MVB`         | X    | X                                                        | X                              | X    | X                                     |
-| `MVW`         | X    | X                                                        | X                              | X    | X                                     |
-| `MVD`         | X    | X                                                        | X                              | X    | X                                     |
-| `MVQ`         | X    | X                                                        | X                              | X    | X                                     |
-| `PSH`         | X    | X                                                        | X                              | X    | X                                     |
-| `POP`         | X    | X                                                        | X                              | X    | X                                     |
-| `CAL`         | X    | X                                                        | X                              | X    | X                                     |
-| `RET`         | X    | X                                                        | X                              | X    | X                                     |
-| `WCN`         | X    | X                                                        | X                              | X    | X                                     |
-| `WCB`         | X    | X                                                        | X                              | X    | X                                     |
-| `WCX`         | X    | X                                                        | X                              | X    | X                                     |
-| `WCC`         | X    | X                                                        | X                              | X    | X                                     |
-| `WFN`         | X    | X                                                        | X                              | X    | X                                     |
-| `WFB`         | X    | X                                                        | X                              | X    | X                                     |
-| `WFX`         | X    | X                                                        | X                              | X    | X                                     |
-| `WFC`         | X    | X                                                        | X                              | X    | X                                     |
-| `OFL`         | X    | X                                                        | (File is empty)                | X    | X                                     |
-| `CFL`         | X    | X                                                        | X                              | X    | X                                     |
-| `DFL`         | X    | X                                                        | X                              | X    | X                                     |
-| `FEX`         | X    | X                                                        | X                              | X    | X                                     |
-| `FSZ`         | X    | X                                                        | X                              | X    | X                                     |
-| `RCC`         | X    | X                                                        | X                              | X    | X                                     |
-| `RFC`         | X    | X                                                        | [No more unread bytes in file] | X    | X                                     |
-| `SIGN_JLT`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JLE`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JGT`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JGE`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JSI`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JNS`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JOV`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_JNO`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_DIV`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_DVR`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_REM`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_SHR`    | STD  | (Any bit not equal to the sign bit was shifted past LSB) | X                              | STD  | 0                                     |
-| `SIGN_MVB`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_MVW`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_MVD`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_WCN`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_WCB`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_WFN`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_WFB`    | X    | X                                                        | X                              | X    | X                                     |
-| `SIGN_EXB`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_EXW`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_EXD`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `SIGN_NEG`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_ADD`    | STD  | (Result is less than the initial value)                  | X                              | STD  | 0                                     |
-| `FLPT_SUB`    | STD  | (Result is greater than the initial value)               | X                              | STD  | 0                                     |
-| `FLPT_MUL`    | STD  | (Result is less than the initial value)                  | X                              | STD  | 0                                     |
-| `FLPT_DIV`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_DVR`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_REM`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_SIN`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_ASN`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_COS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_ACS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_TAN`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_ATN`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_PTN`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_POW`    | STD  | (Result is less than the initial value)                  | X                              | STD  | 0                                     |
-| `FLPT_LOG`    | STD  | (Result is greater than the initial value)               | X                              | STD  | 0                                     |
-| `FLPT_WCN`    | X    | X                                                        | X                              | X    | X                                     |
-| `FLPT_WFN`    | X    | X                                                        | X                              | X    | X                                     |
-| `FLPT_EXH`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_EXS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_SHS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_SHH`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_NEG`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_UTF`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_STF`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_FTS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_FCS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_FFS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_FNS`    | STD  | 0                                                        | X                              | STD  | 0                                     |
-| `FLPT_CMP`    | STD  | (Value of first operand is less than second)             | X                              | STD  | 0                                     |
-| `EXTD_BSW`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_LDA`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_LDF`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_CLA`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_CLF`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_AEX`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_FEX`    | X    | X                                                        | X                              | X    | X                                     |
-| `ASMX_CAL`    | X    | X                                                        | X                              | X    | X                                     |
-| `HEAP_ALC`    | X    | X                                                        | X                              | X    | X                                     |
-| `HEAP_TRY`    | X    | X                                                        | X                              | X    | X                                     |
-| `HEAP_REA`    | X    | X                                                        | X                              | X    | X                                     |
-| `HEAP_TRE`    | X    | X                                                        | X                              | X    | X                                     |
-| `HEAP_FRE`    | X    | X                                                        | X                              | X    | X                                     |
+| Instruction   | Zero                                            | Carry                                                    | File End                       | Sign | Overflow                              | Auto Echo |
+|---------------|-------------------------------------------------|----------------------------------------------------------|--------------------------------|------|---------------------------------------|-----------|
+| `HLT`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `NOP`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JMP`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JEQ` / `JZO` | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JNE` / `JNZ` | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JLT` / `JCA` | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JLE`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JGT`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `JGE` / `JNC` | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ADD`         | STD                                             | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) | X         |
+| `ICR`         | STD                                             | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) | X         |
+| `SUB`         | STD                                             | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) | X         |
+| `DCR`         | STD                                             | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) | X         |
+| `MUL`         | STD                                             | (Result is unrepresentable as both unsigned and signed)  | X                              | STD  | 0                                     | X         |
+| `DIV`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `DVR`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `REM`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SHL`         | STD                                             | (Any `1` bit was shifted past MSB)                       | X                              | STD  | 0                                     | X         |
+| `SHR`         | STD                                             | (Any `1` bit was shifted past LSB)                       | X                              | STD  | 0                                     | X         |
+| `AND`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `ORR`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `XOR`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `NOT`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `RNG`         | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `TST`         | STD                                             | X                                                        | X                              | STD  | X                                     | X         |
+| `CMP`         | STD                                             | (Result is unrepresentable as unsigned)                  | X                              | STD  | (Result is unrepresentable as signed) | X         |
+| `MVB`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `MVW`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `MVD`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `MVQ`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `PSH`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `POP`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `CAL`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `RET`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WCN`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WCB`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WCX`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WCC`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WFN`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WFB`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WFX`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `WFC`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `OFL`         | X                                               | X                                                        | (File is empty)                | X    | X                                     | X         |
+| `CFL`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `DFL`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FEX`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSZ`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `RCC`         | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `RFC`         | X                                               | X                                                        | [No more unread bytes in file] | X    | X                                     | X         |
+| `SIGN_JLT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JLE`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JGT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JGE`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JSI`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JNS`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JOV`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_JNO`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_DIV`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_DVR`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_REM`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_SHR`    | STD                                             | (Any bit not equal to the sign bit was shifted past LSB) | X                              | STD  | 0                                     | X         |
+| `SIGN_MVB`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_MVW`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_MVD`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_WCN`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_WCB`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_WFN`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_WFB`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `SIGN_EXB`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_EXW`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_EXD`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `SIGN_NEG`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_ADD`    | STD                                             | (Result is less than the initial value)                  | X                              | STD  | 0                                     | X         |
+| `FLPT_SUB`    | STD                                             | (Result is greater than the initial value)               | X                              | STD  | 0                                     | X         |
+| `FLPT_MUL`    | STD                                             | (Result is less than the initial value)                  | X                              | STD  | 0                                     | X         |
+| `FLPT_DIV`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_DVR`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_REM`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_SIN`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_ASN`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_COS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_ACS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_TAN`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_ATN`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_PTN`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_POW`    | STD                                             | (Result is less than the initial value)                  | X                              | STD  | 0                                     | X         |
+| `FLPT_LOG`    | STD                                             | (Result is greater than the initial value)               | X                              | STD  | 0                                     | X         |
+| `FLPT_WCN`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FLPT_WFN`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FLPT_EXH`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_EXS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_SHS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_SHH`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_NEG`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_UTF`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_STF`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_FTS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_FCS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_FFS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_FNS`    | STD                                             | 0                                                        | X                              | STD  | 0                                     | X         |
+| `FLPT_CMP`    | STD                                             | (Value of first operand is less than second)             | X                              | STD  | 0                                     | X         |
+| `EXTD_BSW`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_QPF`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_QPV`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_CSS`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_HLT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_MPA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_LDA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_LDF`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_CLA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_CLF`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_AEX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_FEX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `ASMX_CAL`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `HEAP_ALC`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `HEAP_TRY`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `HEAP_REA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `HEAP_TRE`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `HEAP_FRE`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_CWD`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GWD`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_CDR`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_DDR`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_DDE`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_DEX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_CPY`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_MOV`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_BDL`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GNF`    | (There were no more files in the listing)       | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GND`    | (There were no more directories in the listing) | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GCT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GMT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_GAT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_SCT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_SMT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `FSYS_SAT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_CLS`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_AEE`    | X                                               | X                                                        | X                              | X    | X                                     | 1         |
+| `TERM_AED`    | X                                               | X                                                        | X                              | X    | X                                     | 0         |
+| `TERM_SCY`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_SCX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_GCY`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_GCX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_GSY`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_GSX`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_BEP`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_SFC`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_SBC`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `TERM_RSC`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 
 ## Full Instruction Reference
 
@@ -3808,8 +3850,8 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | `CFL` | Close File | - | Close the currently open file | `0xE2` | `pre-v1` |
 | `DFL` | Delete File | Address | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address | `0xE3` | `pre-v1` |
 | `DFL` | Delete File | Pointer | Delete the file at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0xE4` | `pre-v1` |
-| `FEX` | File Exists | Register, Address | Store `1` in a register if the filepath specified in memory starting at an address exists, else `0` | `0xE5` | `pre-v1` |
-| `FEX` | File Exists | Register, Pointer | Store `1` in a register if the filepath specified in memory starting at an address in a register exists, else `0` | `0xE6` | `pre-v1` |
+| `FEX` | File Exists? | Register, Address | Store `1` in a register if the filepath specified in memory starting at an address exists, else `0` | `0xE5` | `pre-v1` |
+| `FEX` | File Exists? | Register, Pointer | Store `1` in a register if the filepath specified in memory starting at an address in a register exists, else `0` | `0xE6` | `pre-v1` |
 | `FSZ` | Get File Size | Register, Address | In a register, store the byte size of the file at the path specified in memory starting at an address | `0xE7` | `pre-v1` |
 | `FSZ` | Get File Size | Register, Pointer | In a register, store the byte size of the file at the path specified in memory starting at an address in a register | `0xE8` | `pre-v1` |
 | **Reading** ||||||
@@ -3979,6 +4021,20 @@ Extension set number `0x03`, opcodes start with `0xFF, 0x03`. Contains additiona
 |----------|-----------|----------|----------|------------------|-----------------------|
 | **Byte Operations** ||||||
 | `EXTD_BSW` | Reverse Byte Order | Register | Reverse the byte order of a register, thereby converting little endian to big endian and vice versa | `0x00` | `v2` |
+| **Processor Queries** ||||||
+| `EXTD_QPF` | Query Present Features | Register | Set the value of a register to a bit-field representing the features implemented in the executing processor | `0x10` | `v4` |
+| `EXTD_QPV` | Query Present Version | Register | Set the value of a register to the major version the executing processor | `0x11` | `v4` |
+| `EXTD_QPV` | Query Present Version | Register, Register | Set the value of two registers to the major and minor version the executing processor respectively | `0x12` | `v4` |
+| `EXTD_CSS` | Call Stack Size | Register | Set the value of a register to the number of bytes pushed to the stack when the `CAL` instruction is used | `0x13` | `v4` |
+| **Halt** ||||||
+| `EXTD_HLT` | Halt With Exit Code | Register | Stops the processor from executing the program, setting the exit code to the value of a register | `0x20` | `v4` |
+| `EXTD_HLT` | Halt With Exit Code | Literal | Stops the processor from executing the program, setting the exit code to a literal value | `0x21` | `v4` |
+| `EXTD_HLT` | Halt With Exit Code | Address | Stops the processor from executing the program, setting the exit code to the contents of memory at an address | `0x22` | `v4` |
+| `EXTD_HLT` | Halt With Exit Code | Pointer | Stops the processor from executing the program, setting the exit code to the contents of memory at an address in a register | `0x23` | `v4` |
+| **Pointers** ||||||
+| `EXTD_MPA` | Move Pointer Address | Register, Pointer | Set the value of a register to the calculated address of a pointer | `0x30` | `v4` |
+| `EXTD_MPA` | Move Pointer Address | Address, Pointer | Set the value of memory at an address to the calculated address of a pointer | `0x31` | `v4` |
+| `EXTD_MPA` | Move Pointer Address | Pointer, Pointer | Set the value of memory at an address in a register to the calculated address of a pointer | `0x32` | `v4` |
 
 ### External Assembly Extension Set
 
@@ -3995,10 +4051,10 @@ Extension set number `0x04`, opcodes start with `0xFF, 0x04`. Contains instructi
 | `ASMX_CLA` | Close Assembly | - | Close the currently open .NET Assembly, as well as any open function | `0x10` | `v3` |
 | `ASMX_CLF` | Close Function | - | Close the currently open function, the assembly stays open | `0x11` | `v3` |
 | **Validity Check** ||||||
-| `ASMX_AEX` | Assembly Valid | Address | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address exists and is valid, else `0` | `0x20` | `v3` |
-| `ASMX_AEX` | Assembly Valid | Pointer | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a register exists and is valid, else `0` | `0x21` | `v3` |
-| `ASMX_FEX` | Function Valid | Address | Store `1` in a register if the function with the name specified in memory starting at an address exists in the open .NET Assembly and is valid, else `0` | `0x22` | `v3` |
-| `ASMX_FEX` | Function Valid | Pointer | Store `1` in a register if the function with the name specified in memory starting at an address in a register exists in the open .NET Assembly and is valid, else `0` | `0x23` | `v3` |
+| `ASMX_AEX` | Assembly Valid? | Address | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address exists and is valid, else `0` | `0x20` | `v3` |
+| `ASMX_AEX` | Assembly Valid? | Pointer | Store `1` in a register if the .NET Assembly at the path specified in memory starting at an address in a register exists and is valid, else `0` | `0x21` | `v3` |
+| `ASMX_FEX` | Function Valid? | Address | Store `1` in a register if the function with the name specified in memory starting at an address exists in the open .NET Assembly and is valid, else `0` | `0x22` | `v3` |
+| `ASMX_FEX` | Function Valid? | Pointer | Store `1` in a register if the function with the name specified in memory starting at an address in a register exists in the open .NET Assembly and is valid, else `0` | `0x23` | `v3` |
 | **Calling** ||||||
 | `ASMX_CAL` | Call External Function | - | Call the loaded external function, giving `null` as the passed value | `0x30` | `v3` |
 | `ASMX_CAL` | Call External Function | Register | Call the loaded external function, giving the value of a register as the passed value | `0x31` | `v3` |
@@ -4032,6 +4088,100 @@ Extension set number `0x05`, opcodes start with `0xFF, 0x05`. Contains instructi
 | `HEAP_TRE` | Try Re-allocate Memory | Register, Pointer | Re-allocate a block of memory starting at the address in a register with the contents of memory at an address in a register as its size, storing the first address of the allocated block in a register, or storing `-1` if the operation fails | `0x17` | `v3` |
 | **Freeing** ||||||
 | `HEAP_FRE` | Free Memory | Register | Free a block of memory starting at the address in a register | `0x20` | `v3` |
+
+### File System Extension Set
+
+Extension set number `0x06`, opcodes start with `0xFF, 0x06`. Contains instructions that provide additional file and directory operations not part of the base instruction set.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code | Minimum Major Version |
+|----------|-----------|----------|----------|------------------|-----------------------|
+| **Working Directory** ||||||
+| `FSYS_CWD` | Change Working Directory | Address | Change the process working directory to the directory at the path specified by a `0x00` terminated string in memory starting at an address | `0x00` | `v4` |
+| `FSYS_CWD` | Change Working Directory | Pointer | Change the process working directory to the directory at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x01` | `v4` |
+| `FSYS_GWD` | Get Working Directory | Address | Store the `0x00` terminated path of the process working directory in memory starting at an address | `0x02` | `v4` |
+| `FSYS_GWD` | Get Working Directory | Pointer | Store the `0x00` terminated path of the process working directory in memory starting at an address in a register | `0x03` | `v4` |
+| **Directory Operations** ||||||
+| `FSYS_CDR` | Create Directory | Address | Create a directory at the path specified by a `0x00` terminated string in memory starting at an address | `0x10` | `v4` |
+| `FSYS_CDR` | Create Directory | Pointer | Create a directory at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x11` | `v4` |
+| `FSYS_DDR` | Recursively Delete Directory | Address | Delete the directory and all its contents at the path specified by a `0x00` terminated string in memory starting at an address | `0x20` | `v4` |
+| `FSYS_DDR` | Recursively Delete Directory | Pointer | Delete the directory and all its contents at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x21` | `v4` |
+| `FSYS_DDE` | Delete Empty Directory | Address | Delete the empty directory at the path specified by a `0x00` terminated string in memory starting at an address | `0x22` | `v4` |
+| `FSYS_DDE` | Delete Empty Directory | Pointer | Delete the empty directory at the path specified by a `0x00` terminated string in memory starting at an address in a register | `0x23` | `v4` |
+| `FSYS_DEX` | Directory Exists? | Register, Address | Store `1` in a register if the directory path specified in memory starting at an address exists, else `0` | `0x30` | `v4` |
+| `FSYS_DEX` | Directory Exists? | Register, Pointer | Store `1` in a register if the directory path specified in memory starting at an address in a register exists, else `0` | `0x31` | `v4` |
+| **File Movement** ||||||
+| `FSYS_CPY` | Copy File | Address, Address | Copy between paths specified in memory, from the second operand to the first | `0x40` | `v4` |
+| `FSYS_CPY` | Copy File | Address, Pointer | Copy between paths specified in memory, from the second operand to the first | `0x41` | `v4` |
+| `FSYS_CPY` | Copy File | Pointer, Address | Copy between paths specified in memory, from the second operand to the first | `0x42` | `v4` |
+| `FSYS_CPY` | Copy File | Pointer, Pointer | Copy between paths specified in memory, from the second operand to the first | `0x43` | `v4` |
+| `FSYS_MOV` | Move File | Address, Address | Move between paths specified in memory, from the second operand to the first, deleting the source file | `0x44` | `v4` |
+| `FSYS_MOV` | Move File | Address, Pointer | Move between paths specified in memory, from the second operand to the first, deleting the source file | `0x45` | `v4` |
+| `FSYS_MOV` | Move File | Pointer, Address | Move between paths specified in memory, from the second operand to the first, deleting the source file | `0x46` | `v4` |
+| `FSYS_MOV` | Move File | Pointer, Pointer | Move between paths specified in memory, from the second operand to the first, deleting the source file | `0x47` | `v4` |
+| **Directory Listing** ||||||
+| `FSYS_BDL` | Begin Directory Listing | - | Start listing the contents of the process's current directory | `0x50` | `v4` |
+| `FSYS_BDL` | Begin Directory Listing | Address | Start listing the contents of the directory path specified in memory starting at an address | `0x51` | `v4` |
+| `FSYS_BDL` | Begin Directory Listing | Pointer | Start listing the contents of the directory path specified in memory starting at an address in a register | `0x52` | `v4` |
+| `FSYS_GNF` | Get Next File | Address | Store the `0x00` terminated path of the next file in the current directory listing in memory starting at an address | `0x60` | `v4` |
+| `FSYS_GNF` | Get Next File | Pointer | Store the `0x00` terminated path of the next file in the current directory listing in memory starting at an address in a register | `0x61` | `v4` |
+| `FSYS_GND` | Get Next Directory | Address | Store the `0x00` terminated path of the next directory in the current directory listing in memory starting at an address | `0x62` | `v4` |
+| `FSYS_GND` | Get Next Directory | Pointer | Store the `0x00` terminated path of the next directory in the current directory listing in memory starting at an address in a register | `0x63` | `v4` |
+| **File Times** ||||||
+| `FSYS_GCT` | Get Creation Time | Register, Address | Store in a register the creation time of a file specified by a `0x00` terminated string in memory starting at an address | `0x70` | `v4` |
+| `FSYS_GCT` | Get Creation Time | Register, Pointer | Store in a register the creation time of a file specified by a `0x00` terminated string in memory starting at an address in a register | `0x71` | `v4` |
+| `FSYS_GMT` | Get Modified Time | Register, Address | Store in a register the modified time of a file specified by a `0x00` terminated string in memory starting at an address | `0x72` | `v4` |
+| `FSYS_GMT` | Get Modified Time | Register, Pointer | Store in a register the modified time of a file specified by a `0x00` terminated string in memory starting at an address in a register | `0x73` | `v4` |
+| `FSYS_GAT` | Get Access Time | Register, Address | Store in a register the access time of a file specified by a `0x00` terminated string in memory starting at an address | `0x74` | `v4` |
+| `FSYS_GAT` | Get Access Time | Register, Pointer | Store in a register the access time of a file specified by a `0x00` terminated string in memory starting at an address in a register | `0x75` | `v4` |
+| `FSYS_SCT` | Set Creation Time | Address, Register | Set the creation time of a file specified by a `0x00` terminated string in memory starting at an address to a value stored in a register | `0x80` | `v4` |
+| `FSYS_SCT` | Set Creation Time | Address, Literal | Set the creation time of a file specified by a `0x00` terminated string in memory starting at an address to a literal value | `0x81` | `v4` |
+| `FSYS_SCT` | Set Creation Time | Pointer, Register | Set the creation time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a value stored in a register | `0x82` | `v4` |
+| `FSYS_SCT` | Set Creation Time | Pointer, Literal | Set the creation time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a literal value | `0x83` | `v4` |
+| `FSYS_SMT` | Set Modified Time | Address, Register | Set the modified time of a file specified by a `0x00` terminated string in memory starting at an address to a value stored in a register | `0x84` | `v4` |
+| `FSYS_SMT` | Set Modified Time | Address, Literal | Set the modified time of a file specified by a `0x00` terminated string in memory starting at an address to a literal value | `0x85` | `v4` |
+| `FSYS_SMT` | Set Modified Time | Pointer, Register | Set the modified time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a value stored in a register | `0x86` | `v4` |
+| `FSYS_SMT` | Set Modified Time | Pointer, Literal | Set the modified time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a literal value | `0x87` | `v4` |
+| `FSYS_SAT` | Set Access Time | Address, Register | Set the access time of a file specified by a `0x00` terminated string in memory starting at an address to a value stored in a register | `0x88` | `v4` |
+| `FSYS_SAT` | Set Access Time | Address, Literal | Set the access time of a file specified by a `0x00` terminated string in memory starting at an address to a literal value | `0x89` | `v4` |
+| `FSYS_SAT` | Set Access Time | Pointer, Register | Set the access time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a value stored in a register | `0x8A` | `v4` |
+| `FSYS_SAT` | Set Access Time | Pointer, Literal | Set the access time of a file specified by a `0x00` terminated string in memory starting at an address in a register to a literal value | `0x8B` | `v4` |
+
+### Terminal Extension Set
+
+Extension set number `0x07`, opcodes start with `0xFF, 0x07`. Contains instructions that provide functionality to interact with and control the process's console window.
+
+| Mnemonic | Full Name | Operands | Function | Instruction Code | Minimum Major Version |
+|----------|-----------|----------|----------|------------------|-----------------------|
+| **Clear** ||||||
+| `TERM_CLS` | Clear Screen | - | Remove all characters from the console window and return the cursor to its initial position | `0x00` | `v4` |
+| **Auto Echo** ||||||
+| `TERM_AEE` | Auto Echo Enable | - | Set the Auto Echo status flag | `0x10` | `v4` |
+| `TERM_AED` | Auto Echo Disable | - | Unset the Auto Echo status flag | `0x11` | `v4` |
+| **Cursor Position** ||||||
+| `TERM_SCY` | Set Vertical Cursor Position | Register | Set the vertical position of the console cursor to the value of a register | `0x20` | `v4` |
+| `TERM_SCY` | Set Vertical Cursor Position | Literal | Set the vertical position of the console cursor to a literal value | `0x21` | `v4` |
+| `TERM_SCY` | Set Vertical Cursor Position | Address | Set the vertical position of the console cursor to the value of memory at an address | `0x22` | `v4` |
+| `TERM_SCY` | Set Vertical Cursor Position | Pointer | Set the vertical position of the console cursor to the value of memory at an address in a register | `0x23` | `v4` |
+| `TERM_SCX` | Set Horizontal Cursor Position | Register | Set the horizontal position of the console cursor to the value of a register | `0x24` | `v4` |
+| `TERM_SCX` | Set Horizontal Cursor Position | Literal | Set the horizontal position of the console cursor to a literal value | `0x25` | `v4` |
+| `TERM_SCX` | Set Horizontal Cursor Position | Address | Set the horizontal position of the console cursor to the value of memory at an address | `0x26` | `v4` |
+| `TERM_SCX` | Set Horizontal Cursor Position | Pointer | Set the horizontal position of the console cursor to the value of memory at an address in a register | `0x27` | `v4` |
+| `TERM_GCY` | Get Vertical Cursor Position | Register | Set the value of a register to the current vertical position of the console cursor | `0x30` | `v4` |
+| `TERM_GCX` | Get Horizontal Cursor Position | Register | Set the value of a register to the current horizontal position of the console cursor | `0x31` | `v4` |
+| `TERM_GSY` | Get Vertical Console Size | Register | Set the value of a register to the current vertical size of the console | `0x32` | `v4` |
+| `TERM_GSX` | Get Horizontal Console Size | Register | Set the value of a register to the current horizontal size of the console | `0x33` | `v4` |
+| **Beep** ||||||
+| `TERM_BEP` | Beep | - | Play a beep/bell sound | `0x40` | `v4` |
+| **Colours** ||||||
+| `TERM_SFC` | Set Foreground Colour | Register | Set the console foreground (text) colour to the value of a register | `0x50` | `v4` |
+| `TERM_SFC` | Set Foreground Colour | Literal | Set the console foreground (text) colour to a literal value | `0x51` | `v4` |
+| `TERM_SFC` | Set Foreground Colour | Address | Set the console foreground (text) colour to a value in memory at an address | `0x52` | `v4` |
+| `TERM_SFC` | Set Foreground Colour | Address | Set the console foreground (text) colour to a value in memory at an address in a register | `0x53` | `v4` |
+| `TERM_SBC` | Set Background Colour | Register | Set the console background (text) colour to the value of a register | `0x54` | `v4` |
+| `TERM_SBC` | Set Background Colour | Literal | Set the console background (text) colour to a literal value | `0x55` | `v4` |
+| `TERM_SBC` | Set Background Colour | Address | Set the console background (text) colour to a value in memory at an address | `0x56` | `v4` |
+| `TERM_SBC` | Set Background Colour | Address | Set the console background (text) colour to a value in memory at an address in a register | `0x57` | `v4` |
+| `TERM_RSC` | Reset Colours | - | Reset both the console foreground and background colours to their defaults | `0x58` | `v4` |
 
 ## ASCII Table
 
