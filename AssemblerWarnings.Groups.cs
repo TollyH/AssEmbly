@@ -382,11 +382,11 @@
             { new Opcode(0x06, 0x72), new[] { 1 } },  // FSYS_GMT reg, adr
             { new Opcode(0x06, 0x74), new[] { 1 } },  // FSYS_GAT reg, adr
             { new Opcode(0x06, 0x80), new[] { 0 } },  // FSYS_SCT adr, reg
-            { new Opcode(0x06, 0x82), new[] { 0 } },  // FSYS_SCT adr, lit
+            { new Opcode(0x06, 0x81), new[] { 0 } },  // FSYS_SCT adr, lit
             { new Opcode(0x06, 0x84), new[] { 0 } },  // FSYS_SMT adr, reg
-            { new Opcode(0x06, 0x86), new[] { 0 } },  // FSYS_SMT adr, lit
+            { new Opcode(0x06, 0x85), new[] { 0 } },  // FSYS_SMT adr, lit
             { new Opcode(0x06, 0x88), new[] { 0 } },  // FSYS_SAT adr, reg
-            { new Opcode(0x06, 0x8A), new[] { 0 } },  // FSYS_SAT adr, lit
+            { new Opcode(0x06, 0x89), new[] { 0 } },  // FSYS_SAT adr, lit
 
             { new Opcode(0x07, 0x22), new[] { 0 } },  // TERM_SCY adr
             { new Opcode(0x07, 0x26), new[] { 0 } },  // TERM_SCX adr
@@ -452,11 +452,11 @@
             { new Opcode(0x06, 0x71), new[] { 1 } },
             { new Opcode(0x06, 0x73), new[] { 1 } },
             { new Opcode(0x06, 0x75), new[] { 1 } },
-            { new Opcode(0x06, 0x81), new[] { 0 } },
+            { new Opcode(0x06, 0x82), new[] { 0 } },
             { new Opcode(0x06, 0x83), new[] { 0 } },
-            { new Opcode(0x06, 0x85), new[] { 0 } },
+            { new Opcode(0x06, 0x86), new[] { 0 } },
             { new Opcode(0x06, 0x87), new[] { 0 } },
-            { new Opcode(0x06, 0x89), new[] { 0 } },
+            { new Opcode(0x06, 0x8A), new[] { 0 } },
             { new Opcode(0x06, 0x8B), new[] { 0 } },
 
             { new Opcode(0x00, 0x86), new[] { 0 } },
@@ -741,11 +741,11 @@
 
             new Opcode(0x04, 0x32),  // ASMX_CAL lit
 
-            new Opcode(0x06, 0x82),  // FSYS_SCT adr, lit
+            new Opcode(0x06, 0x81),  // FSYS_SCT adr, lit
             new Opcode(0x06, 0x83),  // FSYS_SCT ptr, lit
-            new Opcode(0x06, 0x86),  // FSYS_SMT adr, lit
+            new Opcode(0x06, 0x85),  // FSYS_SMT adr, lit
             new Opcode(0x06, 0x87),  // FSYS_SMT ptr, lit
-            new Opcode(0x06, 0x8A),  // FSYS_SAT adr, lit
+            new Opcode(0x06, 0x89),  // FSYS_SAT adr, lit
             new Opcode(0x06, 0x8B),  // FSYS_SAT ptr, lit
         };
         /// <summary>
@@ -764,11 +764,11 @@
             new Opcode(0x01, 0x61),  // SIGN_WFN lit
             new Opcode(0x01, 0x65),  // SIGN_WFB lit
 
-            new Opcode(0x06, 0x82),  // FSYS_SCT adr, lit
+            new Opcode(0x06, 0x81),  // FSYS_SCT adr, lit
             new Opcode(0x06, 0x83),  // FSYS_SCT ptr, lit
-            new Opcode(0x06, 0x86),  // FSYS_SMT adr, lit
+            new Opcode(0x06, 0x85),  // FSYS_SMT adr, lit
             new Opcode(0x06, 0x87),  // FSYS_SMT ptr, lit
-            new Opcode(0x06, 0x8A),  // FSYS_SAT adr, lit
+            new Opcode(0x06, 0x89),  // FSYS_SAT adr, lit
             new Opcode(0x06, 0x8B),  // FSYS_SAT ptr, lit
         };
         /// <summary>
