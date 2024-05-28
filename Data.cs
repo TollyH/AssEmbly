@@ -791,20 +791,20 @@
 
             // FSYS_SCT (Set Creation Time of File or Directory)
             { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x80) },
-            { ("FSYS_SCT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x81) },
-            { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x82) },
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x81) },
+            { ("FSYS_SCT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x82) },
             { ("FSYS_SCT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x83) },
 
             // FSYS_SMT (Set Modification Time of File or Directory)
             { ("FSYS_SMT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x84) },
-            { ("FSYS_SMT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x85) },
-            { ("FSYS_SMT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x86) },
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x85) },
+            { ("FSYS_SMT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x86) },
             { ("FSYS_SMT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x87) },
 
             // FSYS_SAT (Set Access Time of File or Directory)
             { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Register }), new Opcode(0x06, 0x88) },
-            { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x89) },
-            { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x8A) },
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Address, OperandType.Literal }), new Opcode(0x06, 0x89) },
+            { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Register }), new Opcode(0x06, 0x8A) },
             { ("FSYS_SAT", new OperandType[2] { OperandType.Pointer, OperandType.Literal }), new Opcode(0x06, 0x8B) },
 #endif
 

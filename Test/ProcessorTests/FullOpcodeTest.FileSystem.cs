@@ -963,7 +963,7 @@ namespace AssEmbly.Test.ProcessorTests
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
                 testProcessor.Registers[(int)Register.rg8] = 0x140;
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x81, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x82, (int)Register.rg8, (int)Register.rg7 });
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(randomTimestamp, (int)(File.GetCreationTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
@@ -982,7 +982,7 @@ namespace AssEmbly.Test.ProcessorTests
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x82, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x81, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
                 testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
@@ -1035,7 +1035,7 @@ namespace AssEmbly.Test.ProcessorTests
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
                 testProcessor.Registers[(int)Register.rg8] = 0x140;
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x85, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x86, (int)Register.rg8, (int)Register.rg7 });
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(randomTimestamp, (int)(File.GetLastWriteTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
@@ -1049,7 +1049,7 @@ namespace AssEmbly.Test.ProcessorTests
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x86, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x85, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
                 testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
@@ -1097,7 +1097,7 @@ namespace AssEmbly.Test.ProcessorTests
                 Processor testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = (ulong)randomTimestamp;
                 testProcessor.Registers[(int)Register.rg8] = 0x140;
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x89, (int)Register.rg8, (int)Register.rg7 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x8A, (int)Register.rg8, (int)Register.rg7 });
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
                 Assert.AreEqual(randomTimestamp, (int)(File.GetLastAccessTimeUtc("copyfile") - DateTime.UnixEpoch).TotalSeconds, "Instruction did not produce correct result");
@@ -1111,7 +1111,7 @@ namespace AssEmbly.Test.ProcessorTests
                 int randomTimestamp = rng.Next(int.MinValue, int.MaxValue);
 
                 Processor testProcessor = new(2046);
-                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x8A, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x06, 0x89, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
                 testProcessor.WriteMemoryQWord(11, (ulong)randomTimestamp);
                 testProcessor.WriteMemoryString(0x140, "copyfile");
                 _ = testProcessor.Execute(false);
