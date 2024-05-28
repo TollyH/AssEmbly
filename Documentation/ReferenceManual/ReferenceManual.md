@@ -438,6 +438,8 @@ Multipliers
 
 If a pointer has both a constant and a register displacement, the constant displacement is encoded first, followed immediately by the encoded register displacement.
 
+For an interactive website demonstrating pointer encoding, see here: <https://tollyh.github.io/AssEmbly/PointerToy/>.
+
 Some examples of pointer encoding (result bytes are in hexadecimal):
 
 ```text
