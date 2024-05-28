@@ -414,7 +414,7 @@ Read Sizes
 
 If the pointer has no displacement component, then the pointer encoding stops after the first byte. Otherwise, the remaining bytes encode the pointer's displacement component.
 
-Constant displacements are encoded as a single 8 byte (64 bit), two's complement, little endian, signed integer number (signed numbers and little endian are explained in later sections).
+Constant displacements are encoded as a single 8 byte (64 bit), little endian, two's complement signed integer number (signed numbers and little endian are explained in later sections).
 
 Register displacements are encoded as a single byte with the register itself in the lower 4 bits, the multiplier in the next 3 bits, and a subtraction flag in the highest bit, like so:
 
