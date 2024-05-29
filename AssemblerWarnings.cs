@@ -261,6 +261,7 @@ namespace AssEmbly
                 { 0033, Analyzer_Rolling_Warning_0033 },
                 { 0034, Analyzer_Rolling_Warning_0034 },
                 { 0035, Analyzer_Rolling_Warning_0035 },
+                { 0036, Analyzer_Rolling_Warning_0036 },
 #endif
             };
             suggestionRollingAnalyzers = new Dictionary<int, RollingWarningAnalyzer>
@@ -899,6 +900,13 @@ namespace AssEmbly
             // Warning 0035: Pointer read size does not match the size of this move instruction. The pointer read size will be ignored.
             return newBytes.Length > 0 && !instructionIsData && moveInstructionPointerReadSizes.TryGetValue(instructionOpcode, out PointerReadSize readSize)
                 && Assembler.ParsePointer(operands[1]).ReadSize != readSize;
+        }
+
+        private bool Analyzer_Rolling_Warning_0036()
+        {
+            // Warning 0036: Pointer size other than 8 bits (`B*`) used in a context where a single byte will always be read.
+            return newBytes.Length > 0 && !instructionIsData && pointerSingleByte.Contains(instructionOpcode)
+                && Assembler.ParsePointer(operands[0]).ReadSize != PointerReadSize.Byte;
         }
 #endif
 

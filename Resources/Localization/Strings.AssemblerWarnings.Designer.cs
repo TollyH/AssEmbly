@@ -662,5 +662,14 @@ namespace AssEmbly.Resources.Localization {
                 return ResourceManager.GetString("Warning_0035", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pointer size other than 8 bits (`B*`) used in a context where a single byte will always be read..
+        /// </summary>
+        internal static string Warning_0036 {
+            get {
+                return ResourceManager.GetString("Warning_0036", resourceCulture);
+            }
+        }
     }
 }

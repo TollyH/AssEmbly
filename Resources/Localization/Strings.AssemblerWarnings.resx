@@ -240,4 +240,7 @@
   <data name="Warning_0035" xml:space="preserve">
     <value>Pointer read size does not match the size of this move instruction. The pointer read size will be ignored.</value>
   </data>
+  <data name="Warning_0036" xml:space="preserve">
+    <value>Pointer size other than 8 bits (`B*`) used in a context where a single byte will always be read.</value>
+  </data>
 </root>

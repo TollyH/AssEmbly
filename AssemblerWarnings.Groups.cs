@@ -480,6 +480,22 @@
         {
             new Opcode(0x03, 0x30), new Opcode(0x03, 0x31), new Opcode(0x03, 0x32),
         };
+        /// <summary>
+        /// All instructions that always read a single byte from a pointer - regardless of its read size.
+        /// The pointer is always the first operand.
+        /// </summary>
+        internal static readonly HashSet<Opcode> pointerSingleByte = new()
+        {
+            new Opcode(0x00, 0xC7),
+            new Opcode(0x00, 0xCB),
+            new Opcode(0x00, 0xCF),
+            new Opcode(0x00, 0xD7),
+            new Opcode(0x00, 0xDB),
+            new Opcode(0x00, 0xDF),
+
+            new Opcode(0x01, 0x57),
+            new Opcode(0x01, 0x67),
+        };
 
         /// <summary>
         /// Directives that result in data (non-code bytes) being inserted into the assembly.
