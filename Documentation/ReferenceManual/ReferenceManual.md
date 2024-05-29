@@ -539,7 +539,7 @@ Currently, the **lowest 5** bits of the 64-bit value have a special use — the 
 The 5 bits currently in use are:
 
 ```text
-0b00...00000OSFCZ
+0b00...0000AOSFCZ
 
 ... = 52 omitted bits
 Z = Zero flag
@@ -547,6 +547,7 @@ C = Carry flag
 F = File end flag
 S = Sign flag
 O = Overflow flag
+A = Auto Echo flag
 ```
 
 Each bit of this number can be considered as a `true` (`1`) or `false` (`0`) value as to whether the flag is "set" or not.
@@ -2923,6 +2924,8 @@ When an `RCC` instruction is reached, the program will pause execution and wait 
 Be aware that if the user types a character that requires multiple bytes to represent in UTF-8, `RCC` will still only retrieve a single byte. You will have to use `RCC` multiple times to get all of the bytes needed to represent the character. `WCC` will also only write a single byte at a time, though as long as the console has UTF-8 support, simply writing each UTF-8 byte one after the other will result in the correct character being displayed.
 
 Note that the user does not need to press enter after inputting a character, execution will resume immediately after a single character is typed. If you wish to wait for the user to press enter, compare the inputted character to the newline character. The example program `input.ext.asm` contains a subroutine which does this. The user pressing the enter key will always give a single `10`/`0xA` newline byte, regardless of platform.
+
+By default, `RCC` will not show the character typed by the user on the console. To change this, the `TERM_AEE` instruction can be used. This instruction sets the *Auto Echo flag* in the `rsf` register, which instructs `RCC` to automatically output the inputted byte. Alternatively, you can use the `WCC` instruction immediately after using `RCC` to mimic this behaviour by passing the same register to `WCC` as was given to `RCC`. You can unset the Auto Echo flag with the `TERM_AED` instruction to restore the default behaviour.
 
 ## File Handling
 
