@@ -2,7 +2,7 @@
 
 Applies to versions: `4.0.0`
 
-Last revised: 2024-05-27
+Last revised: 2024-05-29
 
 ## Introduction
 
@@ -667,7 +667,7 @@ MVW :AREA_1, 65535  ; 16-bit integer limit
 MVB :AREA_2, 255  ; 8-bit integer limit
 ```
 
-Note that providing a literal over the limit for a given instruction will not result in an error. Instead, the **upper** bits that do not fit in the specified size will be truncated. All 64-bits will still be assembled into the binary (literals are **always** assembled to 8 bytes).
+Note that providing a literal over the limit for a given instruction will not result in an error. Instead, the **upper** bits that do not fit in the specified size will be truncated. All 64 bits will still be assembled into the binary (literals are **always** assembled to 8 bytes).
 
 For example:
 
@@ -727,11 +727,13 @@ MVQ *rg2, rg0
 
 When using any move instruction larger than `MVB`, be careful to ensure that not only the starting point is within the bounds of available memory, but also all of the subsequent bytes. For example, if you have `8192` bytes of available memory (making `8191` the maximum address), you cannot use `MVQ` on the starting address `8189`, as that requires at least 8 bytes.
 
+Unlike other instructions, move instructions ignore any read size specifiers on pointer operands, with the size of the move instruction taking priority. For this reason and to avoid confusion, the read size of a source pointer operand (a pointer as the second operand) should always match the size of the move instruction being used. Destination pointer operands should never have any size specifier regardless of the move instruction size, in line with all other instruction pointer operands that aren't used to read a value.
+
 ## Maths and Bitwise Operations
 
 Math and bitwise instructions operate **in-place** in AssEmbly, meaning the first operand for the operation is also used as the destination for the resulting value to be stored to. Destinations, and thus the first operand, must always be a **register**.
 
-Mathematical and bitwise operations are always done with 64-bits, therefore if a memory location (e.g. a label or pointer) is used as the second operand, 8 bytes will be read starting at that address for the operation in little endian encoding (see the "moving with memory" section above for more info on little endian).
+Mathematical and bitwise operations are always done on 64-bit values. If an address is used as the second operand (either as a label reference or an address literal), 8 bytes will always be read in little endian encoding starting at that address (see the "moving with memory" section above for more information on little endian encoding). The number of bytes read from memory when using a pointer as the second operand depends on the pointer's read size specifier, though the result of the operation will still always be a 64-bit value, even when using smaller read sizes. Pointers are also read using little endian encoding.
 
 ### Addition and Multiplication
 
@@ -1003,7 +1005,7 @@ SIGN_NEG rg0  ; Performs the equivalent of "NOT rg0" then "ICR rg0" in one instr
 ; rg0 is now -9547 (or 18446744073709542069 when interpreted as unsigned)
 ```
 
-Stored values can be interpreted as either **unsigned** or **signed**. Unsigned values are always positive and use all 64 bits to store their value, giving a range of `0` to `18,446,744,073,709,551,615`. Signed values can be either positive *or* negative and, while still stored using 64-bits, the highest bit is instead to store the sign. This gives a range of `-9,223,372,036,854,775,808` to `9,223,372,036,854,775,807` for signed operations. The number of distinct values is the same as unsigned values, but now half of the values are negative.
+Stored values can be interpreted as either **unsigned** or **signed**. Unsigned values are always positive and use all 64 bits to store their value, giving a range of `0` to `18,446,744,073,709,551,615`. Signed values can be either positive *or* negative and, while still stored using 64 bits, the highest bit is instead to store the sign. This gives a range of `-9,223,372,036,854,775,808` to `9,223,372,036,854,775,807` for signed operations. The number of distinct values is the same as unsigned values, but now half of the values are negative.
 
 To check if the limits of a signed number have been exceeded after an operation instead of the limits of an unsigned number, the **overflow flag** should be used instead of the carry flag. This is explained in detail in the dedicated section on the overflow flag vs the carry flag.
 
@@ -1106,7 +1108,7 @@ Whereas the behaviour of an **arithmetic shift** (`SIGN_SHR`) looks like this:
 
 ### Extending Smaller Signed Values
 
-Operations on signed numbers will always expect them to be 64-bits in size, with the 64th bit as the sign bit. If you have a signed value stored in a smaller format, using the 8th (byte), 16th (word), or 32nd (double word) bits as the sign bit, you can use one of the extension instructions (`SIGN_EXB`, `SIGN_EXW`, and `SIGN_EXD` respectively) to convert the number to its equivalent value in 64 bits.
+Operations on signed numbers will always expect them to be 64 bits in size, with the 64th bit as the sign bit. If you have a signed value stored in a smaller format, using the 8th (byte), 16th (word), or 32nd (double word) bits as the sign bit, you can use one of the extension instructions (`SIGN_EXB`, `SIGN_EXW`, and `SIGN_EXD` respectively) to convert the number to its equivalent value in 64 bits.
 
 For example:
 
@@ -1114,12 +1116,12 @@ For example:
 MVW rg0, 0b1111111101011011
 ; rg0 is 0b0000000000000000000000000000000000000000000000001111111101011011 in binary
 ; This is -165 when considering only the lower 16 bits as a signed number,
-; however we need the value to occupy all 64-bits to be interpreted properly.
+; however we need the value to occupy all 64 bits to be interpreted properly.
 ; As of current, even the signed instructions will read rg0 as 65371
 
 SIGN_EXW rg0  ; SIGN_EXW is for extending 16->64, use SIGN_EXB for 8->64 or SIGN_EXD for 32->64
 ; rg0 is now 0b1111111111111111111111111111111111111111111111111111111101011011 in binary
-; This occupies all 64-bits, so rg0 will now work correctly as -165
+; This occupies all 64 bits, so rg0 will now work correctly as -165
 ```
 
 Using the extending instructions with a positive value will not affect the value of the register up to the specified size of bits, though any bits higher than the number supported by the used extend instruction will be set to `0` instead of `1`.
@@ -1710,7 +1712,7 @@ To insert a string using `%DAT`, the desired characters must be surrounded by do
 ```text
 MVQ rg0, :&STRING  ; Move literal address of string to rg0
 :STRING_LOOP
-MVB rg1, *rg0  ; Move contents of address stored in rg0 to rg1
+MVB rg1, B*rg0  ; Move contents of address stored in rg0 to rg1
 CMP rg1, 0  ; Check if rg1 is 0
 JEQ :END  ; If it is, stop program
 ICR rg0  ; Otherwise, increment source address by 1
@@ -1743,8 +1745,8 @@ Address | Bytes
  0x00   | 99             | 06  | 2E 00 00 00 00 00 00 00
         | MVQ (reg, lit) | rg0 | :STRING (address 0x2E)
 --------+----------------------------------------------------
- 0x0A   | 83             | 07  | 06
-        | MVB (reg, ptr) | rg1 | *rg0
+ 0x0A   | 83             | 07  | 36
+        | MVB (reg, ptr) | rg1 | B*rg0
 --------+----------------------------------------------------
  0x0D   | 75             | 07  | 00 00 00 00 00 00 00 00
         | CMP (reg, lit) | rg1 | 0
@@ -1976,8 +1978,6 @@ CMP rg0, 0  ; still generates no suggestion
 CMP rg0, 0  ; generates suggestion 0005 again
 ```
 
-Be aware that some analyzers do not run until the end of the assembly process and so cannot be re-enabled without inadvertently causing the warning to re-appear. This can be overcome by placing the disabling `%ANALYZER` directive at the end of the base file for any analyzers where this behaviour is an issue, or by simply not re-enabling the analyzer.
-
 ### %MESSAGE - Manually Emit Assembler Warning
 
 The `%MESSAGE` directive can be used to cause a custom assembler message (i.e. an error, warning, or suggestion) to be given for the line that the directive is used on. One operand is required: the severity of the message to raise (either `error`, `warning`, or `suggestion`). A second, optional operand can also be given, which must be a quoted string literal to use as the content of the custom message.
@@ -2030,7 +2030,7 @@ For example:
 SUB rfp, 8
 %REPEAT 3
     ICR rfp
-    MVB rg0, *rfp
+    MVB rg0, B*rfp
     MVB *rg1, rg0
     ICR rg1
 %ENDREPEAT
@@ -2042,15 +2042,15 @@ ADD rg1, 16
 ```text
 SUB rfp, 8
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 MVB *rg1, rg0
 ICR rg1
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 MVB *rg1, rg0
 ICR rg1
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 MVB *rg1, rg0
 ICR rg1
 ADD rg1, 16
@@ -2070,7 +2070,7 @@ SUB rfp, 8
 
 %REPEAT 4
     ICR rfp
-    MVB rg0, *rfp
+    MVB rg0, B*rfp
     %REPEAT 3
         DCR rg2
     %ENDREPEAT
@@ -2087,28 +2087,28 @@ ADD rg1, 16
 SUB rfp, 8
 
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 DCR rg2
 DCR rg2
 DCR rg2
 MVB *rg1, rg0
 ICR rg1
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 DCR rg2
 DCR rg2
 DCR rg2
 MVB *rg1, rg0
 ICR rg1
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 DCR rg2
 DCR rg2
 DCR rg2
 MVB *rg1, rg0
 ICR rg1
 ICR rfp
-MVB rg0, *rfp
+MVB rg0, B*rfp
 DCR rg2
 DCR rg2
 DCR rg2
@@ -2882,7 +2882,7 @@ For example:
 
 AssEmbly has native support for reading and writing from the console. There are four types of write that can be performed: 64-bit number in decimal; byte in decimal; byte in hexadecimal; and a raw byte (character). There is only a single type of read: a single raw byte. There is no native support for reading numbers in any base, nor is there support for reading or writing multiple numbers/bytes at once.
 
-Writing can be done from registers, literals, and memory locations; reading must be done to a register. As with the move instructions, if a byte write instruction is used on a register or literal, only the lowest byte will be considered. If one is used on a memory address (e.g. a label or a pointer), only a single byte of memory will be read, as an opposed to the 8 bytes that are read when writing a 64-bit number.
+Writing can be done from registers, literals, and memory locations; reading must be done to a register. As with the move instructions, if a byte write instruction is used on a register or literal, only the lowest byte will be considered. If one is used on a memory address (e.g. a label or a pointer), only a single byte of memory will be read, with any pointer read size specifiers being ignored. When writing a 64-bit number, 8 bytes will always be read for address operands, whereas pointers will respect their read size specifier - unlike single-byte writes.
 
 An example of each type of write:
 
@@ -3023,7 +3023,7 @@ As well as reading and writing, there are also instructions for checking whether
 
 ## The Stack
 
-The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8 byte) values. Registers, literals, addresses, and pointers can all be given as operands to the push (`PSH`) instruction.
+The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8-byte) values. Registers, literals, addresses, and pointers can all be given as operands to the push (`PSH`) instruction.
 
 Once items have been pushed to the stack, they can be removed (**popped**), starting with the most recently pushed item. As with most other instructions with a destination, items from the stack must be popped into registers with the `POP` instruction. Once an item is removed from the stack, the effective size of the stack shrinks back down, and the popped item will no longer be considered part of the stack until and unless it is pushed again.
 
@@ -3170,7 +3170,7 @@ If you utilise registers in a subroutine, you should use the stack to ensure tha
 
 ### Passing Multiple Parameters
 
-The `CAL` instruction can only take a single data parameter, however, there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are both 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you should do this in another register, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
+The `CAL` instruction can only take a single data parameter, however, there may be situations where multiple values need to be passed to a subroutine; it is best to use the stack in situations such as these. Before calling the subroutine, push any values you want to act as parameters to the subroutine, to the stack. Once the subroutine has been called, you can use `rsb` to calculate the address that each parameter will be stored at. To access the first parameter (the last one pushed before calling), you need to account for the two automatically pushed values first. These, along with every other value in the stack, are both 8 bytes long, so adding `16` (`8 * 2`) to `rsb` will get you the address of this parameter (you can do this with pointer displacement, `rsb` should be left unmodified). To access any subsequent parameters, simply add another `8` on top of this.
 
 For example:
 
@@ -3182,20 +3182,12 @@ CAL :SUBROUTINE, 1  ; Parameter A (rfp)
 ; rrv is now 10
 
 :SUBROUTINE
-PSH rg0  ; Preserve the value of rg0
-
-MVQ rg0, rsb
-ADD rg0, 16  ; Parameter B
-ADD rfp, *rg0
+ADD rfp, *rsb[16]  ; Parameter B
 ; rfp is now 3
-ADD rg0, 8  ; Parameter C
-ADD rfp, *rg0
+ADD rfp, *rsb[24]  ; Parameter C
 ; rfp is now 6
-ADD rg0, 8  ; Parameter D
-ADD rfp, *rg0
+ADD rfp, *rsb[32]  ; Parameter D
 ; rfp is now 10
-
-POP rg0  ; Restore rg0 to its original value
 RET rfp
 ```
 
@@ -3816,7 +3808,7 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | `WCN` | Write Number to Console | Register | Write a register value as a decimal number to the console | `0xC0` | `pre-v1` |
 | `WCN` | Write Number to Console | Literal | Write a literal value as a decimal number to the console | `0xC1` | `pre-v1` |
 | `WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a decimal number to the console | `0xC2` | `pre-v1` |
-| `WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the console | `0xC3` | `pre-v1` |
+| `WCN` | Write Number to Console | Pointer | Write a value in memory starting at the address in a register as a decimal number to the console | `0xC3` | `pre-v1` |
 | `WCB` | Write Numeric Byte to Console | Register | Write the lower 8-bits of a register value as a decimal number to the console | `0xC4` | `pre-v1` |
 | `WCB` | Write Numeric Byte to Console | Literal | Write the lower 8-bits of a literal value as a decimal number to the console | `0xC5` | `pre-v1` |
 | `WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address as a decimal number to the console | `0xC6` | `pre-v1` |
@@ -3833,7 +3825,7 @@ Note that for the base instruction set (number `0x00`) *only*, the leading `0xFF
 | `WFN` | Write Number to File | Register | Write a register value as a decimal number to the opened file | `0xD0` | `pre-v1` |
 | `WFN` | Write Number to File | Literal | Write a literal value as a decimal number to the opened file | `0xD1` | `pre-v1` |
 | `WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a decimal number to the opened file | `0xD2` | `pre-v1` |
-| `WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a decimal number to the opened file | `0xD3` | `pre-v1` |
+| `WFN` | Write Number to File | Pointer | Write a value in memory starting at the address in a register as a decimal number to the opened file | `0xD3` | `pre-v1` |
 | `WFB` | Write Numeric Byte to File | Register | Write the lower 8-bits of a register value as a decimal number to the opened file | `0xD4` | `pre-v1` |
 | `WFB` | Write Numeric Byte to File | Literal | Write the lower 8-bits of a literal value as a decimal number to the opened file | `0xD5` | `pre-v1` |
 | `WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address as a decimal number to the opened file | `0xD6` | `pre-v1` |
@@ -3917,7 +3909,7 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`. Contains instructi
 | `SIGN_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x50` | `v2` |
 | `SIGN_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x51` | `v2` |
 | `SIGN_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the console | `0x52` | `v2` |
-| `SIGN_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x53` | `v2` |
+| `SIGN_WCN` | Write Number to Console | Pointer | Write a value in memory starting at the address in a register as a signed decimal number to the console | `0x53` | `v2` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Register | Write the lower 8-bits of a register value as a signed decimal number to the console | `0x54` | `v2` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the console | `0x55` | `v2` |
 | `SIGN_WCB` | Write Numeric Byte to Console | Address | Write contents of memory at the address as a signed decimal number to the console | `0x56` | `v2` |
@@ -3926,7 +3918,7 @@ Extension set number `0x01`, opcodes start with `0xFF, 0x01`. Contains instructi
 | `SIGN_WFN` | Write Number to File | Register | Write a register value as a signed decimal number to the opened file | `0x60` | `v2` |
 | `SIGN_WFN` | Write Number to File | Literal | Write a literal value as a signed decimal number to the opened file | `0x61` | `v2` |
 | `SIGN_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the opened file | `0x62` | `v2` |
-| `SIGN_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the opened file | `0x63` | `v2` |
+| `SIGN_WFN` | Write Number to File | Pointer | Write a value in memory starting at the address in a register as a signed decimal number to the opened file | `0x63` | `v2` |
 | `SIGN_WFB` | Write Numeric Byte to File | Register | Write the lower 8-bits of a register value as a signed decimal number to the opened file | `0x64` | `v2` |
 | `SIGN_WFB` | Write Numeric Byte to File | Literal | Write the lower 8-bits of a literal value as a signed decimal number to the opened file | `0x65` | `v2` |
 | `SIGN_WFB` | Write Numeric Byte to File | Address | Write contents of memory at the address as a signed decimal number to the opened file | `0x66` | `v2` |
@@ -3991,12 +3983,12 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructi
 | `FLPT_WCN` | Write Number to Console | Register | Write a register value as a signed decimal number to the console | `0x70` | `v2` |
 | `FLPT_WCN` | Write Number to Console | Literal | Write a literal value as a signed decimal number to the console | `0x71` | `v2` |
 | `FLPT_WCN` | Write Number to Console | Address | Write 64-bits (4 bytes) of memory starting at the address as a signed decimal number to the console | `0x72` | `v2` |
-| `FLPT_WCN` | Write Number to Console | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a signed decimal number to the console | `0x73` | `v2` |
+| `FLPT_WCN` | Write Number to Console | Pointer | Write a value in memory starting at the address in a register as a signed decimal number to the console | `0x73` | `v2` |
 | **File Writing** ||||||
 | `FLPT_WFN` | Write Number to File | Register | Write a register value as a floating point decimal number to the opened file | `0x80` | `v2` |
 | `FLPT_WFN` | Write Number to File | Literal | Write a literal value as a floating point decimal number to the opened file | `0x81` | `v2` |
 | `FLPT_WFN` | Write Number to File | Address | Write 64-bits (4 bytes) of memory starting at the address as a floating point decimal number to the opened file | `0x82` | `v2` |
-| `FLPT_WFN` | Write Number to File | Pointer | Write 64-bits (4 bytes) of memory starting at the address in a register as a floating point decimal number to the opened file | `0x83` | `v2` |
+| `FLPT_WFN` | Write Number to File | Pointer | Write a value in memory starting at the address in a register as a floating point decimal number to the opened file | `0x83` | `v2` |
 | **Conversions** ||||||
 | `FLPT_EXH` | Extend Half Precision Float to Double Precision Float | Register | Convert the value in a register from a half-precision float (16-bits) to a double-precision float (64-bits) | `0x90` | `v2` |
 | `FLPT_EXS` | Extend Single Precision Float to Double Precision Float | Register | Convert the value in a register from a single-precision float (32-bits) to a double-precision float (64-bits) | `0x91` | `v2` |
