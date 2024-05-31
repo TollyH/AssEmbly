@@ -7,6 +7,8 @@
 ; The exact binary output that this program should produce
 ; is located in KitchenSink.bin
 
+%ANALYZER suggestion, 0025, 0
+
 :ENTRY
 MVQ rg0, 69.0
 

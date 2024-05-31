@@ -340,6 +340,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use the %NUM directive instead of 8 consecutive %DAT directives..
+        /// </summary>
+        internal static string Suggestion_0025 {
+            get {
+                return ResourceManager.GetString("Suggestion_0025", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string Warning_0000 {
