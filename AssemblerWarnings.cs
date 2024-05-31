@@ -180,6 +180,7 @@ namespace AssEmbly
         {
             UpdateDisabledPositions(filePosition);
             labelDefinitionPositions[labelName] = (filePosition, macroName);
+            consecutiveDatCount = 0;
         }
 
         /// <summary>
@@ -289,6 +290,7 @@ namespace AssEmbly
                 { 0023, Analyzer_Rolling_Suggestion_0023 },
 #endif
                 { 0024, Analyzer_Rolling_Suggestion_0024 },
+                { 0025, Analyzer_Rolling_Suggestion_0025 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -345,6 +347,7 @@ namespace AssEmbly
         private string? lastMacroName;
         private int lastMacroLineDepth;
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
+        private int consecutiveDatCount = 0;
 
         private void PreAnalyzeStateUpdate()
         {
@@ -383,25 +386,34 @@ namespace AssEmbly
             if (instructionIsData)
             {
                 dataInsertionLines.Add((filePosition, macroName, macroLineDepth));
-                if (operands[0][0] == '"' && (
-                    mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
-                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase)))
+                if (mnemonic.Equals("%DAT", StringComparison.OrdinalIgnoreCase)
+                    || mnemonic.Equals("DAT", StringComparison.OrdinalIgnoreCase))
                 {
-                    instructionIsString = true;
-                    if (lastInstructionWasString)
+                    if (operands[0][0] == '"')
                     {
-                        // Only store the last in a chain of string insertions
-                        endingStringInsertionLines.RemoveAt(endingStringInsertionLines.Count - 1);
+                        consecutiveDatCount = 0;
+                        instructionIsString = true;
+                        if (lastInstructionWasString)
+                        {
+                            // Only store the last in a chain of string insertions
+                            endingStringInsertionLines.RemoveAt(endingStringInsertionLines.Count - 1);
+                        }
+                        endingStringInsertionLines.Add((filePosition, macroName, macroLineDepth));
                     }
-                    endingStringInsertionLines.Add((filePosition, macroName, macroLineDepth));
+                    else
+                    {
+                        consecutiveDatCount++;
+                    }
                 }
             }
             else if (instructionIsImport)
             {
+                consecutiveDatCount = 0;
                 importLines.Add((filePosition, macroName, macroLineDepth));
             }
             else if (newBytes.Length > 0)
             {
+                consecutiveDatCount = 0;
                 lastExecutableLine[filePosition.File] = filePosition.Line;
                 _ = executableAddresses.Add(currentAddress);
                 instructionIsExecutable = true;
@@ -1225,6 +1237,12 @@ namespace AssEmbly
             // Suggestion 0024: Use `MVQ` instead of `EXTD_MPA` when the source pointer has no displacement.
             return newBytes.Length > 0 && !instructionIsData && pointerAddressAsLiteral.Contains(instructionOpcode)
                 && !operands[1].Contains('[');
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0025()
+        {
+            // Suggestion 0025: Use the %NUM directive instead of 8 consecutive %DAT directives.
+            return newBytes.Length > 0 && consecutiveDatCount > 0 && consecutiveDatCount % 8 == 0;
         }
 
 #if DISPLACEMENT

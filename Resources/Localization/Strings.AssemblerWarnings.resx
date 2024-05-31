@@ -243,4 +243,7 @@
   <data name="Warning_0036" xml:space="preserve">
     <value>Pointer size other than 8 bits (`B*`) used in a context where a single byte will always be read.</value>
   </data>
+  <data name="Suggestion_0025" xml:space="preserve">
+    <value>Use the %NUM directive instead of 8 consecutive %DAT directives.</value>
+  </data>
 </root>
