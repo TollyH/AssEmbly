@@ -2537,6 +2537,20 @@ The `%DELMACRO` directive can be used from within a macro, however, as with ever
 
 Using the `%DELMACRO` directive with a macro name that does not exist will immediately stop assembly and cause an error to be thrown. This will happen even if the macro *used* to exist, meaning you cannot delete the same macro twice (unless it has been redefined in the meantime).
 
+#### Pre-defined Macros
+
+The assembler automatically defines the following macros:
+
+| Macro Name     | Purpose                                                                                |
+|----------------|----------------------------------------------------------------------------------------|
+| `#FILE_PATH`   | Contains the full path to the current file being assembled                             |
+| `#FILE_NAME`   | Contains just the file name of the current file being assembled                        |
+| `#FOLDER_PATH` | Contains the full path to the directory that contains the current file being assembled |
+
+The contents of these macros is already pre-processed to be valid inside an AssEmbly string, though the surrounding quote marks are not included.
+
+Trying to overwrite or delete these macros will have no effect.
+
 ### %DEFINE - Assembler Variable Definition
 
 The `%DEFINE` directive creates an **assembler variable**, a named storage location that exists for the duration of the assembly process. The directive takes two operands: the name of the variable to define, and the value to assign to it. You can also assign a new value to an existing variable by giving the existing name as the first operand. Assembler variables are always 64-bit integers, and can be inserted into a program as a literal number by writing their name prefixed with an at sign (`@`) at the desired location in the program. Variable names follow the same restrictions as label names: they are case sensitive, and can only contain letters, numbers, and underscores. Unlike labels, the first character in a variable name *can* be a number.
@@ -2576,17 +2590,27 @@ Assembler constants are special, predefined variables that have values set by th
 
 The following table is a list of all assembler constants and their purpose:
 
-| Constant                    | Static? | Description                                                                                                                                                               |
-|-----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `@!ASSEMBLER_VERSION_MAJOR` | Yes     | The major version of AssEmbly being used to assemble the program (the first number in a version formatted as `x.x.x`)                                                     |
-| `@!ASSEMBLER_VERSION_MINOR` | Yes     | The minor version of AssEmbly being used to assemble the program (the second number in a version formatted as `x.x.x`)                                                    |
-| `@!ASSEMBLER_VERSION_PATCH` | Yes     | The patch version of AssEmbly being used to assemble the program (the third number in a version formatted as `x.x.x`)                                                     |
-| `@!V1_FORMAT`               | Yes     | Has a value of `1` if the program is being assembled into the header-less AAP format used by AssEmbly version 1, otherwise has a value of `0`                             |
-| `@!V1_CALL_STACK`           | Yes     | Has a value of `1` if the program will be executed using the "3 registers pushed" calling convention used by AssEmbly version 1, otherwise has a value of `0`             |
-| `@!IMPORT_DEPTH`            | No      | The current size of the import stack. Starts at `0` when used within the base file, then increments for every import statement, and decrements when an imported file ends |
-| `@!CURRENT_ADDRESS`         | No      | The current number of bytes that have been inserted into the program so far. Equivalent to the address that the current instruction will start at when assembled          |
-| `@!OBSOLETE_DIRECTIVES`     | Yes     | Has a value of `1` if the use of pre-3.2 directives is enabled, otherwise has a value of `0`                                                                              |
-| `@!ESCAPE_SEQUENCES`        | Yes     | Has a value of `1` if post-1.1 string escape sequences are enabled, otherwise has a value of `0`                                                                          |
+| Constant                               | Static? | Description                                                                                                                                                               |
+|----------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `@!ASSEMBLER_VERSION_MAJOR`            | Yes     | The major version of AssEmbly being used to assemble the program (the first number in a version formatted as `x.x.x`)                                                     |
+| `@!ASSEMBLER_VERSION_MINOR`            | Yes     | The minor version of AssEmbly being used to assemble the program (the second number in a version formatted as `x.x.x`)                                                    |
+| `@!ASSEMBLER_VERSION_PATCH`            | Yes     | The patch version of AssEmbly being used to assemble the program (the third number in a version formatted as `x.x.x`)                                                     |
+| `@!V1_FORMAT`                          | Yes     | Has a value of `1` if the program is being assembled into the header-less AAP format used by AssEmbly version 1, otherwise has a value of `0`                             |
+| `@!V1_CALL_STACK`                      | Yes     | Has a value of `1` if the program will be executed using the "3 registers pushed" calling convention used by AssEmbly version 1, otherwise has a value of `0`             |
+| `@!IMPORT_DEPTH`                       | No      | The current size of the import stack. Starts at `0` when used within the base file, then increments for every import statement, and decrements when an imported file ends |
+| `@!CURRENT_ADDRESS`                    | No      | The current number of bytes that have been inserted into the program so far. Equivalent to the address that the current instruction will start at when assembled          |
+| `@!FULL_BASE_OPCODES`                  | Yes     | Has a value of `1` if instructions from the base instruction set will be assembled with full 3-byte opcodes, otherwise has a value of `0`                                 |
+| `@!OBSOLETE_DIRECTIVES`                | Yes     | Has a value of `1` if the use of pre-3.2 directives is enabled, otherwise has a value of `0`                                                                              |
+| `@!ESCAPE_SEQUENCES`                   | Yes     | Has a value of `1` if post-1.1 string escape sequences are enabled, otherwise has a value of `0`                                                                          |
+| `@!FILE_PATH_MACROS`                   | Yes     | Has a value of `1` if automatically defined file path macros (such as `#FILE_PATH`) are enabled, otherwise has a value of `0`                                             |
+| `@!EXTENSION_SET_SIGNED_AVAIL`         | Yes     | Has a value of `1` if the Signed Extension Set is available to be assembled, otherwise has a value of `0`                                                                 |
+| `@!EXTENSION_SET_FLOATING_POINT_AVAIL` | Yes     | Has a value of `1` if the Floating Point Extension Set is available to be assembled, otherwise has a value of `0`                                                         |
+| `@!EXTENSION_SET_EXTENDED_BASE_AVAIL`  | Yes     | Has a value of `1` if the Extended Base Set is available to be assembled, otherwise has a value of `0`                                                                    |
+| `@!EXTENSION_SET_EXTERNAL_ASM_AVAIL`   | Yes     | Has a value of `1` if the External Assembly Extension Set is available to be assembled, otherwise has a value of `0`                                                      |
+| `@!EXTENSION_SET_HEAP_ALLOCATE_AVAIL`  | Yes     | Has a value of `1` if the Memory Allocation Extension Set is available to be assembled, otherwise has a value of `0`                                                      |
+| `@!EXTENSION_SET_FILE_SYSTEM_AVAIL`    | Yes     | Has a value of `1` if the File System Extension Set is available to be assembled, otherwise has a value of `0`                                                            |
+| `@!EXTENSION_SET_TERMINAL_AVAIL`       | Yes     | Has a value of `1` if the Terminal Extension Set is available to be assembled, otherwise has a value of `0`                                                               |
+| `@!DISPLACEMENT_AVAIL`                 | Yes     | Has a value of `1` if pointer displacement, label displacement, and explicit pointer read specifiers can be assembled, otherwise has a value of `0`                       |
 
 "Static" assembler constants will retain the same value throughout the entire assembly process. Other assembler constants may change throughout assembly depending on where they are used.
 
