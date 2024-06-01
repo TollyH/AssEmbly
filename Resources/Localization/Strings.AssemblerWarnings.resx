@@ -246,4 +246,7 @@
   <data name="Suggestion_0025" xml:space="preserve">
     <value>Use the %NUM directive instead of 8 consecutive %DAT directives.</value>
   </data>
+  <data name="Suggestion_0026" xml:space="preserve">
+    <value>Assignment to the rfp/rrv register can be inlined.</value>
+  </data>
 </root>
