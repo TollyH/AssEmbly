@@ -2,7 +2,7 @@
 
 Applies to versions: `4.0.0`
 
-Last revised: 2024-05-29
+Last revised: 2024-06-01
 
 ## Introduction
 
@@ -56,7 +56,7 @@ AssEmbly was designed and implemented in its entirety by [Tolly Hill](https://gi
 | Opcode Size                  | 1 byte (base instruction set) / 3 bytes (extension sets)                   |
 | Operand Size                 | 1 byte (registers) / 8 bytes (literals, addresses) / 1–10 bytes (pointers) |
 | Instruction Size             | 1 byte – 23 bytes (current) / unlimited (theoretical)                      |
-| Instruction Count            | 410 opcodes (153 unique operations)                                        |
+| Instruction Count            | 414 opcodes (154 unique operations)                                        |
 | Text Encoding                | UTF-8                                                                      |
 
 ## Basic Syntax
@@ -3024,6 +3024,10 @@ JZO :READ  ; If it isn't set (i.e. it is equal to 0), jump back to READ
 
 As well as reading and writing, there are also instructions for checking whether a file exists (`FEX`), getting the size of a file (`FSZ`), and deleting a file (`DFL`). They all take a path in the same way `OFL` does. `DFL` has no effect other than deleting the file. `FEX` and `FSZ` first take a register operand to store their result in, then the path to the file as the second operand. `FEX` stores `1` in the register if the file exists, `0` if not. `FSZ` stores the total size of the file in bytes.
 
+The deletion performed by `DFL` is **permanent**. Deleted files will *not* be sent to your system's recycle bin, so be careful when using this instruction.
+
+`FEX` will return `0` if a *directory*, not a *file*, exists at the given path.
+
 ## The Stack
 
 The stack is a section of memory most often used in conjunction with subroutines, explained in the subsequent section. It starts at the very end of available memory, and dynamically grows backwards as more items are added (**pushed**) to it. The stack contains exclusively 64-bit (8-byte) values. Registers, literals, addresses, and pointers can all be given as operands to the push (`PSH`) instruction.
@@ -3273,6 +3277,118 @@ AAAA....CCCCDDDD................
 
 > Freeing a region does not cause the other regions to move, so even though we now have 20 free bytes in memory, we cannot allocate any more than 16 into a single region, as it would require the region to be split across multiple ranges, which is not valid. This ultimately means that the most memory you can allocate in a single region is the number of bytes in the **largest contiguous region of unallocated memory**. Attempting to allocate 17+ bytes in this situation would produce the same result as attempting to allocate without enough free total memory.
 
+## Interacting with the File System
+
+In addition to the base file read and write instructions, AssEmbly also contains instructions for performing general file system operations. These instructions are part of the *File System Extension Set*, and begin with the `FSYS_` prefix.
+
+### Working Directory
+
+The **working** directory of the processor is the directory that all relative paths are evaluated from. This includes paths given to `OFL`, `DFL`, `FEX`, etc., as well as all instructions in the File System Extension Set that take a path as input. For example, if the current directory is `C:\Users\Alice`, then the path `Documents\file.txt` is equivalent to `C:\Users\Alice\Documents\file.txt`.
+
+The full path of the current working directory can be retrieved with the `FSYS_GWD` instruction. It takes a single operand: an address or pointer to the address in which to store the path. Paths start at the given address, and are saved as consecutive bytes in UTF-8 encoding with a single null (`0x00`) byte at the end - the same format as input paths. You must ensure that there is enough free memory after the given start address to store any path, the maximum length of which depends on which operating system AssEmbly is running on.
+
+The current working directory of the processor can be changed with the `FSYS_CWD` instruction. It also takes a single address or pointer operand, which points to the start address of a null-terminated UTF-8 string to use as the path to the new working directory. The directory must already exist. The path to the new working directory can be a relative path, but it must be relative to the *old* working directory if it is one.
+
+### Moving and Copying Files
+
+Files can be both moved and copied with the `FSYS_MOV` and `FSYS_CPY` instructions respectively. Both take two addresses or pointers as operands: the start addresses of paths in memory stored as null-terminated UTF-8 strings. The first path is used as the destination for the operation, and the second path is used as the source. Only files can be copied by these instructions, not directories. The target file will be identical to the source file after the operation completes. After a copy, both the source and destination file will exist. After a move, only the destination file will exist.
+
+### Directory Operations
+
+There are instructions for creating, deleting, and checking for the existence of directories.
+
+#### Creating Directories
+
+To create a directory, use the `FSYS_CDR` instruction with the desired path as the first operand, formatted as a null-terminated UTF-8 string. `FSYS_CDR` will create *all* directories in the path, ignoring any that already exist, meaning you only need to use the instruction once to ensure that every directory in the path exists.
+
+For example, assuming you already have an empty folder called `Folder 1`:
+
+```text
+FSYS_CDR :FOLDER_PATH
+
+:FOLDER_PATH
+%DAT "Folder 1/Folder 2/Folder 3/Folder 4\0"
+```
+
+> Upon executing this program, `FSYS_CDR` will do nothing with `Folder 1` as it already exists, then it will create `Folder 2` inside `Folder 1`, then create `Folder 3` inside `Folder 2`, then finally create `Folder 4` inside `Folder 3`.
+
+#### Deleting Directories
+
+There are two instructions for deleting directories: `FSYS_DDR` and `FSYS_DDE`. Both take a single operand: the address or pointer to the start of the null-terminated UTF-8 directory path string to delete.
+
+`FSYS_DDE` can only be used to delete a directory if it is already completely empty (i.e. it contains no other files or directories, even empty ones). `FSYS_DDR` deletes a directory **recursively**, meaning both the directory and all of its contents, including the contents of any subdirectories at any level of nesting, will be deleted by the instruction.
+
+The deletion performed by both `FSYS_DDR` and `FSYS_DDE` is **permanent**. Deleted files and directories will *not* be sent to your system's recycle bin, so be careful when using these instructions.
+
+#### Checking Directory Existence
+
+To check if a given directory exists, the `FSYS_DEX` instruction can be used. The first operand must be a register, which will have its value set to `0` if the directory does not exist, or `1` if it does. The second operand is an address or pointer to the start of the null-terminated UTF-8 directory path string to check for.
+
+`FSYS_DEX` will return `0` if a *file*, not a *directory*, exists at the given path.
+
+### Listing Directory Contents
+
+The `FSYS_BDL` instruction begins a *directory listing*, which allows you to iterate over every file and subdirectory in a directory. If given no operands, `FSYS_BDL` will begin a listing of the current working directory, however it can also take an address or pointer to a null-terminated UTF-8 directory path to list the contents of that directory instead.
+
+Once a directory listing has been started, the `FSYS_GNF` and `FSYS_GND` instructions can be used to get the name of the next file or directory in the listing respectively. Each takes a single operand: the address or pointer to save the retrieved name to. The listing will automatically move onto the next item after the instruction is executed. The list of files and the list of directories are separate, so getting the next file does not move the directory listing, or vice versa. Only the file/directory *names* are returned by `FSYS_GNF` and `FSYS_GND`, not the full paths.
+
+File names are saved as null-terminated UTF-8 strings. There must be enough free memory after the start address to store every possible name. A different address can be given to `FSYS_GNF` or `FSYS_GND` each time and, assuming the memory regions do not overlap, the previous data will remain valid.
+
+Once the last item in a listing has been read, the corresponding instruction of `FSYS_GNF` or `FSYS_GND` will start to return empty strings (a string that contains only the null terminator). The zero flag will also be set when this happens. Note that `FSYS_GNF` and `FSYS_GND` do not set the zero flag until *after* the final item has been retrieved and they have been executed again afterwards, returning the empty string. The zero flag will remain unset when getting the final item itself.
+
+Only one directory can be listed at a time. Directory listings do *not* include the contents of any subdirectories, only the immediately contained subdirectories themselves. You do not need to finish listing a directory before you can start listing another, however doing so will reset the progress of the listing if go back to it. Directory listings do not need to be explicitly stopped or closed.
+
+### File Times
+
+AssEmbly has instructions for getting and setting the creation, last modified, and last accessed times of files with the `FSYS_GCT`, `FSYS_GMT`, `FSYS_GAT`, `FSYS_SCT`, `FSYS_SMT`, and `FSYS_SAT` instructions respectively (`G` = Get, `S` = Set, `C` = Creation, `M` = Last Modified, `A` = Last Accessed).
+
+The get instructions take a register as the first operand to store the retrieved time in, then take an address or pointer to the null-terminated UTF-8 filepath to retrieve from as the second operand. The set instructions take the address or pointer to the filepath as the first operand, then take a register or literal value as the second operand to use as the time to set.
+
+File times include both the date and time, formatted as a signed, 64-bit integer number that represents the number of seconds before or after the **UNIX Epoch** (`1970-01-01 00:00:00 UTC`). These values are known as **UNIX timestamps**.
+
+Be aware that not all operating systems have equal support for file times. Some Linux systems, for example, may not have support for file creation times, so `FSYS_GCT` and `FSYS_SCT` will not behave as expected on these platforms.
+
+## Controlling the Terminal
+
+In addition to reading and writing from the console, there are also instructions for performing more advanced interactions with the terminal window. These instructions are part of the **Terminal Extension Set** and start with the `TERM_` prefix.
+
+### Console Colours
+
+Most terminals are capable of displaying text with different foreground and background colours. To change these, the `TERM_SFC` and `TERM_SBC` instructions can be used respectively. They take a single operand which can be any type, corresponding to the numeric value of the colour to set.
+
+The values for each colour are as follows:
+
+| Number | Colour       |
+|--------|--------------|
+| 0      | Black        |
+| 1      | Dark Blue    |
+| 2      | Dark Green   |
+| 3      | Dark Cyan    |
+| 4      | Dark Red     |
+| 5      | Dark Magenta |
+| 6      | Dark Yellow  |
+| 7      | Gray         |
+| 8      | Dark Gray    |
+| 9      | Blue         |
+| 10     | Green        |
+| 11     | Cyan         |
+| 12     | Red          |
+| 13     | Magenta      |
+| 14     | Yellow       |
+| 15     | White        |
+
+Values given to `TERM_SFC` and `TERM_SBC` must be in this range. Setting the colour will, on most platforms, only affect text written to the console *after* the instructions' usage. Text already on the terminal window will retain the colours it was originally written with.
+
+The `TERM_RSC` instruction can be used to restore both the foreground and background colours to their original value. It will always restore both at the same time.
+
+### Cursor Position and Window Size
+
+Normally, the cursor simply progresses one character at a time as each one is written, however it is also possible to control the exact position of the cursor on the terminal window.
+
+You can get the current horizontal and vertical position of the cursor with the `TERM_GCX` and `TERM_GCY` instructions respectively. Both take a single register to store the current position in. The first character on the terminal (the top left corner) is at position (X: 0, Y: 0), with X and Y increasing as you go right and down respectively. There are also `TERM_GSX` and `TERM_GSY` instructions to get the total width and height of the current terminal window, behaving in the same way as `TERM_GCX` and `TERM_GCY`. Be aware that the terminal can be resized while the program is still running.
+
+To set the position of the cursor, use the `TERM_SCX` and `TERM_SCY` instructions to set the horizontal and vertical positions respectively. Both take a single operand of any type to use as the position value. It must be greater than or equal to 0 and less than the size of the terminal window in the relevant dimension.
+
 ## Interoperating with C# Code
 
 It is possible to execute external code from .NET assembly files in AssEmbly. These external methods have the ability to both read from and write to the AssEmbly processor's memory and registers. An optional value can also be passed to the external method upon calling to prevent needing to go through registers or memory for a single parameter.
@@ -3363,6 +3479,45 @@ Your value: 9000
 ### Testing if an Assembly or Function Exists
 
 The `ASMX_LDA` and `ASMX_LDF` instructions will throw an error, stopping execution, if the path/name they are given does not correspond to a valid target to load. If you wish to test whether or not this will happen without crashing the program, you can use the `ASMX_AEX` and `ASMX_FEX` instructions. They both take a register as their first operand, then the memory address of the null-terminated target string as their second. If the target assembly/function exists and is valid, the value of the first operand register will be set to `1`, otherwise it will be set to `0`. An assembly must already be loaded in order to check the validity of a function, as only the currently open assembly will be searched.
+
+## Miscellaneous Operations
+
+### Halting with an Exit Code
+
+An **exit code** is a single integer number returned by every process when it closes on most operating systems. Conventionally, an exit code of `0` means that the process ended successfully, whereas a non-zero exit code corresponds to an error that has occurred.
+
+The `HLT` instruction does not take any operands, therefore it always causes the processor to exit with the default exit code of `0`. If you want to halt with a different exit code, the `EXTD_HLT` instruction can be used. It behaves identically to `HLT`, except it takes a single operand of any type to use as the value to set the exit code to.
+
+### Getting Runtime Processor Information
+
+It is possible that an AssEmbly processor may not support every available feature of the architecture. For this reason, there are instructions that can be used to query the processor for what features it does support.
+
+To get a bit-field of optional features supported by the current processor, use the `EXTD_QPF` instruction. It takes a single register operand to store the bit-field in. Each individual bit of the bit-field corresponds to a separate feature, similarly to how the `rsf` register stores status flags.
+
+The meaning of each bit is as follows (bit 0 is the lowest order bit):
+
+| Bit | Meaning                                                                                                                 |
+|-----|-------------------------------------------------------------------------------------------------------------------------|
+| 0   | V1 stack emulation is supported (does not necessarily mean it is in use - mostly irrelevant for running programs)       |
+| 1   | Signed Extension Set is supported                                                                                       |
+| 2   | Floating Point Extension Set is supported                                                                               |
+| 3   | Extended Base Set is supported                                                                                          |
+| 4   | GZip program compression is supported (does not necessarily mean it is in use - mostly irrelevant for running programs) |
+| 5   | External Assembly Extension Set is supported                                                                            |
+| 6   | Memory Allocation Extension Set is supported                                                                            |
+| 7   | File System Extension Set is supported                                                                                  |
+| 8   | Terminal Extension Set is supported                                                                                     |
+| 9   | Pointer displacement and less-than-64-bit pointer reads are supported                                                   |
+
+A bit being set to `1` means that the feature is supported. Conversely, the bit being unset means that the feature is not supported. The remaining bits have no meaning and should always be `0`, though don't rely on this being the case.
+
+To check the version of AssEmbly being used by the processor, the `EXTD_QPV` instruction can be used. It takes either one or two register operands. If one is given, its value will be set to the *major* version of the processor (the first number in a version formatted as `x.x.x`). If two are given, the first will have its value set to the major version, and the second will have its value set to the current *minor* version of the processor (the second number in a version formatted as `x.x.x`).
+
+There is also an `EXTD_CSS` instruction that is used to get the number of bytes automatically pushed and popped from the stack by the `CAL` and `RET` instructions. This value will almost always be `16`, corresponding to the two 8-byte register values that are usually pushed. It may, however, be `24` if the processor has been configured to emulate the function call behaviour of AssEmbly version 1, which superfluously pushed the `rso` register in addition to the `rsb` and `rpo` registers upon calling a function. The value is saved into a single register operand, though realistically it is unnecessary to ever check this unless you *need* to support all versions of AssEmbly.
+
+### Sleeping
+
+The `EXTD_SLP` instruction can be used to pause execution for a set amount of time. It takes a single operand of any type which corresponds to the integer amount of time in milliseconds to sleep for. No operations can be performed by the processor while it is sleeping.
 
 ## Text Encoding
 
@@ -3483,6 +3638,8 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `FLPT_FNS`    | X                | X              | O              |
 | `FLPT_CMP`    | X                | X              | O              |
 | `EXTD_BSW`    | (4)              | (4)            | (4)            |
+| `EXTD_HLT`    | X                | O              | X              |
+| `EXTD_SLP`    | O                | X              | X              |
 | `HEAP_ALC`    | O                | X              | X              |
 | `HEAP_TRY`    | O                | X              | X              |
 | `HEAP_REA`    | O                | X              | X              |
@@ -3622,6 +3779,7 @@ Instructions that don't take any data or are otherwise not applicable have been 
 | `EXTD_CSS`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 | `EXTD_HLT`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 | `EXTD_MPA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
+| `EXTD_SLP`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 | `ASMX_LDA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 | `ASMX_LDF`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
 | `ASMX_CLA`    | X                                               | X                                                        | X                              | X    | X                                     | X         |
@@ -4032,6 +4190,11 @@ Extension set number `0x03`, opcodes start with `0xFF, 0x03`. Contains additiona
 | `EXTD_MPA` | Move Pointer Address | Register, Pointer | Set the value of a register to the calculated address of a pointer | `0x30` | `v4` |
 | `EXTD_MPA` | Move Pointer Address | Address, Pointer | Set the value of memory at an address to the calculated address of a pointer | `0x31` | `v4` |
 | `EXTD_MPA` | Move Pointer Address | Pointer, Pointer | Set the value of memory at an address in a register to the calculated address of a pointer | `0x32` | `v4` |
+| **Sleep** ||||||
+| `EXTD_SLP` | Sleep | Register | Wait for an amount of milliseconds specified by the value of a register before resuming program execution | `0x40` | `v4` |
+| `EXTD_SLP` | Sleep | Literal | Wait for an amount of milliseconds specified by a literal value before resuming program execution | `0x41` | `v4` |
+| `EXTD_SLP` | Sleep | Address | Wait for an amount of milliseconds specified by the contents of memory at an address before resuming program execution | `0x42` | `v4` |
+| `EXTD_SLP` | Sleep | Pointer | Wait for an amount of milliseconds specified by the contents of memory at an address in a register before resuming program execution | `0x43` | `v4` |
 
 ### External Assembly Extension Set
 
@@ -4173,11 +4336,11 @@ Extension set number `0x07`, opcodes start with `0xFF, 0x07`. Contains instructi
 | `TERM_SFC` | Set Foreground Colour | Register | Set the console foreground (text) colour to the value of a register | `0x50` | `v4` |
 | `TERM_SFC` | Set Foreground Colour | Literal | Set the console foreground (text) colour to a literal value | `0x51` | `v4` |
 | `TERM_SFC` | Set Foreground Colour | Address | Set the console foreground (text) colour to a value in memory at an address | `0x52` | `v4` |
-| `TERM_SFC` | Set Foreground Colour | Address | Set the console foreground (text) colour to a value in memory at an address in a register | `0x53` | `v4` |
+| `TERM_SFC` | Set Foreground Colour | Pointer | Set the console foreground (text) colour to a value in memory at an address in a register | `0x53` | `v4` |
 | `TERM_SBC` | Set Background Colour | Register | Set the console background (text) colour to the value of a register | `0x54` | `v4` |
 | `TERM_SBC` | Set Background Colour | Literal | Set the console background (text) colour to a literal value | `0x55` | `v4` |
 | `TERM_SBC` | Set Background Colour | Address | Set the console background (text) colour to a value in memory at an address | `0x56` | `v4` |
-| `TERM_SBC` | Set Background Colour | Address | Set the console background (text) colour to a value in memory at an address in a register | `0x57` | `v4` |
+| `TERM_SBC` | Set Background Colour | Pointer | Set the console background (text) colour to a value in memory at an address in a register | `0x57` | `v4` |
 | `TERM_RSC` | Reset Colours | - | Reset both the console foreground and background colours to their defaults | `0x58` | `v4` |
 
 ## ASCII Table
