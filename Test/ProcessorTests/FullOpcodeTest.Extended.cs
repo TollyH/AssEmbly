@@ -1,4 +1,6 @@
-﻿namespace AssEmbly.Test.ProcessorTests
+﻿using System.Diagnostics;
+
+namespace AssEmbly.Test.ProcessorTests
 {
     public static partial class FullOpcodeTest
     {
@@ -294,6 +296,62 @@
                 Assert.AreEqual(14UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
                 Assert.AreEqual(0x30609200UL, testProcessor.ReadMemoryQWord(0x140), "Instruction did not produce correct result");
                 Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+            }
+
+            [TestMethod]
+            public void EXTD_SLP_Register()
+            {
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 567;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x40, (int)Register.rg7 });
+                Stopwatch timer = Stopwatch.StartNew();
+                _ = testProcessor.Execute(false);
+                timer.Stop();
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.IsTrue(timer.ElapsedMilliseconds is >= 500 and <= 1000, "Instruction did not sleep");
+            }
+
+            [TestMethod]
+            public void EXTD_SLP_Literal()
+            {
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x41, 0x37, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                Stopwatch timer = Stopwatch.StartNew();
+                _ = testProcessor.Execute(false);
+                timer.Stop();
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.IsTrue(timer.ElapsedMilliseconds is >= 500 and <= 1000, "Instruction did not sleep");
+            }
+
+            [TestMethod]
+            public void EXTD_SLP_Address()
+            {
+                Processor testProcessor = new(2046);
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x42, 0x40, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                testProcessor.WriteMemoryQWord(0x140, 567);
+                Stopwatch timer = Stopwatch.StartNew();
+                _ = testProcessor.Execute(false);
+                timer.Stop();
+                Assert.AreEqual(11UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.IsTrue(timer.ElapsedMilliseconds is >= 500 and <= 1000, "Instruction did not sleep");
+            }
+
+            [TestMethod]
+            public void EXTD_SLP_Pointer()
+            {
+                Processor testProcessor = new(2046);
+                testProcessor.Registers[(int)Register.rg7] = 0x140;
+                testProcessor.LoadProgram(new byte[] { 0xFF, 0x03, 0x43, (int)Register.rg7 });
+                testProcessor.WriteMemoryQWord(0x140, 567);
+                Stopwatch timer = Stopwatch.StartNew();
+                _ = testProcessor.Execute(false);
+                timer.Stop();
+                Assert.AreEqual(4UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
+                Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
+                Assert.IsTrue(timer.ElapsedMilliseconds is >= 500 and <= 1000, "Instruction did not sleep");
             }
         }
     }

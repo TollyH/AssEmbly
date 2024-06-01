@@ -3078,6 +3078,30 @@ namespace AssEmbly
                                         throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_MovePointerAddress, opcodeLow));
                                 }
                                 break;
+                            case 0x40:  // Sleep
+                                switch (opcodeLow)
+                                {
+                                    case 0x0:  // EXTD_SLP reg
+                                        result = ReadMemoryRegister(operandStart);
+                                        Registers[(ulong)Register.rpo]++;
+                                        break;
+                                    case 0x1:  // EXTD_SLP lit
+                                        result = ReadMemoryQWord(operandStart);
+                                        Registers[(ulong)Register.rpo] += 8;
+                                        break;
+                                    case 0x2:  // EXTD_SLP adr
+                                        result = ReadMemoryPointedQWord(operandStart);
+                                        Registers[(ulong)Register.rpo] += 8;
+                                        break;
+                                    case 0x3:  // EXTD_SLP ptr
+                                        result = ReadMemoryRegisterPointedNumber(operandStart, out byteCount);
+                                        Registers[(ulong)Register.rpo] += byteCount;
+                                        break;
+                                    default:
+                                        throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_Low_Extended_Halt, opcodeLow));
+                                }
+                                Thread.Sleep(TimeSpan.FromMilliseconds(result));
+                                break;
                             default:
                                 throw new InvalidOpcodeException(string.Format(Strings_Processor.Error_Opcode_High_Extended, opcodeHigh));
                         }

@@ -659,6 +659,13 @@
             { ("EXTD_MPA", new OperandType[2] { OperandType.Register, OperandType.Pointer }), new Opcode(0x03, 0x30) },
             { ("EXTD_MPA", new OperandType[2] { OperandType.Address, OperandType.Pointer }), new Opcode(0x03, 0x31) },
             { ("EXTD_MPA", new OperandType[2] { OperandType.Pointer, OperandType.Pointer }), new Opcode(0x03, 0x32) },
+
+            // EXTD_SLP (Sleep)
+            { ("EXTD_SLP", new OperandType[1] { OperandType.Register }), new Opcode(0x03, 0x40) },
+            { ("EXTD_SLP", new OperandType[1] { OperandType.Literal }), new Opcode(0x03, 0x41) },
+            { ("EXTD_SLP", new OperandType[1] { OperandType.Address }), new Opcode(0x03, 0x42) },
+            { ("EXTD_SLP", new OperandType[1] { OperandType.Pointer }), new Opcode(0x03, 0x43) },
+
 #endif
 
 #if EXTENSION_SET_EXTERNAL_ASM
