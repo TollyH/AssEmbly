@@ -14,7 +14,7 @@ ASMX_LDA :ASSEMBLY_NAME
 
 :CLOCK_LOOP
 CallExternalFunction(:CLOCK_METHOD_NAME, :&DATETIME_FORMAT)
-CallExternalFunction(:SLEEP_METHOD_NAME, 500)  ; 500ms/0.5s
+EXTD_SLP 500  ; 500ms/0.5s
 
 WCC '\r'  ; Return to start of line
 
@@ -25,9 +25,6 @@ JMP :CLOCK_LOOP
 
 :CLOCK_METHOD_NAME
 %DAT "PrintFormattedDateTime\0"
-
-:SLEEP_METHOD_NAME
-%DAT "Sleep\0"
 
 :DATETIME_FORMAT
 %DAT "yyyy-MM-dd HH:mm:ss\0"

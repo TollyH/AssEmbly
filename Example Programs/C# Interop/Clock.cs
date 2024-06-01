@@ -22,13 +22,4 @@ public static class AssEmblyInterop
         string format = GetStringFromMemory(memory, passedValue.Value);
         Console.Write(DateTime.Now.ToString(format, System.Globalization.CultureInfo.InvariantCulture));
     }
-    
-    public static void Sleep(byte[] memory, ulong[] registers, ulong? passedValue)
-    {
-        if (passedValue is null)
-        {
-            throw new ArgumentException("This method requires a number of milliseconds to sleep");
-        }
-        System.Threading.Thread.Sleep((int)passedValue);
-    }
 }
