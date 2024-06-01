@@ -291,6 +291,7 @@ namespace AssEmbly
 #endif
                 { 0024, Analyzer_Rolling_Suggestion_0024 },
                 { 0025, Analyzer_Rolling_Suggestion_0025 },
+                { 0026, Analyzer_Rolling_Suggestion_0026 },
             };
 
             nonFatalErrorFinalAnalyzers = new Dictionary<int, FinalWarningAnalyzer>();
@@ -1243,6 +1244,18 @@ namespace AssEmbly
         {
             // Suggestion 0025: Use the %NUM directive instead of 8 consecutive %DAT directives.
             return newBytes.Length > 0 && consecutiveDatCount > 0 && consecutiveDatCount % 8 == 0;
+        }
+
+        private bool Analyzer_Rolling_Suggestion_0026()
+        {
+            // Suggestion 0026: Assignment to the rfp/rrv register can be inlined.
+            return newBytes.Length > 0 && lastMnemonic.Equals("MVQ", StringComparison.OrdinalIgnoreCase)
+                && ((mnemonic.Equals("CAL", StringComparison.OrdinalIgnoreCase)
+                        && operands.Length == 1
+                        && lastOperands[0].Equals("rfp", StringComparison.OrdinalIgnoreCase))
+                    || (mnemonic.Equals("RET", StringComparison.OrdinalIgnoreCase)
+                        && operands.Length == 0
+                        && lastOperands[0].Equals("rrv", StringComparison.OrdinalIgnoreCase)));
         }
 
 #if DISPLACEMENT

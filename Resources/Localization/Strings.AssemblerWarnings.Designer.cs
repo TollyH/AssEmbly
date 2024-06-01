@@ -349,6 +349,15 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Assignment to the rfp/rrv register can be inlined..
+        /// </summary>
+        internal static string Suggestion_0026 {
+            get {
+                return ResourceManager.GetString("Suggestion_0026", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Manually emitted warning..
         /// </summary>
         internal static string Warning_0000 {
