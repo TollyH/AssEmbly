@@ -348,6 +348,8 @@ namespace AssEmbly
         private string? lastMacroName;
         private int lastMacroLineDepth;
         private Stack<Assembler.ImportStackFrame> lastImportStack = new();
+        private FilePosition lastFilePosition = new();
+
         private int consecutiveDatCount = 0;
 
         private void PreAnalyzeStateUpdate()
@@ -452,11 +454,12 @@ namespace AssEmbly
 
         private void PostAnalyzeStateUpdate()
         {
-            currentAddress += (uint)newBytes.Length;
-            if (newBytes.Length > 0)
+            if (newBytes.Length == 0)
             {
-                lastInstructionWasTerminator = terminators.Contains(instructionOpcode);
+                return;
             }
+            currentAddress += (uint)newBytes.Length;
+            lastInstructionWasTerminator = terminators.Contains(instructionOpcode);
             lastInstructionWasData = instructionIsData;
             lastInstructionWasImport = instructionIsImport;
             lastInstructionWasString = instructionIsString;
@@ -466,6 +469,7 @@ namespace AssEmbly
             lastImportStack = importStack;
             lastMacroName = macroName;
             lastMacroLineDepth = macroLineDepth;
+            lastFilePosition = filePosition;
         }
 
         private void UpdateDisabledPositions(FilePosition filePosition)
@@ -687,7 +691,8 @@ namespace AssEmbly
             {
                 return new List<Warning>
                 {
-                    new(WarningSeverity.Warning, 0009, filePosition, mnemonic, operands, lineText[(filePosition, lastMacroLineDepth)], lastMacroName)
+                    new(WarningSeverity.Warning, 0009, lastFilePosition, lastMnemonic, lastOperands,
+                        lineText[(lastFilePosition, lastMacroLineDepth)], lastMacroName)
                 };
             }
             return new List<Warning>();
