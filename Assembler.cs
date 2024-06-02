@@ -21,7 +21,10 @@ namespace AssEmbly
         ulong EntryPoint,
         AAPFeatures UsedExtensions,
         FilePosition[] AssembledLines,
-        int AssembledFiles
+        int AssembledFiles,
+        Dictionary<string, ulong> Labels,
+        HashSet<string> AllVariables,
+        HashSet<string> AllMacros
     );
 
     /// <summary>
@@ -176,6 +179,10 @@ namespace AssEmbly
         private readonly Dictionary<string, int> timesSeenFile = new();
         // Files that begin with an %ASM_ONCE directive (i.e. won't throw a circular import error)
         private readonly HashSet<string> completeAsmOnceFiles = new();
+
+        // Collections for every macro and variable defined throughout the program, including deleted ones
+        private readonly HashSet<string> allMacros = new();
+        private readonly HashSet<string> allVariables = new();
 
         /// <param name="baseFilePath">
         /// The path to the file being assembled.
@@ -367,6 +374,7 @@ namespace AssEmbly
             }
 
             assemblerVariables[name] = value;
+            _ = allVariables.Add(name);
         }
 
         /// <summary>
@@ -376,11 +384,15 @@ namespace AssEmbly
         /// This method will perform validation on the name of the macro and remove a multi-line macro with the same name if it exists.
         /// </remarks>
         /// <exception cref="SyntaxError">Thrown if the given name is invalid.</exception>
-        public void SetSingleLineMacro(string name, string replacement)
+        public void SetSingleLineMacro(string name, string replacement, bool automatic = false)
         {
             ValidateMacroName(name);
 
             singleLineMacros[name] = replacement;
+            if (!automatic)
+            {
+                _ = allMacros.Add(name);
+            }
             singleLineMacroNames.Add(name);
             singleLineMacroNames = singleLineMacroNames.OrderByDescending(n => n.Length).Distinct().ToList();
             if (multiLineMacros.Remove(name))
@@ -401,6 +413,7 @@ namespace AssEmbly
             ValidateMacroName(name);
 
             multiLineMacros[name] = replacement;
+            _ = allMacros.Add(name);
             multiLineMacroNames.Add(name);
             multiLineMacroNames = multiLineMacroNames.OrderByDescending(n => n.Length).Distinct().ToList();
             if (singleLineMacros.Remove(name))
@@ -454,7 +467,8 @@ namespace AssEmbly
 #if ASSEMBLER_WARNINGS
                 warnings.ToArray(),
 #endif
-                entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count);
+                entryPoint, usedExtensions, processedLines.ToArray(), timesSeenFile.Count,
+                labels, allVariables, allMacros);
         }
 
         /// <summary>
@@ -2664,9 +2678,9 @@ namespace AssEmbly
 
         private void SetFileMacros()
         {
-            SetSingleLineMacro("#FILE_PATH", currentFilePosition.File.EscapeCharacters());
-            SetSingleLineMacro("#FILE_NAME", Path.GetFileName(currentFilePosition.File).EscapeCharacters());
-            SetSingleLineMacro("#FOLDER_PATH", (Path.GetDirectoryName(currentFilePosition.File) ?? "").EscapeCharacters());
+            SetSingleLineMacro("#FILE_PATH", currentFilePosition.File.EscapeCharacters(), true);
+            SetSingleLineMacro("#FILE_NAME", Path.GetFileName(currentFilePosition.File).EscapeCharacters(), true);
+            SetSingleLineMacro("#FOLDER_PATH", (Path.GetDirectoryName(currentFilePosition.File) ?? "").EscapeCharacters(), true);
         }
 
         /// <summary>
