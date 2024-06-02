@@ -40,28 +40,20 @@ namespace AssEmbly
             AllowFullyQualifiedBaseOpcodes = true
         };
 
-        public Debugger(bool inReplMode, ulong entryPoint = 0,
-            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
-        {
-            InReplMode = inReplMode;
-            DebuggingProcessor = new Processor(Program.DefaultMemorySize, entryPoint, useV1CallStack, mapStack, autoEcho);
-            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
-        }
-
-        public Debugger(bool inReplMode, ulong memorySize, ulong entryPoint = 0,
-            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
-        {
-            InReplMode = inReplMode;
-            DebuggingProcessor = new Processor(memorySize, entryPoint, useV1CallStack, mapStack, autoEcho);
-            DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
-        }
+        private bool forceBreak;
+        private bool currentlyAwaitingInput = false;
 
         public Debugger(bool inReplMode, Processor processorToDebug)
         {
             InReplMode = inReplMode;
             DebuggingProcessor = processorToDebug;
             DebuggingProcessor.Registers.CopyTo(replPreviousRegisters, 0);
+            Console.CancelKeyPress += Console_CancelKeyPress;
         }
+
+        public Debugger(bool inReplMode, ulong memorySize = Program.DefaultMemorySize, ulong entryPoint = 0,
+            bool useV1CallStack = false, bool mapStack = true, bool autoEcho = false)
+            : this(inReplMode, new Processor(memorySize, entryPoint, useV1CallStack, mapStack, autoEcho)) { }
 
         public void LoadDebugFile(string debugFilePath)
         {
@@ -195,7 +187,11 @@ namespace AssEmbly
                 try
                 {
                     bool breakForDebug;
-                    if (InReplMode)
+                    if (forceBreak)
+                    {
+                        breakForDebug = true;
+                    }
+                    else if (InReplMode)
                     {
                         // If we're acting as a REPL, only ask user for an instruction if there isn't one already to execute.
                         breakForDebug = DebuggingProcessor.Memory[DebuggingProcessor.Registers[(int)Register.rpo]] == 0;
@@ -237,11 +233,16 @@ namespace AssEmbly
                             DisplayDebugInfo();
                         }
                     }
+                    currentlyAwaitingInput = true;
                     bool endCommandEntryLoop = false;
                     while (!endCommandEntryLoop && breakForDebug)
                     {
                         Console.Write(InReplMode ? Strings_Debugger.REPL_Command_Prompt : Strings_Debugger.Command_Prompt);
-                        string userInput = Console.ReadLine()!;
+                        string? userInput = Console.ReadLine();
+                        if (userInput is null)
+                        {
+                            continue;
+                        }
                         if (InReplMode)
                         {
                             if (ProcessReplInput(userInput))
@@ -308,6 +309,7 @@ namespace AssEmbly
                             }
                         }
                     }
+                    currentlyAwaitingInput = false;
                     if (DebuggingProcessor.Execute(false) && !InReplMode)
                     {
                         Program.PrintWarning(Strings_Debugger.Warning_HLT_Reached);
@@ -910,6 +912,21 @@ namespace AssEmbly
 #else
                 return false;
 #endif
+            }
+        }
+
+        private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+        {
+            forceBreak = true;
+            // Only kill the process if user presses CTRL+C while being prompted for input,
+            // otherwise return them to the input prompt
+            if (currentlyAwaitingInput)
+            {
+                Environment.Exit(0);
+            }
+            else
+            {
+                e.Cancel = true;
             }
         }
     }

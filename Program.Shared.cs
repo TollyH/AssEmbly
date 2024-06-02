@@ -5,7 +5,7 @@ namespace AssEmbly
 {
     internal static partial class Program
     {
-        public static readonly ulong DefaultMemorySize = 8192;  // 8KB
+        public const ulong DefaultMemorySize = 8192;  // 8KB
 
         // Shared methods that are used by multiple commands
         public static AAPFile? LoadAAPFile(string appPath, bool ignoreNewerVersion)
