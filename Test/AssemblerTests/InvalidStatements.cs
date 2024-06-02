@@ -61,6 +61,7 @@
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "0b" }));
             _ = Assert.ThrowsException<SyntaxError>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "_" }));
             _ = Assert.ThrowsException<OperandException>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "18446744073709551616" }));
+            _ = Assert.ThrowsException<OperandException>(() => Assembler.AssembleStatement("ADD", new[] { "rg0", "-18446744073709551613" }));
         }
 
         [TestMethod]
