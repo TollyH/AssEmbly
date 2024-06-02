@@ -1423,6 +1423,11 @@ namespace AssEmbly
                 }
                 else
                 {
+                    if (parsedNumber > (ulong)long.MaxValue + 1)
+                    {
+                        throw new OperandException(
+                            string.Format(Strings_Assembler.Error_Literal_Too_Small, long.MinValue, operand));
+                    }
                     parsedNumber = (ulong)-(long)parsedNumber;
                 }
             }
