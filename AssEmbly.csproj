@@ -14,12 +14,12 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="!$(DefineConstants.Contains(';NO_AUTO_DEFINE;'))">
     <DefineConstants>$(DefineConstants);V1_CALL_STACK_COMPAT;EXTENSION_SET_SIGNED;EXTENSION_SET_FLOATING_POINT;EXTENSION_SET_EXTENDED_BASE;GZIP_COMPRESSION;EXTENSION_SET_EXTERNAL_ASM;EXTENSION_SET_HEAP_ALLOCATE;EXTENSION_SET_FILE_SYSTEM;EXTENSION_SET_TERMINAL;DISPLACEMENT;ASSEMBLER;ASSEMBLER_WARNINGS;PROCESSOR;DEBUGGER;DISASSEMBLER;CLI;</DefineConstants>
   </PropertyGroup>
 
   <Choose>
-    <When Condition="$(DefineConstants.Contains('CLI'))">
+    <When Condition="$(DefineConstants.Contains(';CLI;'))">
       <PropertyGroup>
         <OutputType>Exe</OutputType>
       </PropertyGroup>
