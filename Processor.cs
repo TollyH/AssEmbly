@@ -99,8 +99,10 @@ namespace AssEmbly
             _mappedMemoryRanges.Add(new Range((long)memorySize, (long)memorySize));
 #endif
             ProgramLoaded = false;
+#if CLI
             // AssEmbly stores strings as UTF-8, so console must be set to UTF-8 to render bytes correctly
             Console.OutputEncoding = Encoding.UTF8;
+#endif
 #if V1_CALL_STACK_COMPAT
             UseV1CallStack = useV1CallStack;
             stackCallSize = useV1CallStack ? 24UL : 16UL;
