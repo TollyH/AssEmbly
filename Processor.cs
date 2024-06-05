@@ -214,6 +214,7 @@ namespace AssEmbly
             }
             bool halt = false;
             using Stream stdout = stdoutOverride ?? Console.OpenStandardOutput();
+            using Stream? stdin = stdinOverride ?? (Console.IsInputRedirected ? Console.OpenStandardInput() : null);
             do
             {
                 byte extensionSet;
@@ -1607,7 +1608,7 @@ namespace AssEmbly
                                                         // so we can't wait for a pressed key - read the stdin stream directly instead
                                                         do
                                                         {
-                                                            signedInitial = stdinOverride?.ReadByte() ?? Console.Read();
+                                                            signedInitial = stdinOverride?.ReadByte() ?? stdin!.ReadByte();
                                                         } while (waitForInputChar && signedInitial == -1);
                                                         if (signedInitial == -1)
                                                         {
