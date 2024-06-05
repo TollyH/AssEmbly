@@ -1343,54 +1343,53 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // WCN reg
-                                        Console.Write(ReadMemoryRegister(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryRegister(operandStart).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // WCN lit
-                                        Console.Write(ReadMemoryQWord(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryQWord(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // WCN adr
-                                        Console.Write(ReadMemoryPointedQWord(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryPointedQWord(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // WCN ptr
-                                        Console.Write(ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedNumber(operandStart, out byteCount).ToString()));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // WCB reg
-                                        Console.Write(0xFF & ReadMemoryRegister(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes((0xFF & ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // WCB lit
-                                        Console.Write(Memory[operandStart]);
+                                        stdout.Write(Encoding.UTF8.GetBytes(Memory[operandStart].ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // WCB adr
-                                        Console.Write(ReadMemoryPointedByte(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryPointedByte(operandStart).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // WCB ptr
-                                        Console.Write(ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        stdout.Write(Encoding.UTF8.GetBytes(ReadMemoryRegisterPointedByte(operandStart, out byteCount).ToString()));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x8:  // WCX reg
-                                        Console.Write(Strings.Generic_Hex_Value, 0xFF & ReadMemoryRegister(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(string.Format(Strings.Generic_Hex_Value, 0xFF & ReadMemoryRegister(operandStart))));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x9:  // WCX lit
-                                        Console.Write(Strings.Generic_Hex_Value, Memory[operandStart]);
+                                        stdout.Write(Encoding.UTF8.GetBytes(string.Format(Strings.Generic_Hex_Value, Memory[operandStart])));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xA:  // WCX adr
-                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryPointedByte(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(string.Format(Strings.Generic_Hex_Value, ReadMemoryPointedByte(operandStart))));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0xB:  // WCX ptr
-                                        Console.Write(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        stdout.Write(Encoding.UTF8.GetBytes(string.Format(Strings.Generic_Hex_Value, ReadMemoryRegisterPointedByte(operandStart, out byteCount))));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
-                                    // Following instructions write raw bytes to stdout to prevent C# converting our UTF-8 bytes to UTF-16.
                                     case 0xC:  // WCC reg
                                     {
                                         stdout.WriteByte((byte)(0xFF & ReadMemoryRegister(operandStart)));
@@ -2099,35 +2098,35 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // SIGN_WCN reg
-                                        Console.Write((long)ReadMemoryRegister(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // SIGN_WCN lit
-                                        Console.Write((long)ReadMemoryQWord(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // SIGN_WCN adr
-                                        Console.Write((long)ReadMemoryPointedQWord(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryPointedQWord(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // SIGN_WCN ptr
-                                        Console.Write((long)ReadMemoryRegisterPointedNumber(operandStart, out byteCount));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((long)ReadMemoryRegisterPointedNumber(operandStart, out byteCount)).ToString()));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     case 0x4:  // SIGN_WCB reg
-                                        Console.Write((sbyte)ReadMemoryRegister(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegister(operandStart)).ToString()));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x5:  // SIGN_WCB lit
-                                        Console.Write((sbyte)Memory[operandStart]);
+                                        stdout.Write(Encoding.UTF8.GetBytes(((sbyte)Memory[operandStart]).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x6:  // SIGN_WCB adr
-                                        Console.Write((sbyte)ReadMemoryPointedByte(operandStart));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryPointedByte(operandStart)).ToString()));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x7:  // SIGN_WCB ptr
-                                        Console.Write((sbyte)ReadMemoryRegisterPointedByte(operandStart, out byteCount));
+                                        stdout.Write(Encoding.UTF8.GetBytes(((sbyte)ReadMemoryRegisterPointedByte(operandStart, out byteCount)).ToString()));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:
@@ -2724,19 +2723,19 @@ namespace AssEmbly
                                 switch (opcodeLow)
                                 {
                                     case 0x0:  // FLPT_WCN reg
-                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)));
+                                        stdout.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegister(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo]++;
                                         break;
                                     case 0x1:  // FLPT_WCN lit
-                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)));
+                                        stdout.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x2:  // FLPT_WCN adr
-                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)));
+                                        stdout.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryPointedQWord(operandStart)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo] += 8;
                                         break;
                                     case 0x3:  // FLPT_WCN ptr
-                                        Console.Write(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart, out byteCount)));
+                                        stdout.Write(Encoding.UTF8.GetBytes(BitConverter.UInt64BitsToDouble(ReadMemoryRegisterPointedNumber(operandStart, out byteCount)).ToString(CultureInfo.InvariantCulture)));
                                         Registers[(int)Register.rpo] += byteCount;
                                         break;
                                     default:

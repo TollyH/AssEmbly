@@ -5831,12 +5831,11 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC0, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("1234567890", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("1234567890", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5844,12 +5843,11 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-1);
                 testProcessor.LoadProgram(new byte[] { 0xC0, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("18446744073709551615", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5862,23 +5860,21 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC1, 0xD2, 0x02, 0x96, 0x49, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("1234567890", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("1234567890", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xC1, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("18446744073709551615", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -5890,25 +5886,23 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC2, 225, 0, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.WriteMemoryQWord(225, 1234567890);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("1234567890", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("1234567890", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xC2, 225, 0, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("18446744073709551615", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -5921,13 +5915,12 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC3, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.WriteMemoryQWord(225, 1234567890);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("1234567890", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("1234567890", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5935,13 +5928,12 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = 225;
                 testProcessor.LoadProgram(new byte[] { 0xC3, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.WriteMemoryQWord(225, unchecked((ulong)-1));
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("18446744073709551615", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("18446744073709551615", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(225UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5955,12 +5947,11 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC4, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("210", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("210", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5968,12 +5959,11 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-1);
                 testProcessor.LoadProgram(new byte[] { 0xC4, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("255", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("255", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -5986,23 +5976,21 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC5, 0xD2, 0x02, 0x96, 0x49, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("210", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("210", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xC5, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("255", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("255", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -6014,25 +6002,23 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC6, 0xFD, 7, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = 210;
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, stdoutOverride: consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("210", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("210", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xC6, 0xFD, 7, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = unchecked((byte)-1);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("255", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("255", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -6045,13 +6031,12 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC7, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = 210;
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("210", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("210", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -6059,13 +6044,12 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = 2045;
                 testProcessor.LoadProgram(new byte[] { 0xC7, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = unchecked((byte)-1);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("255", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("255", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -6079,12 +6063,11 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC8, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("D2", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("D2", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(1234567890UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -6092,12 +6075,11 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = unchecked((ulong)-1);
                 testProcessor.LoadProgram(new byte[] { 0xC8, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("FF", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("FF", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(unchecked((ulong)-1), testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -6110,23 +6092,21 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xC9, 0xD2, 0x02, 0x96, 0x49, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("D2", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("D2", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xC9, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("FF", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("FF", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -6138,25 +6118,23 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xCA, 0xFD, 7, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = 210;
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("D2", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("D2", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
 
                 testProcessor = new(2046);
                 testProcessor.LoadProgram(new byte[] { 0xCA, 0xFD, 7, 0, 0, 0, 0, 0, 0 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = unchecked((byte)-1);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(9UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("FF", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("FF", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                 }
             }
@@ -6169,13 +6147,12 @@ namespace AssEmbly.Test.ProcessorTests
                 // Set all status flags to ensure the instruction doesn't update them
                 testProcessor.Registers[(int)Register.rsf] = ulong.MaxValue;
                 testProcessor.LoadProgram(new byte[] { 0xCB, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = 210;
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("D2", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("D2", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(ulong.MaxValue, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
@@ -6183,13 +6160,12 @@ namespace AssEmbly.Test.ProcessorTests
                 testProcessor = new(2046);
                 testProcessor.Registers[(int)Register.rg7] = 2045;
                 testProcessor.LoadProgram(new byte[] { 0xCB, (int)Register.rg7 });
-                using (StringWriter consoleOutput = new())
+                using (MemoryStream consoleOutput = new())
                 {
-                    Console.SetOut(consoleOutput);
                     testProcessor.Memory[2045] = unchecked((byte)-1);
-                    _ = testProcessor.Execute(false);
+                    _ = testProcessor.Execute(false, consoleOutput);
                     Assert.AreEqual(2UL, testProcessor.Registers[(int)Register.rpo], "Instruction updated the rpo register by an incorrect amount");
-                    Assert.AreEqual("FF", consoleOutput.ToString(), "Instruction printed an incorrect result to the console");
+                    Assert.AreEqual("FF", Encoding.UTF8.GetString(consoleOutput.ToArray()), "Instruction printed an incorrect result to the console");
                     Assert.AreEqual(0UL, testProcessor.Registers[(int)Register.rsf], "Instruction updated the status flags");
                     Assert.AreEqual(2045UL, testProcessor.Registers[(int)Register.rg7], "Instruction updated the second operand");
                 }
