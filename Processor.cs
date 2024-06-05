@@ -179,6 +179,10 @@ namespace AssEmbly
         /// depending on the value of <paramref name="runUntilHalt"/>.
         /// </summary>
         /// <returns><see langword="true"/> if execution should stop (HLT reached) - otherwise <see langword="false"/></returns>
+        /// <param name="waitForInputChar">
+        /// Must not be <see langword="false"/> if console key presses are being used for the RCC instruction.
+        /// If <see langword="true"/>, RCC becomes a no-op and does not increment rpo if no characters are currently available on the input stream.
+        /// </param>
         /// <exception cref="InvalidOperationException">
         /// Thrown if a program hasn't been loaded into this processor, or the processor has reached the end of allocated memory.
         /// </exception>
@@ -194,7 +198,7 @@ namespace AssEmbly
         /// <exception cref="DivideByZeroException">Thrown if a division instruction is executed with a value of zero as the divisor.</exception>
         /// <exception cref="FileNotFoundException">Thrown if an operation that requires a file to exist could not find the target file.</exception>
         /// <exception cref="DirectoryNotFoundException">Thrown if an operation that requires a directory to exist could not find the target directory.</exception>
-        public bool Execute(bool runUntilHalt, Stream? stdoutOverride = null)
+        public bool Execute(bool runUntilHalt, Stream? stdoutOverride = null, Stream? stdinOverride = null, bool waitForInputChar = true)
         {
             if (!ProgramLoaded)
             {
@@ -204,13 +208,18 @@ namespace AssEmbly
             {
                 throw new InvalidOperationException("The processor has reached the end of accessible memory.");
             }
+            if (!waitForInputChar && stdinOverride is null && !Console.IsInputRedirected)
+            {
+                throw new ArgumentException("waitForInputChar cannot be false when characters are being read from console key presses, not a stream.");
+            }
             bool halt = false;
             using Stream stdout = stdoutOverride ?? Console.OpenStandardOutput();
             do
             {
                 byte extensionSet;
                 byte opcode;
-                if (Memory[Registers[(int)Register.rpo]] == Opcode.FullyQualifiedMarker)
+                bool fullOpcode = Memory[Registers[(int)Register.rpo]] == Opcode.FullyQualifiedMarker;
+                if (fullOpcode)
                 {
                     extensionSet = Memory[++Registers[(int)Register.rpo]];
                     opcode = Memory[++Registers[(int)Register.rpo]];
@@ -1592,11 +1601,20 @@ namespace AssEmbly
                                                 // to be converted to UTF-8.
                                                 do
                                                 {
-                                                    if (Console.IsInputRedirected)
+                                                    if (stdinOverride is not null || Console.IsInputRedirected)
                                                     {
                                                         // The program input isn't connected to a terminal,
                                                         // so we can't wait for a pressed key - read the stdin stream directly instead
-                                                        pressedKeyChar = (char)Console.Read();
+                                                        do
+                                                        {
+                                                            signedInitial = stdinOverride?.ReadByte() ?? Console.Read();
+                                                        } while (waitForInputChar && signedInitial == -1);
+                                                        if (signedInitial == -1)
+                                                        {
+                                                            Registers[(int)Register.rpo] -= fullOpcode ? 3UL : 1UL;
+                                                            return false;
+                                                        }
+                                                        pressedKeyChar = (char)signedInitial;
                                                         inputCharacter += pressedKeyChar;
                                                     }
                                                     else
