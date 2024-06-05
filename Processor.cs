@@ -247,10 +247,10 @@ namespace AssEmbly
                 ulong byteCount;
                 int shiftAmount;
                 string filepath;
+                long signedInitial;
 #if EXTENSION_SET_SIGNED
                 ulong initialSign;
                 ulong resultSign;
-                long signedInitial;
                 long signedMathend;
                 ulong signedShiftAllBits;
 #endif
