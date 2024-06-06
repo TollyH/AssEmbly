@@ -13,6 +13,15 @@ namespace AssEmbly
             return unescaped.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("@", "\\@");
         }
 
+        /// <summary>
+        /// Convert a char to its equivalent form as an escaped AssEmbly character literal.
+        /// </summary>
+        /// <remarks>Neither the input nor the output to this function have surrounding quote marks.</remarks>
+        public static string EscapeCharacter(this char character)
+        {
+            return character is '\\' or '\'' or '@' ? $"\\{character}" : $"{character}";
+        }
+
         public static void SetContentTo<T>(this Stack<T> target, Stack<T> source)
         {
             target.Clear();
