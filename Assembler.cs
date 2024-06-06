@@ -11,9 +11,7 @@ namespace AssEmbly
     public readonly record struct AssemblyResult
     (
         byte[] Program,
-#if DEBUGGER
         string DebugInfo,
-#endif
         string[] ExpandedSourceFile,
 #if ASSEMBLER_WARNINGS
         Warning[] Warnings,
@@ -452,17 +450,13 @@ namespace AssEmbly
             {
                 programBytes = program.ToArray();
             }
-#if DEBUGGER
             string debugInfo = DebugInfo.GenerateDebugInfoFile((uint)program.Count, assembledLines,
                 // Convert dictionary to sorted list
                 addressLabelNames.Select(x => (x.Key, x.Value)).OrderBy(x => x.Key).ToList(),
                 resolvedImports, fileLineMap);
-#endif
             return new AssemblyResult(
                 programBytes,
-#if DEBUGGER
                 debugInfo,
-#endif
                 dynamicLines.ToArray(),
 #if ASSEMBLER_WARNINGS
                 warnings.ToArray(),

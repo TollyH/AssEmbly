@@ -58,8 +58,6 @@
   <ItemGroup Condition="!$(DefineConstants.Contains(';DEBUGGER;'))">
     <Compile Remove="Debugger.cs" />
     <Compile Remove="Debugger.*.cs" />
-    <Compile Remove="DebugInfo.cs" />
-    <Compile Remove="DebugInfo.*.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="!$(DefineConstants.Contains(';DISASSEMBLER;'))">

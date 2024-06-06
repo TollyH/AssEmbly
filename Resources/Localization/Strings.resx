@@ -115,4 +115,10 @@ Licensed under GPLv3; run the "license" operation for details.</value>
   <data name="Generic_Unmapped" xml:space="preserve">
     <value>unmapped</value>
   </data>
+  <data name="DebugInfo_Error_Invalid_Format" xml:space="preserve">
+    <value>The provided debug information file was in an invalid format</value>
+  </data>
+  <data name="DebugInfo_Error_Wrong_Version" xml:space="preserve">
+    <value>The provided debug information file was created for a different version of AssEmbly</value>
+  </data>
 </root>

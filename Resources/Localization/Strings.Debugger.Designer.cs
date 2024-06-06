@@ -98,24 +98,6 @@ namespace AssEmbly.Resources.Localization {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The provided debug information file was in an invalid format.
-        /// </summary>
-        internal static string DebugInfo_Error_Invalid_Format {
-            get {
-                return ResourceManager.GetString("DebugInfo_Error_Invalid_Format", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The provided debug information file was created for a different version of AssEmbly.
-        /// </summary>
-        internal static string DebugInfo_Error_Wrong_Version {
-            get {
-                return ResourceManager.GetString("DebugInfo_Error_Wrong_Version", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to This command requires either 1 or no arguments. Run &apos;help&apos; for more info..
         /// </summary>
         internal static string Error_Args_Required_0to1 {

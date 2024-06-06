@@ -159,7 +159,6 @@ namespace AssEmbly
     }
 #endif
 
-#if DEBUGGER
     /// <summary>
     /// Represents exceptions specific to the AssEmbly debugger.
     /// </summary>
@@ -183,7 +182,6 @@ namespace AssEmbly
         public DebugFileException([Localizable(true)] string message, [Localizable(true)] string consoleMessage) : base(message, consoleMessage) { }
         public DebugFileException([Localizable(true)] string message, [Localizable(true)] string consoleMessage, Exception inner) : base(message, consoleMessage, inner) { }
     }
-#endif
 
 #if PROCESSOR
     /// <summary>

@@ -263,12 +263,6 @@ Halt instruction reached. You should not continue unless this instruction was pl
   <data name="Warning_Stack_Empty" xml:space="preserve">
     <value>The stack is currently empty.</value>
   </data>
-  <data name="DebugInfo_Error_Invalid_Format" xml:space="preserve">
-    <value>The provided debug information file was in an invalid format</value>
-  </data>
-  <data name="DebugInfo_Error_Wrong_Version" xml:space="preserve">
-    <value>The provided debug information file was created for a different version of AssEmbly</value>
-  </data>
   <data name="REPL_Changed_Flags_Header" xml:space="preserve">
     <value>Flag changes:</value>
   </data>

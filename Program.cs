@@ -307,12 +307,10 @@ namespace AssEmbly
                 programSize = bytes.LongLength - AAPFile.HeaderSize;
             }
 
-#if DEBUGGER
             if (!args.IsOptionGiven('D', "no-debug-file"))
             {
                 File.WriteAllText(destination + ".adi", assemblyResult.DebugInfo);
             }
-#endif
             if (args.IsOptionGiven('e', "output-expanded"))
             {
                 File.WriteAllLines(filename + ".exp.asm", assemblyResult.ExpandedSourceFile);
