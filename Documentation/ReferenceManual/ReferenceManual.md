@@ -1612,7 +1612,7 @@ An equivalent of the first example, but for the overflow flag instead of the car
 ```AssEmbly
 MVQ rg0, 5
 SUB rg0, 10
-JOV :OVERFLOW  ; Jump to label if overflow flag is set
+SIGN_JOV :OVERFLOW  ; Jump to label if overflow flag is set
 WCN 10  ; This will execute, as 5 SUB 10 will not cause the overflow flag to be set
 :OVERFLOW
 WCN 20
