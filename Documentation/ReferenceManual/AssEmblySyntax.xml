@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<language name="AssEmbly" version="1.0" kateversion="5.1" section="Sources" extensions="*.asm">
+  <highlighting>
+    <contexts>
+      <context name="Normal" attribute="Normal Text">
+        <IncludeRules context="Keywords"/>
+        <IncludeRules context="Literals"/>
+        <IncludeRules context="Labels"/>
+        <IncludeRules context="Variables"/>
+        <IncludeRules context="Registers"/>
+        <IncludeRules context="Parameters"/>
+        <IncludeRules context="Special"/>
+        <IncludeRules context="Strings"/>
+        <IncludeRules context="CharLiterals"/>
+        <IncludeRules context="Comments"/>
+      </context>
+
+      <context name="Keywords" attribute="Mnemonic">
+        <RegExpr attribute="Mnemonic" context="#stay" insensitive="true" String="^\s*!?\s*(?:HLT|NOP|JMP|JEQ|JZO|JNE|JNZ|JLT|JCA|JLE|JGT|JGE|JNC|ADD|ICR|SUB|DCR|MUL|DIV|DVR|REM|SHL|SHR|AND|ORR|XOR|NOT|RNG|TST|CMP|MVB|MVW|MVD|MVQ|PSH|POP|CAL|RET|WCN|WCB|WCX|WCC|WFN|WFB|WFX|WFC|OFL|CFL|DFL|FEX|FSZ|RCC|RFC|SIGN_JLT|SIGN_JLE|SIGN_JGT|SIGN_JGE|SIGN_JSI|SIGN_JNS|SIGN_JOV|SIGN_JNO|SIGN_DIV|SIGN_DVR|SIGN_REM|SIGN_SHR|SIGN_MVB|SIGN_MVW|SIGN_MVD|SIGN_WCN|SIGN_WCB|SIGN_WFN|SIGN_WFB|SIGN_EXB|SIGN_EXW|SIGN_EXD|SIGN_NEG|FLPT_ADD|FLPT_SUB|FLPT_MUL|FLPT_DIV|FLPT_DVR|FLPT_REM|FLPT_SIN|FLPT_ASN|FLPT_COS|FLPT_ACS|FLPT_TAN|FLPT_ATN|FLPT_PTN|FLPT_POW|FLPT_LOG|FLPT_WCN|FLPT_WFN|FLPT_EXH|FLPT_EXS|FLPT_SHS|FLPT_SHH|FLPT_NEG|FLPT_UTF|FLPT_STF|FLPT_FTS|FLPT_FCS|FLPT_FFS|FLPT_FNS|FLPT_CMP|EXTD_BSW|ASMX_LDA|ASMX_LDF|ASMX_CLA|ASMX_CLF|ASMX_AEX|ASMX_FEX|ASMX_CAL|HEAP_ALC|HEAP_TRY|HEAP_REA|HEAP_TRE|HEAP_FRE|EXTD_QPF|EXTD_QPV|EXTD_CSS|EXTD_HLT|EXTD_MPA|FSYS_CWD|FSYS_GWD|FSYS_CDR|FSYS_DDR|FSYS_DDE|FSYS_DEX|FSYS_CPY|FSYS_MOV|FSYS_BDL|FSYS_GNF|FSYS_GND|FSYS_GCT|FSYS_GMT|FSYS_GAT|FSYS_SCT|FSYS_SMT|FSYS_SAT|TERM_CLS|TERM_AEE|TERM_AED|TERM_SCY|TERM_SCX|TERM_GCY|TERM_GCX|TERM_GSY|TERM_GSX|TERM_BEP|TERM_SFC|TERM_SBC|TERM_RSC|EXTD_SLP)"/>
+        <RegExpr attribute="Directive" context="#stay" insensitive="true" String="^\s*!?\s*%(?:PAD|DAT|NUM|IMP|MACRO|ENDMACRO|DELMACRO|ANALYZER|MESSAGE|IBF|DEBUG|LABEL_OVERRIDE|STOP|REPEAT|ENDREPEAT|ASM_ONCE|DEFINE|UNDEFINE|VAROP|IF|ELSE|ELSE_IF|ENDIF|WHILE|ENDWHILE)"/>
+      </context>
+
+      <context name="Labels" attribute="LabelReference">
+        <RegExpr attribute="LabelDefinition" context="#stay" insensitive="true" String="^\s*!?\s*:[A-Za-z_][A-Za-z0-9_]*"/>
+        <RegExpr attribute="LabelLiteral" context="#stay" insensitive="true" String=":&amp;[A-Za-z_][A-Za-z0-9_]*"/>
+        <RegExpr attribute="LabelReference" context="#stay" insensitive="true" String=":[A-Za-z_][A-Za-z0-9_]*"/>
+      </context>
+
+      <context name="Literals" attribute="NumericLiteral">
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String="-?0b[0-1_]+"/>
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String="-?0x[0-9a-fA-F_]+"/>
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String="[\-0-9._][0-9_.]*"/>
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String=":0x[0-9a-fA-F_]+"/>
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String=":0b[0-1_]+"/>
+        <RegExpr attribute="NumericLiteral" context="#stay" insensitive="true" String=":[0-9_]+"/>
+      </context>
+
+      <context name="Variables" attribute="AssemblerVariable">
+        <RegExpr attribute="AssemblerConstant" context="#stay" insensitive="true" String="@![A-Za-z0-9_]+"/>
+        <RegExpr attribute="AssemblerVariable" context="#stay" insensitive="true" String="@[A-Za-z0-9_]+"/>
+        <RegExpr attribute="PreDefinedMacro" context="#stay" String="#(?:FILE_PATH|FILE_NAME|FOLDER_PATH)"/>
+      </context>
+
+      <context name="Registers" attribute="Register">
+        <RegExpr attribute="Pointer" context="#stay" insensitive="true" String="[QqDdWwBb]?\*(?:rpo|rso|rsb|rsf|rrv|rfp|rg0|rg1|rg2|rg3|rg4|rg5|rg6|rg7|rg8|rg9)"/>
+        <RegExpr attribute="Register" context="#stay" insensitive="true" String="(?:rpo|rso|rsb|rsf|rrv|rfp|rg0|rg1|rg2|rg3|rg4|rg5|rg6|rg7|rg8|rg9)"/>
+      </context>
+
+      <context name="Parameters" attribute="MacroParameter">
+        <RegExpr attribute="MacroParameter" context="#stay" insensitive="true" String="\$[0-9]+!?"/>
+      </context>
+
+      <context name="Special" attribute="SpecialOperand">
+        <RegExpr attribute="SpecialOperand" context="#stay" insensitive="true" String="(?:DEF|NDEF|EQ|NEQ|GT|GTE|LT|LTE)"/>
+        <RegExpr attribute="SpecialOperand" context="#stay" insensitive="true" String="(?:ADD|SUB|MUL|DIV|REM|BIT_AND|BIT_OR|BIT_XOR|BIT_NOT|AND|OR|XOR|NOT|SHL|SHR|CMP_EQ|CMP_NEQ|CMP_GT|CMP_GTE|CMP_LT|CMP_LTE)"/>
+        <RegExpr attribute="SpecialOperand" context="#stay" insensitive="true" String="(?:error|warning|suggestion)"/>
+      </context>
+
+      <context name="Strings" attribute="QuotedLiteral">
+        <StringDetect attribute="QuotedLiteral" context="String" String="&quot;"/>
+      </context>
+
+      <context name="String" attribute="QuotedLiteral">
+        <DetectChar attribute="QuotedLiteral" char="&quot;" context="#pop"/>
+        <IncludeRules context="EscapeSequence"/>
+        <IncludeRules context="Variables"/>
+      </context>
+
+      <context name="CharLiterals" attribute="QuotedLiteral">
+        <StringDetect attribute="QuotedLiteral" context="CharLiteral" String="'"/>
+      </context>
+
+      <context name="CharLiteral" attribute="QuotedLiteral">
+        <DetectChar attribute="QuotedLiteral" char="'" context="#pop"/>
+        <IncludeRules context="EscapeSequence"/>
+        <IncludeRules context="Variables"/>
+      </context>
+
+      <context name="Comments" attribute="Comment">
+        <RegExpr attribute="Comment" context="#stay" String=";.*"/>
+      </context>
+
+      <context name="EscapeSequence" attribute="EscapeSequence">
+        <RegExpr attribute="EscapeSequence" context="#stay" String="\\(?:&quot;|'|\\|@|0|a|b|f|n|r|t|v|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"/>
+      </context>
+
+    </contexts>
+    <itemDatas>
+      <itemData name="Normal Text" defStyleNum="dsNormal" color="#D4D4D4"/>
+      <itemData name="Mnemonic" defStyleNum="dsKeyword" color="#C586C0"/>
+      <itemData name="Directive" defStyleNum="dsPreprocessor" color="#569CD6"/>
+      <itemData name="NumericLiteral" defStyleNum="dsDecVal" color="#B5CEA8"/>
+      <itemData name="LabelDefinition" defStyleNum="dsPreprocessor" color="#569CD6"/>
+      <itemData name="LabelReference" defStyleNum="dsVariable" color="#9CDCFE"/>
+      <itemData name="LabelLiteral" defStyleNum="dsBuiltIn" color="#4EC9B0"/>
+      <itemData name="AssemblerVariable" defStyleNum="dsVariable" color="#9CDCFE"/>
+      <itemData name="AssemblerConstant" defStyleNum="dsPreprocessor" color="#569CD6"/>
+      <itemData name="PreDefinedMacro" defStyleNum="dsPreprocessor" color="#569CD6"/>
+      <itemData name="Pointer" defStyleNum="dsBuiltIn" color="#4EC9B0"/>
+      <itemData name="Register" defStyleNum="dsFunction" color="#DCDCAA"/>
+      <itemData name="MacroParameter" defStyleNum="dsVariable" color="#9CDCFE"/>
+      <itemData name="SpecialOperand" defStyleNum="dsFunction" color="#DCDCAA"/>
+      <itemData name="QuotedLiteral" defStyleNum="dsString" color="#CE9178"/>
+      <itemData name="EscapeSequence" defStyleNum="dsSpecialChar" color="#D7BA7D"/>
+      <itemData name="Comment" defStyleNum="dsComment" color="#6A9955"/>
+    </itemDatas>
+  </highlighting>
+</language>

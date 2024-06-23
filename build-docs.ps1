@@ -13,9 +13,9 @@ New-Item -Path $buildFolder -ItemType Directory
 Write-Output "    Building .txt..."
 pandoc -t plain -s $sourceFile --tab-stop=2 -o $buildFolder\ReferenceManual.txt
 Write-Output "    Building .html..."
-pandoc -s $sourceFile --highlight-style=breezedark --toc --toc-depth=6 --css=$docsFolder\ReferenceManual.css --embed-resource -H $docsFolder\ReferenceManual.HtmlHeader.html -o $buildFolder\ReferenceManual.html --metadata pagetitle="AssEmbly Reference Manual"
+pandoc -s $sourceFile --highlight-style=$docsFolder\pandoc.theme --syntax-definition=$docsFolder\AssEmblySyntax.xml --toc --toc-depth=6 --css=$docsFolder\ReferenceManual.css --embed-resource -H $docsFolder\ReferenceManual.HtmlHeader.html -o $buildFolder\ReferenceManual.html --metadata pagetitle="AssEmbly Reference Manual"
 Write-Output "    Building .docx..."
-pandoc -s $sourceFile --highlight-style=breezedark -o $buildFolder\ReferenceManual.docx
+pandoc -s $sourceFile --highlight-style=$docsFolder\pandoc.theme --syntax-definition=$docsFolder\AssEmblySyntax.xml -o $buildFolder\ReferenceManual.docx
 
 Write-Output "    Building .pdf..."
 $word_app = New-Object -ComObject Word.Application

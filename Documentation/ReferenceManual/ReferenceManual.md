@@ -1,8 +1,8 @@
 # AssEmbly Reference Manual
 
-Applies to versions: `4.0.0`
+Applies to versions: `4.0.0` - `4.1.0`
 
-Last revised: 2024-06-01
+Last revised: 2024-06-23
 
 ## Introduction
 
@@ -67,7 +67,7 @@ All AssEmbly instructions are written on a separate line, starting with a **mnem
 
 A simple example:
 
-```text
+```AssEmbly
 MVQ rg0, 10
 ```
 
@@ -96,7 +96,7 @@ If you wish to insert text into a program without it being considered by the ass
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 10  ; This text will be ignored
 ; As will this text
 DCR rg0  ; "DCR rg0" will assemble as normal
@@ -109,7 +109,7 @@ Labels mark a position in the file for the program to move (**jump**) to or refe
 
 For example:
 
-```text
+```AssEmbly
 :AREA_1  ; This comment is valid and will not be read as part of the label
 MVQ rg0, 10  ; :AREA_1 now points here
 
@@ -122,7 +122,7 @@ Labels store the **address** of whatever is next assembled after they are define
 
 For example:
 
-```text
+```AssEmbly
 :NOT_COMMENT  ; Comment 1
 ; Comment 2
 ; Comment 3
@@ -135,7 +135,7 @@ Labels can also be placed at the very end of a file to point to the first byte i
 
 For example, in the small file:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 MVQ rg1, 10
 :END
@@ -147,7 +147,7 @@ The label name `:ENTRY` (case insensitive) has a special meaning. If it is prese
 
 For example, in this small file:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 :ENTRY
 MVQ rg1, 10
@@ -166,7 +166,7 @@ Registers are named, single-number stores separate from the processor's main mem
 
 The first operand in this instruction is a register:
 
-```text
+```AssEmbly
 MVQ rg0, 10
 ```
 
@@ -176,7 +176,7 @@ Literals are numeric values that are directly written in an assembly file and **
 
 The second operand in each of these instructions is a literal that will each represent the same number (ten) after assembly:
 
-```text
+```AssEmbly
 MVQ rg0, 10  ; Base 10
 MVQ rg0, 0b1010  ; Base 2
 MVQ rg0, 0xA  ; Base 16
@@ -186,7 +186,7 @@ When writing literals, you can place an underscore anywhere within the number va
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 1_000_000  ; This is valid, will be assembled as 1000000 (0xF4240)
 MVQ rg0, 0x_10_0__000_0  ; This is still valid, underscores don't have to be uniform
 
@@ -203,7 +203,7 @@ In addition to numeric literals, literal values can also be written in the form 
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 'a'  ; Move the value 97 to rg0
 MVQ rg0, '*'  ; Move the value 42 to rg0
 MVQ rg0, 'ãƒˆ'  ; Move the value 8946659 to rg0
@@ -217,7 +217,7 @@ Character literals can also contain escape sequences, assuming the escape sequen
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, '\''  ; Move the value 39 to rg0
 MVQ rg0, '\\'  ; Move the value 92 to rg0
 MVQ rg0, '\n'  ; Move the value 10 to rg0
@@ -236,7 +236,7 @@ An address is a value that is interpreted as a location to be read from, written
 
 Consider the following example:
 
-```text
+```AssEmbly
 :AREA_1
 WCC '\n'
 MVB rg0, :AREA_1  ; Move the byte stored at :AREA_1 in memory to rg0
@@ -246,7 +246,7 @@ MVB rg0, :AREA_1  ; Move the byte stored at :AREA_1 in memory to rg0
 
 Another example, assuming these are the very first lines in a file:
 
-```text
+```AssEmbly
 WCC '\n'
 :AREA_1
 WCX :AREA_1  ; Will write "CA" to the console
@@ -258,7 +258,7 @@ If, when referencing a label, you want to utilise the address of the label *itse
 
 For example:
 
-```text
+```AssEmbly
 WCC '\n'
 :AREA_1
 MVQ rg0, :&AREA_1  ; Move 9 (the address itself) to rg0
@@ -271,7 +271,7 @@ While it is usually recommended to use a label to reference an address, it is al
 
 For example:
 
-```text
+```AssEmbly
 WCC '\n'
 WCX :9  ; Will write "CA" to the console
 WCX :0x09  ; Will write "CA" to the console
@@ -286,7 +286,7 @@ Memory can also be accessed by using the current value of a register as a memory
 
 For example:
 
-```text
+```AssEmbly
 :AREA_1
 WCC '\n'
 MVQ rg0, :&AREA_1  ; Move 0 (the address itself) to rg0
@@ -319,7 +319,7 @@ All whitespace inside square brackets is ignored by the assembler, so you can se
 
 Some examples of displacement:
 
-```text
+```AssEmbly
 ; Assume a label named :LABEL is defined at address 8 for these examples
 MVQ rg0, 10  ; Set rg0 to 10
 MVQ rg1, 6  ; Set rg1 to 6
@@ -360,7 +360,7 @@ Label addresses, label literals, and address literals can also be displaced outs
 
 For example:
 
-```text
+```AssEmbly
 ; Continue to assume a label named :LABEL is defined at address 8
 
 MVQ rg2, :&LABEL[10]  ; Adds 10 to 8 and moves the resulting address into rg2
@@ -513,7 +513,7 @@ Stores the memory address of the current location in memory being executed. For 
 
 For example, in the short program (assuming the first instruction is the first in a file):
 
-```text
+```AssEmbly
 MVQ rg0, 10
 DCR rg0
 ```
@@ -524,7 +524,7 @@ DCR rg0
 
 For example, in the instruction:
 
-```text
+```AssEmbly
 MVQ rg0, rpo
 ```
 
@@ -562,7 +562,7 @@ Stores the return value of the last executed subroutine. Note that if a subrouti
 
 For example:
 
-```text
+```AssEmbly
 :SUBROUTINE_ONE
 ...
 ...
@@ -589,7 +589,7 @@ Stores a single parameter passed to a subroutine. If such a parameter is not pro
 
 For example:
 
-```text
+```AssEmbly
 :SUBROUTINE_ONE
 ADD rfp, 1
 RET rfp
@@ -620,7 +620,7 @@ More information can be found in the dedicated sections on the stack and subrout
 
 A simple example, assuming memory is 8192 bytes in size (making 8191 the highest address):
 
-```text
+```AssEmbly
 WCN rso  ; Outputs "8192"
 PSH 5  ; Push the literal 5 to the stack
 WCN rso  ; Outputs "8184" (stack values are 8 bytes)
@@ -652,7 +652,7 @@ When using move instructions, the destination always comes first. The destinatio
 
 An example of setting registers to the maximum literal values for each instruction:
 
-```text
+```AssEmbly
 MVQ rg0, 18446744073709551615  ; 64-bit integer limit
 MVD rg1, 4294967295  ; 32-bit integer limit
 MVW rg2, 65535  ; 16-bit integer limit
@@ -661,7 +661,7 @@ MVB rg3, 255  ; 8-bit integer limit
 
 Or labels and pointers:
 
-```text
+```AssEmbly
 MVQ *rg0, 18446744073709551615  ; 64-bit integer limit
 MVD *rg1, 4294967295  ; 32-bit integer limit
 MVW :AREA_1, 65535  ; 16-bit integer limit
@@ -672,7 +672,7 @@ Note that providing a literal over the limit for a given instruction will not re
 
 For example:
 
-```text
+```AssEmbly
 MVB rg0, 9874
 ```
 
@@ -684,7 +684,7 @@ When moving to and from a register, `MVQ` will update or read all of its bits (r
 
 For example, assume that before the `MVD` instruction, `rg1` has a value of `14,879,176,506,051,693,048`:
 
-```text
+```AssEmbly
 MVW rg1, 65535
 ```
 
@@ -714,14 +714,14 @@ An example with a 64-bit number, `35,312,134,238,538,232` (`0x007D7432F18C89F8`)
 
 Be aware that moving directly between two memory locations is not allowed. To move from one location in memory to another, use a register as a midpoint, like so:
 
-```text
+```AssEmbly
 MVQ rg0, :MEMORY_SOURCE
 MVQ :MEMORY_DESTINATION, rg0
 ```
 
 This also applies to pointers as well as labels (`rg1` contains the source address, `rg2` the destination):
 
-```text
+```AssEmbly
 MVQ rg0, *rg1
 MVQ *rg2, rg0
 ```
@@ -740,7 +740,7 @@ Mathematical and bitwise operations are always done on 64-bit values. If an addr
 
 Examples of addition and multiplication:
 
-```text
+```AssEmbly
 MVQ rg0, 55  ; Set the value of rg0 to 55
 ADD rg0, 45  ; Add 45 to the value of rg0, storing in rg0
 ; rg0 is now 100
@@ -755,7 +755,7 @@ Be aware that because there is a limit of 64-bits for mathematical operations, i
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 18446744073709551615  ; Set rg0 to the 64-bit limit
 ADD rg0, 10  ; Add 10 to rg0
 ; rg0 is now 10
@@ -767,7 +767,7 @@ ADD rg0, 50  ; Add 50 to rg0
 
 In the specific case of adding `1` to a register, the `ICR` (increment) operation can be used instead.
 
-```text
+```AssEmbly
 MVQ rg0, 5
 ICR rg0
 ; rg0 is now 6
@@ -777,7 +777,7 @@ ICR rg0
 
 An example of subtraction:
 
-```text
+```AssEmbly
 MVQ rg0, 55  ; Set the value of rg0 to 55
 SUB rg0, 45  ; Subtract 45 from the value of rg0, storing in rg0
 ; rg0 is now 10
@@ -790,7 +790,7 @@ If a subtraction causes the result to go below 0, the carry status flag will be 
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0  ; Set rg0 to 0
 SUB rg0, 1  ; Subtract 1 from rg0
 ; rg0 is now 18446744073709551615 (-1)
@@ -804,7 +804,7 @@ This overflowed value can also be interpreted as a negative number using two's c
 
 In the specific case of subtracting `1` from a register, the `DCR` (decrement) operation can be used instead.
 
-```text
+```AssEmbly
 MVQ rg0, 5
 DCR rg0
 ; rg0 is now 4
@@ -816,7 +816,7 @@ There are three types of division in AssEmbly: integer division (`DIV`), divisio
 
 Integer division divides the first operand by the second, discards the remainder, then stores the result in the first operand. For example:
 
-```text
+```AssEmbly
 MVQ rg0, 12  ; Set rg0 to 12
 DIV rg0, 4  ; Divide the value in rg0 by 4, storing the result in rg0
 ; rg0 is now 3
@@ -830,7 +830,7 @@ Division with remainder, unlike most other operations, takes three operands, the
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 12  ; Set rg0 to 12
 DVR rg0, rg1, 4  ; Divide the value in rg0 by 4, storing the integer result in rg0, and remainder in rg1
 ; rg0 is now 3, rg1 is now 0
@@ -842,7 +842,7 @@ DVR rg2, rg3, 3  ; Divide the value in rg2 by 3, storing the integer result in r
 
 Remainder only division is similar to integer division in that it only keeps one of the results, but this time the dividend (first operand) is overwritten by the remainder, and the integer result is discarded:
 
-```text
+```AssEmbly
 MVQ rg0, 12  ; Set rg0 to 12
 REM rg0, 4  ; Divide the value in rg0 by 4, storing the remainder in rg0
 ; rg0 is now 0
@@ -858,7 +858,7 @@ Shifting is the process of moving the bits in a binary number either up (left â€
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b11010
 ; rg0:
 ; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
@@ -874,7 +874,7 @@ SHL rg0, 2
 
 Here's one for shifting right:
 
-```text
+```AssEmbly
 MVQ rg0, 0b11010
 ; rg0:
 ; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
@@ -910,7 +910,7 @@ Bitwise AND (`AND`):
 
 The `AND` operation will only set a bit to `1` if the bit in both operands is `1`. For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b00101
 AND rg0, 0b10100
 ; rg0 now has a value of 0b00100
@@ -930,7 +930,7 @@ Bitwise OR (`ORR`):
 
 The `ORR` operation will set a bit to `1` if the bit in either operand is `1`. For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b00101
 ORR rg0, 0b10100
 ; rg0 now has a value of 0b10101
@@ -950,7 +950,7 @@ Bitwise XOR (Exclusive OR - `XOR`):
 
 The `XOR` operation will set a bit to `1` if the bit in one, but not both, operands is `1`. For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b00101
 XOR rg0, 0b10100
 ; rg0 now has a value of 0b10001
@@ -960,7 +960,7 @@ The `NOT` operation only takes a single operand, which must be a register. It si
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b00101
 NOT rg0
 ; rg0 now has a value of 0b11010
@@ -972,14 +972,14 @@ The random number instruction (`RNG`) takes a single operand: the register to st
 
 Remainder only division (`REM`) by a value one higher than the desired maximum can be used to limit the random number to a maximum value, like so:
 
-```text
+```AssEmbly
 RNG rg0  ; rg0 could now be any value between 0 and 18446744073709551615
 REM rg0, 5  ; rg0 is now constrained between 0 and 4 depending on its initial value
 ```
 
 To set a minimum value also, simply add a constant value to the result of the `REM` operation:
 
-```text
+```AssEmbly
 RNG rg0  ; rg0 could now be any value between 0 and 18446744073709551615
 REM rg0, 5  ; rg0 is now constrained between 0 and 4 depending on its initial value
 ADD rg0, 5  ; rg0 is now constrained between 5 and 9
@@ -991,7 +991,7 @@ Negative numbers are stored using two's complement in AssEmbly, which means that
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 9547
 ; rg0 is 0b0000000000000000000000000000000000000000000000000010010101001011 in binary
 MVQ rg0, -9547  ; You can use a '-' sign anywhere a regular literal would be accepted
@@ -1000,7 +1000,7 @@ MVQ rg0, -9547  ; You can use a '-' sign anywhere a regular literal would be acc
 
 To switch between the positive and negative form of a number, use the `SIGN_NEG` instruction:
 
-```text
+```AssEmbly
 MVQ rg0, 9547
 SIGN_NEG rg0  ; Performs the equivalent of "NOT rg0" then "ICR rg0" in one instruction
 ; rg0 is now -9547 (or 18446744073709542069 when interpreted as unsigned)
@@ -1016,7 +1016,7 @@ Some instructions that work normally with negative values include `ADD`, `SUB`, 
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 12
 ADD rg0, -5
 ; rg0 is now 7, ADD works as expected with negative values
@@ -1049,7 +1049,7 @@ Arithmetic right shifts can be performed with the `SIGN_SHR` instruction, which 
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 0b11010
 ; rg0:
 ; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
@@ -1067,7 +1067,7 @@ SIGN_SHR rg0, 2
 
 Here's an example with a negative value:
 
-```text
+```AssEmbly
 MVQ rg0, -26
 ; rg0:
 ; |  Bit  | ... | 64 | 32 | 16 | 8  | 4  | 2  | 1  |
@@ -1113,7 +1113,7 @@ Operations on signed numbers will always expect them to be 64 bits in size, with
 
 For example:
 
-```text
+```AssEmbly
 MVW rg0, 0b1111111101011011
 ; rg0 is 0b0000000000000000000000000000000000000000000000001111111101011011 in binary
 ; This is -165 when considering only the lower 16 bits as a signed number,
@@ -1129,7 +1129,7 @@ Using the extending instructions with a positive value will not affect the value
 
 For example:
 
-```text
+```AssEmbly
 MVB rg0, 12
 ; rg0 is 0b0000000000000000000000000000000000000000000000000000000000001100 in binary
 
@@ -1155,7 +1155,7 @@ As explained earlier, during most mathematical operations the carry flag is set 
 
 Some examples:
 
-```text
+```AssEmbly
 MVQ rg0, 10
 SUB rg0, 5
 ; As unsigned, rg0 is now 5. As signed it is also 5.
@@ -1189,7 +1189,7 @@ To make an integer literal into a floating point literal, it must contain a deci
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 ; rg0 is 0x0000000000000005, which cannot be used in floating point operations
 
@@ -1204,7 +1204,7 @@ There are floating point equivalents of all the math operations in the base inst
 
 Some examples of basic floating point math:
 
-```text
+```AssEmbly
 MVQ rg0, 5.7
 FLPT_ADD rg0, 3.2
 FLPT_WCN rg0
@@ -1227,7 +1227,7 @@ Operations exclusive to floating point include trigonometric functions (i.e. Sin
 
 Some examples:
 
-```text
+```AssEmbly
 MVQ rg0, 5.0
 FLPT_POW rg0, 2.0
 FLPT_WCN rg0
@@ -1250,7 +1250,7 @@ There are two instructions for converting integers to floats: `FLPT_UTF` and `FL
 
 Examples of integer to float conversion:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 ; rg0 is 0x0000000000000005, which cannot be used in floating point operations
 
@@ -1273,7 +1273,7 @@ There are four instructions for converting floats to integers: `FLPT_FTS`, `FLPT
 
 Examples of float to integer conversion:
 
-```text
+```AssEmbly
 MVQ rg0, 5.7
 FLPT_FTS rg0
 SIGN_WCN rg0
@@ -1317,7 +1317,7 @@ SIGN_WCN rg0
 
 Some further examples of `FLPT_FNS` with midpoint and lower values:
 
-```text
+```AssEmbly
 MVQ rg0, 5.5
 FLPT_FNS rg0
 SIGN_WCN rg0
@@ -1355,7 +1355,7 @@ Floating point operations work solely on 64-bit floating point values, however t
 
 Here are some examples of direct conversion:
 
-```text
+```AssEmbly
 MVQ rg0, 0x4248  ; 3.141 as a half-precision float
 ; rg0 cannot currently be used with floating point operations
 FLPT_EXH rg0
@@ -1379,7 +1379,7 @@ FLPT_SHS rg0
 
 And one for converting a single-precision to a half-precision float:
 
-```text
+```AssEmbly
 MVQ rg0, 0x40490FDB  ; 3.1415927 as a single-precision float
 FLPT_EXS rg0
 ; rg0 is now 0x400921FB60000000 (3.14159274101257)
@@ -1393,7 +1393,7 @@ Jumping is the processes of changing where the processor is currently executing 
 
 Jumps are usually made to labels, like so:
 
-```text
+```AssEmbly
 MVQ rg0, 0  ; Set rg0 to 0
 :ADD_LOOP  ; Create a label to the following instruction (ADD)
 ADD rg0, 5  ; Add 5 to the current value of rg0
@@ -1404,7 +1404,7 @@ JMP :ADD_LOOP  ; Go back to ADD_LOOP and continue executing from there
 
 Here is another example of a jump:
 
-```text
+```AssEmbly
 MVQ rg0, 0
 ADD rg0, 5
 JMP :SKIP
@@ -1420,7 +1420,7 @@ Jumps can also be made to pointers and address literals, though you must be sure
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, :&MY_CODE  ; Move the literal address of MY_CODE to rg0
 JMP *rg0  ; Jump to that address
 MVQ rg0, 5  ; This won't be executed
@@ -1473,7 +1473,7 @@ To branch based on how two unsigned (always positive) numbers relate to each oth
 
 For example:
 
-```text
+```AssEmbly
 RNG rg0  ; Set rg0 to a random number
 CMP rg0, 1000  ; Compare rg0 to 1000
 JGT :GREATER  ; Jump straight to GREATER if rg0 is greater than 1000
@@ -1485,7 +1485,7 @@ SUB rg0, 1000  ; This will execute in either situation
 > Be aware that the `GREATER` label will still be reached if `rg0` is less than or equal to `1000` here, the `ADD` instruction will just be executed first.
 > To have the contents of the `GREATER` label execute **only** if `rg0` is greater than `1000`, include an unconditional jump like so:
 
-```text
+```AssEmbly
 RNG rg0  ; Set rg0 to a random number
 CMP rg0, 1000  ; Compare rg0 to 1000
 JGT :GREATER  ; Jump straight to GREATER if rg0 is greater than 1000
@@ -1506,7 +1506,7 @@ The `CMP` instruction can also be used to compare signed (negative and positive)
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 25
 MVQ rg1, -6
 CMP rg0, rg1
@@ -1519,7 +1519,7 @@ WCN 20  ; This will execute
 
 And what would happen if the regular `JGT` instruction was used:
 
-```text
+```AssEmbly
 MVQ rg0, 25
 MVQ rg1, -6
 CMP rg0, rg1
@@ -1538,7 +1538,7 @@ To compare two floating point values, the `FLPT_CMP` instruction needs to be use
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 25.4
 MVQ rg1, -6.3
 FLPT_CMP rg0, rg1
@@ -1557,7 +1557,7 @@ To test if a single bit of a number is set or not, the `TST` instruction can be 
 
 This would be done like so:
 
-```text
+```AssEmbly
 :READ
 RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
@@ -1574,7 +1574,7 @@ The carry, overflow, zero, and sign flags also have specific jump operations tha
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 SUB rg0, 10
 JCA :CARRY  ; Jump to label if carry flag is set
@@ -1588,7 +1588,7 @@ WCN 20
 
 The zero flag checks can also be used following a mathematical operation like so:
 
-```text
+```AssEmbly
 SUB rg0, 7  ; Subtract 7 from rg0
 JNZ :NOT_ZERO  ; Jump straight to NOT_ZERO if rg0 didn't become 0
 ADD rg0, 1  ; Only execute this if rg0 became 0 because of the SUB operation
@@ -1599,7 +1599,7 @@ ADD rg0, 1  ; Only execute this if rg0 became 0 because of the SUB operation
 
 The `SIGN_JOV`, `SIGN_JNO`, `SIGN_JSI`, and `SIGN_JNS` instructions can be used to check if the overflow and sign flags are set and unset respectively in the same way:
 
-```text
+```AssEmbly
 SUB rg0, 7  ; Subtract 7 from rg0
 SIGN_JNS :NOT_NEGATIVE  ; Jump straight to NOT_NEGATIVE if rg0 didn't become negative
 SIGN_NEG rg0  ; Only execute this if rg0 became negative because of the SUB operation
@@ -1609,7 +1609,7 @@ SIGN_NEG rg0  ; Only execute this if rg0 became negative because of the SUB oper
 
 An equivalent of the first example, but for the overflow flag instead of the carry flag, as should be used for signed operations:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 SUB rg0, 10
 JOV :OVERFLOW  ; Jump to label if overflow flag is set
@@ -1631,7 +1631,7 @@ The `%PAD` directive tells the assembler to insert a certain number of `0` bytes
 
 For example, consider the following program:
 
-```text
+```AssEmbly
 MVQ rg0, :&PADDING  ; Store the address of the padding in rg0
 JMP :PROGRAM  ; Jump to the next part of the program, skipping over the padding
 
@@ -1678,7 +1678,7 @@ The `%DAT` directive inserts either a single byte, or a string of UTF-8 characte
 
 An example of single byte insertion:
 
-```text
+```AssEmbly
 MVB rg0, :BYTE  ; MVB must be used, as %DAT will not insert a full 64-bit number
 ; rg0 is now 54
 HLT  ; Stop the program executing into the %DAT insertion (important!)
@@ -1710,7 +1710,7 @@ Address | Bytes
 
 To insert a string using `%DAT`, the desired characters must be surrounded by double quote marks (`"`) and be given as the sole operand to the directive. For example:
 
-```text
+```AssEmbly
 MVQ rg0, :&STRING  ; Move literal address of string to rg0
 :STRING_LOOP
 MVB rg1, B*rg0  ; Move contents of address stored in rg0 to rg1
@@ -1777,7 +1777,7 @@ The `%NUM` directive is similar to `%DAT`, except it always inserts 8 bytes exac
 
 An example:
 
-```text
+```AssEmbly
 MVQ rg0, 115  ; Initialise rg0 to 15
 ADD rg0, :NUMBER  ; Add the number stored in memory to rg0
 ; rg0 is now 100130
@@ -1821,7 +1821,7 @@ For example, suppose you had two files in the same folder, one called `program.a
 
 > Contents of `program.asm`:
 
-```text
+```AssEmbly
 MVQ rg0, :NUMBER_ONE
 MVQ rg1, :NUMBER_TWO
 HLT  ; Prevent program executing into number data
@@ -1831,7 +1831,7 @@ HLT  ; Prevent program executing into number data
 
 > Contents of `numbers.asm`:
 
-```text
+```AssEmbly
 :NUMBER_ONE
 %NUM 123
 
@@ -1841,7 +1841,7 @@ HLT  ; Prevent program executing into number data
 
 > When `program.asm` is assembled, the assembler will open and include the lines in `numbers.asm` once it reaches the `%IMP` directive, resulting in the file looking like so:
 
-```text
+```AssEmbly
 MVQ rg0, :NUMBER_ONE
 MVQ rg1, :NUMBER_TWO
 HLT  ; Prevent program executing into number data
@@ -1866,19 +1866,19 @@ An example of a circular dependency:
 
 > `file_one.asm`:
 
-```text
+```AssEmbly
 %IMP "file_two.asm"
 ```
 
 > `file_two.asm`:
 
-```text
+```AssEmbly
 %IMP "file_three.asm"
 ```
 
 > `file_three.asm`:
 
-```text
+```AssEmbly
 %IMP "file_one.asm"
 ```
 
@@ -1892,7 +1892,7 @@ For example, suppose you had two files in the same folder, one called `program.a
 
 > Contents of `program.asm`:
 
-```text
+```AssEmbly
 MVQ rg0, :&STRING
 :LOOP
 MVQ rg1, *rg0
@@ -1968,7 +1968,7 @@ After using the directive, its effect remains active until assembly ends, or the
 
 For example:
 
-```text
+```AssEmbly
 CMP rg0, 0  ; generates suggestion 0005
 
 %ANALYZER suggestion, 0005, 0
@@ -1985,7 +1985,7 @@ The `%MESSAGE` directive can be used to cause a custom assembler message (i.e. a
 
 Two examples of the directive being used:
 
-```text
+```AssEmbly
 %MESSAGE suggestion
 %MESSAGE warning, "This needs changing"
 ```
@@ -1998,7 +1998,7 @@ By default, labels store the address of the instruction that they are directly f
 
 For example:
 
-```text
+```AssEmbly
 :MY_LABEL
 :MY_OTHER_LABEL
 %LABEL_OVERRIDE 1234
@@ -2008,7 +2008,7 @@ For example:
 
 The address given can also be a reference to another label. The label should be in ampersand-prefixed form. For example:
 
-```text
+```AssEmbly
 :POINTS_TO_SOME_CODE
 %LABEL_OVERRIDE :&SOME_CODE
 
@@ -2027,7 +2027,7 @@ The `%REPEAT` directive is used to assemble a block of lines multiple times, wit
 
 For example:
 
-```text
+```AssEmbly
 SUB rfp, 8
 %REPEAT 3
     ICR rfp
@@ -2040,7 +2040,7 @@ ADD rg1, 16
 
 > The above example is equivalent to the following program and will produce the same program bytes when assembled:
 
-```text
+```AssEmbly
 SUB rfp, 8
 ICR rfp
 MVB rg0, B*rfp
@@ -2066,7 +2066,7 @@ Assembler directives can also be present within `%REPEAT` blocks and will be pro
 
 For example:
 
-```text
+```AssEmbly
 SUB rfp, 8
 
 %REPEAT 4
@@ -2084,7 +2084,7 @@ ADD rg1, 16
 
 > The above example is equivalent to the following program and will produce the same program bytes when assembled:
 
-```text
+```AssEmbly
 SUB rfp, 8
 
 ICR rfp
@@ -2147,7 +2147,7 @@ In the event that there are multiple single-line macros present on the line at t
 
 For example:
 
-```text
+```AssEmbly
 MVQ rg0, Number  ; Results in an error
 
 %MACRO Number, 345
@@ -2182,7 +2182,7 @@ To use a multi-line macro, the name of the macro must be the sole contents of th
 
 For example:
 
-```text
+```AssEmbly
 %MACRO multi-line
     ICR rg0
     DCR rg1
@@ -2200,7 +2200,7 @@ WCN rg1
 
 > When executed, this program will print `8` (the value of `rg0`) and `2` (the value of `rg1`) to the console, as each instance of `multi-line` was replaced with both the `ICR` *and* `DCR` instructions. The fully expanded program is equivalent to the following:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 MVQ rg1, 5
 ICR rg0
@@ -2227,7 +2227,7 @@ Multi-line macros cannot reference themselves, even indirectly through another m
 
 For example, this program is invalid and will throw an error:
 
-```text
+```AssEmbly
 %MACRO my_macro1
     MVQ rg0, 123
     ADD rg0, 456
@@ -2246,7 +2246,7 @@ my_macro1  ; Throws error
 > Even though neither `my_macro1` nor `my_macro2` directly contain themselves, they still end up cyclically referring to themselves through each other. The assembler will detect this, and stop assembly.
 > This program, however, is valid, and will assemble without failure:
 
-```text
+```AssEmbly
 %MACRO my_macro1
     MVQ rg0, 123
     ADD rg0, 456
@@ -2280,7 +2280,7 @@ It is possible to disable the expansion of both single-line and multi-line macro
 
 For example:
 
-```text
+```AssEmbly
 %MACRO rg0, rg1  ; Would replace all instances of "rg0" with "rg1" if matched
 
 !MVQ rg0, rg2  ; Macro does not match - instruction stays as "MVQ rg0, rg2"
@@ -2296,7 +2296,7 @@ The beginning and ending markers for a macro disabling block **must** be the onl
 
 For example, this is **not** valid and will result in an error:
 
-```text
+```AssEmbly
 !>MVQ rg0, rg1
 MVQ rg2, rg3<!
 ```
@@ -2307,7 +2307,7 @@ Neither the `!` line prefix nor the `!>` and `<!` markers can be inserted as the
 
 Some examples:
 
-```text
+```AssEmbly
 %MACRO start disable block
     !>
     ; This line WILL BE inside a macro disabling block when it is inserted by the macro
@@ -2324,7 +2324,7 @@ start disable block
 ; This line is NOT inside a macro disabling block
 ```
 
-```text
+```AssEmbly
 %MACRO my_macro
     !>
     ; This line WILL BE inside a macro disabling block when it is inserted by the macro
@@ -2333,7 +2333,7 @@ start disable block
 %ENDMACRO
 ```
 
-```text
+```AssEmbly
 %MACRO another_macro
     ...
 %ENDMACRO
@@ -2357,7 +2357,7 @@ To give parameters while using either a single-line or multi-line macro, type an
 
 For example:
 
-```text
+```AssEmbly
 %MACRO register, rg$0
 
 DVR register(0), register(1), rg2
@@ -2372,7 +2372,7 @@ instruction(rg2,rg3)
 
 > Here, the line `DVR register(0), register(1), rg2` gets expanded to `DVR rg0, rg1, rg2`, as the `$0` is removed and replaced with the first (and in this case only) parameter given to the `register` macro. `instruction(rg2,rg3)` gets expanded to the following lines:
 
-```text
+```AssEmbly
     ADD rg2, rg3
     SUB rg3, 5
 ```
@@ -2381,7 +2381,7 @@ It is possible to give parameters to a macro even if it never references them, a
 
 Macro parameters and macro names do not need to be separated by any characters, for example, the following is perfectly valid:
 
-```text
+```AssEmbly
 %MACRO surround,$0$1$0
 
 MVQ rg0, surround(1,2)surround(3,4)
@@ -2395,7 +2395,7 @@ The individual separated parameters of both single-line and multi-line macros ar
 
 For example:
 
-```text
+```AssEmbly
 %MACRO register, rg$0
 
 %MACRO instruction
@@ -2415,7 +2415,7 @@ By default, if a parameter is referenced by a macro but it is not given when the
 
 For example:
 
-```text
+```AssEmbly
 %MACRO my_macro, 12$0
 
 ADD rg0, my_macro  ; No error thrown
@@ -2424,7 +2424,7 @@ ADD rg0, my_macro  ; No error thrown
 > In this example `ADD rg0, my_macro` expands to `ADD rg0, 12`, as the `$0` is replaced with empty text.
 > To instead throw an error, the example should be written like this:
 
-```text
+```AssEmbly
 %MACRO my_macro, 12$0!
 
 ADD rg0, my_macro  ; Throws error
@@ -2436,7 +2436,7 @@ If the same parameter is used multiple times within a macro, only one instance o
 
 For example, all of the parameters in the following examples are empty text but will not throw an error, even if the parameter was marked as required:
 
-```text
+```AssEmbly
 uses-1-param()  ; $0 is given but empty, all other parameters are not given
 uses-2-params(,)  ; $0 and $1 are given but empty, all other parameters are not given
 uses-3-params(,,)  ; $0, $1, and $2 are given but empty, all other parameters are not given
@@ -2449,7 +2449,7 @@ It is **not** possible for a macro nested inside another macro to access the par
 
 For example:
 
-```text
+```AssEmbly
 %MACRO my_macro1
     MVQ rg0, $0!
     ADD rg0, $1!
@@ -2468,7 +2468,7 @@ my_macro2(123,456)  ; Throws error
 
 The program must instead be written like so:
 
-```text
+```AssEmbly
 %MACRO my_macro1
     MVQ rg0, $0!
     ADD rg0, $1!
@@ -2493,7 +2493,7 @@ Because commas and brackets have special meanings within macro parameters, if yo
 
 For example:
 
-```text
+```AssEmbly
 %MACRO instruction, $0 $1
 
 instruction(MVQ,rg0\,rg1)
@@ -2505,7 +2505,7 @@ These backslashes are distinct from those found in string escape sequences, as t
 
 For example:
 
-```text
+```AssEmbly
 %MACRO insert_string, %DAT "$0"
 
 insert_string(a\\nb\\nc)
@@ -2517,7 +2517,7 @@ Similarly, if you wish to have a literal `$` character within the contents of a 
 
 For example:
 
-```text
+```AssEmbly
 %MACRO balance, %DAT "Your balance is $$$0"
 
 balance(1.23)
@@ -2557,7 +2557,7 @@ The `%DEFINE` directive creates an **assembler variable**, a named storage locat
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 123
 
 MVQ rg0, @MY_VARIABLE
@@ -2571,7 +2571,7 @@ To use a literal `@` sign within a string and not have it interpreted as the sta
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0xFF_FF
 
 :STRING
@@ -2654,7 +2654,7 @@ The first operand can be any one of the following:
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 5
 
 %VAROP ADD, MY_VARIABLE, 6
@@ -2671,7 +2671,7 @@ As with anywhere else, the numeric literal for the value to operate with can als
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 5
 %DEFINE MY_OTHER_VARIABLE, 10
 
@@ -2696,7 +2696,7 @@ To check for the existence of an assembler variable, either the `DEF` (defined) 
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0
 
 %IF DEF, MY_VARIABLE
@@ -2722,7 +2722,7 @@ There are six literal value comparisons available for use with the `%IF` directi
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0
 %DEFINE MY_OTHER_VARIABLE, 5
 
@@ -2751,7 +2751,7 @@ An `%IF` block can be followed by any number of `%ELSE_IF` blocks, with each `%E
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0
 %DEFINE MY_OTHER_VARIABLE, 5
 
@@ -2794,7 +2794,7 @@ Conditional blocks can be located within other conditional blocks. Inner blocks 
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0
 %DEFINE MY_OTHER_VARIABLE, 5
 
@@ -2829,7 +2829,7 @@ The condition for the block is re-evaluated before each insertion. If it fails, 
 
 For example:
 
-```text
+```AssEmbly
 %DEFINE MY_VARIABLE, 0
 
 %WHILE LT, @MY_VARIABLE, 30
@@ -2855,7 +2855,7 @@ For example:
 
 > This program is effectively equivalent to the following example and will assemble to the same bytes:
 
-```text
+```AssEmbly
 MVQ rg0, @MY_VARIABLE
 MVQ rg0, @MY_VARIABLE
 MVQ rg0, @MY_VARIABLE
@@ -2895,7 +2895,7 @@ The `%STOP` directive is used to immediately end the assembly process. As soon a
 
 For example:
 
-```text
+```AssEmbly
 %IF NDEF, MY_VARIABLE
     %STOP "@MY_VARIABLE is a required variable. Please define it."
 %ENDIF
@@ -2911,7 +2911,7 @@ Writing can be done from registers, literals, and memory locations; reading must
 
 An example of each type of write:
 
-```text
+```AssEmbly
 MVQ rg0, 0xFF0062
 
 WCN rg0  ; Write a 64-bit number to the console in decimal
@@ -2939,7 +2939,7 @@ Keep in mind that newlines are not automatically written after each write instru
 
 An example of reading a byte:
 
-```text
+```AssEmbly
 RCC rg0  ; Read a byte from the console and save the byte code to rg0
 ```
 
@@ -2961,7 +2961,7 @@ Files must be explicitly opened with the `OFL` instruction before they can read 
 
 Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes in memory, ending with at least one `0` byte. An example static filepath definition is as follows:
 
-```text
+```AssEmbly
 :FILE_PATH
 %DAT "file.txt\0"
 ```
@@ -2969,7 +2969,7 @@ Filepaths given to `OFL` to be opened should be strings of UTF-8 character bytes
 > This would normally be placed after all program code and a `HLT` instruction to prevent it accidentally being executed as if it were part of the program.
 > The file can be opened with the following line anywhere in the program:
 
-```text
+```AssEmbly
 OFL :FILE_PATH
 ...
 CFL
@@ -2977,7 +2977,7 @@ CFL
 
 > You could also use a pointer if you wish:
 
-```text
+```AssEmbly
 MVQ rg0, :&FILE_PATH
 OFL *rg0
 ...
@@ -2992,7 +2992,7 @@ Reading and writing from files is almost identical to how it is done from the co
 
 An example of writing to a file:
 
-```text
+```AssEmbly
 MVQ rg0, 0xFF0062
 OFL :FILE_PATH  ; Open file with the 0-terminated string at :FILE_PATH
 
@@ -3037,7 +3037,7 @@ File contents can be read with the `RFC` instruction, taking a single register a
 
 To read all bytes until the end of a file, you will need to continually read single bytes from the file, testing the file end flag after every read, stopping as soon as it becomes set. The example program `read_file.asm` has an example of this, as well as this example from the bit testing section:
 
-```text
+```AssEmbly
 :READ
 RFC rg0  ; Read the next byte from the open file to rg0
 TST rsf, 0b100  ; Check if the third bit is set
@@ -3106,7 +3106,7 @@ A common use of the stack is to store the value of a register, use the register 
 
 An example of this is as follows:
 
-```text
+```AssEmbly
 MVQ rg0, 45
 ADD rg0, 20
 ; rg0 is 65
@@ -3128,7 +3128,7 @@ Subroutines are defined with a label as with any other form of jump destination 
 
 An example of a simple subroutine:
 
-```text
+```AssEmbly
 MVQ rg0, 5
 CAL :ADD_TO_RG0
 ; rg0 is now 15
@@ -3153,7 +3153,7 @@ The `CAL` instruction can also take an optional second operand: a value to pass 
 
 An example of subroutines utilising fast calling:
 
-```text
+```AssEmbly
 :SUBROUTINE_ONE
 ADD rfp, 1
 MVQ rg0, rfp
@@ -3176,7 +3176,7 @@ The `RET` instruction can also take an optional operand to return a value. Retur
 
 Here is the above example for fast calling adapted to use return values:
 
-```text
+```AssEmbly
 :SUBROUTINE_ONE
 ADD rfp, 1
 RET rfp  ; Return, setting rrv to the value of rfp
@@ -3205,7 +3205,7 @@ The `CAL` instruction can only take a single data parameter, however, there may 
 
 For example:
 
-```text
+```AssEmbly
 PSH 4  ; Parameter D
 PSH 3  ; Parameter C
 PSH 2  ; Parameter B
@@ -3236,7 +3236,7 @@ There are two instructions that can be used to allocate a new region of memory: 
 
 For example, assuming memory is 8192 bytes in size:
 
-```text
+```AssEmbly
 HEAP_TRY rg0, 20
 ; rg0 now stores the memory address to the first byte in a 20 byte long region
 
@@ -3274,7 +3274,7 @@ As a consequence of memory regions being contiguous, the maximum number of bytes
 
 Consider the following situation, assuming we're starting with 32 bytes of free memory:
 
-```text
+```AssEmbly
 HEAP_ALC rg0, 4  ; Region "A"
 HEAP_ALC rg1, 4  ; Region "B"
 HEAP_ALC rg2, 4  ; Region "C"
@@ -3289,7 +3289,7 @@ AAAABBBBCCCCDDDD................
 
 > Now what if we free Region B?
 
-```text
+```AssEmbly
 HEAP_FRE rg1
 ```
 
@@ -3327,7 +3327,7 @@ To create a directory, use the `FSYS_CDR` instruction with the desired path as t
 
 For example, assuming you already have an empty folder called `Folder 1`:
 
-```text
+```AssEmbly
 FSYS_CDR :FOLDER_PATH
 
 :FOLDER_PATH
@@ -3470,7 +3470,7 @@ Once both an assembly and function are loaded, you can use the `ASMX_CAL` instru
 
 Here is an example program that utilises a method from the C# example above:
 
-```text
+```AssEmbly
 ASMX_LDA :DLL_PATH  ; Load the assembly
 ASMX_LDF :FUNC_PATH  ; Load the function from the assembly
 
