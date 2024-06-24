@@ -379,3 +379,9 @@ FodyWeavers.xsd
 
 # HxD bin backup files
 *.bin.bak
+
+# InnoSetup output
+Installer/Output/
+
+# InnoSetup environment-specific file
+Installer/folders.txt
