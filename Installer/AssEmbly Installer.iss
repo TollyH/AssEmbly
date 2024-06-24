@@ -79,7 +79,7 @@ Source: "{#VBCCRepositoryPath}\bin\*"; DestDir: "{app}\vbcc"; Flags: ignoreversi
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
-Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app};{app}\vbcc"
+Root: HKLM; Subkey: "SYSTEM\CurrentControlSet\Control\Session Manager\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{olddata};{app};{app}\vbcc"; Tasks: addpath
 
 [Icons]
 Name: "{group}\{#MyAppName} Reference Manual"; Filename: "{app}\Documentation"; Components: docs
