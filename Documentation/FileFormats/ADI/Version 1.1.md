@@ -21,7 +21,7 @@ The general layout of the file is as follows:
 
 ```text
 AssEmbly Debug Information File
-Format Version: 1.0
+Format Version: 1.1
 Date: <YYYY-MM-DD> <HH:MM:SS>
 Command Line: <command line - for reference only and can be any text>
 Total Program Size: <size excluding AAP header> bytes
@@ -57,7 +57,7 @@ An ADI file for a blank program would look like this - with the date and command
 
 ```text
 AssEmbly Debug Information File
-Format Version: 1.0
+Format Version: 1.1
 Date: 2024-03-24 19:57:26
 Command Line: C:\path\to\AssEmbly.exe assemble "C:\path\to\program.asm"
 Total Program Size: 0 bytes
