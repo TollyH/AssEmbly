@@ -4134,10 +4134,10 @@ Extension set number `0x02`, opcodes start with `0xFF, 0x02`. Contains instructi
 | `FLPT_MUL` | Multiply | Register, Literal | Multiply the contents of a register by a literal value | `0x21` | `v2` |
 | `FLPT_MUL` | Multiply | Register, Address | Multiply a register by the contents of memory at an address | `0x22` | `v2` |
 | `FLPT_MUL` | Multiply | Register, Pointer | Multiply a register by the contents of memory at an address in a register | `0x23` | `v2` |
-| `FLPT_DIV` | Integer Divide | Register, Register | Divide the contents of one register by another, discarding the remainder | `0x30` | `v2` |
-| `FLPT_DIV` | Integer Divide | Register, Literal | Divide the contents of a register by a literal value, discarding the remainder | `0x31` | `v2` |
-| `FLPT_DIV` | Integer Divide | Register, Address | Divide a register by the contents of memory at an address, discarding the remainder | `0x32` | `v2` |
-| `FLPT_DIV` | Integer Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register, discarding the remainder | `0x33` | `v2` |
+| `FLPT_DIV` | Divide | Register, Register | Divide the contents of one register by another | `0x30` | `v2` |
+| `FLPT_DIV` | Divide | Register, Literal | Divide the contents of a register by a literal value | `0x31` | `v2` |
+| `FLPT_DIV` | Divide | Register, Address | Divide a register by the contents of memory at an address | `0x32` | `v2` |
+| `FLPT_DIV` | Divide | Register, Pointer | Divide a register by the contents of memory at an address in a register | `0x33` | `v2` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Register | Divide the contents of one register by another, storing the remainder | `0x34` | `v2` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Literal | Divide the contents of a register by a literal value, storing the remainder | `0x35` | `v2` |
 | `FLPT_DVR` | Divide With Remainder | Register, Register, Address | Divide a register by the contents of memory at an address, storing the remainder | `0x36` | `v2` |
