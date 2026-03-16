@@ -282,7 +282,7 @@ function onFirstByteHexEdit() {
 }
 
 function onConstantHexEdit() {
-    constant = BigInt("0x" + constantHex.value ?? "") & 0xFFFFFFFFFFFFFFFFn;
+    constant = BigInt("0x" + (constantHex.value ?? "")) & 0xFFFFFFFFFFFFFFFFn;
 
     updateConstantBits();
     updateConstantHex();
